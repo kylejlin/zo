@@ -5,6 +5,17 @@ It is a work in progress, and not suitable for use.
 
 ## Brainstorm
 
+### Unanswered questions
+
+- Does it ever make sense to call `self_fun` in a parameterized type?
+  - Should we disallow it?
+- Match equality generation rules.
+  - Exploit constructor injectivity?
+- Should match expressions have an explicit output type annotation?
+- How to tag types to prevent unwanted duck typing?
+- Should string literals be first class, or a derived feature?
+- Records, modules, packages
+
 ### Inductive type expressions
 
 Here is the classic Peano-style Nat:
@@ -27,7 +38,7 @@ The general `type` syntax is
 
 A `type` expression expands the DeBruijn index stack by `[self_type]`.
 
-#### TODO: Redesign this
+#### TODO (Solved): Redesign this
 
 What's to stop people from writing something like `(@type (@for @universe $0))`?
 I think I need to add restrictions.
@@ -139,10 +150,9 @@ Two:
             // $3 => b
             // $4 => a
 
-            //
             // Therefore...
 
-            ($2 $1 $3) // Return `(add a_pred b)` where `add` is the outer function.
+            ($2 $1 $3) // Return `add(a_pred, b)` where `add` is the outer function.
         )
     )
 )
@@ -207,3 +217,63 @@ or the variant type equals `(@for (...) X)` where `X` is either:
 
 - The self type constructor
 - The self type constructor applied to one or more index arguments.
+
+### Parameterized inductive types
+
+Here is `List` parameterized over some type `T`:
+
+```zo
+(
+    @fun
+
+    // Param types
+    (
+        @type // T: Type
+    )
+
+    // Return type
+    @type
+
+    // Body
+    (
+        @ind
+
+        // Indices:
+        ()
+
+        // The DeBruijn stack is now
+        // $0 => List(T) - i.e., self type
+        // $1 => List - i.e., self fun // <-- TODO: Is this safe to use in a total language? Then again, we're not aiming for totality anyways.
+        // $2 => T
+
+        // nil: List(T)
+        $0
+
+        // cons: forall(car: T, cdr: List(T)) => List(T)
+        (
+            @for
+            (
+                $2 // car: T
+                $0 // cdr: List(T)
+            )
+            // The DeBruijn stack is now
+            // $0 => cdr
+            // $1 => car
+            // $2 => List(T) - i.e., self type
+            // $3 => List - i.e., self fun
+
+            $2 // List(T)
+        )
+    )
+)
+```
+
+We could also define it with type indices instead of type params.
+
+**TODO:** Do we need type indices? What if you just call the "self fun" with a new arg?
+But that just might lead to infinite recursion at typechecking time.
+The only way it would _not_ lead to infinite recursion if the argument eventually decreases
+(not necessarily monotonically, though that might make things easier to check).
+
+Ah wait, we definitely need indices if we want types like `Equal`.
+If we used params, you could construct `Equal(0, 1)` (and every other possible bogus contradiction).
