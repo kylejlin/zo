@@ -157,3 +157,53 @@ The extension is progressive, meaning:
 - ...so on for the rest of the params.
 - For the return type, the stack is extended by `[param_1, param_2, ... param_n]`.
 - For the body, the stack is extended by `[param_1, param_2, ... param_n, self_fun]`.
+
+### Inductive type expressions revisited
+
+Let's try redesigning inductive type expressions.
+First, let's change `@type` to `@ind`, to free up the keyword `@type` for the type of types.
+
+Here is the classic Peano-style Nat:
+
+```zo
+(@ind $0 (@for $0 $1))
+```
+
+Next, let's allow types to take indices.
+
+Here's the new way of writing the `Nat` type.
+
+```zo
+(
+    @ind
+    // Indices:
+    () // No indices
+
+    // The DeBruijn stack is now
+    // $0 => self_type_constructor (Nat)
+
+    // Variant types:
+
+    // zero: Nat
+    $0
+
+    // succ: forall(pred: Nat) => Nat
+    (
+        @for
+        (
+            $0 // pred: Nat
+        )
+        $1 // Nat
+    )
+)
+```
+
+The DeBruin index stack is _progressively_ extended `[index_1, index_2, ... index_n, self_type_constructor]`.
+Again, note that the stack is progressively extended.
+See the Functions section for details.
+
+For each variant type, there must exist some `X` such that the variant type equals `X`
+or the variant type equals `(@for (...) X)` where `X` is either:
+
+- The self type constructor
+- The self type constructor applied to one or more index arguments.
