@@ -3,7 +3,7 @@
 Zo is an experimental programming language.
 It is a work in progress, and not suitable for use.
 
-## Syntax
+## Brainstorm
 
 ### Inductive type expressions
 
@@ -26,6 +26,11 @@ The general `type` syntax is
 ```
 
 A `type` expression expands the DeBruijn index stack by `[self_type]`.
+
+#### TODO: Redesign this
+
+What's to stop people from writing something like `(@type (@for @universe $0))`?
+I think I need to add restrictions.
 
 ### Constructing members of inductive types (aka "introduction")
 
@@ -58,11 +63,6 @@ Two:
     (:1 (:1 :0))
 )
 ```
-
-**TODO: Redesign this**
-
-What's to stop people from writing something like `(@type (@for @universe $0))`?
-I think I need to add restrictions.
 
 ### Matching against members of inductive types (aka "elimination")
 
