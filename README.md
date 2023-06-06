@@ -277,3 +277,107 @@ The only way it would _not_ lead to infinite recursion if the argument eventuall
 
 Ah wait, we definitely need indices if we want types like `Equal`.
 If we used params, you could construct `Equal(0, 1)` (and every other possible bogus contradiction).
+
+### Inductive definitions - take 3
+
+Peano Nat:
+
+```zo
+(
+    @ind
+
+    // Indices
+    ()
+
+    // Name
+    "lang.core.Nat" // If you don't care, you can alternatively just write the empty string
+
+    // Variants
+    (
+        // zero: Nat
+        ()
+
+        // succ: forall(pred: Nat): Nat
+        (@for (@0) ())
+    )
+)
+```
+
+Or, if we can use stratification.
+One strategy is to replace `@ind` with `@type`,
+and then use `@ind` as to inductively construct types
+using natural induction.
+Since we are reappropriating the `@type` keyword,
+we need to use `@tyty` for the type of types.
+
+Example:
+
+```zo
+(
+    @ind
+
+    // We'll call the universe level `ul`.
+
+    // Case 1: ul == zero
+    (
+        @type
+        "lang.core.Nat"
+
+        // Indices
+        ()
+
+        // Variants
+        (
+            // zero: Nat(universe_level)
+            ()
+        )
+    )
+
+    // Case 2: universe_level == succ(ul_pred)
+    // DB index stack is now
+    // @0 => Nat(ul_pred)
+
+    (
+        @type
+        "lang.core.Nat"
+
+        // Indices
+        ()
+
+        // Variants
+        (
+            // zero: Nat(ul)
+            ()
+
+            // succ(pred: Nat(ul_pred)): Nat(ul)
+            (@for @0 ())
+        )
+    )
+)
+```
+
+But this has its own host of problems.
+For example, there's nothing stopping the
+`@type` expressions in case 1 and case 2
+from having different sets of variants.
+That would make no sense.
+
+I think we scratch it.
+We should just return to the original, simpler `@ind`.
+Currently, this produces no benefits over using the old
+`@ind`'s `@0` (self type).
+
+If we want to use stratification,
+we can actually already use it with the existing `@ind` syntax.
+
+The one issue is that it's limited to defining `T(succ(n))` in terms of `T(n)`
+(and other nonrecursive terms).
+If we want to define `T(succ(succ(n)))`, for example, this won't work.
+But the ind-type solution described above doesn't fix this either,
+so we might as well scratch it.
+
+The only fix would probably be to introduce `@lfun`, `@lmatch`, and the like.
+Then you could match on universe levels, like any other expression.
+But then if universe levels become part of the main language,
+it will probably cause more paradoxes.
+So it probably should stay restricted to the meta language.
