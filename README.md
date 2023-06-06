@@ -377,7 +377,75 @@ But the ind-type solution described above doesn't fix this either,
 so we might as well scratch it.
 
 The only fix would probably be to introduce `@lfun`, `@lmatch`, and the like.
-Then you could match on universe levels, like any other expression.
-But then if universe levels become part of the main language,
+Then you could match on set universe levels, like any other expression.
+But then if set universe levels become part of the main language,
 it will probably cause more paradoxes.
 So it probably should stay restricted to the meta language.
+
+I think the index arg syntax is confusing, but I'll have to think more about this.
+
+### Inductive type definitions and (type) universe levels.
+
+Rules:
+
+1. The return type of an `@ind` equals the max of its index types' types.
+
+   For example, if we have `List(T)` implemented with an index, like this:
+
+   ```zo
+   (@ind (@type0) "List" ...)
+   ```
+
+   Then the index types are `(@type0)`.
+   Therefore, the index type types are `((TYPEOF @type0))`, which equals `(@type1)`.
+
+   Thus, the return type is the max of `(@type1)`, which equals `@type1`.
+
+Actually, wait, I think this is flawed.
+I think we're on the right path, but it's not there yet.
+
+Take 2:
+
+The return type type of an `@ind` variant constructor equals the max of its param types' types.
+So if we have the `List.nil(T): List(T)`, written:
+
+```
+...
+// nil(T: Type): List(T)
+(@for (@type0) (@0))
+...
+```
+
+Then the one and only param type is `@type0`.
+So the only (and therefore max) param type type is `@type1`.
+So the return type type is `@type1`.
+And the return type is `List(T)`, which is of type `@type1`.
+
+This feels better.
+This is why parameterized types don't incur the "plus one universe level cost",
+unlike indexed types.
+It's because their params are defined externally,
+so you don't need to have `T: Type0` as a param.
+
+```
+// Assume `T: type0` is already externally defined
+// DB index stack:
+// @1 => T: type0
+// @0 => self type (i.e., List(T))
+...
+// cons(T: Type, car: List(T)): List(T)
+(@for (@1 @0) (@0))
+...
+```
+
+The param types are `(T List(T))`.
+So the param type types are `(@type0 @type_n)`.
+So the return type is the max of `@type0` and `@type_n`,
+but we are free to assign `@type_n` to whatever[1].
+So the return type type is `@type0`.
+And the return type is `List(T)`, whichis of type `@type0`.
+
+[1]: Are we really? TODO: Think about this more carefully.
+
+The key insight is that inductive type expressions are basically
+new axiom definitions, so we need to prevent self-referential propositions.
