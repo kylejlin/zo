@@ -246,12 +246,15 @@ or name-polymorphic expressions in Zo.
 )
 ```
 
-**Important:**
-As you can see, the variant constructor indices use forward counting.
+As commented above,
+the variant constructor indices use forward counting.
 That is, the first variant constructor is `0`,
 the second variant constructor is `1`, and so on.
 Variant constructor indices should not be confused with
 DeBruijn indices, which use backwards counting.
+
+It is also important to note that
+the variant constructor indices must be number literals.
 
 ## Variants
 
