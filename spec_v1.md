@@ -2,16 +2,16 @@
 
 ## Type expressions
 
-Peano Nat:
+### Peano Nat:
 
 ```zo
 (
     ind
 
-    // Type
+    // Type: THIS MUST BE A UNIVERSE LITERAL.
     Type0
 
-    // Name
+    // Name: THIS MUST BE A STRING LITERAL.
     "Nat"
 
     // Index types
@@ -34,13 +34,18 @@ Peano Nat:
 )
 ```
 
-Equal:
+As you can see, the universe level and name
+must be literals.
+This ultimately means there are no universe-level-polymorphic
+or name-polymorphic expressions in Zo.
+
+### Equal:
 
 ```
 (
     fun
 
-    // Decreasing index.
+    // Decreasing index. THIS MUST BE A NUMBER LITERAL.
     // This is equal to the arity
     // if the fun is non-recursive.
     // In this case, the fun is indeed non-recursive,
@@ -94,7 +99,7 @@ Equal:
 )
 ```
 
-Boolean:
+### Boolean:
 
 ```zo
 (
@@ -116,7 +121,7 @@ Boolean:
 )
 ```
 
-List:
+### List:
 
 ```zo
 (
@@ -163,7 +168,7 @@ List:
 
 ## Variant constructors
 
-`Nat.zero`:
+### `Nat.zero`:
 
 ```zo
 (
@@ -197,12 +202,12 @@ List:
         )
     )
 
-    // Variant constructors
+    // Variant constructor index - THIS MUST BE A NUMBER LITERAL.
     0
 )
 ```
 
-`Nat.zero`:
+### `Nat.succ`:
 
 ```zo
 (
@@ -236,7 +241,7 @@ List:
         )
     )
 
-    // Variant constructors
+    // Variant constructor index - THIS MUST BE A NUMBER LITERAL.
     1
 )
 ```
@@ -253,7 +258,7 @@ DeBruijn indices, which use backwards counting.
 I could write the full code out, but then things would get long.
 So, for this section, I will use Zozen's `let` syntax.
 
-`3`:
+### `3`:
 
 ```zozen
 let Nat =
@@ -288,7 +293,7 @@ let succ = (vcon Nat 1)
 return (succ (succ (succ zero)))
 ```
 
-`[3]` (i.e., singleton list containing `3`):
+### `[3]` (i.e., singleton list containing `3`):
 
 ```zozen
 // START Copy previous code
@@ -375,7 +380,7 @@ let NatList_cons = (vcon NatList 1)
 return (NatList_cons three NatList_nil)
 ```
 
-`(Eq Nat 3 3)`:
+### `(Eq Nat 3 3)`:
 
 ```zozen
 // START Copy previous code
