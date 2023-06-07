@@ -1,4 +1,4 @@
-# Zo Informal Syntax Spec
+# Zo Syntax Spec
 
 ## Overview
 
