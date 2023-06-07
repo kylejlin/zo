@@ -482,3 +482,80 @@ let EqNat3 = (Eq Nat three)
 let refl_nat_3 = (vcon EqNat3 0)
 let proof_that_3_equals_3 = refl_nat_3
 ```
+
+## Matching
+
+This section also uses the Zozen syntax.
+
+### Is zero
+
+```zozen
+let Nat = ...
+let zero = ...
+let succ = ...
+let three = ...
+let Bool = ...
+let true = ...
+let false = ...
+
+return (
+    match
+
+    // Matchee
+    three
+
+    // Return type
+    Bool
+
+    // Cases
+    (
+        // `Nat.zero` case
+
+        // DB index stack is empty
+
+        true
+
+        // `Nat.succ` case
+
+        // DB index stack is
+        // 0 => pred: Nat
+
+        false
+    )
+)
+```
+
+### Pred or zero
+
+```zozen
+let Nat = ...
+let zero = ...
+let succ = ...
+let three = ...
+
+return (
+    match
+
+    // Matchee
+    three
+
+    // Return type
+    Nat
+
+    // Cases
+    (
+        // `Nat.zero` case
+
+        // DB index stack is empty
+
+        zero
+
+        // `Nat.succ` case
+
+        // DB index stack is
+        // 0 => pred: Nat
+
+        0
+    )
+)
+```
