@@ -7,6 +7,7 @@
 - Variants
 - Matching
 - Functions
+- Function application
 - Foralls
 - Universes
 
@@ -509,6 +510,12 @@ return
     )
 )
 ```
+
+## Function application
+
+The syntax is `(callee arg0 arg1 ... argN)`.
+There are no nullary functions.
+Therefore, there is never a need to write `(callee)`.
 
 ## Foralls
 
