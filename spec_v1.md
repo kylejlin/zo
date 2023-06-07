@@ -161,13 +161,13 @@ List:
 )
 ```
 
-## Variants
+## Variant constructors
 
-Zero:
+`Nat.zero`:
 
 ```zo
 (
-    new
+    vcon
 
     // Type
     (
@@ -202,11 +202,11 @@ Zero:
 )
 ```
 
-Two:
+`Nat.zero`:
 
 ```zo
 (
-    new
+    vcon
 
     // Type
     (
@@ -237,7 +237,7 @@ Two:
     )
 
     // Variant constructors
-    (1 (1 0))
+    1
 )
 ```
 
@@ -248,65 +248,129 @@ the second variant constructor is `1`, and so on.
 Variant constructor indices should not be confused with
 DeBruijn indices, which use backwards counting.
 
-Singleton list containing zero:
+## Variants
 
-The full code would be rather long, so I'm going to
-abbreviate it by writing `<<<NAT>>>` as a placeholder.
-In the real code, you would replace `<<<NAT>>>` with the
-code for nat (i.e., `(ind Type0 Nat () (...))`).
+I could write the full code out, but then things would get long.
+So, for this section, I will use Zozen's `let` syntax.
 
-Similarly, I will also use `<<<ZERO>>>` as a placeholder for
-the zero nat.
+`3`:
 
-```zo
-(
-    new
-
+```zozen
+let Nat =
     (
+        ind
+
+        // Type
+        Type0
+
+        // Name
+        "Nat"
+
+        // Index types
+        ()
+
+        // Variants
         (
-            fun
+            // The DB index stack is
+            // 0 => self_type_constructor: Type0
 
-            // Decreasing arg index (in this case, non-recursive)
-            1
+            // zero: self_type_constructor
+            (() ())
 
-            // Param types
-            (Type0)
-
-            // Return type
-            Type0
-
-            // Body
-            (
-                ind
-
-                Type0
-
-                "List"
-
-                ()
-
-                (
-                    // DB index stack is
-                    // 0 => self_type_constructor = List(T): Type0
-                    // 1 => self_fun: forall(T': Type0) -> Type0
-                    // 2 => T: Type0
-
-                    // nil: self_type_constructor
-                    // In other words,
-                    // nil: List(T)
-                    (() ())
-
-                    // cons: forall(car: T, cdr: self_type_constructor) -> self_type_constructor
-                    // In other words,
-                    // cons: forall(card: T, cdr: List(T)) -> List(T)
-                    ((2 0) ())
-                )
-            )
+            // succ: forall(pred: self_type_constructor) -> self_type_constructor
+            ((0) ())
         )
-
-        <<<NAT>>>
     )
 
-    (1 <<<ZERO>>> 0)
-)
+let zero = (vcon Nat 0)
+let succ = (vcon Nat 1)
+
+return (succ (succ (succ zero)))
+```
+
+`[3]` (i.e., singleton list containing `3`):
+
+```zozen
+// START Copy previous code
+
+let Nat =
+    (
+        ind
+
+        // Type
+        Type0
+
+        // Name
+        "Nat"
+
+        // Index types
+        ()
+
+        // Variants
+        (
+            // The DB index stack is
+            // 0 => self_type_constructor: Type0
+
+            // zero: self_type_constructor
+            (() ())
+
+            // succ: forall(pred: self_type_constructor) -> self_type_constructor
+            ((0) ())
+        )
+    )
+
+let zero = (vcon Nat 0)
+let succ = (vcon Nat 1)
+
+// END Copy previous code
+
+let three = (succ (succ (succ zero)))
+
+let List =
+    (
+        fun
+
+        // Decreasing arg index (in this case, non-recursive)
+        1
+
+        // Param types
+        (Type0)
+
+        // Return type
+        Type0
+
+        // Body
+        (
+            ind
+
+            Type0
+
+            "List"
+
+            ()
+
+            (
+                // DB index stack is
+                // 0 => self_type_constructor = List(T): Type0
+                // 1 => self_fun: forall(T': Type0) -> Type0
+                // 2 => T: Type0
+
+                // nil: self_type_constructor
+                // In other words,
+                // nil: List(T)
+                (() ())
+
+                // cons: forall(car: T, cdr: self_type_constructor) -> self_type_constructor
+                // In other words,
+                // cons: forall(card: T, cdr: List(T)) -> List(T)
+                ((2 0) ())
+            )
+        )
+    )
+
+let NatList = (List Nat)
+let NatList_nil = (vcon NatList 0)
+let NatList_cons = (vcon NatList 1)
+
+return (NatList_cons three NatList_nil)
 ```
