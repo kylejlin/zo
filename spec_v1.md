@@ -562,4 +562,4 @@ Some obvious code is abbreviated with `...`.
 
 ## Universes
 
-TODO
+A universe is `Type0`, `Type1`, `Type2`, or `Type<n>` for any `<n>`.
