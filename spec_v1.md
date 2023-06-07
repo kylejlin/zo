@@ -1,5 +1,14 @@
 # Zo Informal Syntax Spec
 
+## Overview
+
+- Type expressions
+- Variant constructors
+- Variants
+- Matching
+- Functions
+- Foralls
+
 ## Type expressions
 
 ### Peano Nat:
@@ -45,12 +54,10 @@ or name-polymorphic expressions in Zo.
 (
     fun
 
-    // Decreasing index. THIS MUST BE A NUMBER LITERAL.
+    // Decreasing param index. THIS MUST BE A NUMBER LITERAL OR `nonrec`.
     // This is equal to the arity
-    // if the fun is non-recursive.
-    // In this case, the fun is indeed non-recursive,
-    // so we set this to the arity (2).
-    2
+    // If the fun is non-recursive, write `nonrec`.
+    nonrec
 
     // Param types
     (Type0 0)
@@ -127,8 +134,7 @@ or name-polymorphic expressions in Zo.
 (
     fun
 
-    // Decreasing arg index (in this case, non-recursive)
-    1
+    nonrec
 
     // Param types
     (Type0)
@@ -338,8 +344,7 @@ let List =
     (
         fun
 
-        // Decreasing arg index (in this case, non-recursive)
-        1
+        nonrec
 
         // Param types
         (Type0)
@@ -425,12 +430,7 @@ let Eq =
     (
         fun
 
-        // Decreasing index.
-        // This is equal to the arity
-        // if the fun is non-recursive.
-        // In this case, the fun is indeed non-recursive,
-        // so we set this to the arity (2).
-        2
+        nonrec
 
         // Param types
         (Type0 0)
@@ -486,6 +486,7 @@ let proof_that_3_equals_3 = refl_nat_3
 ## Matching
 
 This section also uses the Zozen syntax.
+Some obvious code is abbreviated with `...`.
 
 ### Is zero
 
@@ -556,6 +557,117 @@ return (
         // 0 => pred: Nat
 
         0
+    )
+)
+```
+
+## Functions
+
+This section also uses the Zozen syntax.
+Some obvious code is abbreviated with `...`.
+
+### `not`
+
+```zozen
+let Bool = ...
+let true = ...
+let false = ...
+
+return
+(
+    fun
+
+    // Decreasing param index.
+    // THIS MUST BE A NUMBER LITERAL OR `nonrec`.
+    // If the function is non-recursive,
+    // you can write `nonrec`.
+    nonrec
+
+    // Param types
+    (Bool)
+
+    // Return type
+    Bool
+
+    // Body
+        // DB index stack is
+        // 0 => self_fun (inaccessible): forall(b': Bool) -> Bool
+        // 1 => b: Bool
+    (
+
+        match
+
+        // Matchee
+        1
+
+        // Return type
+        Bool
+
+        // Cases
+        (
+            // True case
+            false
+
+            // False case
+            true
+        )
+    )
+)
+```
+
+As commented above,
+the decreasing param index must be a number literal
+or the `nonrec` keyword.
+
+### `is_even`
+
+```zozen
+let Nat = ...
+let zero = ...
+let succ = ...
+let Bool = ...
+let true = ...
+let false = ...
+let not = ...
+
+return
+(
+    fun
+
+    // Decreasing param index
+    0
+
+    // Param types
+    (Nat)
+
+    // Return type
+    Bool
+
+    // Body
+        // DB index stack is
+        // 0 => self_fun: forall(n': Nat) -> Nat
+        // 1 => n: Nat
+    (
+        match
+
+        // Matchee
+        1 // n
+
+        // Return type
+        Bool
+
+        // Cases
+        (
+            // Zero case
+            true
+
+            // Succ case
+                // DB index stack is
+                // 0 => npred: Nat
+                // 1 => self_fun: forall(n': Nat) -> Nat
+                // 2 => n: Nat
+            (not (1 0))
+        )
     )
 )
 ```
