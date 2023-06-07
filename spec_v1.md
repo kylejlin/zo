@@ -8,6 +8,7 @@
 - Matching
 - Functions
 - Foralls
+- Universes
 
 ## Type expressions
 
@@ -63,7 +64,7 @@ or name-polymorphic expressions in Zo.
     (Type0 0)
 
     // Return type
-    Type1
+    Type1 // TODO REVIEW: Shouldn't it be a `for`?
 
     // Body
     (
@@ -671,3 +672,51 @@ return
     )
 )
 ```
+
+## Foralls
+
+This section also uses the Zozen syntax.
+Some obvious code is abbreviated with `...`.
+
+### `typeof List`
+
+```zozen
+(
+    for
+
+    // Param types
+    (Type0)
+
+    // Return type
+    Type0
+)
+```
+
+### `typeof Eq`:
+
+TODO
+
+<!-- ```zo
+(
+    for
+
+    // Param types
+    (
+        Type0 // T: Type0
+        0 // x: T
+    )
+
+    // Return type
+    (
+        for
+
+        // Param types
+        (
+            1 // y: T
+        )
+
+        // Return type
+        Type1
+    )
+)
+``` -->
