@@ -64,20 +64,34 @@ or name-polymorphic expressions in Zo.
     (Type0 0)
 
     // Return type
-    Type1 // TODO REVIEW: Shouldn't it be a `for`?
+    (
+        for
+
+        // Param types
+            // DB index stack is
+            // 0 => x: T
+            // 1 => T: Type0
+        (
+            1 // y: T
+        )
+
+        // Return type
+        Type0
+    )
 
     // Body
     (
         ind
 
-        type1
+        Type0
 
         "Eq"
 
         // Index types
         (
             // The DB index stack is
-            // 0 => self_fun: forall(T': Type0, x': T') -> Type1
+            // 0 => self_fun (inaccessible) : forall(T': Type0, x': T') ->
+            //                    (forall(y': T') -> Type0)
             //      Note this is inaccessible since the fun is
             //      declared as non-recursive.
             // 1 => x: T
@@ -88,15 +102,14 @@ or name-polymorphic expressions in Zo.
 
         // Variant constructors
         (
-            // The DB index stack is
-            // 0 => self_type_constructor: forall(y': T) -> Type1
-            //
-            // Note that indices are not added to the DB stack in this case.
-            // You have to manually add them.
-            //
-            // 1 => self_fun (inaccessible): forall(T': Type0, x': T') -> Type1
-            // 2 => x: T
-            // 3 => T: Type0
+                // The DB index stack is
+                // 0 => self_type_constructor: forall(y': T) -> Type0
+                // 1 => self_fun (inaccessible) : forall(T': Type0, x': T') ->
+                //                    (forall(y': T') -> Type0)
+                // 2 => x: T
+                // 3 => T: Type0
+                //
+                // Note that indices are not added to the DB stack in this case.
 
             // refl: self_type_constructor(x)
             // In other words
@@ -265,38 +278,13 @@ the variant constructor indices must be number literals.
 
 ## Variants
 
-I could write the full code out, but then things would get long.
-So, for this section, I will use Zozen's `let` syntax.
+This section uses Zozen's `let` syntax.
+Furthermore, some obvious code is abbreviated with `...`.
 
 ### `3`:
 
 ```zozen
-let Nat =
-    (
-        ind
-
-        // Type
-        Type0
-
-        // Name
-        "Nat"
-
-        // Index types
-        ()
-
-        // Variants
-        (
-            // The DB index stack is
-            // 0 => self_type_constructor: Type0
-
-            // zero: self_type_constructor
-            (() ())
-
-            // succ: forall(pred: self_type_constructor) -> self_type_constructor
-            ((0) ())
-        )
-    )
-
+let Nat = ...
 let zero = (vcon Nat 0)
 let succ = (vcon Nat 1)
 
@@ -306,82 +294,12 @@ return (succ (succ (succ zero)))
 ### `[3]` (i.e., singleton list containing `3`):
 
 ```zozen
-// START Copy previous code
+let Nat = ...
+let zero = ...
+let succ = ...
+let three = ...
 
-let Nat =
-    (
-        ind
-
-        // Type
-        Type0
-
-        // Name
-        "Nat"
-
-        // Index types
-        ()
-
-        // Variants
-        (
-            // The DB index stack is
-            // 0 => self_type_constructor: Type0
-
-            // zero: self_type_constructor
-            (() ())
-
-            // succ: forall(pred: self_type_constructor) -> self_type_constructor
-            ((0) ())
-        )
-    )
-
-let zero = (vcon Nat 0)
-let succ = (vcon Nat 1)
-
-// END Copy previous code
-
-let three = (succ (succ (succ zero)))
-
-let List =
-    (
-        fun
-
-        nonrec
-
-        // Param types
-        (Type0)
-
-        // Return type
-        Type0
-
-        // Body
-        (
-            ind
-
-            Type0
-
-            "List"
-
-            ()
-
-            (
-                // DB index stack is
-                // 0 => self_type_constructor = List(T): Type0
-                // 1 => self_fun: forall(T': Type0) -> Type0
-                // 2 => T: Type0
-
-                // nil: self_type_constructor
-                // In other words,
-                // nil: List(T)
-                (() ())
-
-                // cons: forall(car: T, cdr: self_type_constructor) -> self_type_constructor
-                // In other words,
-                // cons: forall(card: T, cdr: List(T)) -> List(T)
-                ((2 0) ())
-            )
-        )
-    )
-
+let List = ...
 let NatList = (List Nat)
 let NatList_nil = (vcon NatList 0)
 let NatList_cons = (vcon NatList 1)
@@ -392,93 +310,12 @@ return (NatList_cons three NatList_nil)
 ### `(Eq Nat 3 3)`:
 
 ```zozen
-// START Copy previous code
+let Nat = ...
+let zero = ...
+let succ = ...
+let three = ...
 
-let Nat =
-    (
-        ind
-
-        // Type
-        Type0
-
-        // Name
-        "Nat"
-
-        // Index types
-        ()
-
-        // Variants
-        (
-            // The DB index stack is
-            // 0 => self_type_constructor: Type0
-
-            // zero: self_type_constructor
-            (() ())
-
-            // succ: forall(pred: self_type_constructor) -> self_type_constructor
-            ((0) ())
-        )
-    )
-
-let zero = (vcon Nat 0)
-let succ = (vcon Nat 1)
-
-// END Copy previous code
-
-let three = (succ (succ (succ zero)))
-
-let Eq =
-    (
-        fun
-
-        nonrec
-
-        // Param types
-        (Type0 0)
-
-        // Return type
-        Type1
-
-        // Body
-        (
-            ind
-
-            type1
-
-            "Eq"
-
-            // Index types
-            (
-                // The DB index stack is
-                // 0 => self_fun: forall(T': Type0, x': T') -> Type1
-                //      Note this is inaccessible since the fun is
-                //      declared as non-recursive.
-                // 1 => x: T
-                // 2 => T: Type0
-
-                2 // y: T
-            )
-
-            // Variant constructors
-            (
-                // The DB index stack is
-                // 0 => self_type_constructor: forall(y': T) -> Type1
-                //
-                // Note that indices are not added to the DB stack in this case.
-                // You have to manually add them.
-                //
-                // 1 => self_fun (inaccessible): forall(T': Type0, x': T') -> Type1
-                // 2 => x: T
-                // 3 => T: Type0
-
-                // refl: self_type_constructor(x)
-                // In other words
-                // refl: Eq(T, x)[x]
-                (() (2))
-            )
-        )
-    )
-
+let Eq = ...
 let EqNat3 = (Eq Nat three)
 let refl_nat_3 = (vcon EqNat3 0)
 let proof_that_3_equals_3 = refl_nat_3
@@ -694,9 +531,7 @@ Some obvious code is abbreviated with `...`.
 
 ### `typeof Eq`:
 
-TODO
-
-<!-- ```zo
+```zo
 (
     for
 
@@ -712,14 +547,18 @@ TODO
 
         // Param types
         (
+            // DB index stack is
+            // 0 => x: T
+            // 1 => T: Type0
+
             1 // y: T
         )
 
         // Return type
-        Type1
+        Type0
     )
 )
-``` -->
+```
 
 ## Universes
 
