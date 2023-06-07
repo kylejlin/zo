@@ -1,4 +1,4 @@
-# Zo Informal Spec
+# Zo Informal Syntax Spec
 
 ## Type expressions
 
@@ -17,12 +17,13 @@ Peano Nat:
     // Index types
     ()
 
-    // Variants
+    // Variant constructors
     (
         // The DB index stack is
         // 0 => self_type_constructor: Type0
 
-        // Variant syntax: (variant_constructor_param_types index_args)
+        // Variant constructor syntax:
+        // (variant_constructor_param_types index_args)
 
         // zero: self_type_constructor
         (() ())
@@ -72,7 +73,7 @@ Equal:
             2 // y: T
         )
 
-        // Variants
+        // Variant constructors
         (
             // The DB index stack is
             // 0 => self_type_constructor: forall(y': T) -> Type1
@@ -157,5 +158,155 @@ List:
             ((2 0) ())
         )
     )
+)
+```
+
+## Variants
+
+Zero:
+
+```zo
+(
+    new
+
+    // Type
+    (
+        ind
+
+        // Type
+        Type0
+
+        // Name
+        "Nat"
+
+        // Index types
+        ()
+
+        // Variants
+        (
+            // The DB index stack is
+            // 0 => self_type_constructor: Type0
+
+            // Variant syntax: (variant_constructor_param_types index_args)
+
+            // zero: self_type_constructor
+            (() ())
+
+            // succ: forall(pred: self_type_constructor) -> self_type_constructor
+            ((0) ())
+        )
+    )
+
+    // Variant constructors
+    0
+)
+```
+
+Two:
+
+```zo
+(
+    new
+
+    // Type
+    (
+        ind
+
+        // Type
+        Type0
+
+        // Name
+        "Nat"
+
+        // Index types
+        ()
+
+        // Variants
+        (
+            // The DB index stack is
+            // 0 => self_type_constructor: Type0
+
+            // Variant syntax: (variant_constructor_param_types index_args)
+
+            // zero: self_type_constructor
+            (() ())
+
+            // succ: forall(pred: self_type_constructor) -> self_type_constructor
+            ((0) ())
+        )
+    )
+
+    // Variant constructors
+    (1 (1 0))
+)
+```
+
+**Important:**
+As you can see, the variant constructor indices use forward counting.
+That is, the first variant constructor is `0`,
+the second variant constructor is `1`, and so on.
+Variant constructor indices should not be confused with
+DeBruijn indices, which use backwards counting.
+
+Singleton list containing zero:
+
+The full code would be rather long, so I'm going to
+abbreviate it by writing `<<<NAT>>>` as a placeholder.
+In the real code, you would replace `<<<NAT>>>` with the
+code for nat (i.e., `(ind Type0 Nat () (...))`).
+
+Similarly, I will also use `<<<ZERO>>>` as a placeholder for
+the zero nat.
+
+```zo
+(
+    new
+
+    (
+        (
+            fun
+
+            // Decreasing arg index (in this case, non-recursive)
+            1
+
+            // Param types
+            (Type0)
+
+            // Return type
+            Type0
+
+            // Body
+            (
+                ind
+
+                Type0
+
+                "List"
+
+                ()
+
+                (
+                    // DB index stack is
+                    // 0 => self_type_constructor = List(T): Type0
+                    // 1 => self_fun: forall(T': Type0) -> Type0
+                    // 2 => T: Type0
+
+                    // nil: self_type_constructor
+                    // In other words,
+                    // nil: List(T)
+                    (() ())
+
+                    // cons: forall(car: T, cdr: self_type_constructor) -> self_type_constructor
+                    // In other words,
+                    // cons: forall(card: T, cdr: List(T)) -> List(T)
+                    ((2 0) ())
+                )
+            )
+        )
+
+        <<<NAT>>>
+    )
+
+    (1 <<<ZERO>>> 0)
 )
 ```
