@@ -98,3 +98,48 @@ return
 ```
 
 The type (written in Zozen notation) is `(for (Nat) Type0)`.
+
+## Variant constructors
+
+### `Nat.zero`:
+
+```zo
+(
+    vcon
+
+    // Type
+    (
+        ind
+
+        // Type
+        Type0
+
+        // Name
+        "Nat"
+
+        // Index types
+        ()
+
+        // Variants
+        (
+            // zero: self_type_constructor
+            (() ())
+
+            // succ (its details are irrelevant for this example)
+            ((0) ())
+        )
+    )
+
+    // Variant constructor index
+    0
+)
+```
+
+1. First, since the variant constructor index is `0`,
+   we find the zeroth constructor (namely, `(() ())`).
+2. Then, we take the constructor params (the left `()`),
+   and create a `(for <params> <return_type>)`, with `<params>`
+   replaced by the constructor params.
+   This gives us `(for () <return_type>)`.
+   We will fill in the `<return_type>` placeholder in a later step.
+3. Then, we take the TODO
