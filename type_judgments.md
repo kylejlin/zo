@@ -2,6 +2,7 @@
 
 ## Overview
 
+- Notational conventions
 - Params
 - Type expressions
 - Variant constructors
@@ -12,6 +13,30 @@
 - Foralls
 - Universes
 
+## Notational conventions
+
+1. Define `(@cfor <param_types> <return_type>)` as
+   `(cfor <param_types> <return_type>)` if `<param_types>` is nonempty,
+   and `<return_type>` if `<param_types>` is empty.
+
+   "cfor" stands for "collapsing for", since the `for` "collapses"
+   when it has zero params.
+
+2. Define `(@capp <callee> <args>)`
+   as `(<callee> <args>)` if `<args>` is nonempty,
+   and `<callee>` if `<args>` is empty.
+
+   "capp" stands for "collapsing application",
+   since the application "collapses" when it has zero args.
+
+3. If you see Zozen-specific syntax
+   (e.g., `let` definitions, or named variables like `Nat`),
+   you can automatically
+   assume we are using Zozen.
+   We will not explicitly say "We are using Zozen syntax" every time.
+   This will not cause any ambiguity because
+   "vanilla" Zo does not support this syntax.
+
 ## Params
 
 A param `0` has type `context[0]`.
@@ -20,10 +45,17 @@ In general, a param `n` has type `context[n]`.
 
 ## Type expressions
 
-### Zero indices
+**Definition:** A type expression of the form
 
-A type expression of the form `(ind <type_n> ...)` has type `<type_n>`.
-For example, the below Peano nat has the type `Type0`.
+```zolike
+(ind <type_n> _any_name (index_type0 index_type1 ... index_type_n) ...)
+```
+
+has the type `(@cfor (index_type0 index_type1 ... index_type_n) <type_n>)`.
+
+### `Nat`
+
+Consider the below type expression for the Peano nat:
 
 ```zo
 (
@@ -53,22 +85,11 @@ For example, the below Peano nat has the type `Type0`.
 )
 ```
 
-### One or more indices
+It has the type `(@cfor () Type0)`, which simplifies to `Type0`.
 
-A type expression of the form
+### `Eq(Nat, zero)`
 
-```zolike
-(ind <type_n> _any_name (index_type0 index_type1 ... index_type_n) ...)
-```
-
-has the type
-
-```zolike
-(for (index_type0 index_type1 ... index_type_n) <type_n>)
-```
-
-For example, consider the below type expression for `Eq(Nat, zero)`.
-We use Zozen notation for brevity.
+Consider the below type expression for `Eq(Nat, zero)`:
 
 ```zozen
 let Nat = ...
@@ -97,7 +118,7 @@ return
 )
 ```
 
-The type (written in Zozen notation) is `(for (Nat) Type0)`.
+It has the type `(@cfor (Nat) Type0)`, which simplifies to `(for (Nat) Type0)`.
 
 ## Variant constructors
 
