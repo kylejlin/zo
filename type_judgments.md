@@ -6,7 +6,6 @@
 - Params
 - `ind` expressions
 - Variant constructors
-- Variants
 - Matching
 - Functions
 - Function application
