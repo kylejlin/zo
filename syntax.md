@@ -191,6 +191,7 @@ or name-polymorphic expressions in Zo.
 
 ```zozen
 let Nat = ...
+let succ = ...
 
 return
 (

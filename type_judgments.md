@@ -357,3 +357,95 @@ It has the type
 `(@cfor () (@capp Eq_Nat_zero zero))`,
 which simplifies to
 `(Eq_Nat_zero zero)`.
+
+### `Le(zero).step`
+
+```zozen
+let Nat = ...
+let zero = ...
+let succ = ...
+let Le_zero = (
+    ind
+
+    Type0
+
+    "Le"
+
+    // Index types
+    (Nat)
+
+    // Variants
+    (
+        // DB index stack is
+        // 0 => self_type_constructor: forall(rhs: Nat) -> Type0
+
+        // refl
+        (() (zero))
+
+        // step
+        (
+            // Variant constructor param types
+            (
+                Nat // rhs_pred: Nat
+
+                    // DB index stack is
+                    // 0 => rhs_pred: Nat
+                    // 1 => self_type_constructor: forall(rhs: Nat) -> Type0
+
+                (1 0) // lhs_le_rhs_pred: Le(lhs)[rhs_pred]
+            )
+
+            // Index args
+
+                // DB index stack is
+                // 0 => lhs_le_rhs_pred: Le(lhs)[rhs_pred]
+                // 1 => rhs_pred: Nat
+                // 2 => self_type_constructor: forall(rhs: Nat) -> Type0
+
+            ((succ 1))
+        )
+    )
+)
+
+return
+(
+    vcon
+
+    Le_zero
+
+    1
+)
+```
+
+It has the type
+
+```zozen
+(
+    @cfor
+
+    (
+        Nat
+        (Le_zero 0)
+    )
+
+    (
+        @capp
+
+        Le_zero
+
+        (
+            (succ 1)
+        )
+    )
+)
+```
+
+which simplifies to
+
+```zozen
+(
+    for
+    (Nat (Le_zero 0))
+    (Le_zero (succ 1))
+)
+```
