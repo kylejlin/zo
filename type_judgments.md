@@ -74,11 +74,6 @@ By definition, it has the form:
 )
 ```
 
-If this expression has any type at all,
-then it has the type
-
-`(@cfor (index_type0 index_type1 ... index_type_n) <output_type>)`.
-
 In order to have a type,
 the expression must meet the following conditions:
 
@@ -110,6 +105,11 @@ the expression must meet the following conditions:
 
    5. The constructor satisifes the strict positivity requirement.
       TODO: Define this.
+
+If the above conditions are met,
+then this expression has the type:
+
+`(@cfor (index_type0 index_type1 ... index_type_n) <output_type>)`.
 
 ### `Nat`
 
@@ -194,7 +194,7 @@ By definition, it has the form
 ```
 
 In order to have a type,
-this must meet the following conditions:
+this expression must meet the following conditions:
 
 1. `<ind_expression>` is a well-typed `ind` expression.
 2. The variant constructor index is valid. Formally:
