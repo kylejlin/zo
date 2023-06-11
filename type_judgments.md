@@ -449,3 +449,39 @@ which simplifies to
     (Le_zero (succ 1))
 )
 ```
+
+## `match` expressions
+
+### General rule
+
+Suppose we have a `match` expression.
+By definition, it must have the form
+
+```zolike
+(
+    match
+
+    <matchee>
+
+    <return_type>
+
+    (
+        <return_val0>
+        <return_val1>
+        ...
+        <return_val_n>
+    )
+)
+```
+
+In order to have a type,
+this expression must meet the following conditions:
+
+1. `<matchee>` is well-typed, and its type is an `ind` expression.
+2. `<return_type>` is well-typed, and its type is a `Type` expression.
+3. The number of `<return_val>`s equals the number of variants in the
+   `<matchee>`.
+4. For every `<return_val_i>` is compatible with `<return_type>`
+   under the extended context and econtext.
+
+TODO: Define econtext semantics.

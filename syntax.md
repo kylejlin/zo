@@ -187,7 +187,7 @@ or name-polymorphic expressions in Zo.
 )
 ```
 
-### Less than or equal (parameterized)
+### Less than or equal
 
 ```zozen
 let Nat = ...
