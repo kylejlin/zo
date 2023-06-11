@@ -14,16 +14,16 @@
 
 ## Notational conventions
 
-1. Define `(@cfor <param_types> <return_type>)` as
-   `(cfor <param_types> <return_type>)` if `<param_types>` is nonempty,
-   and `<return_type>` if `<param_types>` is empty.
+1. Define `(@cfor <parenthesized_param_types> <return_type>)` as
+   `(cfor <parenthesized_param_types> <return_type>)` if `<parenthesized_param_types>` is nonempty,
+   and `<return_type>` if `<parenthesized_param_types>` is empty.
 
    "cfor" stands for "collapsing for", since the `for` "collapses"
    when it has zero params.
 
-2. Define `(@capp <callee> <args>)`
-   as `(<callee> <args>)` if `<args>` is nonempty,
-   and `<callee>` if `<args>` is empty.
+2. Define `(@capp <callee> <parenthesized_args>)`
+   as `(<callee> <parenthesized_args>)` if `<parenthesized_args>` is nonempty,
+   and `<callee>` if `<parenthesized_args>` is empty.
 
    "capp" stands for "collapsing application",
    since the application "collapses" when it has zero args.
@@ -180,7 +180,66 @@ It has the type `(@cfor (Nat) Type0)`, which simplifies to `(for (Nat) Type0)`.
 
 ## Variant constructors
 
-### `Nat.zero`:
+### General rule
+
+Suppose we have some `vcon` expression.
+By definition, it has the form
+
+```zolike
+(
+    vcon
+    <ind_expression>
+    <variant_constructor_index>
+)
+```
+
+In order to have a type,
+this must meet the following conditions:
+
+1. `<ind_expression>` is a well-typed `ind` expression.
+2. The variant constructor index is valid. Formally:
+
+   `<variant_constructor_index> \in [0, variant_count)`,
+   where `variant_count` is the number
+   of variants in `<ind_expression>`.
+
+If the above conditions are met,
+then this expression has the type
+
+```zolike
+(
+    @cfor
+
+    (
+        (@shift -1 0 (@replace 0 <ind_expression> (param_type_0)))
+        (@shift -1 1 (@replace 1 <ind_expression> (param_type_1)))
+        (@shift -1 2 (@replace 2 <ind_expression> (param_type_2)))
+        ...
+        (@shift -1 m (@replace m <ind_expression> (param_type_m)))
+    )
+
+    (
+        @capp
+
+        <ind_expression>
+
+        (
+            (@shift -1 m+1 (@replace m+1 <ind_expression> (iarg0)))
+            (@shift -1 m+1 (@replace m+1 <ind_expression> (iarg1)))
+            (@shift -1 m+1 (@replace m+1 <ind_expression> (iarg2)))
+            ...
+            (@shift -1 m+1 (@replace m+1 <ind_expression> (iarg_n)))
+        )
+    )
+)
+```
+
+where we define
+`((param_type0 ... param_type_m) (iarg0 ... iarg_n))`
+as the `<variant_constructor_index>`th variant of
+`<ind_expression>`.
+
+### `Nat.zero`
 
 Consider the below expression for `zero`:
 
@@ -216,10 +275,10 @@ Consider the below expression for `zero`:
 )
 ```
 
-It has the type `(@cfor () (@capp Nat))`,
+It has the type `(@cfor () (@capp Nat ()))`,
 which simplifies to `Nat`.
 
-### `Nat.succ`:
+### `Nat.succ`
 
 Consider the below expression for `succ`:
 
@@ -255,5 +314,5 @@ Consider the below expression for `succ`:
 )
 ```
 
-It has the type `(@cfor (Nat) (@capp Nat))`,
+It has the type `(@cfor (Nat) (@capp Nat ()))`,
 which simplifies to `(for (Nat) Nat)`.
