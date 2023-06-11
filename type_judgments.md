@@ -119,11 +119,10 @@ Consider the below type expression for the Peano nat:
 (
     ind
 
-    Type0 // <-- This determines the type expression's type.
+    Type0
 
     "Nat"
 
-    // Notice there are no indices.
     ()
 
     // Variant constructors
@@ -157,13 +156,13 @@ return
 (
     ind
 
-    Type0 // <-- This is the type_n
+    Type0
 
     "Eq"
 
     // Index types
     (
-        Nat // <-- This is index_type0
+        Nat
     )
 
     // Variant constructors
@@ -316,3 +315,45 @@ Consider the below expression for `succ`:
 
 It has the type `(@cfor (Nat) (@capp Nat ()))`,
 which simplifies to `(for (Nat) Nat)`.
+
+### `Eq(Nat, zero).refl`
+
+```zozen
+let Nat = ...
+let zero = ...
+let Eq_Nat_zero =
+    (
+        ind
+
+        Type0
+
+        "Eq"
+
+        // Index types
+        (
+            Nat
+        )
+
+        // Variant constructors
+        (
+            // refl: self_type_constructor(zero)
+            // In other words
+            // refl: Eq(Nat, zero)[zero]
+            (() (zero))
+        )
+    )
+
+return
+(
+    vcon
+
+    Eq_Nat_zero
+
+    0
+)
+```
+
+It has the type
+`(@cfor () (@capp Eq_Nat_zero zero))`,
+which simplifies to
+`(Eq_Nat_zero zero)`.
