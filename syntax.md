@@ -110,7 +110,7 @@ or name-polymorphic expressions in Zo.
                 // 2 => x: T
                 // 3 => T: Type0
                 //
-                // Note that indices are not added to the DB stack in this case.
+                // Note that indices are not added to the DB stack.
 
             // refl: self_type_constructor(x)
             // In other words
@@ -182,6 +182,75 @@ or name-polymorphic expressions in Zo.
             // In other words,
             // cons: forall(card: T, cdr: List(T)) -> List(T)
             ((2 0) ())
+        )
+    )
+)
+```
+
+### Less than or equal (parameterized)
+
+```zozen
+let Nat = ...
+
+return
+(
+    fun
+
+    nonrec
+
+    // Param types
+    (Nat)
+
+    // Return type
+    Type0
+
+    // Body
+    (
+        ind
+
+        Type0
+
+        "Le"
+
+        // Index types
+        (Nat)
+
+        // Variants
+        (
+            // DB index stack is
+            // 0 => self_type_constructor: forall(rhs: Nat) -> Type0
+            // 1 => self_fun (inaccessible)
+            // 2 => lhs: Nat
+
+            // refl
+            (() (2))
+
+            // step
+            (
+                // Variant constructor param types
+                (
+                    Nat // rhs_pred: Nat
+
+                        // DB index stack is
+                        // 0 => rhs_pred: Nat
+                        // 1 => self_type_constructor: forall(rhs: Nat) -> Type0
+                        // 2 => self_fun (inaccessible)
+                        // 3 => lhs: Nat
+
+                    (1 0) // lhs_le_rhs_pred: Le(lhs)[rhs_pred]
+                )
+
+                // Index args
+
+                    // DB index stack is
+                    // 0 => lhs_le_rhs_pred: Le(lhs)[rhs_pred]
+                    // 1 => rhs_pred: Nat
+                    // 2 => self_type_constructor: forall(rhs: Nat) -> Type0
+                    // 3 => self_fun (inaccessible)
+                    // 4 => lhs: Nat
+
+                ((succ 1))
+            )
         )
     )
 )
