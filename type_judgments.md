@@ -182,6 +182,8 @@ It has the type `(@cfor (Nat) Type0)`, which simplifies to `(for (Nat) Type0)`.
 
 ### `Nat.zero`:
 
+Consider the below expression for `zero`:
+
 ```zo
 (
     vcon
@@ -214,11 +216,44 @@ It has the type `(@cfor (Nat) Type0)`, which simplifies to `(for (Nat) Type0)`.
 )
 ```
 
-1. First, since the variant constructor index is `0`,
-   we find the zeroth constructor (namely, `(() ())`).
-2. Then, we take the constructor params (the left `()`),
-   and create a `(for <params> <return_type>)`, with `<params>`
-   replaced by the constructor params.
-   This gives us `(for () <return_type>)`.
-   We will fill in the `<return_type>` placeholder in a later step.
-3. Then, we take the TODO
+It has the type `(@cfor () (@capp Nat))`,
+which simplifies to `Nat`.
+
+### `Nat.succ`:
+
+Consider the below expression for `succ`:
+
+```zo
+(
+    vcon
+
+    // Type
+    (
+        ind
+
+        // Type
+        Type0
+
+        // Name
+        "Nat"
+
+        // Index types
+        ()
+
+        // Variants
+        (
+            // zero: self_type_constructor
+            (() ())
+
+            // succ (succ's details are irrelevant for this example)
+            ((0) ())
+        )
+    )
+
+    // Variant constructor index
+    1
+)
+```
+
+It has the type `(@cfor (Nat) (@capp Nat))`,
+which simplifies to `(for (Nat) Nat)`.
