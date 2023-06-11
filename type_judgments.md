@@ -4,7 +4,7 @@
 
 - Notational conventions
 - Params
-- Type expressions
+- `ind` expressions
 - Variant constructors
 - Variants
 - Matching
@@ -43,15 +43,74 @@ A param `0` has type `context[0]`.
 A param `1` has type `context[1]`.
 In general, a param `n` has type `context[n]`.
 
-## Type expressions
+## `ind` expressions
 
-**Definition:** A type expression of the form
+### General rule
+
+Suppose we have some `ind` expression.
+By definition, it has the form:
 
 ```zolike
-(ind <type_n> _any_name (index_type0 index_type1 ... index_type_n) ...)
+(
+    ind
+
+    <output_type> // This is a guaranteed to be a literal
+                  // `Type<p>` for some `<p>`.
+
+    <name>
+
+    (
+        <index_type0>
+        <index_type1>
+        ...
+        <index_type_m>
+    )
+
+    (
+        <variant0>
+        <variant1>
+        ...
+        <variant_n>
+    )
+)
 ```
 
-has the type `(@cfor (index_type0 index_type1 ... index_type_n) <type_n>)`.
+If this expression has any type at all,
+then it has the type
+
+`(@cfor (index_type0 index_type1 ... index_type_n) <output_type>)`.
+
+In order to have a type,
+the expression must meet the following conditions:
+
+1. Every index type is well-typed. Formally:
+
+   For every `i`, there exists some `q_i` such that
+   `<index_type_i>` has a type of `Type<q_i>`.
+
+2. The index types are consistent with `<output_type>`. Formally:
+
+   `<output_type>` is greater than or equal to
+   the maximum of the set `{ typeof(<index_type_i>) | i \in [0, m] }`.
+   If there are no indices, then `<output_type>` may be any `Type<p>`.
+
+3. For every variant:
+
+   1. Every constructor param is well-typed.
+   2. Every return type index arg is well-typed.
+   3. The number of index args matches the number of indices.
+   4. The constructor param types are consistent with `<output_type>`. Formally:
+
+      By definition, the variant is of the form
+      `((<param0> <param1> ... <param_q>) <_index_args>)`.
+
+      `<output_type>` is greater than or equal to
+      the maximum of the set `{ typeof(<param_i>) | i \in [0, q] }`.
+      If this variant has no constructor params,
+      this variant vacuously satisfies the consistency requirement.
+
+   5. The constructor satisifes the strict positivity requirement.
+      TODO: Define this.
 
 ### `Nat`
 
