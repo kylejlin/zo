@@ -4,13 +4,13 @@
 
 - Notational conventions
 - Params
-- `ind` expressions
-- Variant constructors
-- Matching
-- Functions
+- `ind`
+- `vcon`
+- `match`
+- `fun`
 - Function application
-- Foralls
-- Universes
+- `for`
+- `Type<n>`
 
 ## Notational conventions
 
