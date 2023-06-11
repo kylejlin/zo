@@ -205,7 +205,7 @@ It has the type `(@cfor (Nat) Type0)`, which simplifies to `(for (Nat) Type0)`.
             // zero: self_type_constructor
             (() ())
 
-            // succ (its details are irrelevant for this example)
+            // succ (succ's details are irrelevant for this example)
             ((0) ())
         )
     )
