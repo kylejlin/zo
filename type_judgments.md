@@ -4,13 +4,13 @@
 
 - Notational conventions
 - Params
-- `ind`
-- `vcon`
-- `match`
-- `fun`
+- `ind` expressions
+- `vcon` expressions
+- `match` expressions
+- `fun` expressions
 - Function application
-- `for`
-- `Type<n>`
+- `for` expressions
+- `Type<n>` expressions
 
 ## Notational conventions
 
@@ -177,7 +177,7 @@ return
 
 It has the type `(@cfor (Nat) Type0)`, which simplifies to `(for (Nat) Type0)`.
 
-## Variant constructors
+## `vcon` expressions
 
 ### General rule
 
