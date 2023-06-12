@@ -650,3 +650,7 @@ If the following conditions are met,
 the expression has the type `Type<q_max>`,
 where `q_max` equals the maximum of the set
 `{ q0, q1, ... q_m, q_return }`.
+
+## `Type<n>` expressions
+
+`Type<n>` has the type `Type<n+1>`.
