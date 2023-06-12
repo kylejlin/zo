@@ -1,7 +1,8 @@
 # Type Judgments
 
-## Overview
+## Contents
 
+- Disclaimer
 - Notational conventions
 - Params
 - `ind` expressions
@@ -11,6 +12,14 @@
 - Function application
 - `for` expressions
 - `Type<n>` expressions
+
+## Disclaimer
+
+This spec is written for my personal use.
+It contains many notational inconsistencies.
+If information is obvious to me, I usually elide it,
+even if it's important.
+So read it at your own risk.
 
 ## Notational conventions
 
@@ -36,11 +45,34 @@
    This will not cause any ambiguity because
    "vanilla" Zo does not support this syntax.
 
+4. We abbreviate "De Bruijn" index as "DB index".
+
+5. We use two contexts: a _type context_ and an _equality context_.
+   We abbreviate these as "tcontext" and "econtext", respectively.
+
+   The tcontext is a stack of expressions,
+   corresponding to the types of the DB indices.
+
+   The econtext is a stack of pairs of expressions.
+   Each pair's elements are judgmentally equal.
+   For example, if `econtext = [(0, 1), (6, 4)]`,
+   then `0` and `1` are judgmentally equal,
+   and `6` and `4` are judgmentally equal.
+
+   You must take care to shift the econtext when
+   you modify the tcontext.
+
+6. `(@shift <shift_amount> <cutoff> <expression>)` shifts DB indices.
+
+7. `(@replace <replacee_db_index> <replacement> <target>)`
+   replaces occurences of `<replacee_db_index>`
+   in `<target>` with `<replacement>`.
+
 ## Params
 
-A param `0` has type `context[0]`.
-A param `1` has type `context[1]`.
-In general, a param `n` has type `context[n]`.
+A param `0` has type `tcontext[0]`.
+A param `1` has type `tcontext[1]`.
+In general, a param `n` has type `tcontext[n]`.
 
 ## `ind` expressions
 
@@ -481,7 +513,50 @@ this expression must meet the following conditions:
 2. `<return_type>` is well-typed, and its type is a `Type` expression.
 3. The number of `<return_val>`s equals the number of variants in the
    `<matchee>`.
-4. For every `<return_val_i>` is compatible with `<return_type>`
-   under the extended context and econtext.
+4. For every `<return_val_i>`:
+   1. `<return_val_i>` has some type `return_type_i`
+      under the extended tcontext and econtext.
+   2. `return_type_i` is compatible with `<return_type>`
+      under the extended tcontext and econtext.
 
-TODO: Define econtext semantics.
+### Extending the tcontext and econtext
+
+Suppose we have
+
+```zolike
+(
+    match
+
+    <matchee>
+
+    <return_type>
+
+    (
+        <return_val0>
+        <return_val1>
+        ...
+        <return_val_m>
+    )
+)
+```
+
+where `<matchee>` has type `(@capp <ind_type> (<matchee_index0> ... <matchee_index_n>))`.
+
+Then for any `i \in [0, m]`:
+
+First, we define the following:
+
+1. Let the `i`th variant constructor of `<ind_type>` have index args
+   `(vcon_index0 ... vcon_index_n)`.
+2. Let the `i`th variant constructor of `<ind_type>` have param types
+   `(vcon_param_type0 ... vcon_param_type_p)`.
+
+Then:
+
+1. Add `vcon_param_type0`, ..., `vcon_param_type_p` to the tcontext.
+2. Upshift the econtext by `p+1`.
+3. Add `(vcon_index0 |-> (@shift p+1 0 matchee_index0))`,
+   `(vcon_index1 |-> (@shift p+1 0 matchee_index1))`,
+   ... `(vcon_index_n |-> (@shift p+1 0 matchee_index_n))`
+   to the econtext.
+4. Add `((@shift p+1 0 <matchee>) |-> (@capp (@dycon <ind_type> i) (0 1 2 ... p)))` to the econtext.
