@@ -621,3 +621,32 @@ We define _syntactic substruct_ (abbreviated as "substruct") as follows:
 3. For any `match` expression where all
    the return values are substructs,
    the `match` expression itself is a substruct.
+
+## Function applications
+
+TODO
+
+## `for` expressions
+
+Suppose we have an expression of the form:
+
+```zolike
+(
+    for
+
+    (<param_type0> ... <param_type_m>)
+
+    <return_type>
+)
+```
+
+In order to have a type,
+the expression must meet the following requirements:
+
+1. For every `i`, `<param_type_i>` has the type `Type<q_i>`.
+2. `<return_type>` has the type `Type<q_return>`.
+
+If the following conditions are met,
+the expression has the type `Type<q_max>`,
+where `q_max` equals the maximum of the set
+`{ q0, q1, ... q_m, q_return }`.
