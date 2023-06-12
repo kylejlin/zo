@@ -562,3 +562,62 @@ Then:
 4. Add `((@shift p+1 0 <matchee>) |-> (@capp (vcon <ind_type> i) (0 1 2 ... p)))` to the econtext.
 
 ### TODO Examples
+
+## `fun` expressions
+
+### General rule
+
+Suppose we have an expression of the form
+
+```zolike
+(
+    fun
+
+    <decreasing_param_index>
+
+    (<param_type0> ... <param_type_m>)
+
+    <return_type>
+
+    <body>
+)
+```
+
+In order to have a type,
+the expression must meet the following requirements:
+
+1. `<decreasing_param_index>` is `nonrec` or some `n \in [0, m]`.
+2. The `n`th param is decreasing in every recursive call in `<body>`.
+   We describe this in more detail later.
+3. For every `i`, `<param_type_i>` has a type of `Type<q_i>`.
+4. `<return_type>` has a type of `Type<q_return>`.
+5. `<body>` has a type of `<return_type>`.
+
+If the following conditions are met,
+this expression has the type
+
+```zolike
+(
+    for
+
+    (<param_type0> ... <param_type_m>)
+
+    <return_type>
+)
+```
+
+### Decreasing param check
+
+Every recursive call must pass a _syntactic substruct_ of the `n`th param
+as the recursive call's `n`th arg.
+We define _syntactic substruct_ (abbreviated as "substruct") as follows:
+
+1. Base case: For any `match` expression
+   where the matchee is the `n`th param,
+   all match case params are substructs.
+2. For any `match` expression
+   where the matchee is a substruct,
+   all match case params are substructs.
+3. For any `match` expression where all
+   the return values are substructs,
+   the `match` expression itself is a substruct.
