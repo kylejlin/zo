@@ -624,7 +624,51 @@ We define _syntactic substruct_ (abbreviated as "substruct") as follows:
 
 ## Function applications
 
-TODO
+Suppose we have an expression of the form:
+
+```zolike
+(<callee> <arg0> ... <arg_m>)
+```
+
+In order to have a type,
+the expression must meet the following requirements:
+
+1. `<callee>` has the type `(for (param_type0 ... param_type_m) return_type)`.
+   Notice that the number of params must match the number of args (i.e., `m`).
+2. For each `i`, `<arg_i>` has the type
+
+   ```zolike
+   (@suball i-1 param_type_i)
+   ```
+
+   where we define `(@suball <j> <expression>)` as
+
+   ```zolike
+   (
+       @replace
+       <j>
+       <arg_j>
+       ...
+       (
+           @replace
+           2
+           <arg2>
+           (
+               @replace
+               1
+               <arg1>
+               (@replace 0 <arg0> <expression>)
+           )
+       )
+   )
+   ```
+
+If the following conditions are met,
+the expression has the type:
+
+```zolike
+(@suball m <return_type>)
+```
 
 ## `for` expressions
 
@@ -647,8 +691,13 @@ the expression must meet the following requirements:
 2. `<return_type>` has the type `Type<q_return>`.
 
 If the following conditions are met,
-the expression has the type `Type<q_max>`,
-where `q_max` equals the maximum of the set
+the expression has the type
+
+```zolike
+Type<q_max>
+```
+
+...where `q_max` equals the maximum of the set
 `{ q0, q1, ... q_m, q_return }`.
 
 ## `Type<n>` expressions
