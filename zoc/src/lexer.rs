@@ -45,7 +45,7 @@ impl Lexer<'_> {
                 self.handle_char_assuming_state_is_word(current_index, current, start, byte_len)
             }
             State::String { start, byte_len } => {
-                self.handle_char_assuming_state_is_string(current_index, current, start, byte_len)
+                self.handle_char_assuming_state_is_string(current, start, byte_len)
             }
         }
     }
@@ -105,7 +105,6 @@ impl Lexer<'_> {
 
     fn handle_char_assuming_state_is_string(
         &mut self,
-        current_index: ByteIndex,
         current: char,
         start: ByteIndex,
         byte_len: usize,
@@ -131,6 +130,7 @@ impl Lexer<'_> {
     fn finish_pending_state(&mut self) -> Result<(), LexError> {
         match self.state {
             State::Main => Ok(()),
+
             State::Word { start, byte_len } => {
                 let word_src = &self.src[start.0..start.0 + byte_len];
                 let Some(word) = parse_word(word_src, start) else {
@@ -139,10 +139,22 @@ impl Lexer<'_> {
                 self.out.push(word);
                 Ok(())
             }
+
             State::String { start, byte_len } => {
                 let end = ByteIndex(start.0 + byte_len);
-                let quote_exclusive_string_src = &self.src[start.0 + '"'.len_utf8()..end.0];
-                let value = get_string_value(quote_exclusive_string_src)?;
+                let quote_exclusive_start = ByteIndex(start.0 + '"'.len_utf8());
+                let quote_exclusive_end = ByteIndex(start.0 + byte_len - '"'.len_utf8());
+                let quote_exclusive_string_src =
+                    &self.src[quote_exclusive_start.0..quote_exclusive_end.0];
+                let value = match get_string_value(quote_exclusive_string_src) {
+                    Ok(v) => v,
+                    Err(local_span) => {
+                        return Err(LexError(
+                            quote_exclusive_start + local_span.0,
+                            quote_exclusive_start + local_span.1,
+                        ));
+                    }
+                };
                 self.out.push(Token::String(StringLiteral {
                     value,
                     span: (start, end),
@@ -201,7 +213,16 @@ mod string_parser {
     /// does not have any double quotes.
     /// If `quote_exclusive_string_src` has double quotes,
     /// this function may produce an incorrect result.
-    pub fn get_string_value(quote_exclusive_string_src: &str) -> Result<String, ByteIndex> {
+    ///
+    /// This function returns `Err(Some(span))` if it encounters
+    /// an invalid escape sequence, where `span` is the location
+    /// of the invalid escape sequence.
+    ///
+    /// This function returns `Err(None)` if it encounters
+    /// an unterminated escape sequence.
+    pub fn get_string_value(
+        quote_exclusive_string_src: &str,
+    ) -> Result<String, (ByteIndex, ByteIndex)> {
         StringParser::new(quote_exclusive_string_src).parse()
     }
 
@@ -228,13 +249,16 @@ mod string_parser {
     }
 
     impl StringParser<'_> {
-        fn parse(mut self) -> Result<String, ByteIndex> {
+        fn parse(mut self) -> Result<String, (ByteIndex, ByteIndex)> {
             for (current_index, current) in self.quote_exclusive_string_src.char_indices() {
                 self.handle_char(ByteIndex(current_index), current)?;
             }
 
             match self.state {
-                State::Escape { .. } => Err(ByteIndex(self.quote_exclusive_string_src.len())),
+                State::Escape { start, .. } => Err((
+                    start,
+                    ByteIndex(start.0 + self.quote_exclusive_string_src.len()),
+                )),
                 State::Main => Ok(self.out),
             }
         }
@@ -243,7 +267,7 @@ mod string_parser {
             &mut self,
             current_index: ByteIndex,
             current: char,
-        ) -> Result<(), ByteIndex> {
+        ) -> Result<(), (ByteIndex, ByteIndex)> {
             match self.state {
                 State::Main => self.handle_char_assuming_state_is_main(current_index, current),
                 State::Escape { start, byte_len } => self.handle_char_assuming_state_is_escape(
@@ -259,7 +283,7 @@ mod string_parser {
             &mut self,
             current_index: ByteIndex,
             current: char,
-        ) -> Result<(), ByteIndex> {
+        ) -> Result<(), (ByteIndex, ByteIndex)> {
             match current {
                 '{' => {
                     self.state = State::Escape {
@@ -281,7 +305,7 @@ mod string_parser {
             current: char,
             start: ByteIndex,
             byte_len: usize,
-        ) -> Result<(), ByteIndex> {
+        ) -> Result<(), (ByteIndex, ByteIndex)> {
             if current == '}' {
                 let brace_exclusive_start = ByteIndex(start.0 + '{'.len_utf8());
                 let brace_exclusive_end = current_index;
@@ -301,28 +325,28 @@ mod string_parser {
             &mut self,
             brace_exclusive_start: ByteIndex,
             brace_exclusive_end: ByteIndex,
-        ) -> Result<(), ByteIndex> {
-            let brace_exclusive_src =
-                &self.quote_exclusive_string_src[brace_exclusive_start.0..brace_exclusive_end.0];
+        ) -> Result<(), (ByteIndex, ByteIndex)> {
+            let invalid_escape_sequence_err = Err((brace_exclusive_start, brace_exclusive_end));
 
-            match brace_exclusive_src.chars().next() {
-                Some('0') => {}
-                _ => return Err(brace_exclusive_start),
+            let byte_len = brace_exclusive_end.0 - brace_exclusive_start.0;
+            if byte_len < 3 {
+                return invalid_escape_sequence_err;
             }
 
-            let second_char_index = ByteIndex(brace_exclusive_start.0 + '0'.len_utf8());
-            match self.quote_exclusive_string_src[second_char_index.0..brace_exclusive_end.0]
-                .chars()
-                .next()
-            {
-                Some('x') => {}
-                _ => return Err(second_char_index),
+            let brace_exclusive_src =
+                &self.quote_exclusive_string_src[brace_exclusive_start.0..brace_exclusive_end.0];
+            if !brace_exclusive_src.starts_with("0x") {
+                return invalid_escape_sequence_err;
             }
 
             let hex_start = ByteIndex(brace_exclusive_start.0 + "0x".len());
             let hex_src = &self.quote_exclusive_string_src[hex_start.0..brace_exclusive_end.0];
-            let val = u32::from_str_radix(hex_src, 16).map_err(|_| hex_start)?;
-            let val = char::try_from(val).map_err(|_| hex_start)?;
+            let Ok(val) = u32::from_str_radix(hex_src, 16) else {
+                return invalid_escape_sequence_err;
+            };
+            let Ok(val) = char::try_from(val) else {
+                return invalid_escape_sequence_err;
+            };
             self.out.push(val);
             Ok(())
         }

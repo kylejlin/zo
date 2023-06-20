@@ -1,5 +1,23 @@
+use std::ops::{Add, Sub};
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct ByteIndex(pub usize);
+
+impl Add for ByteIndex {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        ByteIndex(self.0 + rhs.0)
+    }
+}
+
+impl Sub for ByteIndex {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        ByteIndex(self.0 - rhs.0)
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct NumberLiteral {
