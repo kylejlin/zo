@@ -12,7 +12,7 @@ struct Lexer<'a> {
     state: State,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 enum State {
     Main,
     Word { start: ByteIndex, byte_len: usize },
@@ -197,34 +197,134 @@ mod string_parser {
 
     use super::*;
 
-    use std::{iter::Peekable, str::CharIndices};
-
     /// This function assumes the `quote_exclusive_string_src` argument
     /// does not have any double quotes.
     /// If `quote_exclusive_string_src` has double quotes,
     /// this function may produce an incorrect result.
     pub fn get_string_value(quote_exclusive_string_src: &str) -> Result<String, ByteIndex> {
-        let mut out = String::new();
-        let mut iter = quote_exclusive_string_src.char_indices().peekable();
-        while let Some((i, c)) = iter.next() {
-            if let Some(escape_range) = consume_escape_sequence_if_it_exists(&mut iter)? {
-                let escape_src = &quote_exclusive_string_src[escape_range.0 .0..escape_range.1 .0];
-                todo!();
-                continue;
-            }
-
-            out.push(c);
-        }
-        Ok(out)
+        StringParser::new(quote_exclusive_string_src).parse()
     }
 
-    fn consume_escape_sequence_if_it_exists(
-        iter: &mut Peekable<CharIndices>,
-    ) -> Result<Option<(ByteIndex, ByteIndex)>, ByteIndex> {
-        if iter.peek().map(|(_, c)| *c) != Some('{') {
-            return Ok(None);
+    struct StringParser<'a> {
+        quote_exclusive_string_src: &'a str,
+        out: String,
+        state: State,
+    }
+
+    #[derive(Clone, Copy)]
+    enum State {
+        Main,
+        Escape { start: ByteIndex, byte_len: usize },
+    }
+
+    impl<'a> StringParser<'a> {
+        fn new(quote_exclusive_string_src: &'a str) -> Self {
+            Self {
+                quote_exclusive_string_src,
+                out: String::new(),
+                state: State::Main,
+            }
+        }
+    }
+
+    impl StringParser<'_> {
+        fn parse(mut self) -> Result<String, ByteIndex> {
+            for (current_index, current) in self.quote_exclusive_string_src.char_indices() {
+                self.handle_char(ByteIndex(current_index), current)?;
+            }
+
+            match self.state {
+                State::Escape { .. } => Err(ByteIndex(self.quote_exclusive_string_src.len())),
+                State::Main => Ok(self.out),
+            }
         }
 
-        todo!()
+        fn handle_char(
+            &mut self,
+            current_index: ByteIndex,
+            current: char,
+        ) -> Result<(), ByteIndex> {
+            match self.state {
+                State::Main => self.handle_char_assuming_state_is_main(current_index, current),
+                State::Escape { start, byte_len } => self.handle_char_assuming_state_is_escape(
+                    current_index,
+                    current,
+                    start,
+                    byte_len,
+                ),
+            }
+        }
+
+        fn handle_char_assuming_state_is_main(
+            &mut self,
+            current_index: ByteIndex,
+            current: char,
+        ) -> Result<(), ByteIndex> {
+            match current {
+                '{' => {
+                    self.state = State::Escape {
+                        start: current_index,
+                        byte_len: '{'.len_utf8(),
+                    };
+                    Ok(())
+                }
+                _ => {
+                    self.out.push(current);
+                    Ok(())
+                }
+            }
+        }
+
+        fn handle_char_assuming_state_is_escape(
+            &mut self,
+            current_index: ByteIndex,
+            current: char,
+            start: ByteIndex,
+            byte_len: usize,
+        ) -> Result<(), ByteIndex> {
+            if current == '}' {
+                let brace_exclusive_start = ByteIndex(start.0 + '{'.len_utf8());
+                let brace_exclusive_end = current_index;
+                self.push_escape_sequence(brace_exclusive_start, brace_exclusive_end)?;
+                self.state = State::Main;
+                return Ok(());
+            }
+
+            self.state = State::Escape {
+                start: current_index,
+                byte_len: byte_len + current.len_utf8(),
+            };
+            Ok(())
+        }
+
+        fn push_escape_sequence(
+            &mut self,
+            brace_exclusive_start: ByteIndex,
+            brace_exclusive_end: ByteIndex,
+        ) -> Result<(), ByteIndex> {
+            let brace_exclusive_src =
+                &self.quote_exclusive_string_src[brace_exclusive_start.0..brace_exclusive_end.0];
+
+            match brace_exclusive_src.chars().next() {
+                Some('0') => {}
+                _ => return Err(brace_exclusive_start),
+            }
+
+            let second_char_index = ByteIndex(brace_exclusive_start.0 + '0'.len_utf8());
+            match self.quote_exclusive_string_src[second_char_index.0..brace_exclusive_end.0]
+                .chars()
+                .next()
+            {
+                Some('x') => {}
+                _ => return Err(second_char_index),
+            }
+
+            let hex_start = ByteIndex(brace_exclusive_start.0 + "0x".len());
+            let hex_src = &self.quote_exclusive_string_src[hex_start.0..brace_exclusive_end.0];
+            let val = u32::from_str_radix(hex_src, 16).map_err(|_| hex_start)?;
+            let val = char::try_from(val).map_err(|_| hex_start)?;
+            self.out.push(val);
+            Ok(())
+        }
     }
 }
