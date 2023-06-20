@@ -18,3 +18,5 @@ pub struct UniverseLiteral {
     pub level: usize,
     pub start: ByteIndex,
 }
+
+pub use crate::parser::Token;
