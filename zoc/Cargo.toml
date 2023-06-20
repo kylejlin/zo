@@ -1,0 +1,11 @@
+[package]
+name = "zoc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[build-dependencies]
+kiki = "7"
+walkdir = "2"
+sha256 = "1.1.4"
