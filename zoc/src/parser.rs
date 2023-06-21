@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 a19903bbdbaaefa5b9976193db2982674d16f63a5108ccfc76fb104eef00493f
+// @sha256 dbed2ee988e1662c169ebfad396883468a9228e22bff57ca3a96256aafe44f3a
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -21,7 +21,7 @@ pub enum Token {
     VconKw(crate::token::ByteIndex),
     MatchKw(crate::token::ByteIndex),
     FunKw(crate::token::ByteIndex),
-    ForallKw(crate::token::ByteIndex),
+    ForKw(crate::token::ByteIndex),
     NonrecKw(crate::token::ByteIndex),
     Number(crate::token::NumberLiteral),
     String(crate::token::StringLiteral),
@@ -45,8 +45,8 @@ pub enum Expr {
     App(
         Box<App>,
     ),
-    Forall(
-        Box<Forall>,
+    For(
+        Box<For>,
     ),
     Deb(
         crate::token::NumberLiteral,
@@ -126,7 +126,7 @@ pub struct App {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Forall {
+pub struct For {
     pub param_types: Box<ZeroOrMoreExprs>,
     pub return_type: Box<Expr>,
 }
@@ -184,7 +184,7 @@ enum QuasiterminalKind {
     VconKw = 3,
     MatchKw = 4,
     FunKw = 5,
-    ForallKw = 6,
+    ForKw = 6,
     NonrecKw = 7,
     Number = 8,
     String = 9,
@@ -204,7 +204,7 @@ enum NonterminalKind {
     Fun = 7,
     NumberOrNonrecKw = 8,
     App = 9,
-    Forall = 10,
+    For = 10,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -284,14 +284,14 @@ enum Node {
     Fun(Fun),
     NumberOrNonrecKw(NumberOrNonrecKw),
     App(App),
-    Forall(Forall),
+    For(For),
     LParen(crate::token::ByteIndex),
     RParen(crate::token::ByteIndex),
     IndKw(crate::token::ByteIndex),
     VconKw(crate::token::ByteIndex),
     MatchKw(crate::token::ByteIndex),
     FunKw(crate::token::ByteIndex),
-    ForallKw(crate::token::ByteIndex),
+    ForKw(crate::token::ByteIndex),
     NonrecKw(crate::token::ByteIndex),
     Number(crate::token::NumberLiteral),
     String(crate::token::StringLiteral),
@@ -394,12 +394,12 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R5 => {
-            let t0 = Box::new(Forall::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(For::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::Expr(Expr::Forall(
+                Node::Expr(Expr::For(
                     t0,
                 )),
                 NonterminalKind::Expr,
@@ -627,11 +627,11 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 7);
             
             (
-                Node::Forall(Forall {
+                Node::For(For {
                     param_types: param_types_3,
                     return_type: return_type_5,
                 }),
-                NonterminalKind::Forall,
+                NonterminalKind::For,
             )
         }
     }
@@ -653,7 +653,7 @@ impl QuasiterminalKind {
             Token::VconKw(_) => Self::VconKw,
             Token::MatchKw(_) => Self::MatchKw,
             Token::FunKw(_) => Self::FunKw,
-            Token::ForallKw(_) => Self::ForallKw,
+            Token::ForKw(_) => Self::ForKw,
             Token::NonrecKw(_) => Self::NonrecKw,
             Token::Number(_) => Self::Number,
             Token::String(_) => Self::String,
@@ -671,7 +671,7 @@ impl Node {
             Token::VconKw(t) => Self::VconKw(t),
             Token::MatchKw(t) => Self::MatchKw(t),
             Token::FunKw(t) => Self::FunKw(t),
-            Token::ForallKw(t) => Self::ForallKw(t),
+            Token::ForKw(t) => Self::ForKw(t),
             Token::NonrecKw(t) => Self::NonrecKw(t),
             Token::Number(t) => Self::Number(t),
             Token::String(t) => Self::String(t),
@@ -2487,12 +2487,12 @@ impl TryFrom<Node> for App {
     }
 }
 
-impl TryFrom<Node> for Forall {
+impl TryFrom<Node> for For {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::Forall(n) => Ok(n),
+            Node::For(n) => Ok(n),
             _ => Err(node),
         }
     }
@@ -2541,9 +2541,9 @@ impl Node {
         }
     }
     
-    fn try_into_forall_kw_6(self) -> Result<crate::token::ByteIndex, Self> {
+    fn try_into_for_kw_6(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
-            Self::ForallKw(t) => Ok(t),
+            Self::ForKw(t) => Ok(t),
             _ => Err(self),
         }
     }

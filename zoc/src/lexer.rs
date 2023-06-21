@@ -1,5 +1,6 @@
 use crate::token::*;
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct LexError(ByteIndex, ByteIndex);
 
 pub fn lex(s: &str) -> Result<Vec<Token>, LexError> {
@@ -178,7 +179,7 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
         "vcon" => return Some(Token::VconKw(start)),
         "match" => return Some(Token::MatchKw(start)),
         "fun" => return Some(Token::FunKw(start)),
-        "forall" => return Some(Token::ForallKw(start)),
+        "for" => return Some(Token::ForKw(start)),
         "nonrec" => return Some(Token::NonrecKw(start)),
         _ => {}
     }
@@ -475,5 +476,93 @@ mod string_parser {
             let expected = Err((ByteIndex(6), ByteIndex(7)));
             assert_eq!(expected, actual);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn empty() {
+        let actual = lex("");
+        let expected = Ok(vec![]);
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn just_whitespace() {
+        let actual = lex("   \n  \t\t \n ");
+        let expected = Ok(vec![]);
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn ind() {
+        let actual = lex(r#"(ind Type0 "Nat" () ((() ()) ((0) ())))"#);
+        let expected = Ok(vec![
+            Token::LParen(ByteIndex(0)),
+            Token::IndKw(ByteIndex(1)),
+            Token::Universe(UniverseLiteral {
+                level: 0,
+                start: ByteIndex(5),
+            }),
+            Token::String(StringLiteral {
+                value: "Nat".to_owned(),
+                span: (ByteIndex(11), ByteIndex(16)),
+            }),
+            // Begin parenthesized constructor definitions
+            Token::LParen(ByteIndex(17)),
+            Token::RParen(ByteIndex(18)),
+            Token::LParen(ByteIndex(20)),
+            Token::LParen(ByteIndex(21)),
+            Token::LParen(ByteIndex(22)),
+            Token::RParen(ByteIndex(23)),
+            Token::LParen(ByteIndex(25)),
+            Token::RParen(ByteIndex(26)),
+            Token::RParen(ByteIndex(27)),
+            Token::LParen(ByteIndex(29)),
+            Token::LParen(ByteIndex(30)),
+            Token::Number(NumberLiteral {
+                value: 0,
+                span: (ByteIndex(31), ByteIndex(32)),
+            }),
+            Token::RParen(ByteIndex(32)),
+            Token::LParen(ByteIndex(34)),
+            Token::RParen(ByteIndex(35)),
+            Token::RParen(ByteIndex(36)),
+            Token::RParen(ByteIndex(37)),
+            // End parenthesized constructor definitions
+            Token::RParen(ByteIndex(38)),
+        ]);
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn keywords() {
+        let actual = lex(r#"ind vcon match fun for nonrec Type0 Type1 Type33"#);
+        let expected = Ok(vec![
+            Token::IndKw(ByteIndex(0)),
+            Token::VconKw(ByteIndex(4)),
+            Token::MatchKw(ByteIndex(9)),
+            Token::FunKw(ByteIndex(15)),
+            Token::ForKw(ByteIndex(19)),
+            Token::NonrecKw(ByteIndex(23)),
+            Token::Universe(UniverseLiteral {
+                level: 0,
+                start: ByteIndex(30),
+            }),
+            Token::Universe(UniverseLiteral {
+                level: 1,
+                start: ByteIndex(36),
+            }),
+            Token::Universe(UniverseLiteral {
+                level: 33,
+                start: ByteIndex(42),
+            }),
+        ]);
+        assert_eq!(expected, actual);
     }
 }

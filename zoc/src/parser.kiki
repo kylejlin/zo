@@ -7,7 +7,7 @@ enum Expr {
     Match(Match)
     Fun(Fun)
     App(App)
-    Forall(Forall)
+    For(For)
     Deb($Number)
     Universe($Universe)
 }
@@ -118,10 +118,10 @@ struct App {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Forall {
+struct For {
     _: $LParen
 
-    _: $ForallKw
+    _: $ForKw
 
     _: $LParen
     param_types: ZeroOrMoreExprs
@@ -141,7 +141,7 @@ terminal Token {
     $VconKw: crate::token::ByteIndex
     $MatchKw: crate::token::ByteIndex
     $FunKw: crate::token::ByteIndex
-    $ForallKw: crate::token::ByteIndex
+    $ForKw: crate::token::ByteIndex
 
     $NonrecKw: crate::token::ByteIndex
 
