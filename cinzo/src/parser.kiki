@@ -1,0 +1,151 @@
+start Expr
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum Expr {
+    Ind(Ind)
+    Vcon(Vcon)
+    Match(Match)
+    Fun(Fun)
+    App(App)
+    For(For)
+    Deb($Number)
+    Universe($Universe)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Ind {
+    lparen: $LParen
+
+    _: $IndKw
+    type_: $Universe
+    name: $String
+
+    index_types_lparen: $LParen
+    index_types: ZeroOrMoreExprs
+    index_types_rparen: $RParen
+
+    constructor_defs_lparen: $LParen
+    constructor_defs: ZeroOrMoreVariantConstructorDefs
+    constructor_defs_rparen: $RParen
+
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum ZeroOrMoreExprs {
+    Nil
+    Cons(ZeroOrMoreExprs Expr)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum ZeroOrMoreVariantConstructorDefs {
+    Nil
+    Cons(ZeroOrMoreVariantConstructorDefs VariantConstructorDef)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct VariantConstructorDef {
+    lparen: $LParen
+
+    param_types_lparen: $LParen
+    param_types: ZeroOrMoreExprs
+    param_types_rparen: $RParen
+
+    index_args_lparen: $LParen
+    index_args: ZeroOrMoreExprs
+    index_args_rparen: $RParen
+
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Vcon {
+    lparen: $LParen
+
+    _: $VconKw
+    ind: Ind
+    vcon_index: $Number
+
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Match {
+    lparen: $LParen
+
+    _: $MatchKw
+    matchee: Expr
+    return_type: Expr
+
+    cases_lparen: $LParen
+    cases: ZeroOrMoreExprs
+    cases_rparen: $RParen
+
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Fun {
+    lparen: $LParen
+
+    _: $FunKw
+    decreasing_index: NumberOrNonrecKw
+
+    param_types_lparen: $LParen
+    param_types: ZeroOrMoreExprs
+    param_types_rparen: $RParen
+
+    return_type: Expr
+    return_val: Expr
+
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum NumberOrNonrecKw {
+    Number($Number)
+    NonrecKw($NonrecKw)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct App {
+    lparen: $LParen
+
+    callee: Expr
+    args: ZeroOrMoreExprs
+
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct For {
+    lparen: $LParen
+
+    _: $ForKw
+
+    param_types_lparen: $LParen
+    param_types: ZeroOrMoreExprs
+    param_types_rparen: $RParen
+
+    return_type: Expr
+
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+terminal Token {
+    $LParen: crate::token::ByteIndex
+    $RParen: crate::token::ByteIndex
+
+    $IndKw: crate::token::ByteIndex
+    $VconKw: crate::token::ByteIndex
+    $MatchKw: crate::token::ByteIndex
+    $FunKw: crate::token::ByteIndex
+    $ForKw: crate::token::ByteIndex
+
+    $NonrecKw: crate::token::ByteIndex
+
+    $Number: crate::token::NumberLiteral
+    $String: crate::token::StringLiteral
+    $Universe: crate::token::UniverseLiteral
+}

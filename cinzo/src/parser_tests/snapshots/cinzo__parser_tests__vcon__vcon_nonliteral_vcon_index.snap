@@ -1,0 +1,11 @@
+---
+source: src/parser_tests/vcon.rs
+expression: "&err"
+---
+Some(
+    LParen(
+        ByteIndex(
+            117,
+        ),
+    ),
+)
