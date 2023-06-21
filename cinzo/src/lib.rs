@@ -1,7 +1,10 @@
 pub mod ast;
 pub mod cst;
 pub mod cst_to_ast;
+pub mod deb_shift_cache;
+pub mod eval;
 pub mod lexer;
+pub mod nohash_hashmap;
 pub mod semantic_hash;
 pub mod token;
 

@@ -2,13 +2,15 @@ use crate::ast::*;
 
 use hmac_sha256::Hash as Sha256;
 
+use std::hash::{Hash, Hasher};
+
 #[derive(Clone, Debug)]
 pub struct Hashed<T> {
     pub value: T,
     pub digest: Digest,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, Eq, Default, PartialOrd, Ord)]
 pub struct Digest([u8; 32]);
 
 impl AsRef<[u8]> for Digest {
@@ -16,6 +18,16 @@ impl AsRef<[u8]> for Digest {
         &self.0
     }
 }
+
+impl Hash for Digest {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        hasher.write_u64(u64::from_ne_bytes([
+            self.0[0], self.0[1], self.0[2], self.0[3], self.0[4], self.0[5], self.0[6], self.0[7],
+        ]));
+    }
+}
+
+impl nohash_hasher::IsEnabled for Digest {}
 
 pub trait SemanticHash {
     fn semantic_hash(&self) -> Digest;
