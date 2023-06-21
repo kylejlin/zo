@@ -144,7 +144,16 @@ impl SemanticHash for Box<[Hashed<VariantConstructorDef>]> {
 
 impl SemanticHash for VariantConstructorDef {
     fn semantic_hash(&self) -> Digest {
-        todo!()
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::VARIANT_CONSTRUCTOR_DEF]);
+
+        hasher.update(&self.param_types.digest);
+        hasher.update(&self.index_args.digest);
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
     }
 }
 
@@ -160,6 +169,7 @@ mod discriminator {
 
     pub const EXPR_SLICE: u8 = 9;
     pub const VARIANT_CONSTRUCTOR_DEF_SLICE: u8 = 10;
+    pub const VARIANT_CONSTRUCTOR_DEF: u8 = 11;
 
     pub const END: u8 = 64;
 }
