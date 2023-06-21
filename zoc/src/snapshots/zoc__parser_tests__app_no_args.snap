@@ -4,6 +4,9 @@ expression: "&cst"
 ---
 App(
     App {
+        lparen: ByteIndex(
+            0,
+        ),
         callee: Deb(
             NumberLiteral {
                 value: 0,
@@ -18,5 +21,8 @@ App(
             },
         ),
         args: Nil,
+        rparen: ByteIndex(
+            2,
+        ),
     },
 )

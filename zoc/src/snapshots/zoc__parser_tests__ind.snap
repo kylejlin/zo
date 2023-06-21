@@ -4,6 +4,9 @@ expression: "&cst"
 ---
 Ind(
     Ind {
+        lparen: ByteIndex(
+            1,
+        ),
         type_: UniverseLiteral {
             level: 0,
             start: ByteIndex(
@@ -21,16 +24,49 @@ Ind(
                 ),
             ),
         },
+        index_types_lparen: ByteIndex(
+            57,
+        ),
         index_types: Nil,
+        index_types_rparen: ByteIndex(
+            58,
+        ),
+        constructor_defs_lparen: ByteIndex(
+            97,
+        ),
         constructor_defs: Cons(
             Cons(
                 Nil,
                 VariantConstructorDef {
+                    lparen: ByteIndex(
+                        107,
+                    ),
+                    param_types_lparen: ByteIndex(
+                        108,
+                    ),
                     param_types: Nil,
+                    param_types_rparen: ByteIndex(
+                        109,
+                    ),
+                    index_args_lparen: ByteIndex(
+                        111,
+                    ),
                     index_args: Nil,
+                    index_args_rparen: ByteIndex(
+                        112,
+                    ),
+                    rparen: ByteIndex(
+                        113,
+                    ),
                 },
             ),
             VariantConstructorDef {
+                lparen: ByteIndex(
+                    123,
+                ),
+                param_types_lparen: ByteIndex(
+                    124,
+                ),
                 param_types: Cons(
                     Nil,
                     Deb(
@@ -47,8 +83,26 @@ Ind(
                         },
                     ),
                 ),
+                param_types_rparen: ByteIndex(
+                    126,
+                ),
+                index_args_lparen: ByteIndex(
+                    128,
+                ),
                 index_args: Nil,
+                index_args_rparen: ByteIndex(
+                    129,
+                ),
+                rparen: ByteIndex(
+                    130,
+                ),
             },
+        ),
+        constructor_defs_rparen: ByteIndex(
+            136,
+        ),
+        rparen: ByteIndex(
+            138,
         ),
     },
 )

@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 dbed2ee988e1662c169ebfad396883468a9228e22bff57ca3a96256aafe44f3a
+// @sha256 42e72d43c5a6a0d79b9b2657d4f5c681fbbbe803c2da372aa2a68f2285bec0c3
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -58,10 +58,16 @@ pub enum Expr {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Ind {
+    pub lparen: crate::token::ByteIndex,
     pub type_: crate::token::UniverseLiteral,
     pub name: crate::token::StringLiteral,
+    pub index_types_lparen: crate::token::ByteIndex,
     pub index_types: Box<ZeroOrMoreExprs>,
+    pub index_types_rparen: crate::token::ByteIndex,
+    pub constructor_defs_lparen: crate::token::ByteIndex,
     pub constructor_defs: Box<ZeroOrMoreVariantConstructorDefs>,
+    pub constructor_defs_rparen: crate::token::ByteIndex,
+    pub rparen: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -84,29 +90,45 @@ pub enum ZeroOrMoreVariantConstructorDefs {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct VariantConstructorDef {
+    pub lparen: crate::token::ByteIndex,
+    pub param_types_lparen: crate::token::ByteIndex,
     pub param_types: Box<ZeroOrMoreExprs>,
+    pub param_types_rparen: crate::token::ByteIndex,
+    pub index_args_lparen: crate::token::ByteIndex,
     pub index_args: Box<ZeroOrMoreExprs>,
+    pub index_args_rparen: crate::token::ByteIndex,
+    pub rparen: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Vcon {
+    pub lparen: crate::token::ByteIndex,
     pub ind: Box<Ind>,
     pub vcon_index: crate::token::NumberLiteral,
+    pub rparen: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Match {
+    pub lparen: crate::token::ByteIndex,
     pub matchee: Box<Expr>,
     pub return_type: Box<Expr>,
+    pub cases_lparen: crate::token::ByteIndex,
     pub cases: Box<ZeroOrMoreExprs>,
+    pub cases_rparen: crate::token::ByteIndex,
+    pub rparen: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Fun {
+    pub lparen: crate::token::ByteIndex,
     pub decreasing_index: Box<NumberOrNonrecKw>,
+    pub param_types_lparen: crate::token::ByteIndex,
     pub param_types: Box<ZeroOrMoreExprs>,
+    pub param_types_rparen: crate::token::ByteIndex,
     pub return_type: Box<Expr>,
     pub body: Box<Expr>,
+    pub rparen: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -121,14 +143,20 @@ pub enum NumberOrNonrecKw {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct App {
+    pub lparen: crate::token::ByteIndex,
     pub callee: Box<Expr>,
     pub args: Box<ZeroOrMoreExprs>,
+    pub rparen: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct For {
+    pub lparen: crate::token::ByteIndex,
+    pub param_types_lparen: crate::token::ByteIndex,
     pub param_types: Box<ZeroOrMoreExprs>,
+    pub param_types_rparen: crate::token::ByteIndex,
     pub return_type: Box<Expr>,
+    pub rparen: crate::token::ByteIndex,
 }
 
 /// If the parser encounters an unexpected token `t`, it will return `Err(Some(t))`.
@@ -430,26 +458,32 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R8 => {
-            nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let rparen_10 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
+            let constructor_defs_rparen_9 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let constructor_defs_8 = Box::new(ZeroOrMoreVariantConstructorDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let constructor_defs_lparen_7 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
+            let index_types_rparen_6 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let index_types_5 = Box::new(ZeroOrMoreExprs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            nodes.pop().unwrap();
+            let index_types_lparen_4 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             let name_3 = nodes.pop().unwrap().try_into_string_9().ok().unwrap();
             let type__2 = nodes.pop().unwrap().try_into_universe_10().ok().unwrap();
             nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let lparen_0 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             
             states.truncate(states.len() - 11);
             
             (
                 Node::Ind(Ind {
+                    lparen: lparen_0,
                     type_: type__2,
                     name: name_3,
+                    index_types_lparen: index_types_lparen_4,
                     index_types: index_types_5,
+                    index_types_rparen: index_types_rparen_6,
+                    constructor_defs_lparen: constructor_defs_lparen_7,
                     constructor_defs: constructor_defs_8,
+                    constructor_defs_rparen: constructor_defs_rparen_9,
+                    rparen: rparen_10,
                 }),
                 NonterminalKind::Ind,
             )
@@ -495,82 +529,98 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R13 => {
-            nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let rparen_7 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
+            let index_args_rparen_6 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let index_args_5 = Box::new(ZeroOrMoreExprs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let index_args_lparen_4 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
+            let param_types_rparen_3 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let param_types_2 = Box::new(ZeroOrMoreExprs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let param_types_lparen_1 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
+            let lparen_0 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             
             states.truncate(states.len() - 8);
             
             (
                 Node::VariantConstructorDef(VariantConstructorDef {
+                    lparen: lparen_0,
+                    param_types_lparen: param_types_lparen_1,
                     param_types: param_types_2,
+                    param_types_rparen: param_types_rparen_3,
+                    index_args_lparen: index_args_lparen_4,
                     index_args: index_args_5,
+                    index_args_rparen: index_args_rparen_6,
+                    rparen: rparen_7,
                 }),
                 NonterminalKind::VariantConstructorDef,
             )
         }
         RuleKind::R14 => {
-            nodes.pop().unwrap();
+            let rparen_4 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let vcon_index_3 = nodes.pop().unwrap().try_into_number_8().ok().unwrap();
             let ind_2 = Box::new(Ind::try_from(nodes.pop().unwrap()).ok().unwrap());
             nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let lparen_0 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             
             states.truncate(states.len() - 5);
             
             (
                 Node::Vcon(Vcon {
+                    lparen: lparen_0,
                     ind: ind_2,
                     vcon_index: vcon_index_3,
+                    rparen: rparen_4,
                 }),
                 NonterminalKind::Vcon,
             )
         }
         RuleKind::R15 => {
-            nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let rparen_7 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
+            let cases_rparen_6 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let cases_5 = Box::new(ZeroOrMoreExprs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            nodes.pop().unwrap();
+            let cases_lparen_4 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             let return_type_3 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             let matchee_2 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let lparen_0 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             
             states.truncate(states.len() - 8);
             
             (
                 Node::Match(Match {
+                    lparen: lparen_0,
                     matchee: matchee_2,
                     return_type: return_type_3,
+                    cases_lparen: cases_lparen_4,
                     cases: cases_5,
+                    cases_rparen: cases_rparen_6,
+                    rparen: rparen_7,
                 }),
                 NonterminalKind::Match,
             )
         }
         RuleKind::R16 => {
-            nodes.pop().unwrap();
+            let rparen_8 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let body_7 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             let return_type_6 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
-            nodes.pop().unwrap();
+            let param_types_rparen_5 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let param_types_4 = Box::new(ZeroOrMoreExprs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            nodes.pop().unwrap();
+            let param_types_lparen_3 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             let decreasing_index_2 = Box::new(NumberOrNonrecKw::try_from(nodes.pop().unwrap()).ok().unwrap());
             nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let lparen_0 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             
             states.truncate(states.len() - 9);
             
             (
                 Node::Fun(Fun {
+                    lparen: lparen_0,
                     decreasing_index: decreasing_index_2,
+                    param_types_lparen: param_types_lparen_3,
                     param_types: param_types_4,
+                    param_types_rparen: param_types_rparen_5,
                     return_type: return_type_6,
                     body: body_7,
+                    rparen: rparen_8,
                 }),
                 NonterminalKind::Fun,
             )
@@ -600,36 +650,42 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R19 => {
-            nodes.pop().unwrap();
+            let rparen_3 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let args_2 = Box::new(ZeroOrMoreExprs::try_from(nodes.pop().unwrap()).ok().unwrap());
             let callee_1 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
-            nodes.pop().unwrap();
+            let lparen_0 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             
             states.truncate(states.len() - 4);
             
             (
                 Node::App(App {
+                    lparen: lparen_0,
                     callee: callee_1,
                     args: args_2,
+                    rparen: rparen_3,
                 }),
                 NonterminalKind::App,
             )
         }
         RuleKind::R20 => {
-            nodes.pop().unwrap();
+            let rparen_6 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let return_type_5 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
-            nodes.pop().unwrap();
+            let param_types_rparen_4 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let param_types_3 = Box::new(ZeroOrMoreExprs::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let param_types_lparen_2 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             nodes.pop().unwrap();
-            nodes.pop().unwrap();
-            nodes.pop().unwrap();
+            let lparen_0 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             
             states.truncate(states.len() - 7);
             
             (
                 Node::For(For {
+                    lparen: lparen_0,
+                    param_types_lparen: param_types_lparen_2,
                     param_types: param_types_3,
+                    param_types_rparen: param_types_rparen_4,
                     return_type: return_type_5,
+                    rparen: rparen_6,
                 }),
                 NonterminalKind::For,
             )

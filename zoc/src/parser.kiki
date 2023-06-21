@@ -14,21 +14,21 @@ enum Expr {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Ind {
-    _: $LParen
+    lparen: $LParen
 
     _: $IndKw
     type_: $Universe
     name: $String
 
-    _: $LParen
+    index_types_lparen: $LParen
     index_types: ZeroOrMoreExprs
-    _: $RParen
+    index_types_rparen: $RParen
 
-    _: $LParen
+    constructor_defs_lparen: $LParen
     constructor_defs: ZeroOrMoreVariantConstructorDefs
-    _: $RParen
+    constructor_defs_rparen: $RParen
 
-    _: $RParen
+    rparen: $RParen
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -45,60 +45,60 @@ enum ZeroOrMoreVariantConstructorDefs {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct VariantConstructorDef {
-    _: $LParen
+    lparen: $LParen
 
-    _: $LParen
+    param_types_lparen: $LParen
     param_types: ZeroOrMoreExprs
-    _: $RParen
+    param_types_rparen: $RParen
 
-    _: $LParen
+    index_args_lparen: $LParen
     index_args: ZeroOrMoreExprs
-    _: $RParen
+    index_args_rparen: $RParen
 
-    _: $RParen
+    rparen: $RParen
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Vcon {
-    _: $LParen
+    lparen: $LParen
 
     _: $VconKw
     ind: Ind
     vcon_index: $Number
 
-    _: $RParen
+    rparen: $RParen
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Match {
-    _: $LParen
+    lparen: $LParen
 
     _: $MatchKw
     matchee: Expr
     return_type: Expr
 
-    _: $LParen
+    cases_lparen: $LParen
     cases: ZeroOrMoreExprs
-    _: $RParen
+    cases_rparen: $RParen
 
-    _: $RParen
+    rparen: $RParen
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Fun {
-    _: $LParen
+    lparen: $LParen
 
     _: $FunKw
     decreasing_index: NumberOrNonrecKw
 
-    _: $LParen
+    param_types_lparen: $LParen
     param_types: ZeroOrMoreExprs
-    _: $RParen
+    param_types_rparen: $RParen
 
     return_type: Expr
     body: Expr
 
-    _: $RParen
+    rparen: $RParen
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -109,27 +109,27 @@ enum NumberOrNonrecKw {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct App {
-    _: $LParen
+    lparen: $LParen
 
     callee: Expr
     args: ZeroOrMoreExprs
 
-    _: $RParen
+    rparen: $RParen
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct For {
-    _: $LParen
+    lparen: $LParen
 
     _: $ForKw
 
-    _: $LParen
+    param_types_lparen: $LParen
     param_types: ZeroOrMoreExprs
-    _: $RParen
+    param_types_rparen: $RParen
 
     return_type: Expr
 
-    _: $RParen
+    rparen: $RParen
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
