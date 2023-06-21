@@ -2,7 +2,10 @@ use crate::ast::*;
 
 use hmac_sha256::Hash as Sha256;
 
-use std::hash::{Hash, Hasher};
+use std::{
+    hash::{Hash, Hasher},
+    rc::Rc,
+};
 
 #[derive(Clone, Debug)]
 pub struct Hashed<T> {
@@ -199,7 +202,7 @@ impl SemanticHash for Box<[Expr]> {
     }
 }
 
-impl SemanticHash for Box<[Hashed<VariantConstructorDef>]> {
+impl SemanticHash for Box<[Rc<Hashed<VariantConstructorDef>>]> {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256::new();
 

@@ -58,13 +58,13 @@ impl From<cst::ZeroOrMoreExprs> for Vec<ast::Expr> {
     }
 }
 
-impl From<cst::ZeroOrMoreVariantConstructorDefs> for Vec<Hashed<ast::VariantConstructorDef>> {
+impl From<cst::ZeroOrMoreVariantConstructorDefs> for Vec<Rc<Hashed<ast::VariantConstructorDef>>> {
     fn from(cst: cst::ZeroOrMoreVariantConstructorDefs) -> Self {
         match cst {
             cst::ZeroOrMoreVariantConstructorDefs::Nil => vec![],
             cst::ZeroOrMoreVariantConstructorDefs::Cons(defs, def) => {
                 let mut variant_constructor_defs: Self = (*defs).into();
-                let def = Hashed::new((*def).into());
+                let def = Rc::new(Hashed::new((*def).into()));
                 variant_constructor_defs.push(def);
                 variant_constructor_defs
             }

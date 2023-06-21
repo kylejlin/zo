@@ -28,6 +28,7 @@ impl<T> Normalized<T> {
 pub struct Evaluator {
     pub eval_expr_cache: NoHashHashMap<Digest, Result<NormalForm, EvalError>>,
     pub eval_exprs_cache: NoHashHashMap<Digest, Result<Normalized<RcExprs>, EvalError>>,
+    pub eval_vcon_defs_cache: NoHashHashMap<Digest, Result<Normalized<RcVconDefs>, EvalError>>,
     pub deb_shift_cache: DebShiftCache,
 }
 
@@ -38,7 +39,7 @@ impl Evaluator {
 }
 
 type RcExprs = Rc<Hashed<Box<[Expr]>>>;
-type RcVconDefs = Rc<Hashed<Box<[Hashed<VariantConstructorDef>]>>>;
+type RcVconDefs = Rc<Hashed<Box<[Rc<Hashed<VariantConstructorDef>>]>>>;
 
 // #[derive(Clone, Debug)]
 // pub struct Ind {
@@ -166,6 +167,36 @@ impl Evaluator {
     }
 
     fn eval_vcon_defs(&mut self, defs: RcVconDefs) -> Result<Normalized<RcVconDefs>, EvalError> {
+        if let Some(result) = self.eval_vcon_defs_cache.get(&defs.digest) {
+            result.clone()
+        } else {
+            self.eval_unseen_vcon_defs(defs)
+        }
+    }
+
+    fn eval_unseen_vcon_defs(
+        &mut self,
+        defs: RcVconDefs,
+    ) -> Result<Normalized<RcVconDefs>, EvalError> {
+        let defs_digest = defs.digest.clone();
+        let defs = &defs.value;
+        let normalized: Vec<Rc<Hashed<VariantConstructorDef>>> = defs
+            .iter()
+            .map(|def| self.eval_vcon_def(def.clone()).map(Normalized::into_raw))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let result = Ok(Normalized(Rc::new(Hashed::new(
+            normalized.into_boxed_slice(),
+        ))));
+        self.eval_vcon_defs_cache
+            .insert(defs_digest, result.clone());
+        result
+    }
+
+    fn eval_vcon_def(
+        &mut self,
+        def: Rc<Hashed<VariantConstructorDef>>,
+    ) -> Result<Normalized<Rc<Hashed<VariantConstructorDef>>>, EvalError> {
         todo!()
     }
 

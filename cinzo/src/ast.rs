@@ -36,7 +36,7 @@ pub struct Ind {
     pub name: Rc<StringValue>,
     pub universe_level: usize,
     pub index_types: Rc<Hashed<Box<[Expr]>>>,
-    pub constructor_defs: Rc<Hashed<Box<[Hashed<VariantConstructorDef>]>>>,
+    pub constructor_defs: Rc<Hashed<Box<[Rc<Hashed<VariantConstructorDef>>]>>>,
     pub original: Option<Rc<cst::Ind>>,
 }
 
