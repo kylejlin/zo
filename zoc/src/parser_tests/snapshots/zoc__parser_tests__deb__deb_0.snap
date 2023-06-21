@@ -1,10 +1,10 @@
 ---
-source: src/parser_tests.rs
+source: src/parser_tests/deb.rs
 expression: "&cst"
 ---
 Deb(
     NumberLiteral {
-        value: 1,
+        value: 0,
         span: (
             ByteIndex(
                 0,

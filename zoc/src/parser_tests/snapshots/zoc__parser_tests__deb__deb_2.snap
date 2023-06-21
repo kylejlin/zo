@@ -1,5 +1,5 @@
 ---
-source: src/parser_tests.rs
+source: src/parser_tests/deb.rs
 expression: "&cst"
 ---
 Deb(

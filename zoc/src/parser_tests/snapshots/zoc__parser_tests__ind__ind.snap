@@ -1,5 +1,5 @@
 ---
-source: src/parser_tests.rs
+source: src/parser_tests/ind.rs
 expression: "&cst"
 ---
 Ind(
@@ -10,62 +10,62 @@ Ind(
         type_: UniverseLiteral {
             level: 0,
             start: ByteIndex(
-                16,
+                8,
             ),
         },
         name: StringLiteral {
             value: "Nat",
             span: (
                 ByteIndex(
-                    27,
+                    15,
                 ),
                 ByteIndex(
-                    32,
+                    20,
                 ),
             ),
         },
         index_types_lparen: ByteIndex(
-            57,
+            37,
         ),
         index_types: Nil,
         index_types_rparen: ByteIndex(
-            58,
+            38,
         ),
         constructor_defs_lparen: ByteIndex(
-            97,
+            69,
         ),
         constructor_defs: Cons(
             Cons(
                 Nil,
                 VariantConstructorDef {
                     lparen: ByteIndex(
-                        107,
+                        75,
                     ),
                     param_types_lparen: ByteIndex(
-                        108,
+                        76,
                     ),
                     param_types: Nil,
                     param_types_rparen: ByteIndex(
-                        109,
+                        77,
                     ),
                     index_args_lparen: ByteIndex(
-                        111,
+                        79,
                     ),
                     index_args: Nil,
                     index_args_rparen: ByteIndex(
-                        112,
+                        80,
                     ),
                     rparen: ByteIndex(
-                        113,
+                        81,
                     ),
                 },
             ),
             VariantConstructorDef {
                 lparen: ByteIndex(
-                    123,
+                    87,
                 ),
                 param_types_lparen: ByteIndex(
-                    124,
+                    88,
                 ),
                 param_types: Cons(
                     Nil,
@@ -74,35 +74,35 @@ Ind(
                             value: 0,
                             span: (
                                 ByteIndex(
-                                    125,
+                                    89,
                                 ),
                                 ByteIndex(
-                                    126,
+                                    90,
                                 ),
                             ),
                         },
                     ),
                 ),
                 param_types_rparen: ByteIndex(
-                    126,
+                    90,
                 ),
                 index_args_lparen: ByteIndex(
-                    128,
+                    92,
                 ),
                 index_args: Nil,
                 index_args_rparen: ByteIndex(
-                    129,
+                    93,
                 ),
                 rparen: ByteIndex(
-                    130,
+                    94,
                 ),
             },
         ),
         constructor_defs_rparen: ByteIndex(
-            136,
+            96,
         ),
         rparen: ByteIndex(
-            138,
+            98,
         ),
     },
 )

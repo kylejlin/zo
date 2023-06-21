@@ -1,17 +1,17 @@
 ---
-source: src/parser_tests.rs
+source: src/parser_tests/ind.rs
 expression: "&err"
 ---
 Some(
     Number(
         NumberLiteral {
-            value: 1,
+            value: 2,
             span: (
                 ByteIndex(
-                    17,
+                    15,
                 ),
                 ByteIndex(
-                    18,
+                    16,
                 ),
             ),
         },

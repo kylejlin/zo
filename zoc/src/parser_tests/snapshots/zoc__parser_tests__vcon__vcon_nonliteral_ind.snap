@@ -1,17 +1,17 @@
 ---
-source: src/parser_tests.rs
-expression: "&cst"
+source: src/parser_tests/vcon.rs
+expression: "&err"
 ---
 Some(
     Number(
         NumberLiteral {
-            value: 2,
+            value: 1,
             span: (
                 ByteIndex(
-                    27,
+                    9,
                 ),
                 ByteIndex(
-                    28,
+                    10,
                 ),
             ),
         },

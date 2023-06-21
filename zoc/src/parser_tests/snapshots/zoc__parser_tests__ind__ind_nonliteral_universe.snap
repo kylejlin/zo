@@ -1,6 +1,6 @@
 ---
-source: src/parser_tests.rs
-expression: "&cst"
+source: src/parser_tests/ind.rs
+expression: "&err"
 ---
 Some(
     Number(
@@ -8,10 +8,10 @@ Some(
             value: 1,
             span: (
                 ByteIndex(
-                    16,
+                    8,
                 ),
                 ByteIndex(
-                    17,
+                    9,
                 ),
             ),
         },

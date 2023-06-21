@@ -1,5 +1,5 @@
 ---
-source: src/parser_tests.rs
+source: src/parser_tests/app.rs
 expression: "&cst"
 ---
 App(
@@ -20,24 +20,9 @@ App(
                 ),
             },
         ),
-        args: Cons(
-            Nil,
-            Deb(
-                NumberLiteral {
-                    value: 1,
-                    span: (
-                        ByteIndex(
-                            3,
-                        ),
-                        ByteIndex(
-                            4,
-                        ),
-                    ),
-                },
-            ),
-        ),
+        args: Nil,
         rparen: ByteIndex(
-            4,
+            2,
         ),
     },
 )

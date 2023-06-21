@@ -1,5 +1,5 @@
 ---
-source: src/parser_tests.rs
+source: src/parser_tests/vcon.rs
 expression: "&cst"
 ---
 Vcon(
@@ -9,67 +9,67 @@ Vcon(
         ),
         ind: Ind {
             lparen: ByteIndex(
-                17,
+                9,
             ),
             type_: UniverseLiteral {
                 level: 0,
                 start: ByteIndex(
-                    40,
+                    24,
                 ),
             },
             name: StringLiteral {
                 value: "Nat",
                 span: (
                     ByteIndex(
-                        55,
+                        35,
                     ),
                     ByteIndex(
-                        60,
+                        40,
                     ),
                 ),
             },
             index_types_lparen: ByteIndex(
-                93,
+                65,
             ),
             index_types: Nil,
             index_types_rparen: ByteIndex(
-                94,
+                66,
             ),
             constructor_defs_lparen: ByteIndex(
-                105,
+                73,
             ),
             constructor_defs: Cons(
                 Cons(
                     Nil,
                     VariantConstructorDef {
                         lparen: ByteIndex(
-                            119,
+                            83,
                         ),
                         param_types_lparen: ByteIndex(
-                            120,
+                            84,
                         ),
                         param_types: Nil,
                         param_types_rparen: ByteIndex(
-                            121,
+                            85,
                         ),
                         index_args_lparen: ByteIndex(
-                            123,
+                            87,
                         ),
                         index_args: Nil,
                         index_args_rparen: ByteIndex(
-                            124,
+                            88,
                         ),
                         rparen: ByteIndex(
-                            125,
+                            89,
                         ),
                     },
                 ),
                 VariantConstructorDef {
                     lparen: ByteIndex(
-                        139,
+                        99,
                     ),
                     param_types_lparen: ByteIndex(
-                        140,
+                        100,
                     ),
                     param_types: Cons(
                         Nil,
@@ -78,50 +78,50 @@ Vcon(
                                 value: 0,
                                 span: (
                                     ByteIndex(
-                                        141,
+                                        101,
                                     ),
                                     ByteIndex(
-                                        142,
+                                        102,
                                     ),
                                 ),
                             },
                         ),
                     ),
                     param_types_rparen: ByteIndex(
-                        142,
+                        102,
                     ),
                     index_args_lparen: ByteIndex(
-                        144,
+                        104,
                     ),
                     index_args: Nil,
                     index_args_rparen: ByteIndex(
-                        145,
+                        105,
                     ),
                     rparen: ByteIndex(
-                        146,
+                        106,
                     ),
                 },
             ),
             constructor_defs_rparen: ByteIndex(
-                156,
+                112,
             ),
             rparen: ByteIndex(
-                162,
+                114,
             ),
         },
         vcon_index: NumberLiteral {
             value: 0,
             span: (
                 ByteIndex(
-                    235,
+                    179,
                 ),
                 ByteIndex(
-                    236,
+                    180,
                 ),
             ),
         },
         rparen: ByteIndex(
-            237,
+            181,
         ),
     },
 )
