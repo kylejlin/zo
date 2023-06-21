@@ -542,25 +542,26 @@ mod tests {
 
     #[test]
     fn keywords() {
-        let actual = lex(r#"ind vcon match fun for nonrec Type0 Type1 Type33"#);
+        let src = r#"ind vcon match fun for nonrec Type0 Type1 Type33"#;
+        let actual = lex(src);
         let expected = Ok(vec![
-            Token::IndKw(ByteIndex(0)),
-            Token::VconKw(ByteIndex(4)),
-            Token::MatchKw(ByteIndex(9)),
-            Token::FunKw(ByteIndex(15)),
-            Token::ForKw(ByteIndex(19)),
-            Token::NonrecKw(ByteIndex(23)),
+            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::VconKw(ByteIndex(src.find("vcon").unwrap())),
+            Token::MatchKw(ByteIndex(src.find("match").unwrap())),
+            Token::FunKw(ByteIndex(src.find("fun").unwrap())),
+            Token::ForKw(ByteIndex(src.find("for").unwrap())),
+            Token::NonrecKw(ByteIndex(src.find("nonrec").unwrap())),
             Token::Universe(UniverseLiteral {
                 level: 0,
-                start: ByteIndex(30),
+                start: ByteIndex(src.find("Type0").unwrap()),
             }),
             Token::Universe(UniverseLiteral {
                 level: 1,
-                start: ByteIndex(36),
+                start: ByteIndex(src.find("Type1").unwrap()),
             }),
             Token::Universe(UniverseLiteral {
                 level: 33,
-                start: ByteIndex(42),
+                start: ByteIndex(src.find("Type33").unwrap()),
             }),
         ]);
         assert_eq!(expected, actual);
