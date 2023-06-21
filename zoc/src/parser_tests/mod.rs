@@ -3,6 +3,7 @@ use crate::parser::*;
 
 mod app;
 mod deb;
+mod for_;
 mod fun;
 mod ind;
 mod match_;

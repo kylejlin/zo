@@ -25,20 +25,20 @@ fn nonrec_fun() {
 #[test]
 fn rec_fun() {
     let src = r#"
-    (
-        fun
-    
-        // Decreasing param index
-        0
-    
-        // Param types
-        (4)
-    
-        // Return type
-        8
-    
-        1
-    )"#;
+(
+    fun
+
+    // Decreasing param index
+    0
+
+    // Param types
+    (4)
+
+    // Return type
+    8
+
+    1
+)"#;
     let tokens = lex(src).unwrap();
     let cst = parse(tokens).unwrap();
     insta::assert_debug_snapshot!(&cst);

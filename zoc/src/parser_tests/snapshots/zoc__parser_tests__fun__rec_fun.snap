@@ -5,23 +5,23 @@ expression: "&cst"
 Fun(
     Fun {
         lparen: ByteIndex(
-            5,
+            1,
         ),
         decreasing_index: Number(
             NumberLiteral {
                 value: 0,
                 span: (
                     ByteIndex(
-                        66,
+                        46,
                     ),
                     ByteIndex(
-                        67,
+                        47,
                     ),
                 ),
             },
         ),
         param_types_lparen: ByteIndex(
-            104,
+            72,
         ),
         param_types: Cons(
             Nil,
@@ -30,27 +30,27 @@ Fun(
                     value: 4,
                     span: (
                         ByteIndex(
-                            105,
+                            73,
                         ),
                         ByteIndex(
-                            106,
+                            74,
                         ),
                     ),
                 },
             ),
         ),
         param_types_rparen: ByteIndex(
-            106,
+            74,
         ),
         return_type: Deb(
             NumberLiteral {
                 value: 8,
                 span: (
                     ByteIndex(
-                        144,
+                        100,
                     ),
                     ByteIndex(
-                        145,
+                        101,
                     ),
                 ),
             },
@@ -60,16 +60,16 @@ Fun(
                 value: 1,
                 span: (
                     ByteIndex(
-                        159,
+                        107,
                     ),
                     ByteIndex(
-                        160,
+                        108,
                     ),
                 ),
             },
         ),
         rparen: ByteIndex(
-            165,
+            109,
         ),
     },
 )
