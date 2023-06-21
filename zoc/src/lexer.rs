@@ -566,4 +566,32 @@ mod tests {
         ]);
         assert_eq!(expected, actual);
     }
+
+    #[test]
+    fn no_whitespace() {
+        let src = r#"(ind)"#;
+        let actual = lex(src);
+        let expected = Ok(vec![
+            Token::LParen(ByteIndex(src.find("(").unwrap())),
+            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::RParen(ByteIndex(src.find(")").unwrap())),
+        ]);
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn universe_zero_zero() {
+        let src = r#"Type00"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn universe_zero_one() {
+        let src = r#"Type01"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
 }
