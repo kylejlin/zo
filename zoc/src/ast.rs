@@ -10,12 +10,12 @@ pub enum Expr {
     Fun(Rc<Hashed<Fun>>),
     App(Rc<Hashed<App>>),
     For(Rc<Hashed<For>>),
-    Deb(Rc<Hashed<crate::token::NumberLiteral>>),
-    Universe(Rc<Hashed<crate::token::UniverseLiteral>>),
+    Deb(Rc<Hashed<NumberLiteral>>),
+    Universe(Rc<Hashed<UniverseLiteral>>),
 }
 
 impl Expr {
-    pub fn digest(&self) -> [u64; 4] {
+    pub fn digest(&self) -> Digest {
         match self {
             Expr::Ind(h) => h.digest,
             Expr::Vcon(h) => h.digest,
@@ -29,11 +29,7 @@ impl Expr {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct Hashed<T> {
-    pub value: T,
-    pub digest: [u64; 4],
-}
+pub use crate::semantic_hash::*;
 
 #[derive(Clone, Debug)]
 pub struct Ind {

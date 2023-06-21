@@ -1,6 +1,8 @@
 pub mod ast;
 pub mod cst;
+pub mod cst_to_ast;
 pub mod lexer;
+pub mod semantic_hash;
 pub mod token;
 
 mod parser;
