@@ -32,12 +32,12 @@ impl From<cst::Ind> for ast::Ind {
         ast::Ind {
             name: Rc::new(Hashed::new(cst.name.clone())),
             universe_level: cst.type_.level.clone(),
-            index_types: Vec::from(*cst.index_types.clone())
-                .into_boxed_slice()
-                .into(),
-            constructor_defs: Vec::from(*cst.constructor_defs.clone())
-                .into_boxed_slice()
-                .into(),
+            index_types: Rc::new(Hashed::new(
+                Vec::from(*cst.index_types.clone()).into_boxed_slice(),
+            )),
+            constructor_defs: Rc::new(Hashed::new(
+                Vec::from(*cst.constructor_defs.clone()).into_boxed_slice(),
+            )),
             original: Some(Rc::new(cst)),
         }
     }
@@ -72,10 +72,12 @@ impl From<cst::ZeroOrMoreVariantConstructorDefs> for Vec<ast::VariantConstructor
 impl From<cst::VariantConstructorDef> for ast::VariantConstructorDef {
     fn from(cst: cst::VariantConstructorDef) -> Self {
         ast::VariantConstructorDef {
-            param_types: Vec::from(*cst.param_types.clone())
-                .into_boxed_slice()
-                .into(),
-            index_args: Vec::from(*cst.index_args.clone()).into_boxed_slice().into(),
+            param_types: Rc::new(Hashed::new(
+                Vec::from(*cst.param_types.clone()).into_boxed_slice(),
+            )),
+            index_args: Rc::new(Hashed::new(
+                Vec::from(*cst.index_args.clone()).into_boxed_slice(),
+            )),
             original: Some(Rc::new(cst)),
         }
     }
@@ -96,7 +98,9 @@ impl From<cst::Match> for ast::Match {
         ast::Match {
             matchee: Rc::new((*cst.matchee.clone()).into()),
             return_type: Rc::new((*cst.return_type.clone()).into()),
-            cases: Vec::from(*cst.cases.clone()).into_boxed_slice().into(),
+            cases: Rc::new(Hashed::new(
+                Vec::from(*cst.cases.clone()).into_boxed_slice(),
+            )),
             original: Some(Rc::new(cst)),
         }
     }
@@ -109,9 +113,9 @@ impl From<cst::Fun> for ast::Fun {
                 cst::NumberOrNonrecKw::Number(numlit) => Some(numlit.value),
                 cst::NumberOrNonrecKw::NonrecKw(_) => None,
             },
-            param_types: Vec::from(*cst.param_types.clone())
-                .into_boxed_slice()
-                .into(),
+            param_types: Rc::new(Hashed::new(
+                Vec::from(*cst.param_types.clone()).into_boxed_slice(),
+            )),
             return_type: Rc::new((*cst.return_type.clone()).into()),
             return_val: Rc::new((*cst.return_val.clone()).into()),
             original: Some(Rc::new(cst)),
@@ -123,7 +127,7 @@ impl From<cst::App> for ast::App {
     fn from(cst: cst::App) -> Self {
         ast::App {
             callee: Box::new((*cst.callee.clone()).into()),
-            args: Vec::from(*cst.args.clone()).into_boxed_slice().into(),
+            args: Rc::new(Hashed::new(Vec::from(*cst.args.clone()).into_boxed_slice())),
             original: Some(Rc::new(cst)),
         }
     }
@@ -132,9 +136,9 @@ impl From<cst::App> for ast::App {
 impl From<cst::For> for ast::For {
     fn from(cst: cst::For) -> Self {
         ast::For {
-            param_types: Vec::from(*cst.param_types.clone())
-                .into_boxed_slice()
-                .into(),
+            param_types: Rc::new(Hashed::new(
+                Vec::from(*cst.param_types.clone()).into_boxed_slice(),
+            )),
             return_type: Rc::new((*cst.return_type.clone()).into()),
             original: Some(Rc::new(cst)),
         }

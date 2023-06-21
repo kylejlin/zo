@@ -15,16 +15,16 @@ pub enum Expr {
 }
 
 impl Expr {
-    pub fn digest(&self) -> Digest {
+    pub fn digest(&self) -> &Digest {
         match self {
-            Expr::Ind(h) => h.digest,
-            Expr::Vcon(h) => h.digest,
-            Expr::Match(h) => h.digest,
-            Expr::Fun(h) => h.digest,
-            Expr::App(h) => h.digest,
-            Expr::For(h) => h.digest,
-            Expr::Deb(h) => h.digest,
-            Expr::Universe(h) => h.digest,
+            Expr::Ind(h) => &h.digest,
+            Expr::Vcon(h) => &h.digest,
+            Expr::Match(h) => &h.digest,
+            Expr::Fun(h) => &h.digest,
+            Expr::App(h) => &h.digest,
+            Expr::For(h) => &h.digest,
+            Expr::Deb(h) => &h.digest,
+            Expr::Universe(h) => &h.digest,
         }
     }
 }
@@ -35,15 +35,15 @@ pub use crate::semantic_hash::*;
 pub struct Ind {
     pub name: Rc<Hashed<StringLiteral>>,
     pub universe_level: usize,
-    pub index_types: Rc<[Expr]>,
-    pub constructor_defs: Rc<[VariantConstructorDef]>,
+    pub index_types: Rc<Hashed<Box<[Expr]>>>,
+    pub constructor_defs: Rc<Hashed<Box<[VariantConstructorDef]>>>,
     pub original: Option<Rc<cst::Ind>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct VariantConstructorDef {
-    pub param_types: Rc<[Expr]>,
-    pub index_args: Rc<[Expr]>,
+    pub param_types: Rc<Hashed<Box<[Expr]>>>,
+    pub index_args: Rc<Hashed<Box<[Expr]>>>,
     pub original: Option<Rc<cst::VariantConstructorDef>>,
 }
 
@@ -58,14 +58,14 @@ pub struct Vcon {
 pub struct Match {
     pub matchee: Rc<Expr>,
     pub return_type: Rc<Expr>,
-    pub cases: Rc<[Expr]>,
+    pub cases: Rc<Hashed<Box<[Expr]>>>,
     pub original: Option<Rc<cst::Match>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct Fun {
     pub decreasing_index: Option<usize>,
-    pub param_types: Rc<[Expr]>,
+    pub param_types: Rc<Hashed<Box<[Expr]>>>,
     pub return_type: Rc<Expr>,
     pub return_val: Rc<Expr>,
     pub original: Option<Rc<cst::Fun>>,
@@ -74,13 +74,13 @@ pub struct Fun {
 #[derive(Debug, Clone)]
 pub struct App {
     pub callee: Box<Expr>,
-    pub args: Rc<[Expr]>,
+    pub args: Rc<Hashed<Box<[Expr]>>>,
     pub original: Option<Rc<cst::App>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct For {
-    pub param_types: Rc<[Expr]>,
+    pub param_types: Rc<Hashed<Box<[Expr]>>>,
     pub return_type: Rc<Expr>,
     pub original: Option<Rc<cst::For>>,
 }
