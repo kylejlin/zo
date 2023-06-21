@@ -20,9 +20,11 @@ impl From<cst::Expr> for ast::Expr {
 
             cst::Expr::For(cst) => ast::Expr::For(Rc::new(Hashed::new((*cst).into()))),
 
-            cst::Expr::Deb(cst) => ast::Expr::Deb(Rc::new(Hashed::new(cst))),
+            cst::Expr::Deb(cst) => ast::Expr::Deb(Rc::new(Hashed::new(ast::Deb(cst.value)))),
 
-            cst::Expr::Universe(cst) => ast::Expr::Universe(Rc::new(Hashed::new(cst))),
+            cst::Expr::Universe(cst) => {
+                ast::Expr::Universe(Rc::new(Hashed::new(ast::Universe { level: cst.level })))
+            }
         }
     }
 }
@@ -30,7 +32,7 @@ impl From<cst::Expr> for ast::Expr {
 impl From<cst::Ind> for ast::Ind {
     fn from(cst: cst::Ind) -> Self {
         ast::Ind {
-            name: Rc::new(Hashed::new(cst.name.clone())),
+            name: Rc::new(ast::StringValue(cst.name.value.clone())),
             universe_level: cst.type_.level.clone(),
             index_types: Rc::new(Hashed::new(
                 Vec::from(*cst.index_types.clone()).into_boxed_slice(),

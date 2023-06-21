@@ -1,4 +1,4 @@
-use crate::{ast::*, token::*};
+use crate::ast::*;
 
 use hmac_sha256::Hash as Sha256;
 
@@ -39,9 +39,9 @@ impl SemanticHash for Ind {
 
         hasher.update([discriminator::IND]);
 
-        hasher.update(&self.name.digest);
+        hasher.update(&self.name.0);
 
-        hasher.update([discriminator::UNIVERSE]);
+        hasher.update([discriminator::IND_UNIVERSE]);
         hasher.update(&self.universe_level.to_be_bytes());
         hasher.update([discriminator::END]);
 
@@ -143,21 +143,31 @@ impl SemanticHash for For {
     }
 }
 
-impl SemanticHash for NumberLiteral {
+impl SemanticHash for Deb {
     fn semantic_hash(&self) -> Digest {
-        todo!()
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::DEB]);
+
+        hasher.update(self.0.to_be_bytes());
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
     }
 }
 
-impl SemanticHash for StringLiteral {
+impl SemanticHash for Universe {
     fn semantic_hash(&self) -> Digest {
-        todo!()
-    }
-}
+        let mut hasher = Sha256::new();
 
-impl SemanticHash for UniverseLiteral {
-    fn semantic_hash(&self) -> Digest {
-        todo!()
+        hasher.update([discriminator::UNIVERSE]);
+
+        hasher.update(self.level.to_be_bytes());
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
     }
 }
 
@@ -226,6 +236,8 @@ mod discriminator {
 
     pub const SOME: u8 = 13;
     pub const NONE: u8 = 14;
+
+    pub const IND_UNIVERSE: u8 = 15;
 
     pub const END: u8 = 64;
 }

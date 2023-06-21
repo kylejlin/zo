@@ -1,4 +1,4 @@
-use crate::{cst, token::*};
+use crate::cst;
 
 use std::rc::Rc;
 
@@ -10,8 +10,8 @@ pub enum Expr {
     Fun(Rc<Hashed<Fun>>),
     App(Rc<Hashed<App>>),
     For(Rc<Hashed<For>>),
-    Deb(Rc<Hashed<NumberLiteral>>),
-    Universe(Rc<Hashed<UniverseLiteral>>),
+    Deb(Rc<Hashed<Deb>>),
+    Universe(Rc<Hashed<Universe>>),
 }
 
 impl Expr {
@@ -33,12 +33,15 @@ pub use crate::semantic_hash::*;
 
 #[derive(Clone, Debug)]
 pub struct Ind {
-    pub name: Rc<Hashed<StringLiteral>>,
+    pub name: Rc<StringValue>,
     pub universe_level: usize,
     pub index_types: Rc<Hashed<Box<[Expr]>>>,
     pub constructor_defs: Rc<Hashed<Box<[Hashed<VariantConstructorDef>]>>>,
     pub original: Option<Rc<cst::Ind>>,
 }
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
+pub struct StringValue(pub String);
 
 #[derive(Debug, Clone)]
 pub struct VariantConstructorDef {
@@ -83,4 +86,12 @@ pub struct For {
     pub param_types: Rc<Hashed<Box<[Expr]>>>,
     pub return_type: Rc<Expr>,
     pub original: Option<Rc<cst::For>>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+pub struct Deb(pub usize);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+pub struct Universe {
+    pub level: usize,
 }
