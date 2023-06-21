@@ -204,7 +204,17 @@ impl Evaluator {
     }
 
     fn eval_unseen_vcon_def(&mut self, def: RcVconDef) -> Result<Normalized<RcVconDef>, EvalError> {
-        todo!()
+        let def_digest = def.digest.clone();
+        let def = &def.value;
+        let normalized = VariantConstructorDef {
+            param_types: self.eval_expressions(def.param_types.clone())?.into_raw(),
+            index_args: self.eval_expressions(def.index_args.clone())?.into_raw(),
+            original: None,
+        };
+
+        let result = Ok(Normalized(Rc::new(Hashed::new(normalized))));
+        self.eval_vcon_def_cache.insert(def_digest, result.clone());
+        result
     }
 
     fn eval_unseen_vcon(&mut self, vcon: Rc<Hashed<Vcon>>) -> Result<NormalForm, EvalError> {
