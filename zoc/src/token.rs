@@ -19,6 +19,8 @@ impl Sub for ByteIndex {
     }
 }
 
+pub type Span = (ByteIndex, ByteIndex);
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct NumberLiteral {
     pub value: usize,
