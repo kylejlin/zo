@@ -51,8 +51,10 @@ fn ind() {
 
     "Nat"
 
+    // Index types
     ()
 
+    // Variant constructor defs
     (
         (() ())
         ((0) ())
