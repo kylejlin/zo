@@ -112,7 +112,17 @@ impl SemanticHash for UniverseLiteral {
 
 impl SemanticHash for Box<[Expr]> {
     fn semantic_hash(&self) -> Digest {
-        todo!()
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::EXPR_SLICE]);
+
+        for expr in self.iter() {
+            hasher.update(expr.digest());
+        }
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
     }
 }
 
@@ -131,6 +141,9 @@ mod discriminator {
     pub const FOR: u8 = 6;
     pub const DEB: u8 = 7;
     pub const UNIVERSE: u8 = 8;
+
+    pub const EXPR_SLICE: u8 = 9;
+    pub const VARIANT_CONSTRUCTOR_DEF_SLICE: u8 = 10;
 
     pub const END: u8 = 64;
 }
