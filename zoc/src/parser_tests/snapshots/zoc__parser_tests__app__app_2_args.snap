@@ -1,0 +1,58 @@
+---
+source: src/parser_tests/app.rs
+expression: "&cst"
+---
+App(
+    App {
+        lparen: ByteIndex(
+            0,
+        ),
+        callee: Deb(
+            NumberLiteral {
+                value: 0,
+                span: (
+                    ByteIndex(
+                        1,
+                    ),
+                    ByteIndex(
+                        2,
+                    ),
+                ),
+            },
+        ),
+        args: Cons(
+            Cons(
+                Nil,
+                Deb(
+                    NumberLiteral {
+                        value: 1,
+                        span: (
+                            ByteIndex(
+                                3,
+                            ),
+                            ByteIndex(
+                                4,
+                            ),
+                        ),
+                    },
+                ),
+            ),
+            Deb(
+                NumberLiteral {
+                    value: 1,
+                    span: (
+                        ByteIndex(
+                            5,
+                        ),
+                        ByteIndex(
+                            6,
+                        ),
+                    ),
+                },
+            ),
+        ),
+        rparen: ByteIndex(
+            6,
+        ),
+    },
+)
