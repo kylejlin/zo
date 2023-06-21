@@ -35,60 +35,111 @@ where
 
 impl SemanticHash for Ind {
     fn semantic_hash(&self) -> Digest {
-        // let mut hasher = Sha256::new();
+        let mut hasher = Sha256::new();
 
-        // hasher.update([discriminator::IND]);
+        hasher.update([discriminator::IND]);
 
-        // hasher.update(&self.name.digest);
+        hasher.update(&self.name.digest);
 
-        // hasher.update([discriminator::UNIVERSE]);
-        // hasher.update(&self.universe_level.to_be_bytes());
-        // hasher.update([discriminator::END]);
+        hasher.update([discriminator::UNIVERSE]);
+        hasher.update(&self.universe_level.to_be_bytes());
+        hasher.update([discriminator::END]);
 
-        // for index_type in self.index_types.iter() {
-        //     hasher.update(&index_type.digest());
-        // }
+        hasher.update(&self.index_types.digest);
 
-        // for constructor_def in self.constructor_defs.iter() {
-        //     hasher.update(&constructor_def.param_types.digest());
-        //     hasher.update(&constructor_def.index_args.digest());
-        // }
+        hasher.update(&self.constructor_defs.digest);
 
-        // hasher.update([discriminator::END]);
+        hasher.update([discriminator::END]);
 
-        // Digest(hasher.finalize())
-
-        todo!()
+        Digest(hasher.finalize())
     }
 }
 
 impl SemanticHash for Vcon {
     fn semantic_hash(&self) -> Digest {
-        todo!()
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::VCON]);
+
+        hasher.update(&self.ind.digest);
+
+        hasher.update([discriminator::VCON_INDEX]);
+        hasher.update(&self.vcon_index.to_be_bytes());
+        hasher.update([discriminator::END]);
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
     }
 }
 
 impl SemanticHash for Match {
     fn semantic_hash(&self) -> Digest {
-        todo!()
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::MATCH]);
+
+        hasher.update(self.matchee.digest());
+        hasher.update(self.return_type.digest());
+        hasher.update(&self.cases.digest);
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
     }
 }
 
 impl SemanticHash for Fun {
     fn semantic_hash(&self) -> Digest {
-        todo!()
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::FUN]);
+
+        if let Some(i) = self.decreasing_index {
+            hasher.update([discriminator::SOME]);
+            hasher.update(i.to_be_bytes());
+        } else {
+            hasher.update([discriminator::NONE]);
+            hasher.update(0usize.to_be_bytes());
+        }
+
+        hasher.update(&self.param_types.digest);
+        hasher.update(self.return_type.digest());
+        hasher.update(self.return_val.digest());
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
     }
 }
 
 impl SemanticHash for App {
     fn semantic_hash(&self) -> Digest {
-        todo!()
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::APP]);
+
+        hasher.update(self.callee.digest());
+        hasher.update(&self.args.digest);
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
     }
 }
 
 impl SemanticHash for For {
     fn semantic_hash(&self) -> Digest {
-        todo!()
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::FOR]);
+
+        hasher.update(&self.param_types.digest);
+        hasher.update(self.return_type.digest());
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
     }
 }
 
@@ -170,6 +221,11 @@ mod discriminator {
     pub const EXPR_SLICE: u8 = 9;
     pub const VARIANT_CONSTRUCTOR_DEF_SLICE: u8 = 10;
     pub const VARIANT_CONSTRUCTOR_DEF: u8 = 11;
+
+    pub const VCON_INDEX: u8 = 12;
+
+    pub const SOME: u8 = 13;
+    pub const NONE: u8 = 14;
 
     pub const END: u8 = 64;
 }
