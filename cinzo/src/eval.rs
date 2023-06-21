@@ -218,6 +218,20 @@ impl Evaluator {
     }
 
     fn eval_unseen_vcon(&mut self, vcon: Rc<Hashed<Vcon>>) -> Result<NormalForm, EvalError> {
+        let vcon_digest = vcon.digest.clone();
+        let vcon = &vcon.value;
+        let normalized = Vcon {
+            ind: self.eval_ind(vcon.ind.clone())?.into_raw(),
+            vcon_index: vcon.vcon_index,
+            original: None,
+        };
+
+        let result = Ok(Normalized(Expr::Vcon(Rc::new(Hashed::new(normalized)))));
+        self.eval_expr_cache.insert(vcon_digest, result.clone());
+        result
+    }
+
+    fn eval_ind(&mut self, ind: Rc<Hashed<Ind>>) -> Result<Normalized<Rc<Hashed<Ind>>>, EvalError> {
         todo!()
     }
 
