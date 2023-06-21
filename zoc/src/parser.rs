@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 42e72d43c5a6a0d79b9b2657d4f5c681fbbbe803c2da372aa2a68f2285bec0c3
+// @sha256 0140d3af55bb68320b9863d63ffcdf4ad3ad856120b20967d42dbf0d6a758405
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -127,7 +127,7 @@ pub struct Fun {
     pub param_types: Box<ZeroOrMoreExprs>,
     pub param_types_rparen: crate::token::ByteIndex,
     pub return_type: Box<Expr>,
-    pub body: Box<Expr>,
+    pub return_val: Box<Expr>,
     pub rparen: crate::token::ByteIndex,
 }
 
@@ -600,7 +600,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R16 => {
             let rparen_8 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
-            let body_7 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let return_val_7 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             let return_type_6 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             let param_types_rparen_5 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let param_types_4 = Box::new(ZeroOrMoreExprs::try_from(nodes.pop().unwrap()).ok().unwrap());
@@ -619,7 +619,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
                     param_types: param_types_4,
                     param_types_rparen: param_types_rparen_5,
                     return_type: return_type_6,
-                    body: body_7,
+                    return_val: return_val_7,
                     rparen: rparen_8,
                 }),
                 NonterminalKind::Fun,

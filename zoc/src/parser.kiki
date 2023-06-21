@@ -96,7 +96,7 @@ struct Fun {
     param_types_rparen: $RParen
 
     return_type: Expr
-    body: Expr
+    return_val: Expr
 
     rparen: $RParen
 }
