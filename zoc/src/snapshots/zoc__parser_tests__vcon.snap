@@ -1,0 +1,127 @@
+---
+source: src/parser_tests.rs
+expression: "&cst"
+---
+Vcon(
+    Vcon {
+        lparen: ByteIndex(
+            1,
+        ),
+        ind: Ind {
+            lparen: ByteIndex(
+                17,
+            ),
+            type_: UniverseLiteral {
+                level: 0,
+                start: ByteIndex(
+                    40,
+                ),
+            },
+            name: StringLiteral {
+                value: "Nat",
+                span: (
+                    ByteIndex(
+                        55,
+                    ),
+                    ByteIndex(
+                        60,
+                    ),
+                ),
+            },
+            index_types_lparen: ByteIndex(
+                93,
+            ),
+            index_types: Nil,
+            index_types_rparen: ByteIndex(
+                94,
+            ),
+            constructor_defs_lparen: ByteIndex(
+                105,
+            ),
+            constructor_defs: Cons(
+                Cons(
+                    Nil,
+                    VariantConstructorDef {
+                        lparen: ByteIndex(
+                            119,
+                        ),
+                        param_types_lparen: ByteIndex(
+                            120,
+                        ),
+                        param_types: Nil,
+                        param_types_rparen: ByteIndex(
+                            121,
+                        ),
+                        index_args_lparen: ByteIndex(
+                            123,
+                        ),
+                        index_args: Nil,
+                        index_args_rparen: ByteIndex(
+                            124,
+                        ),
+                        rparen: ByteIndex(
+                            125,
+                        ),
+                    },
+                ),
+                VariantConstructorDef {
+                    lparen: ByteIndex(
+                        139,
+                    ),
+                    param_types_lparen: ByteIndex(
+                        140,
+                    ),
+                    param_types: Cons(
+                        Nil,
+                        Deb(
+                            NumberLiteral {
+                                value: 0,
+                                span: (
+                                    ByteIndex(
+                                        141,
+                                    ),
+                                    ByteIndex(
+                                        142,
+                                    ),
+                                ),
+                            },
+                        ),
+                    ),
+                    param_types_rparen: ByteIndex(
+                        142,
+                    ),
+                    index_args_lparen: ByteIndex(
+                        144,
+                    ),
+                    index_args: Nil,
+                    index_args_rparen: ByteIndex(
+                        145,
+                    ),
+                    rparen: ByteIndex(
+                        146,
+                    ),
+                },
+            ),
+            constructor_defs_rparen: ByteIndex(
+                156,
+            ),
+            rparen: ByteIndex(
+                162,
+            ),
+        },
+        vcon_index: NumberLiteral {
+            value: 0,
+            span: (
+                ByteIndex(
+                    235,
+                ),
+                ByteIndex(
+                    236,
+                ),
+            ),
+        },
+        rparen: ByteIndex(
+            237,
+        ),
+    },
+)
