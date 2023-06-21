@@ -1,0 +1,12 @@
+---
+source: src/parser_tests/universe.rs
+expression: "&cst"
+---
+Universe(
+    UniverseLiteral {
+        level: 42,
+        start: ByteIndex(
+            0,
+        ),
+    },
+)
