@@ -18,6 +18,8 @@ enum State {
     Main,
     Word { start: ByteIndex, byte_len: usize },
     String { start: ByteIndex, byte_len: usize },
+    Slash(ByteIndex),
+    SingleLineComment,
 }
 
 impl<'a> Lexer<'a> {
@@ -48,6 +50,10 @@ impl Lexer<'_> {
             State::String { start, byte_len } => {
                 self.handle_char_assuming_state_is_string(current, start, byte_len)
             }
+            State::Slash(_) => self.handle_char_assuming_state_is_slash(current_index, current),
+            State::SingleLineComment => {
+                self.handle_char_assuming_state_is_single_line_comment(current)
+            }
         }
     }
 
@@ -72,6 +78,7 @@ impl Lexer<'_> {
             }
             '(' => self.out.push(Token::LParen(current_index)),
             ')' => self.out.push(Token::RParen(current_index)),
+            '/' => self.state = State::Slash(current_index),
             _ => {
                 return Err(LexError(
                     current_index,
@@ -122,6 +129,30 @@ impl Lexer<'_> {
         Ok(())
     }
 
+    fn handle_char_assuming_state_is_slash(
+        &mut self,
+        current_index: ByteIndex,
+        current: char,
+    ) -> Result<(), LexError> {
+        if current == '/' {
+            self.state = State::SingleLineComment;
+            return Ok(());
+        }
+
+        self.finish_pending_state_and_reset()?;
+        self.handle_char(current_index, current)
+    }
+
+    fn handle_char_assuming_state_is_single_line_comment(
+        &mut self,
+        current: char,
+    ) -> Result<(), LexError> {
+        if current == '\n' {
+            self.state = State::Main;
+        }
+        Ok(())
+    }
+
     fn finish_pending_state_and_reset(&mut self) -> Result<(), LexError> {
         self.finish_pending_state()?;
         self.state = State::Main;
@@ -162,6 +193,8 @@ impl Lexer<'_> {
                 }));
                 Ok(())
             }
+            State::Slash(start) => Err(LexError(start, ByteIndex(start.0 + '/'.len_utf8()))),
+            State::SingleLineComment => Ok(()),
         }
     }
 }
@@ -574,6 +607,22 @@ mod tests {
         let expected = Ok(vec![
             Token::LParen(ByteIndex(src.find("(").unwrap())),
             Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::RParen(ByteIndex(src.find(")").unwrap())),
+        ]);
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn comments() {
+        let src = r#"(// Hello world!
+// You can write comments on their own line.
+ind // You can also write them at the end of a line 
+nonrec)"#;
+        let actual = lex(src);
+        let expected = Ok(vec![
+            Token::LParen(ByteIndex(src.find("(").unwrap())),
+            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::NonrecKw(ByteIndex(src.find("nonrec").unwrap())),
             Token::RParen(ByteIndex(src.find(")").unwrap())),
         ]);
         assert_eq!(expected, actual);
