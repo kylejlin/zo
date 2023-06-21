@@ -126,7 +126,23 @@ impl SemanticHash for Box<[Expr]> {
     }
 }
 
-impl SemanticHash for Box<[VariantConstructorDef]> {
+impl SemanticHash for Box<[Hashed<VariantConstructorDef>]> {
+    fn semantic_hash(&self) -> Digest {
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::VARIANT_CONSTRUCTOR_DEF_SLICE]);
+
+        for def in self.iter() {
+            hasher.update(&def.digest);
+        }
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
+    }
+}
+
+impl SemanticHash for VariantConstructorDef {
     fn semantic_hash(&self) -> Digest {
         todo!()
     }
