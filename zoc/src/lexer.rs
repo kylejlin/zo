@@ -214,12 +214,16 @@ mod string_parser {
     /// If `quote_exclusive_string_src` has double quotes,
     /// this function may produce an incorrect result.
     ///
-    /// This function returns `Err(Some(span))` if it encounters
-    /// an invalid escape sequence, where `span` is the location
-    /// of the invalid escape sequence.
-    ///
-    /// This function returns `Err(None)` if it encounters
-    /// an unterminated escape sequence.
+    /// This function returns `Err(span)` if it encounters
+    /// an invalid escape sequence or an unterminated escape sequence.
+    /// - If the escape sequence is invalid,
+    ///   `span` is the span of the invalid escape sequence,
+    ///   **excluding** the enclosing curly braces.
+    /// - If the escape sequence is unterminated,
+    ///   the `span` is the span of the unterminated escape sequence,
+    ///   **including** the left curly brace.
+    ///   By definition, there is no right curly brace
+    ///   (otherwise the escape sequence would be terminated).
     pub fn get_string_value(
         quote_exclusive_string_src: &str,
     ) -> Result<String, (ByteIndex, ByteIndex)> {
@@ -255,10 +259,9 @@ mod string_parser {
             }
 
             match self.state {
-                State::Escape { start, .. } => Err((
-                    start,
-                    ByteIndex(start.0 + self.quote_exclusive_string_src.len()),
-                )),
+                State::Escape { start, .. } => {
+                    Err((start, ByteIndex(self.quote_exclusive_string_src.len())))
+                }
                 State::Main => Ok(self.out),
             }
         }
@@ -292,6 +295,9 @@ mod string_parser {
                     };
                     Ok(())
                 }
+
+                '}' => Err((current_index, ByteIndex(current_index.0 + '}'.len_utf8()))),
+
                 _ => {
                     self.out.push(current);
                     Ok(())
@@ -315,7 +321,7 @@ mod string_parser {
             }
 
             self.state = State::Escape {
-                start: current_index,
+                start,
                 byte_len: byte_len + current.len_utf8(),
             };
             Ok(())
@@ -349,6 +355,125 @@ mod string_parser {
             };
             self.out.push(val);
             Ok(())
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn empty() {
+            let actual = get_string_value("");
+            let expected = Ok("".to_owned());
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn hello_world() {
+            let actual = get_string_value("hello world");
+            let expected = Ok("hello world".to_owned());
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn hello_unescaped_newline_world() {
+            let actual = get_string_value("hello\nworld");
+            let expected = Ok("hello\nworld".to_owned());
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn hello_escaped_newline_world() {
+            let actual = get_string_value("hello{0xA}world");
+            let expected = Ok("hello\nworld".to_owned());
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn hello_lcurly_world_rcurly() {
+            let actual = get_string_value("hello{0x7B}world{0x7D}");
+            let expected = Ok("hello{world}".to_owned());
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn hello_double_quote_world_double_quote() {
+            let actual = get_string_value("hello {0x22}world{0x22}");
+            let expected = Ok("hello \"world\"".to_owned());
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn unterminated_invalid_escape() {
+            let actual = get_string_value("hello {world");
+            let expected = Err((ByteIndex(6), ByteIndex(12)));
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn unterminated_but_otherwise_valid_escape() {
+            let actual = get_string_value("hello {0x22");
+            let expected = Err((ByteIndex(6), ByteIndex(11)));
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn empty_escape() {
+            let actual = get_string_value("hello {} world");
+            let expected = Err((ByteIndex(7), ByteIndex(7)));
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn too_short_escape_1_char() {
+            let actual = get_string_value("hello {0} world");
+            let expected = Err((ByteIndex(7), ByteIndex(8)));
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn too_short_escape_2_char() {
+            let actual = get_string_value("hello {0x} world");
+            let expected = Err((ByteIndex(7), ByteIndex(9)));
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn bad_prefix_escape() {
+            let actual = get_string_value("hello {BEEF} world");
+            let expected = Err((ByteIndex(7), ByteIndex(11)));
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn curly_in_escape() {
+            let actual = get_string_value("hello {0x{A}} world");
+            let expected = Err((ByteIndex(7), ByteIndex(11)));
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn non_hex_escape() {
+            let actual = get_string_value("hello {0xG} world");
+            let expected = Err((ByteIndex(7), ByteIndex(10)));
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn capital_x_escape() {
+            let actual = get_string_value("hello {0XA} world");
+            let expected = Err((ByteIndex(7), ByteIndex(10)));
+            assert_eq!(expected, actual);
+        }
+
+        #[test]
+        fn unescaped_rcurly() {
+            let actual = get_string_value("hello } world");
+            let expected = Err((ByteIndex(6), ByteIndex(7)));
+            assert_eq!(expected, actual);
         }
     }
 }
