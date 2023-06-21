@@ -1,0 +1,19 @@
+---
+source: src/parser_tests.rs
+expression: "&cst"
+---
+Some(
+    Number(
+        NumberLiteral {
+            value: 1,
+            span: (
+                ByteIndex(
+                    16,
+                ),
+                ByteIndex(
+                    17,
+                ),
+            ),
+        },
+    ),
+)
