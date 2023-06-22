@@ -5,6 +5,10 @@
 // At least for `MatchCase`.
 //
 // TODO: Rename `VariantConstructorDef` to `VconDef`.
+//
+// TODO: Only unfold a function application
+// if it is nonrecursive or if the decreasing arg
+// is `(vcon ...)` or `((vcon ...) arg1 arg2 ...)`.
 
 use std::rc::Rc;
 
