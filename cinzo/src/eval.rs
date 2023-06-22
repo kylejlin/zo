@@ -315,7 +315,28 @@ impl Evaluator {
     }
 
     fn eval_unseen_app(&mut self, app: RcHashed<App>) -> Result<NormalForm, EvalError> {
-        todo!()
+        let normalized_callee = self.eval(app.value.callee.clone())?.into_raw();
+        let normalized_args = self.eval_expressions(app.value.args.clone())?.into_raw();
+
+        if let Expr::Fun(callee) = &normalized_callee {
+            let unsubstituted = callee.value.return_val.clone();
+            let new_exprs: Vec<Expr> = std::iter::once(normalized_callee)
+                .chain(normalized_args.value.iter().cloned())
+                .collect();
+            let substituted = self.substitute_and_downshift(unsubstituted, &new_exprs);
+            return self.eval(substituted);
+        }
+
+        let app_digest = app.digest.clone();
+        let normalized = App {
+            callee: normalized_callee,
+            args: normalized_args,
+            original: None,
+        };
+
+        let result = Ok(Normalized(Expr::App(Rc::new(Hashed::new(normalized)))));
+        self.eval_expr_cache.insert(app_digest, result.clone());
+        result
     }
 
     fn eval_unseen_for(&mut self, f: RcHashed<For>) -> Result<NormalForm, EvalError> {
