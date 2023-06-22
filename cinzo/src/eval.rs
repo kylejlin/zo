@@ -605,19 +605,24 @@ impl DebSubstituter<'_> {
 mod tests {
     use super::*;
 
+    use pretty_assertions::assert_eq;
+
     #[test]
     fn add_2_3() {
-        let src = substitute_with_compounding(
-            [
-                (
-                    "Nat",
-                    r#"(ind Type0 "Nat" () (
-    (() ())
-    ((0) ())
+        let nat_def = (
+            "Nat",
+            r#"(ind Type0 "Nat" () (
+(() ())
+((0) ())
 ))"#,
-                ),
-                ("zero", "(vcon Nat 0)"),
-                ("succ", "(vcon Nat 1)"),
+        );
+        let zero_def = ("zero", "(vcon Nat 0)");
+        let succ_def = ("succ", "(vcon Nat 1)");
+        let add_two_three_src = substitute_with_compounding(
+            [
+                nat_def,
+                zero_def,
+                succ_def,
                 (
                     "add",
                     "(fun 0 (Nat Nat) Type0
@@ -636,11 +641,25 @@ mod tests {
             ],
             r#"(add two three)"#,
         );
-        let tokens = crate::lexer::lex(&src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        let ast: Expr = cst.into();
-        let nf = Evaluator::default().eval(ast).unwrap();
-        panic!("Done: {nf:#?}");
+        let five_src = substitute_with_compounding(
+            [nat_def, zero_def, succ_def],
+            "(succ (succ (succ (succ (succ zero)))))",
+        );
+
+        let actual = {
+            let tokens = crate::lexer::lex(&add_two_three_src).unwrap();
+            let cst = crate::parser::parse(tokens).unwrap();
+            let ast: Expr = cst.into();
+            Evaluator::default().eval(ast).unwrap().into_raw()
+        };
+
+        let expected = {
+            let tokens = crate::lexer::lex(&five_src).unwrap();
+            let cst = crate::parser::parse(tokens).unwrap();
+            Expr::from(cst)
+        };
+
+        assert_eq!(expected.digest(), actual.digest());
     }
 
     fn substitute_with_compounding<'a>(
