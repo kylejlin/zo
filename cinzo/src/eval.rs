@@ -222,8 +222,12 @@ impl Evaluator {
                 }
 
                 let unsubstituted = match_.cases.value[vcon_index].value.return_val.clone();
-                let substituted = self
-                    .substitute_and_downshift(unsubstituted, &normalized_matchee.value.args.value);
+                let substituted = self.substitute_and_downshift(
+                    unsubstituted,
+                    ReverseExprSlice {
+                        unprocessed: &normalized_matchee.value.args.value,
+                    },
+                );
                 return self.eval(substituted);
             }
         }
@@ -295,10 +299,18 @@ impl Evaluator {
 
         if let Expr::Fun(callee) = &normalized_callee {
             let unsubstituted = callee.value.return_val.clone();
-            let new_exprs: Vec<Expr> = std::iter::once(normalized_callee)
-                .chain(normalized_args.value.iter().cloned())
+            let new_exprs: Vec<Expr> = normalized_args
+                .value
+                .iter()
+                .cloned()
+                .chain(std::iter::once(normalized_callee))
                 .collect();
-            let substituted = self.substitute_and_downshift(unsubstituted, &new_exprs);
+            let substituted = self.substitute_and_downshift(
+                unsubstituted,
+                ReverseExprSlice {
+                    unprocessed: &new_exprs,
+                },
+            );
             return self.eval(substituted);
         }
 
@@ -328,17 +340,21 @@ impl Evaluator {
         result
     }
 
-    fn substitute_and_downshift(&mut self, expr: Expr, new_exprs: &[Expr]) -> Expr {
+    fn substitute_and_downshift(&mut self, expr: Expr, new_exprs: ReverseExprSlice) -> Expr {
         DebSubstituter::new(new_exprs).substitute_and_downshift(expr)
     }
 }
 
 struct DebSubstituter<'a> {
-    new_exprs: &'a [Expr],
+    new_exprs: ReverseExprSlice<'a>,
+}
+
+struct ReverseExprSlice<'a> {
+    pub unprocessed: &'a [Expr],
 }
 
 impl<'a> DebSubstituter<'a> {
-    pub fn new(new_exprs: &'a [Expr]) -> Self {
+    pub fn new(new_exprs: ReverseExprSlice<'a>) -> Self {
         Self { new_exprs }
     }
 }
@@ -575,11 +591,12 @@ impl DebSubstituter<'_> {
         }
 
         let adjusted = original.value.0 - cutoff;
-        if adjusted < self.new_exprs.len() {
-            return self.new_exprs[adjusted].clone();
+        let new_exprs_len = self.new_exprs.unprocessed.len();
+        if adjusted < new_exprs_len {
+            return self.new_exprs.unprocessed[new_exprs_len - 1 - adjusted].clone();
         }
 
-        let shifted = original.value.0 - self.new_exprs.len();
+        let shifted = original.value.0 - new_exprs_len;
         Expr::Deb(Rc::new(Hashed::new(Deb(shifted))))
     }
 }
