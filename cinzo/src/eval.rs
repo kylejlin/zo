@@ -759,7 +759,6 @@ mod tests {
         let three_two_one_src =
             substitute_with_compounding(src_defs, "(<CONS> <3> (<CONS> <2> (<CONS> <1> <NIL>)))");
 
-        // panic!("TODO {rev_one_two_three_src}");
         let actual = {
             let tokens = crate::lexer::lex(&rev_one_two_three_src).unwrap();
             let cst = crate::parser::parse(tokens).unwrap();
