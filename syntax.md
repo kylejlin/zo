@@ -423,14 +423,21 @@ return (
 
         // DB index stack is empty
 
-        true
+        (0 true) // Every match case has the form `(n out)`
+                 // where `n` is the number of vcon params
+                 // and `out` is the case's return value.
+                 //
+                 // In this case, since `Nat.zero` takes
+                 // zero params, `n` is `0`.
+                 //
+                 // `n` MUST ALWAYS BE A NUMBER LITERAL.
 
         // `Nat.succ` case
 
         // DB index stack is
         // 0 => pred: Nat
 
-        false
+        (1 false) // Since `Nat.succ` takes 1 param, `n` is `1`.
     )
 )
 ```
@@ -458,14 +465,14 @@ return (
 
         // DB index stack is empty
 
-        zero
+        (0 zero)
 
         // `Nat.succ` case
 
         // DB index stack is
         // 0 => pred: Nat
 
-        0
+        (1 0)
     )
 )
 ```
@@ -515,10 +522,10 @@ return
         // Cases
         (
             // True case
-            false
+            (0 false)
 
             // False case
-            true
+            (0 true)
         )
     )
 )
@@ -568,14 +575,14 @@ return
         // Cases
         (
             // Zero case
-            true
+            (0 true)
 
             // Succ case
                 // DB index stack is
                 // 0 => npred: Nat
                 // 1 => self_fun: forall(n': Nat) -> Nat
                 // 2 => n: Nat
-            (not (1 0))
+            (1 (not (1 0)))
         )
     )
 )
