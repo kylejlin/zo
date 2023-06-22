@@ -406,7 +406,18 @@ impl DebSubstituter<'_> {
         original: RcExprs,
         starting_cutoff: usize,
     ) -> RcExprs {
-        todo!()
+        let shifted: Vec<Expr> = original
+            .value
+            .iter()
+            .enumerate()
+            .map(|(expr_index, expr)| {
+                self.substitute_and_downshift_with_cutoff(
+                    expr.clone(),
+                    starting_cutoff + expr_index,
+                )
+            })
+            .collect();
+        Rc::new(Hashed::new(shifted.into_boxed_slice()))
     }
 
     fn substitute_and_downshift_vcon_defs_with_cutoff(
