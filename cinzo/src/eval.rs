@@ -39,9 +39,10 @@ impl Evaluator {
     }
 }
 
-type RcExprs = Rc<Hashed<Box<[Expr]>>>;
-type RcVconDef = Rc<Hashed<VariantConstructorDef>>;
-type RcVconDefs = Rc<Hashed<Box<[RcVconDef]>>>;
+type RcHashed<T> = Rc<Hashed<T>>;
+type RcExprs = RcHashed<Box<[Expr]>>;
+type RcVconDef = RcHashed<VariantConstructorDef>;
+type RcVconDefs = RcHashed<Box<[RcVconDef]>>;
 
 // #[derive(Clone, Debug)]
 // pub struct Ind {
@@ -64,7 +65,7 @@ type RcVconDefs = Rc<Hashed<Box<[RcVconDef]>>>;
 
 // #[derive(Debug, Clone)]
 // pub struct Vcon {
-//     pub ind: Rc<Hashed<Ind>>,
+//     pub ind: RcHashed<Ind>,
 //     pub vcon_index: usize,
 //     pub original: Option<Rc<cst::Vcon>>,
 // }
@@ -122,7 +123,7 @@ impl Evaluator {
         }
     }
 
-    fn eval_unseen_ind(&mut self, ind: Rc<Hashed<Ind>>) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_ind(&mut self, ind: RcHashed<Ind>) -> Result<NormalForm, EvalError> {
         let ind_digest = ind.digest.clone();
         let ind = &ind.value;
         let normalized = Ind {
@@ -217,7 +218,7 @@ impl Evaluator {
         result
     }
 
-    fn eval_unseen_vcon(&mut self, vcon: Rc<Hashed<Vcon>>) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_vcon(&mut self, vcon: RcHashed<Vcon>) -> Result<NormalForm, EvalError> {
         let vcon_digest = vcon.digest.clone();
         let vcon = &vcon.value;
         let normalized = Vcon {
@@ -231,23 +232,35 @@ impl Evaluator {
         result
     }
 
-    fn eval_ind(&mut self, ind: Rc<Hashed<Ind>>) -> Result<Normalized<Rc<Hashed<Ind>>>, EvalError> {
+    fn eval_ind(&mut self, ind: RcHashed<Ind>) -> Result<Normalized<RcHashed<Ind>>, EvalError> {
+        if let Some(result) = self.eval_expr_cache.get(&ind.digest) {
+            result.clone().map(|expr| {
+                Normalized(expr.into_raw().try_into_ind().expect(
+                    "Impossible: An `ind` expression cannot evaluate into a non-`ind` expression.",
+                ))
+            })
+        } else {
+            self.eval_unseen_ind(ind).map(|expr| {
+                Normalized(expr.into_raw().try_into_ind().expect(
+                    "Impossible: An `ind` expression cannot evaluate into a non-`ind` expression.",
+                ))
+            })
+        }
+    }
+
+    fn eval_unseen_match(&mut self, m: RcHashed<Match>) -> Result<NormalForm, EvalError> {
         todo!()
     }
 
-    fn eval_unseen_match(&mut self, m: Rc<Hashed<Match>>) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_fun(&mut self, f: RcHashed<Fun>) -> Result<NormalForm, EvalError> {
         todo!()
     }
 
-    fn eval_unseen_fun(&mut self, f: Rc<Hashed<Fun>>) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_app(&mut self, app: RcHashed<App>) -> Result<NormalForm, EvalError> {
         todo!()
     }
 
-    fn eval_unseen_app(&mut self, app: Rc<Hashed<App>>) -> Result<NormalForm, EvalError> {
-        todo!()
-    }
-
-    fn eval_unseen_for(&mut self, f: Rc<Hashed<For>>) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_for(&mut self, f: RcHashed<For>) -> Result<NormalForm, EvalError> {
         todo!()
     }
 }

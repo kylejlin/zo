@@ -17,19 +17,77 @@ pub enum Expr {
 impl Expr {
     pub fn digest(&self) -> &Digest {
         match self {
-            Expr::Ind(h) => &h.digest,
-            Expr::Vcon(h) => &h.digest,
-            Expr::Match(h) => &h.digest,
-            Expr::Fun(h) => &h.digest,
-            Expr::App(h) => &h.digest,
-            Expr::For(h) => &h.digest,
-            Expr::Deb(h) => &h.digest,
-            Expr::Universe(h) => &h.digest,
+            Expr::Ind(e) => &e.digest,
+            Expr::Vcon(e) => &e.digest,
+            Expr::Match(e) => &e.digest,
+            Expr::Fun(e) => &e.digest,
+            Expr::App(e) => &e.digest,
+            Expr::For(e) => &e.digest,
+            Expr::Deb(e) => &e.digest,
+            Expr::Universe(e) => &e.digest,
         }
     }
 }
 
 pub use crate::semantic_hash::*;
+
+impl Expr {
+    pub fn try_into_ind(self) -> Result<Rc<Hashed<Ind>>, Self> {
+        match self {
+            Expr::Ind(e) => Ok(e),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_vcon(self) -> Result<Rc<Hashed<Vcon>>, Self> {
+        match self {
+            Expr::Vcon(e) => Ok(e),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_match(self) -> Result<Rc<Hashed<Match>>, Self> {
+        match self {
+            Expr::Match(e) => Ok(e),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_fun(self) -> Result<Rc<Hashed<Fun>>, Self> {
+        match self {
+            Expr::Fun(e) => Ok(e),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_app(self) -> Result<Rc<Hashed<App>>, Self> {
+        match self {
+            Expr::App(e) => Ok(e),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_for(self) -> Result<Rc<Hashed<For>>, Self> {
+        match self {
+            Expr::For(e) => Ok(e),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_deb(self) -> Result<Rc<Hashed<Deb>>, Self> {
+        match self {
+            Expr::Deb(e) => Ok(e),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_universe(self) -> Result<Rc<Hashed<Universe>>, Self> {
+        match self {
+            Expr::Universe(e) => Ok(e),
+            _ => Err(self),
+        }
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Ind {
