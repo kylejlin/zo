@@ -331,8 +331,18 @@ impl Evaluator {
         result
     }
 
-    fn eval_unseen_for(&mut self, f: RcHashed<For>) -> Result<NormalForm, EvalError> {
-        todo!()
+    fn eval_unseen_for(&mut self, for_: RcHashed<For>) -> Result<NormalForm, EvalError> {
+        let for_digest = for_.digest.clone();
+        let for_ = &for_.value;
+        let normalized = For {
+            param_types: self.eval_expressions(for_.param_types.clone())?.into_raw(),
+            return_type: self.eval(for_.return_type.clone())?.into_raw(),
+            original: None,
+        };
+
+        let result = Ok(Normalized(Expr::For(Rc::new(Hashed::new(normalized)))));
+        self.eval_expr_cache.insert(for_digest, result.clone());
+        result
     }
 
     fn substitute_and_downshift(&mut self, expr: Expr, new_exprs: &[Expr]) -> Expr {
