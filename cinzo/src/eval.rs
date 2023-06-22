@@ -91,7 +91,6 @@ impl Evaluator {
             constructor_defs: self
                 .eval_vcon_defs(ind.constructor_defs.clone())
                 .map(Normalized::into_raw)?,
-            original: None,
         };
 
         let result = Ok(Normalized(Expr::Ind(Rc::new(Hashed::new(normalized)))));
@@ -166,7 +165,6 @@ impl Evaluator {
         let normalized = VariantConstructorDef {
             param_types: self.eval_expressions(def.param_types.clone())?.into_raw(),
             index_args: self.eval_expressions(def.index_args.clone())?.into_raw(),
-            original: None,
         };
 
         let result = Ok(Normalized(Rc::new(Hashed::new(normalized))));
@@ -180,7 +178,6 @@ impl Evaluator {
         let normalized = Vcon {
             ind: self.eval(vcon.ind.clone())?.into_raw(),
             vcon_index: vcon.vcon_index,
-            original: None,
         };
 
         let result = Ok(Normalized(Expr::Vcon(Rc::new(Hashed::new(normalized)))));
@@ -225,7 +222,6 @@ impl Evaluator {
             matchee: normalized_matchee,
             return_type: self.eval(match_.return_type.clone())?.into_raw(),
             cases: self.eval_match_cases(match_.cases.clone())?.into_raw(),
-            original: None,
         };
 
         let result = Ok(Normalized(Expr::Match(Rc::new(Hashed::new(normalized)))));
@@ -255,7 +251,6 @@ impl Evaluator {
                 Ok(Rc::new(Hashed::new(MatchCase {
                     arity: original.value.arity,
                     return_val: self.eval(original.value.return_val.clone())?.into_raw(),
-                    original: None,
                 })))
             })
             .collect::<Result<Vec<_>, _>>()?;
@@ -273,7 +268,6 @@ impl Evaluator {
             param_types: self.eval_expressions(fun.param_types.clone())?.into_raw(),
             return_type: self.eval(fun.return_type.clone())?.into_raw(),
             return_val: self.eval(fun.return_val.clone())?.into_raw(),
-            original: None,
         };
 
         let result = Ok(Normalized(Expr::Fun(Rc::new(Hashed::new(normalized)))));
@@ -306,7 +300,6 @@ impl Evaluator {
         let normalized = App {
             callee: normalized_callee,
             args: normalized_args,
-            original: None,
         };
 
         let result = Ok(Normalized(Expr::App(Rc::new(Hashed::new(normalized)))));
@@ -320,7 +313,6 @@ impl Evaluator {
         let normalized = For {
             param_types: self.eval_expressions(for_.param_types.clone())?.into_raw(),
             return_type: self.eval(for_.return_type.clone())?.into_raw(),
-            original: None,
         };
 
         let result = Ok(Normalized(Expr::For(Rc::new(Hashed::new(normalized)))));
@@ -384,7 +376,6 @@ impl DebSubstituter<'_> {
                 original.constructor_defs.clone(),
                 cutoff + 1,
             ),
-            original: None,
         }))
     }
 
@@ -435,7 +426,6 @@ impl DebSubstituter<'_> {
                 original.index_args.clone(),
                 cutoff + original.param_types.value.len(),
             ),
-            original: None,
         }))
     }
 
@@ -448,7 +438,6 @@ impl DebSubstituter<'_> {
         Rc::new(Hashed::new(Vcon {
             ind: self.substitute_and_downshift_with_cutoff(original.ind.clone(), cutoff),
             vcon_index: original.vcon_index,
-            original: None,
         }))
     }
 
@@ -464,7 +453,6 @@ impl DebSubstituter<'_> {
                 .substitute_and_downshift_with_cutoff(original.return_type.clone(), cutoff),
             cases: self
                 .substitute_and_downshift_match_cases_with_cutoff(original.cases.clone(), cutoff),
-            original: None,
         }))
     }
 
@@ -493,7 +481,6 @@ impl DebSubstituter<'_> {
                 original.return_val.clone(),
                 cutoff + original.arity,
             ),
-            original: original.original.clone(),
         }))
     }
 
@@ -517,7 +504,6 @@ impl DebSubstituter<'_> {
                 original.return_val.clone(),
                 cutoff + original.param_types.value.len() + 1,
             ),
-            original: None,
         }))
     }
 
@@ -533,7 +519,6 @@ impl DebSubstituter<'_> {
                 original.args.clone(),
                 cutoff,
             ),
-            original: None,
         }))
     }
 
@@ -565,7 +550,6 @@ impl DebSubstituter<'_> {
                 original.return_type.clone(),
                 cutoff + original.param_types.value.len(),
             ),
-            original: None,
         }))
     }
 

@@ -40,7 +40,6 @@ impl From<cst::Ind> for ast::Ind {
             constructor_defs: Rc::new(Hashed::new(
                 Vec::from(*cst.constructor_defs.clone()).into_boxed_slice(),
             )),
-            original: Some(Rc::new(cst)),
         }
     }
 }
@@ -81,7 +80,6 @@ impl From<cst::VariantConstructorDef> for ast::VariantConstructorDef {
             index_args: Rc::new(Hashed::new(
                 Vec::from(*cst.index_args.clone()).into_boxed_slice(),
             )),
-            original: Some(Rc::new(cst)),
         }
     }
 }
@@ -91,7 +89,6 @@ impl From<cst::Vcon> for ast::Vcon {
         ast::Vcon {
             ind: (*cst.ind.clone()).into(),
             vcon_index: cst.vcon_index.value,
-            original: Some(Rc::new(cst)),
         }
     }
 }
@@ -104,7 +101,6 @@ impl From<cst::Match> for ast::Match {
             cases: Rc::new(Hashed::new(
                 Vec::from(*cst.cases.clone()).into_boxed_slice(),
             )),
-            original: Some(Rc::new(cst)),
         }
     }
 }
@@ -128,7 +124,6 @@ impl From<cst::MatchCase> for ast::MatchCase {
         ast::MatchCase {
             arity: cst.arity.value,
             return_val: (*cst.return_val.clone()).into(),
-            original: Some(Rc::new(cst)),
         }
     }
 }
@@ -145,7 +140,6 @@ impl From<cst::Fun> for ast::Fun {
             )),
             return_type: (*cst.return_type.clone()).into(),
             return_val: (*cst.return_val.clone()).into(),
-            original: Some(Rc::new(cst)),
         }
     }
 }
@@ -155,7 +149,6 @@ impl From<cst::App> for ast::App {
         ast::App {
             callee: (*cst.callee.clone()).into(),
             args: Rc::new(Hashed::new(Vec::from(*cst.args.clone()).into_boxed_slice())),
-            original: Some(Rc::new(cst)),
         }
     }
 }
@@ -167,7 +160,6 @@ impl From<cst::For> for ast::For {
                 Vec::from(*cst.param_types.clone()).into_boxed_slice(),
             )),
             return_type: (*cst.return_type.clone()).into(),
-            original: Some(Rc::new(cst)),
         }
     }
 }

@@ -1,5 +1,3 @@
-use crate::cst;
-
 use std::rc::Rc;
 
 #[derive(Clone, Debug)]
@@ -95,7 +93,6 @@ pub struct Ind {
     pub universe_level: usize,
     pub index_types: Rc<Hashed<Box<[Expr]>>>,
     pub constructor_defs: Rc<Hashed<Box<[Rc<Hashed<VariantConstructorDef>>]>>>,
-    pub original: Option<Rc<cst::Ind>>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
@@ -105,14 +102,12 @@ pub struct StringValue(pub String);
 pub struct VariantConstructorDef {
     pub param_types: Rc<Hashed<Box<[Expr]>>>,
     pub index_args: Rc<Hashed<Box<[Expr]>>>,
-    pub original: Option<Rc<cst::VariantConstructorDef>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct Vcon {
     pub ind: Expr,
     pub vcon_index: usize,
-    pub original: Option<Rc<cst::Vcon>>,
 }
 
 #[derive(Debug, Clone)]
@@ -120,14 +115,12 @@ pub struct Match {
     pub matchee: Expr,
     pub return_type: Expr,
     pub cases: Rc<Hashed<Box<[Rc<Hashed<MatchCase>>]>>>,
-    pub original: Option<Rc<cst::Match>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct MatchCase {
     pub arity: usize,
     pub return_val: Expr,
-    pub original: Option<Rc<cst::MatchCase>>,
 }
 
 #[derive(Debug, Clone)]
@@ -136,21 +129,18 @@ pub struct Fun {
     pub param_types: Rc<Hashed<Box<[Expr]>>>,
     pub return_type: Expr,
     pub return_val: Expr,
-    pub original: Option<Rc<cst::Fun>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct App {
     pub callee: Expr,
     pub args: Rc<Hashed<Box<[Expr]>>>,
-    pub original: Option<Rc<cst::App>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct For {
     pub param_types: Rc<Hashed<Box<[Expr]>>>,
     pub return_type: Expr,
-    pub original: Option<Rc<cst::For>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
