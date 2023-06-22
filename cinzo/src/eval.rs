@@ -1,5 +1,3 @@
-// TODO: Track `original`, or delete it.
-//
 // TODO: Make `MatchCase` and `VariantConstructorDef`
 // not hashed. It's not worth the trouble.
 // At least for `MatchCase`.
