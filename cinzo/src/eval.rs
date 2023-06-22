@@ -358,9 +358,9 @@ impl DebSubstituter<'_> {
                 original.index_types.clone(),
                 cutoff,
             ),
-            constructor_defs: self.substitute_and_downshift_constructor_defs_with_cutoff(
+            constructor_defs: self.substitute_and_downshift_vcon_defs_with_cutoff(
                 original.constructor_defs.clone(),
-                cutoff + original.index_types.value.len() + 1,
+                cutoff + 1,
             ),
             original: None,
         }))
@@ -374,12 +374,36 @@ impl DebSubstituter<'_> {
         todo!()
     }
 
-    fn substitute_and_downshift_constructor_defs_with_cutoff(
+    fn substitute_and_downshift_vcon_defs_with_cutoff(
         &self,
         original: RcVconDefs,
         cutoff: usize,
     ) -> RcVconDefs {
-        todo!()
+        let shifted: Vec<RcHashed<VariantConstructorDef>> = original
+            .value
+            .iter()
+            .map(|def| self.substitute_and_downshift_vcon_def_with_cutoff(def.clone(), cutoff))
+            .collect();
+        Rc::new(Hashed::new(shifted.into_boxed_slice()))
+    }
+
+    fn substitute_and_downshift_vcon_def_with_cutoff(
+        &self,
+        original: RcHashed<VariantConstructorDef>,
+        cutoff: usize,
+    ) -> RcHashed<VariantConstructorDef> {
+        let original = &original.value;
+        Rc::new(Hashed::new(VariantConstructorDef {
+            param_types: self.substitute_and_downshift_expressions_with_increasing_cutoff(
+                original.param_types.clone(),
+                cutoff,
+            ),
+            index_args: self.substitute_and_downshift_expressions_with_constant_cutoff(
+                original.index_args.clone(),
+                cutoff + original.param_types.value.len(),
+            ),
+            original: None,
+        }))
     }
 
     fn substitute_and_downshift_vcon_with_cutoff(
