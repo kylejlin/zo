@@ -583,3 +583,66 @@ impl DebSubstituter<'_> {
         Expr::Deb(Rc::new(Hashed::new(Deb(shifted))))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn add_2_3() {
+        let src = substitute_with_compounding(
+            [
+                (
+                    "Nat",
+                    r#"(ind Type0 "Nat" () (
+    (() ())
+    ((0) ())
+))"#,
+                ),
+                ("zero", "(vcon Nat 0)"),
+                ("succ", "(vcon Nat 1)"),
+                (
+                    "add",
+                    "(fun 0 (Nat Nat) Type0
+(
+    match 2 Nat
+
+    (
+        (0 1)
+
+        (1 (1 0 (succ 2)))
+    )
+))",
+                ),
+                ("two", "(succ (succ zero))"),
+                ("three", "(succ two)"),
+            ],
+            r#"(add two three)"#,
+        );
+        let tokens = crate::lexer::lex(&src).unwrap();
+        let cst = crate::parser::parse(tokens).unwrap();
+        let ast: Expr = cst.into();
+        let nf = Evaluator::default().eval(ast).unwrap();
+        panic!("Done: {nf:#?}");
+    }
+
+    fn substitute_with_compounding<'a>(
+        iter: impl IntoIterator<Item = (&'a str, &'a str)>,
+        last: &'a str,
+    ) -> String {
+        let mut replacements = vec![];
+        for (from, unreplaced_to) in iter {
+            let to = substitute_without_compounding(&replacements, unreplaced_to);
+            replacements.push((from, to));
+        }
+        substitute_without_compounding(&replacements, last)
+    }
+
+    fn substitute_without_compounding(replacements: &[(&str, String)], original: &str) -> String {
+        let mut result = original.to_string();
+        for (from, to) in replacements {
+            result = result.replace(from, to);
+        }
+        result
+    }
+}
