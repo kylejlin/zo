@@ -9,6 +9,8 @@
 // is `(vcon ...)` or `((vcon ...) arg1 arg2 ...)`.
 //
 // TODO: Reinstate the requirement that `Vcon.ind` is an `Ind`.
+//
+// TODO: Track `original`.
 
 use std::rc::Rc;
 
