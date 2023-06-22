@@ -78,8 +78,24 @@ struct Match {
     return_type: Expr
 
     cases_lparen: $LParen
-    cases: ZeroOrMoreExprs
+    cases: ZeroOrMoreMatchCases
     cases_rparen: $RParen
+
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum ZeroOrMoreMatchCases {
+    Nil
+    Cons(ZeroOrMoreMatchCases MatchCase)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct MatchCase {
+    lparen: $LParen
+
+    arity: $Number
+    return_val: Expr
 
     rparen: $RParen
 }

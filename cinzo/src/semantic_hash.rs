@@ -233,6 +233,37 @@ impl SemanticHash for VariantConstructorDef {
     }
 }
 
+impl SemanticHash for Box<[Rc<Hashed<MatchCase>>]> {
+    fn semantic_hash(&self) -> Digest {
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::MATCH_CASE_SLICE]);
+
+        for def in self.iter() {
+            hasher.update(&def.digest);
+        }
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
+    }
+}
+
+impl SemanticHash for MatchCase {
+    fn semantic_hash(&self) -> Digest {
+        let mut hasher = Sha256::new();
+
+        hasher.update([discriminator::MATCH_CASE]);
+
+        hasher.update(self.arity.to_be_bytes());
+        hasher.update(self.return_val.digest());
+
+        hasher.update([discriminator::END]);
+
+        Digest(hasher.finalize())
+    }
+}
+
 mod discriminator {
     pub const IND: u8 = 1;
     pub const VCON: u8 = 2;
@@ -253,6 +284,9 @@ mod discriminator {
     pub const NONE: u8 = 14;
 
     pub const IND_UNIVERSE: u8 = 15;
+
+    pub const MATCH_CASE_SLICE: u8 = 16;
+    pub const MATCH_CASE: u8 = 17;
 
     pub const END: u8 = 64;
 }

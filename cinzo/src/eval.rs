@@ -1,4 +1,10 @@
 // TODO: Track `original`, or delete it.
+//
+// TODO: Make `MatchCase` and `VariantConstructorDef`
+// not hashed. It's not worth the trouble.
+// At least for `VariantConstructorDef`.
+//
+// TODO: Rename `VariantConstructorDef` to `VconDef`.
 
 use std::rc::Rc;
 
@@ -44,63 +50,8 @@ type RcHashed<T> = Rc<Hashed<T>>;
 type RcExprs = RcHashed<Box<[Expr]>>;
 type RcVconDef = RcHashed<VariantConstructorDef>;
 type RcVconDefs = RcHashed<Box<[RcVconDef]>>;
-
-// #[derive(Clone, Debug)]
-// pub struct Ind {
-//     pub name: Rc<StringValue>,
-//     pub universe_level: usize,
-//     pub index_types: Rc<Hashed<Box<[Expr]>>>,
-//     pub constructor_defs: Rc<Hashed<Box<[Hashed<VariantConstructorDef>]>>>,
-//     pub original: Option<Rc<cst::Ind>>,
-// }
-
-// #[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
-// pub struct StringValue(pub String);
-
-// #[derive(Debug, Clone)]
-// pub struct VariantConstructorDef {
-//     pub param_types: Rc<Hashed<Box<[Expr]>>>,
-//     pub index_args: Rc<Hashed<Box<[Expr]>>>,
-//     pub original: Option<Rc<cst::VariantConstructorDef>>,
-// }
-
-// #[derive(Debug, Clone)]
-// pub struct Vcon {
-//     pub ind: RcHashed<Ind>,
-//     pub vcon_index: usize,
-//     pub original: Option<Rc<cst::Vcon>>,
-// }
-
-// #[derive(Debug, Clone)]
-// pub struct Match {
-//     pub matchee: Rc<Expr>,
-//     pub return_type: Rc<Expr>,
-//     pub cases: Rc<Hashed<Box<[Expr]>>>,
-//     pub original: Option<Rc<cst::Match>>,
-// }
-
-// #[derive(Debug, Clone)]
-// pub struct Fun {
-//     pub decreasing_index: Option<usize>,
-//     pub param_types: Rc<Hashed<Box<[Expr]>>>,
-//     pub return_type: Rc<Expr>,
-//     pub return_val: Rc<Expr>,
-//     pub original: Option<Rc<cst::Fun>>,
-// }
-
-// #[derive(Debug, Clone)]
-// pub struct App {
-//     pub callee: Box<Expr>,
-//     pub args: Rc<Hashed<Box<[Expr]>>>,
-//     pub original: Option<Rc<cst::App>>,
-// }
-
-// #[derive(Debug, Clone)]
-// pub struct For {
-//     pub param_types: Rc<Hashed<Box<[Expr]>>>,
-//     pub return_type: Rc<Expr>,
-//     pub original: Option<Rc<cst::For>>,
-// }
+type RcMatchCase = RcHashed<MatchCase>;
+type RcMatchCases = RcHashed<Box<[RcMatchCase]>>;
 
 impl Evaluator {
     pub fn eval(&mut self, expr: Expr) -> Result<NormalForm, EvalError> {
@@ -259,7 +210,7 @@ impl Evaluator {
                 return Err(EvalError::TooFewMatchCases(m));
             }
 
-            let match_return_value = match_.cases.value[vcon_index].clone();
+            let match_return_value = match_.cases.value[vcon_index].value.return_val.clone();
             return self.eval(match_return_value);
         }
 
@@ -270,7 +221,7 @@ impl Evaluator {
                     return Err(EvalError::TooFewMatchCases(m));
                 }
 
-                let unsubstituted = match_.cases.value[vcon_index].clone();
+                let unsubstituted = match_.cases.value[vcon_index].value.return_val.clone();
                 let substituted = self
                     .substitute_and_downshift(unsubstituted, &normalized_matchee.value.args.value);
                 return self.eval(substituted);
@@ -281,13 +232,45 @@ impl Evaluator {
         let normalized = Match {
             matchee: normalized_matchee,
             return_type: self.eval(match_.return_type.clone())?.into_raw(),
-            cases: self.eval_expressions(match_.cases.clone())?.into_raw(),
+            cases: self.eval_match_cases(match_.cases.clone())?.into_raw(),
             original: None,
         };
 
         let result = Ok(Normalized(Expr::Match(Rc::new(Hashed::new(normalized)))));
         self.eval_expr_cache.insert(match_digest, result.clone());
         result
+    }
+
+    fn eval_match_cases(
+        &mut self,
+        cases: RcMatchCases,
+    ) -> Result<Normalized<RcMatchCases>, EvalError> {
+        // It's not worth caching match cases,
+        // so we'll just re-evaluate them every time.
+        // This isn't actually that expensive,
+        // since the underlying expressions will be cached.
+        self.eval_unseen_match_cases(cases)
+    }
+
+    fn eval_unseen_match_cases(
+        &mut self,
+        cases: RcMatchCases,
+    ) -> Result<Normalized<RcMatchCases>, EvalError> {
+        let cases = &cases.value;
+        let normalized: Vec<RcMatchCase> = cases
+            .iter()
+            .map(|original| {
+                Ok(Rc::new(Hashed::new(MatchCase {
+                    arity: original.value.arity,
+                    return_val: self.eval(original.value.return_val.clone())?.into_raw(),
+                    original: None,
+                })))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(Normalized(Rc::new(Hashed::new(
+            normalized.into_boxed_slice(),
+        ))))
     }
 
     fn eval_unseen_fun(&mut self, fun: RcHashed<Fun>) -> Result<NormalForm, EvalError> {

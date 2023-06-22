@@ -119,8 +119,15 @@ pub struct Vcon {
 pub struct Match {
     pub matchee: Expr,
     pub return_type: Expr,
-    pub cases: Rc<Hashed<Box<[Expr]>>>,
+    pub cases: Rc<Hashed<Box<[Rc<Hashed<MatchCase>>]>>>,
     pub original: Option<Rc<cst::Match>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct MatchCase {
+    pub arity: usize,
+    pub return_val: Expr,
+    pub original: Option<Rc<cst::MatchCase>>,
 }
 
 #[derive(Debug, Clone)]

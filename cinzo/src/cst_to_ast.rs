@@ -109,6 +109,30 @@ impl From<cst::Match> for ast::Match {
     }
 }
 
+impl From<cst::ZeroOrMoreMatchCases> for Vec<Rc<Hashed<ast::MatchCase>>> {
+    fn from(cst: cst::ZeroOrMoreMatchCases) -> Self {
+        match cst {
+            cst::ZeroOrMoreMatchCases::Nil => vec![],
+            cst::ZeroOrMoreMatchCases::Cons(cases, case) => {
+                let mut match_cases: Self = (*cases).into();
+                let case = Rc::new(Hashed::new((*case).into()));
+                match_cases.push(case);
+                match_cases
+            }
+        }
+    }
+}
+
+impl From<cst::MatchCase> for ast::MatchCase {
+    fn from(cst: cst::MatchCase) -> Self {
+        ast::MatchCase {
+            arity: cst.arity.value,
+            return_val: (*cst.return_val.clone()).into(),
+            original: Some(Rc::new(cst)),
+        }
+    }
+}
+
 impl From<cst::Fun> for ast::Fun {
     fn from(cst: cst::Fun) -> Self {
         ast::Fun {
