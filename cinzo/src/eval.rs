@@ -594,40 +594,40 @@ mod tests {
     #[test]
     fn add_2_3() {
         let nat_def = (
-            "Nat",
+            "<NAT>",
             r#"(ind Type0 "Nat" () (
 (() ())
 ((0) ())
 ))"#,
         );
-        let zero_def = ("zero", "(vcon Nat 0)");
-        let succ_def = ("succ", "(vcon Nat 1)");
+        let zero_def = ("<ZERO>", "(vcon <NAT> 0)");
+        let succ_def = ("<SUCC>", "(vcon <NAT> 1)");
         let add_two_three_src = substitute_with_compounding(
             [
                 nat_def,
                 zero_def,
                 succ_def,
                 (
-                    "add",
-                    "(fun 0 (Nat Nat) Type0
+                    "<ADD>",
+                    "(fun 0 (<NAT> <NAT>) Type0
 (
-    match 2 Nat
+    match 2 <NAT>
 
     (
         (0 1)
 
-        (1 (1 0 (succ 2)))
+        (1 (1 0 (<SUCC> 2)))
     )
 ))",
                 ),
-                ("two", "(succ (succ zero))"),
-                ("three", "(succ two)"),
+                ("<2>", "(<SUCC> (<SUCC> <ZERO>))"),
+                ("<3>", "(<SUCC> <2>)"),
             ],
-            r#"(add two three)"#,
+            r#"(<ADD> <2> <3>)"#,
         );
         let five_src = substitute_with_compounding(
             [nat_def, zero_def, succ_def],
-            "(succ (succ (succ (succ (succ zero)))))",
+            "(<SUCC> (<SUCC> (<SUCC> (<SUCC> (<SUCC> <ZERO>)))))",
         );
 
         let actual = {
