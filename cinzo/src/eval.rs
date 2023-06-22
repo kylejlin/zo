@@ -298,8 +298,20 @@ impl Evaluator {
         result
     }
 
-    fn eval_unseen_fun(&mut self, f: RcHashed<Fun>) -> Result<NormalForm, EvalError> {
-        todo!()
+    fn eval_unseen_fun(&mut self, fun: RcHashed<Fun>) -> Result<NormalForm, EvalError> {
+        let fun_digest = fun.digest.clone();
+        let fun = &fun.value;
+        let normalized = Fun {
+            decreasing_index: fun.decreasing_index,
+            param_types: self.eval_expressions(fun.param_types.clone())?.into_raw(),
+            return_type: self.eval(fun.return_type.clone())?.into_raw(),
+            return_val: self.eval(fun.return_val.clone())?.into_raw(),
+            original: None,
+        };
+
+        let result = Ok(Normalized(Expr::Fun(Rc::new(Hashed::new(normalized)))));
+        self.eval_expr_cache.insert(fun_digest, result.clone());
+        result
     }
 
     fn eval_unseen_app(&mut self, app: RcHashed<App>) -> Result<NormalForm, EvalError> {
