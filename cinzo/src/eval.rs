@@ -9,6 +9,8 @@
 // TODO: Only unfold a function application
 // if it is nonrecursive or if the decreasing arg
 // is `(vcon ...)` or `((vcon ...) arg1 arg2 ...)`.
+//
+// TODO: Reinstate the requirement that `Vcon.ind` is an `Ind`.
 
 use std::rc::Rc;
 
