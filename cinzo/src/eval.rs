@@ -253,36 +253,28 @@ impl Evaluator {
         let match_ = &m.value;
         let normalized_matchee = self.eval(match_.matchee.clone())?.into_raw();
 
-        match &normalized_matchee {
-            Expr::Vcon(vcon) => {
+        if let Expr::Vcon(vcon) = &normalized_matchee {
+            let vcon_index = vcon.value.vcon_index;
+            if vcon_index >= match_.cases.value.len() {
+                return Err(EvalError::TooFewMatchCases(m));
+            }
+
+            let match_return_value = match_.cases.value[vcon_index].clone();
+            return self.eval(match_return_value);
+        }
+
+        if let Expr::App(normalized_matchee) = &normalized_matchee {
+            if let Expr::Vcon(vcon) = &normalized_matchee.value.callee {
                 let vcon_index = vcon.value.vcon_index;
                 if vcon_index >= match_.cases.value.len() {
                     return Err(EvalError::TooFewMatchCases(m));
                 }
 
-                let match_return_value = match_.cases.value[vcon_index].clone();
-                return self.eval(match_return_value);
+                let unsubstituted = match_.cases.value[vcon_index].clone();
+                let substituted = self
+                    .substitute_and_downshift(unsubstituted, &normalized_matchee.value.args.value);
+                return self.eval(substituted);
             }
-
-            Expr::App(normalized_matchee) => match &normalized_matchee.value.callee {
-                Expr::Vcon(vcon) => {
-                    let vcon_index = vcon.value.vcon_index;
-                    if vcon_index >= match_.cases.value.len() {
-                        return Err(EvalError::TooFewMatchCases(m));
-                    }
-
-                    let unsubstituted = match_.cases.value[vcon_index].clone();
-                    let substituted = self.substitute_and_downshift(
-                        unsubstituted,
-                        &normalized_matchee.value.args.value,
-                    );
-                    return self.eval(substituted);
-                }
-
-                _other_callee => {}
-            },
-
-            _other_matchee => {}
         }
 
         let match_digest = m.digest.clone();
