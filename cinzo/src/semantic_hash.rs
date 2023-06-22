@@ -3,6 +3,7 @@ use crate::ast::*;
 use hmac_sha256::Hash as Sha256;
 
 use std::{
+    fmt::{Debug, Formatter},
     hash::{Hash, Hasher},
     rc::Rc,
 };
@@ -13,7 +14,7 @@ pub struct Hashed<T> {
     pub digest: Digest,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Default, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, Default, PartialOrd, Ord)]
 pub struct Digest([u8; 32]);
 
 impl AsRef<[u8]> for Digest {
@@ -27,6 +28,16 @@ impl Hash for Digest {
         hasher.write_u64(u64::from_ne_bytes([
             self.0[0], self.0[1], self.0[2], self.0[3], self.0[4], self.0[5], self.0[6], self.0[7],
         ]));
+    }
+}
+
+impl Debug for Digest {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "0x")?;
+        for byte in self.0.iter() {
+            write!(f, "{:02x}", byte)?;
+        }
+        Ok(())
     }
 }
 
