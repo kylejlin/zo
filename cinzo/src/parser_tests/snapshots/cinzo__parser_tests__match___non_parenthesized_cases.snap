@@ -5,13 +5,13 @@ expression: "&err"
 Some(
     Number(
         NumberLiteral {
-            value: 1,
+            value: 0,
             span: (
                 ByteIndex(
-                    32,
+                    33,
                 ),
                 ByteIndex(
-                    33,
+                    34,
                 ),
             ),
         },

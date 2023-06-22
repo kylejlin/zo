@@ -12,9 +12,9 @@ fn match_() {
 
     // Cases
     (
-        1
+        (0 1)
 
-        2
+        (1 2)
     )
 )"#;
     let tokens = lex(src).unwrap();
@@ -32,7 +32,7 @@ fn non_parenthesized_cases() {
 
     3
 
-    1
+    (0 1)
 )"#;
     let tokens = lex(src).unwrap();
     let err = parse(tokens).unwrap_err();
