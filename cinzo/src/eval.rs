@@ -2,7 +2,7 @@
 
 use std::rc::Rc;
 
-use crate::{ast::*, deb_shift_cache::DebShiftCache, nohash_hashmap::NoHashHashMap};
+use crate::{ast::*, nohash_hashmap::NoHashHashMap};
 
 #[derive(Clone, Debug)]
 pub enum EvalError {
@@ -32,7 +32,6 @@ pub struct Evaluator {
     pub eval_exprs_cache: NoHashHashMap<Digest, Result<Normalized<RcExprs>, EvalError>>,
     pub eval_vcon_def_cache: NoHashHashMap<Digest, Result<Normalized<RcVconDef>, EvalError>>,
     pub eval_vcon_defs_cache: NoHashHashMap<Digest, Result<Normalized<RcVconDefs>, EvalError>>,
-    pub deb_shift_cache: DebShiftCache,
 }
 
 impl Evaluator {
@@ -312,6 +311,187 @@ impl Evaluator {
     }
 
     fn substitute_and_downshift(&mut self, expr: Expr, new_exprs: &[Expr]) -> Expr {
+        DebSubstituter::new(new_exprs).substitute_and_downshift(expr)
+    }
+}
+
+struct DebSubstituter<'a> {
+    new_exprs: &'a [Expr],
+}
+
+impl<'a> DebSubstituter<'a> {
+    pub fn new(new_exprs: &'a [Expr]) -> Self {
+        Self { new_exprs }
+    }
+}
+
+impl DebSubstituter<'_> {
+    pub fn substitute_and_downshift(&self, expr: Expr) -> Expr {
+        self.substitute_and_downshift_with_cutoff(expr, 0)
+    }
+
+    fn substitute_and_downshift_with_cutoff(&self, original: Expr, cutoff: usize) -> Expr {
+        match original {
+            Expr::Ind(o) => Expr::Ind(self.substitute_and_downshift_ind_with_cutoff(o, cutoff)),
+            Expr::Vcon(o) => Expr::Vcon(self.substitute_and_downshift_vcon_with_cutoff(o, cutoff)),
+            Expr::Match(o) => {
+                Expr::Match(self.substitute_and_downshift_match_with_cutoff(o, cutoff))
+            }
+            Expr::Fun(o) => Expr::Fun(self.substitute_and_downshift_fun_with_cutoff(o, cutoff)),
+            Expr::App(o) => Expr::App(self.substitute_and_downshift_app_with_cutoff(o, cutoff)),
+            Expr::For(o) => Expr::For(self.substitute_and_downshift_for_with_cutoff(o, cutoff)),
+            Expr::Deb(o) => self.substitute_and_downshift_deb_with_cutoff(o, cutoff),
+            Expr::Universe(_) => original,
+        }
+    }
+
+    fn substitute_and_downshift_ind_with_cutoff(
+        &self,
+        original: RcHashed<Ind>,
+        cutoff: usize,
+    ) -> RcHashed<Ind> {
+        let original = &original.value;
+        Rc::new(Hashed::new(Ind {
+            name: original.name.clone(),
+            universe_level: original.universe_level,
+            index_types: self.substitute_and_downshift_expressions_with_increasing_cutoff(
+                original.index_types.clone(),
+                cutoff,
+            ),
+            constructor_defs: self.substitute_and_downshift_constructor_defs_with_cutoff(
+                original.constructor_defs.clone(),
+                cutoff + original.index_types.value.len() + 1,
+            ),
+            original: None,
+        }))
+    }
+
+    fn substitute_and_downshift_expressions_with_increasing_cutoff(
+        &self,
+        original: RcExprs,
+        starting_cutoff: usize,
+    ) -> RcExprs {
         todo!()
+    }
+
+    fn substitute_and_downshift_constructor_defs_with_cutoff(
+        &self,
+        original: RcVconDefs,
+        cutoff: usize,
+    ) -> RcVconDefs {
+        todo!()
+    }
+
+    fn substitute_and_downshift_vcon_with_cutoff(
+        &self,
+        original: RcHashed<Vcon>,
+        cutoff: usize,
+    ) -> RcHashed<Vcon> {
+        let original = &original.value;
+        Rc::new(Hashed::new(Vcon {
+            ind: self.substitute_and_downshift_ind_with_cutoff(original.ind.clone(), cutoff),
+            vcon_index: original.vcon_index,
+            original: None,
+        }))
+    }
+
+    fn substitute_and_downshift_match_with_cutoff(
+        &self,
+        original: RcHashed<Match>,
+        cutoff: usize,
+    ) -> RcHashed<Match> {
+        let original = &original.value;
+        Rc::new(Hashed::new(Match {
+            matchee: self.substitute_and_downshift_with_cutoff(original.matchee.clone(), cutoff),
+            return_type: self
+                .substitute_and_downshift_with_cutoff(original.return_type.clone(), cutoff),
+            cases: todo!(),
+            original: None,
+        }))
+    }
+
+    fn substitute_and_downshift_fun_with_cutoff(
+        &self,
+        original: RcHashed<Fun>,
+        cutoff: usize,
+    ) -> RcHashed<Fun> {
+        let original = &original.value;
+        Rc::new(Hashed::new(Fun {
+            decreasing_index: original.decreasing_index,
+            param_types: self.substitute_and_downshift_expressions_with_increasing_cutoff(
+                original.param_types.clone(),
+                cutoff,
+            ),
+            return_type: self.substitute_and_downshift_with_cutoff(
+                original.return_type.clone(),
+                cutoff + original.param_types.value.len(),
+            ),
+            return_val: self.substitute_and_downshift_with_cutoff(
+                original.return_val.clone(),
+                cutoff + original.param_types.value.len() + 1,
+            ),
+            original: None,
+        }))
+    }
+
+    fn substitute_and_downshift_app_with_cutoff(
+        &self,
+        original: RcHashed<App>,
+        cutoff: usize,
+    ) -> RcHashed<App> {
+        let original = &original.value;
+        Rc::new(Hashed::new(App {
+            callee: self.substitute_and_downshift_with_cutoff(original.callee.clone(), cutoff),
+            args: self.substitute_and_downshift_expressions_with_constant_cutoff(
+                original.args.clone(),
+                cutoff,
+            ),
+            original: None,
+        }))
+    }
+
+    fn substitute_and_downshift_expressions_with_constant_cutoff(
+        &self,
+        original: RcExprs,
+        cutoff: usize,
+    ) -> RcExprs {
+        todo!()
+    }
+
+    fn substitute_and_downshift_for_with_cutoff(
+        &self,
+        original: RcHashed<For>,
+        cutoff: usize,
+    ) -> RcHashed<For> {
+        let original = &original.value;
+        Rc::new(Hashed::new(For {
+            param_types: self.substitute_and_downshift_expressions_with_increasing_cutoff(
+                original.param_types.clone(),
+                cutoff,
+            ),
+            return_type: self.substitute_and_downshift_with_cutoff(
+                original.return_type.clone(),
+                cutoff + original.param_types.value.len(),
+            ),
+            original: None,
+        }))
+    }
+
+    fn substitute_and_downshift_deb_with_cutoff(
+        &self,
+        original: RcHashed<Deb>,
+        cutoff: usize,
+    ) -> Expr {
+        if original.value.0 < cutoff {
+            return Expr::Deb(original);
+        }
+
+        let adjusted = original.value.0 - cutoff;
+        if adjusted < self.new_exprs.len() {
+            return self.new_exprs[adjusted].clone();
+        }
+
+        let shifted = original.value.0 - self.new_exprs.len();
+        Expr::Deb(Rc::new(Hashed::new(Deb(shifted))))
     }
 }
