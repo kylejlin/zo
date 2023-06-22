@@ -647,6 +647,45 @@ mod tests {
     }
 
     #[test]
+    fn nullary_match_case() {
+        let dummy_ind_def = (
+            "<DUMMY_IND>",
+            r#"(ind Type0 "Dummy" () (
+(() ())
+((0) ())
+((0 1) ())
+))"#,
+        );
+        let match_src = substitute_with_compounding(
+            [dummy_ind_def],
+            r#"
+(
+    match (vcon <DUMMY_IND> 0) <DUMMY_IND> (
+        (0 12)
+        (1 14)
+        (2 (16 1 0))
+    )
+)"#,
+        );
+        let expected_src = r#"12"#;
+
+        let actual = {
+            let tokens = crate::lexer::lex(&match_src).unwrap();
+            let cst = crate::parser::parse(tokens).unwrap();
+            let ast: Expr = cst.into();
+            Evaluator::default().eval(ast).unwrap().into_raw()
+        };
+
+        let expected = {
+            let tokens = crate::lexer::lex(&expected_src).unwrap();
+            let cst = crate::parser::parse(tokens).unwrap();
+            Expr::from(cst)
+        };
+
+        assert_eq!(expected.digest(), actual.digest());
+    }
+
+    #[test]
     fn match_case_param_substitution() {
         let dummy_ind_def = (
             "<DUMMY_IND>",
