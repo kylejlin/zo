@@ -458,8 +458,38 @@ impl DebSubstituter<'_> {
             matchee: self.substitute_and_downshift_with_cutoff(original.matchee.clone(), cutoff),
             return_type: self
                 .substitute_and_downshift_with_cutoff(original.return_type.clone(), cutoff),
-            cases: todo!(),
+            cases: self
+                .substitute_and_downshift_match_cases_with_cutoff(original.cases.clone(), cutoff),
             original: None,
+        }))
+    }
+
+    fn substitute_and_downshift_match_cases_with_cutoff(
+        &self,
+        original: RcMatchCases,
+        cutoff: usize,
+    ) -> RcMatchCases {
+        let shifted: Vec<RcHashed<MatchCase>> = original
+            .value
+            .iter()
+            .map(|case| self.substitute_and_downshift_match_case_with_cutoff(case.clone(), cutoff))
+            .collect();
+        Rc::new(Hashed::new(shifted.into_boxed_slice()))
+    }
+
+    fn substitute_and_downshift_match_case_with_cutoff(
+        &self,
+        original: RcMatchCase,
+        cutoff: usize,
+    ) -> RcMatchCase {
+        let original = &original.value;
+        Rc::new(Hashed::new(MatchCase {
+            arity: original.arity,
+            return_val: self.substitute_and_downshift_with_cutoff(
+                original.return_val.clone(),
+                cutoff + original.arity,
+            ),
+            original: original.original.clone(),
         }))
     }
 
