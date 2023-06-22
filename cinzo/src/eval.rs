@@ -2,7 +2,7 @@
 //
 // TODO: Make `MatchCase` and `VariantConstructorDef`
 // not hashed. It's not worth the trouble.
-// At least for `VariantConstructorDef`.
+// At least for `MatchCase`.
 //
 // TODO: Rename `VariantConstructorDef` to `VconDef`.
 
