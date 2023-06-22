@@ -5,7 +5,9 @@ use std::rc::Rc;
 use crate::{ast::*, deb_shift_cache::DebShiftCache, nohash_hashmap::NoHashHashMap};
 
 #[derive(Clone, Debug)]
-pub enum EvalError {}
+pub enum EvalError {
+    TooFewMatchCases(RcHashed<Match>),
+}
 
 #[derive(Clone, Debug)]
 pub struct Normalized<T>(T);
@@ -249,7 +251,52 @@ impl Evaluator {
     }
 
     fn eval_unseen_match(&mut self, m: RcHashed<Match>) -> Result<NormalForm, EvalError> {
-        todo!()
+        let match_ = &m.value;
+        let normalized_matchee = self.eval(match_.matchee.clone())?.into_raw();
+
+        match &normalized_matchee {
+            Expr::Vcon(vcon) => {
+                let vcon_index = vcon.value.vcon_index;
+                if vcon_index >= match_.cases.value.len() {
+                    return Err(EvalError::TooFewMatchCases(m));
+                }
+
+                let match_return_value = match_.cases.value[vcon_index].clone();
+                return self.eval(match_return_value);
+            }
+
+            Expr::App(normalized_matchee) => match &normalized_matchee.value.callee {
+                Expr::Vcon(vcon) => {
+                    let vcon_index = vcon.value.vcon_index;
+                    if vcon_index >= match_.cases.value.len() {
+                        return Err(EvalError::TooFewMatchCases(m));
+                    }
+
+                    let unsubstituted = match_.cases.value[vcon_index].clone();
+                    let substituted = self.substitute_and_downshift(
+                        unsubstituted,
+                        &normalized_matchee.value.args.value,
+                    );
+                    return self.eval(substituted);
+                }
+
+                _other_callee => {}
+            },
+
+            _other_matchee => {}
+        }
+
+        let match_digest = m.digest.clone();
+        let normalized = Match {
+            matchee: normalized_matchee,
+            return_type: self.eval(match_.return_type.clone())?.into_raw(),
+            cases: self.eval_expressions(match_.cases.clone())?.into_raw(),
+            original: None,
+        };
+
+        let result = Ok(Normalized(Expr::Match(Rc::new(Hashed::new(normalized)))));
+        self.eval_expr_cache.insert(match_digest, result.clone());
+        result
     }
 
     fn eval_unseen_fun(&mut self, f: RcHashed<Fun>) -> Result<NormalForm, EvalError> {
@@ -261,6 +308,10 @@ impl Evaluator {
     }
 
     fn eval_unseen_for(&mut self, f: RcHashed<For>) -> Result<NormalForm, EvalError> {
+        todo!()
+    }
+
+    fn substitute_and_downshift(&mut self, expr: Expr, new_exprs: &[Expr]) -> Expr {
         todo!()
     }
 }

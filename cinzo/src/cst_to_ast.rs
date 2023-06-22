@@ -99,8 +99,8 @@ impl From<cst::Vcon> for ast::Vcon {
 impl From<cst::Match> for ast::Match {
     fn from(cst: cst::Match) -> Self {
         ast::Match {
-            matchee: Rc::new((*cst.matchee.clone()).into()),
-            return_type: Rc::new((*cst.return_type.clone()).into()),
+            matchee: (*cst.matchee.clone()).into(),
+            return_type: (*cst.return_type.clone()).into(),
             cases: Rc::new(Hashed::new(
                 Vec::from(*cst.cases.clone()).into_boxed_slice(),
             )),
@@ -119,8 +119,8 @@ impl From<cst::Fun> for ast::Fun {
             param_types: Rc::new(Hashed::new(
                 Vec::from(*cst.param_types.clone()).into_boxed_slice(),
             )),
-            return_type: Rc::new((*cst.return_type.clone()).into()),
-            return_val: Rc::new((*cst.return_val.clone()).into()),
+            return_type: (*cst.return_type.clone()).into(),
+            return_val: (*cst.return_val.clone()).into(),
             original: Some(Rc::new(cst)),
         }
     }
@@ -129,7 +129,7 @@ impl From<cst::Fun> for ast::Fun {
 impl From<cst::App> for ast::App {
     fn from(cst: cst::App) -> Self {
         ast::App {
-            callee: Box::new((*cst.callee.clone()).into()),
+            callee: (*cst.callee.clone()).into(),
             args: Rc::new(Hashed::new(Vec::from(*cst.args.clone()).into_boxed_slice())),
             original: Some(Rc::new(cst)),
         }
@@ -142,7 +142,7 @@ impl From<cst::For> for ast::For {
             param_types: Rc::new(Hashed::new(
                 Vec::from(*cst.param_types.clone()).into_boxed_slice(),
             )),
-            return_type: Rc::new((*cst.return_type.clone()).into()),
+            return_type: (*cst.return_type.clone()).into(),
             original: Some(Rc::new(cst)),
         }
     }

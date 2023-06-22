@@ -117,8 +117,8 @@ pub struct Vcon {
 
 #[derive(Debug, Clone)]
 pub struct Match {
-    pub matchee: Rc<Expr>,
-    pub return_type: Rc<Expr>,
+    pub matchee: Expr,
+    pub return_type: Expr,
     pub cases: Rc<Hashed<Box<[Expr]>>>,
     pub original: Option<Rc<cst::Match>>,
 }
@@ -127,14 +127,14 @@ pub struct Match {
 pub struct Fun {
     pub decreasing_index: Option<usize>,
     pub param_types: Rc<Hashed<Box<[Expr]>>>,
-    pub return_type: Rc<Expr>,
-    pub return_val: Rc<Expr>,
+    pub return_type: Expr,
+    pub return_val: Expr,
     pub original: Option<Rc<cst::Fun>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct App {
-    pub callee: Box<Expr>,
+    pub callee: Expr,
     pub args: Rc<Hashed<Box<[Expr]>>>,
     pub original: Option<Rc<cst::App>>,
 }
@@ -142,7 +142,7 @@ pub struct App {
 #[derive(Debug, Clone)]
 pub struct For {
     pub param_types: Rc<Hashed<Box<[Expr]>>>,
-    pub return_type: Rc<Expr>,
+    pub return_type: Expr,
     pub original: Option<Rc<cst::For>>,
 }
 
