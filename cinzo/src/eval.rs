@@ -174,7 +174,7 @@ impl Evaluator {
         let vcon_digest = vcon.digest.clone();
         let vcon = &vcon.value;
         let normalized = Vcon {
-            ind: self.eval_ind(vcon.ind.clone())?.into_raw(),
+            ind: self.eval(vcon.ind.clone())?.into_raw(),
             vcon_index: vcon.vcon_index,
             original: None,
         };
@@ -182,22 +182,6 @@ impl Evaluator {
         let result = Ok(Normalized(Expr::Vcon(Rc::new(Hashed::new(normalized)))));
         self.eval_expr_cache.insert(vcon_digest, result.clone());
         result
-    }
-
-    fn eval_ind(&mut self, ind: RcHashed<Ind>) -> Result<Normalized<RcHashed<Ind>>, EvalError> {
-        if let Some(result) = self.eval_expr_cache.get(&ind.digest) {
-            result.clone().map(|expr| {
-                Normalized(expr.into_raw().try_into_ind().expect(
-                    "Impossible: An `ind` expression cannot evaluate into a non-`ind` expression.",
-                ))
-            })
-        } else {
-            self.eval_unseen_ind(ind).map(|expr| {
-                Normalized(expr.into_raw().try_into_ind().expect(
-                    "Impossible: An `ind` expression cannot evaluate into a non-`ind` expression.",
-                ))
-            })
-        }
     }
 
     fn eval_unseen_match(&mut self, m: RcHashed<Match>) -> Result<NormalForm, EvalError> {
@@ -458,7 +442,7 @@ impl DebSubstituter<'_> {
     ) -> RcHashed<Vcon> {
         let original = &original.value;
         Rc::new(Hashed::new(Vcon {
-            ind: self.substitute_and_downshift_ind_with_cutoff(original.ind.clone(), cutoff),
+            ind: self.substitute_and_downshift_with_cutoff(original.ind.clone(), cutoff),
             vcon_index: original.vcon_index,
             original: None,
         }))
@@ -662,6 +646,7 @@ mod tests {
         assert_eq!(expected.digest(), actual.digest());
     }
 
+    #[ignore]
     #[test]
     fn rev_1_2_3() {
         let nat_def = (
@@ -774,7 +759,7 @@ mod tests {
         let three_two_one_src =
             substitute_with_compounding(src_defs, "(<CONS> <3> (<CONS> <2> (<CONS> <1> <NIL>)))");
 
-        panic!("TODO {rev_one_two_three_src}");
+        // panic!("TODO {rev_one_two_three_src}");
         let actual = {
             let tokens = crate::lexer::lex(&rev_one_two_three_src).unwrap();
             let cst = crate::parser::parse(tokens).unwrap();

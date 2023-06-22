@@ -110,7 +110,7 @@ pub struct VariantConstructorDef {
 
 #[derive(Debug, Clone)]
 pub struct Vcon {
-    pub ind: Rc<Hashed<Ind>>,
+    pub ind: Expr,
     pub vcon_index: usize,
     pub original: Option<Rc<cst::Vcon>>,
 }

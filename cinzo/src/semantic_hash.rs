@@ -87,7 +87,7 @@ impl SemanticHash for Vcon {
 
         hasher.update([discriminator::VCON]);
 
-        hasher.update(&self.ind.digest);
+        hasher.update(self.ind.digest());
 
         hasher.update([discriminator::VCON_INDEX]);
         hasher.update(&self.vcon_index.to_be_bytes());

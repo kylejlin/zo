@@ -31,22 +31,6 @@ vcon
 }
 
 #[test]
-fn vcon_nonliteral_ind() {
-    let src = r#"
-(
-vcon
-
-1
-
-// Variant constructor index - THIS MUST BE A NUMBER LITERAL.
-0
-)"#;
-    let tokens = lex(src).unwrap();
-    let err = parse(tokens).unwrap_err();
-    insta::assert_debug_snapshot!(&err);
-}
-
-#[test]
 fn vcon_nonliteral_vcon_index() {
     let src = r#"
 (
