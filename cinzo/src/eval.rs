@@ -662,6 +662,135 @@ mod tests {
         assert_eq!(expected.digest(), actual.digest());
     }
 
+    #[test]
+    fn rev_1_2_3() {
+        let nat_def = (
+            "<NAT>",
+            r#"(ind Type0 "Nat" () (
+    (() ())
+    ((0) ())
+))"#,
+        );
+        let zero_def = ("<ZERO>", "(vcon <NAT> 0)");
+        let succ_def = ("<SUCC>", "(vcon <NAT> 1)");
+        let one_def = ("<1>", "(<SUCC> <ZERO>)");
+        let two_def = ("<2>", "(<SUCC> <1>)");
+        let three_def = ("<3>", "(<SUCC> <2>)");
+        let list_def = (
+            "<LIST>",
+            r#"(
+    fun
+
+    nonrec
+
+    (Type0)
+
+    Type0
+
+    (
+        ind
+
+        Type0
+
+        "List"
+
+        ()
+
+        (
+            // DB index stack is
+            // 0 =>  List(T)
+            // 1 => List 
+            // 2 => T
+
+            // nil
+            (() ())
+
+            // cons
+            ((
+                2
+
+                // DB index stack is
+                // 0 => car
+                // 1 => List(T)
+                // 2 => List
+                // 3 => T
+                1
+            ) ())
+        )
+    )
+)"#,
+        );
+        let nil_def = ("<NIL>", "(vcon (<LIST> <NAT>) 0)");
+        let cons_def = ("<CONS>", "(vcon (<LIST> <NAT>) 1)");
+        let one_two_three_src = ("<123>", "(<CONS> <1> (<CONS> <2> (<CONS> <3> <NIL>)))");
+        let rev_src = (
+            "<REV>",
+            r#"(
+    fun
+    
+    0
+    
+    (
+        (<LIST> <NAT>) // reversee
+        (<LIST> <NAT>) // out
+    )
+    
+    (<LIST> <NAT>)
+    
+    (
+        match 2 (<LIST> <NAT>)
+
+        (
+            (0 1)
+
+            (2 
+                // DB index stack
+                // 0 => reversee.cdr
+                // 1 => reversee.car
+                // 2 => rev
+                // 3 => out
+                // 4 => reversee
+
+                (2 0 (<CONS> 1 3))
+            )
+        )
+    )
+)"#,
+        );
+        let src_defs = [
+            nat_def,
+            zero_def,
+            succ_def,
+            one_def,
+            two_def,
+            three_def,
+            list_def,
+            nil_def,
+            cons_def,
+            one_two_three_src,
+            rev_src,
+        ];
+        let rev_one_two_three_src = substitute_with_compounding(src_defs, r#"(<REV> <123> <NIL>)"#);
+        let three_two_one_src =
+            substitute_with_compounding(src_defs, "(<CONS> <3> (<CONS> <2> (<CONS> <1> <NIL>)))");
+
+        panic!("TODO {rev_one_two_three_src}");
+        let actual = {
+            let tokens = crate::lexer::lex(&rev_one_two_three_src).unwrap();
+            let cst = crate::parser::parse(tokens).unwrap();
+            let ast: Expr = cst.into();
+            Evaluator::default().eval(ast).unwrap().into_raw()
+        };
+
+        let expected = {
+            let tokens = crate::lexer::lex(&three_two_one_src).unwrap();
+            let cst = crate::parser::parse(tokens).unwrap();
+            Expr::from(cst)
+        };
+
+        assert_eq!(expected.digest(), actual.digest());
+    }
+
     fn substitute_with_compounding<'a>(
         iter: impl IntoIterator<Item = (&'a str, &'a str)>,
         last: &'a str,

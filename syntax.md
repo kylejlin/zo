@@ -180,8 +180,17 @@ or name-polymorphic expressions in Zo.
 
             // cons: forall(car: T, cdr: self_type_constructor) -> self_type_constructor
             // In other words,
-            // cons: forall(card: T, cdr: List(T)) -> List(T)
-            ((2 0) ())
+            // cons: forall(car: T, cdr: List(T)) -> List(T)
+            ((
+                2
+
+                // DB index stack is
+                // 0 => car: T
+                // 1 => self_type_constructor = List(T): Type0
+                // 2 => self_fun: forall(T': Type0) -> Type0
+                // 3 => T: Type0
+                1
+            ) ())
         )
     )
 )
