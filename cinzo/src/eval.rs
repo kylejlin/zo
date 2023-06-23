@@ -52,8 +52,7 @@ type RcHashed<T> = Rc<Hashed<T>>;
 type RcExprs = RcHashed<Box<[Expr]>>;
 type RcVconDef = RcHashed<VariantConstructorDef>;
 type RcVconDefs = RcHashed<Box<[RcVconDef]>>;
-type RcMatchCase = RcHashed<MatchCase>;
-type RcMatchCases = RcHashed<Box<[RcMatchCase]>>;
+type RcMatchCases = RcHashed<Box<[MatchCase]>>;
 
 impl Evaluator {
     pub fn eval(&mut self, expr: Expr) -> Result<NormalForm, EvalError> {
@@ -193,7 +192,7 @@ impl Evaluator {
                 return Err(EvalError::TooFewMatchCases(m));
             }
 
-            let match_return_value = match_.cases.value[vcon_index].value.return_val.clone();
+            let match_return_value = match_.cases.value[vcon_index].return_val.clone();
             return self.eval(match_return_value);
         }
 
@@ -204,7 +203,7 @@ impl Evaluator {
                     return Err(EvalError::TooFewMatchCases(m));
                 }
 
-                let unsubstituted = match_.cases.value[vcon_index].value.return_val.clone();
+                let unsubstituted = match_.cases.value[vcon_index].return_val.clone();
                 let substituted = self.substitute_and_downshift(
                     unsubstituted,
                     ReverseExprSlice {
@@ -243,13 +242,13 @@ impl Evaluator {
         cases: RcMatchCases,
     ) -> Result<Normalized<RcMatchCases>, EvalError> {
         let cases = &cases.value;
-        let normalized: Vec<RcMatchCase> = cases
+        let normalized: Vec<MatchCase> = cases
             .iter()
             .map(|original| {
-                Ok(Rc::new(Hashed::new(MatchCase {
-                    arity: original.value.arity,
-                    return_val: self.eval(original.value.return_val.clone())?.into_raw(),
-                })))
+                Ok(MatchCase {
+                    arity: original.arity,
+                    return_val: self.eval(original.return_val.clone())?.into_raw(),
+                })
             })
             .collect::<Result<Vec<_>, _>>()?;
 
@@ -491,7 +490,7 @@ impl DebSubstituter<'_> {
         original: RcMatchCases,
         cutoff: usize,
     ) -> RcMatchCases {
-        let shifted: Vec<RcHashed<MatchCase>> = original
+        let shifted: Vec<MatchCase> = original
             .value
             .iter()
             .map(|case| self.substitute_and_downshift_match_case_with_cutoff(case.clone(), cutoff))
@@ -501,17 +500,14 @@ impl DebSubstituter<'_> {
 
     fn substitute_and_downshift_match_case_with_cutoff(
         &self,
-        original: RcMatchCase,
+        original: MatchCase,
         cutoff: usize,
-    ) -> RcMatchCase {
-        let original = &original.value;
-        Rc::new(Hashed::new(MatchCase {
+    ) -> MatchCase {
+        MatchCase {
             arity: original.arity,
-            return_val: self.substitute_and_downshift_with_cutoff(
-                original.return_val.clone(),
-                cutoff + original.arity,
-            ),
-        }))
+            return_val: self
+                .substitute_and_downshift_with_cutoff(original.return_val, cutoff + original.arity),
+        }
     }
 
     fn substitute_and_downshift_fun_with_cutoff(

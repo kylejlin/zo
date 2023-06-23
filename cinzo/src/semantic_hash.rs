@@ -244,30 +244,20 @@ impl SemanticHash for VariantConstructorDef {
     }
 }
 
-impl SemanticHash for Box<[Rc<Hashed<MatchCase>>]> {
+impl SemanticHash for Box<[MatchCase]> {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256::new();
 
         hasher.update([discriminator::MATCH_CASE_SLICE]);
 
-        for def in self.iter() {
-            hasher.update(&def.digest);
+        for case in self.iter() {
+            hasher.update([discriminator::MATCH_CASE]);
+
+            hasher.update(case.arity.to_be_bytes());
+            hasher.update(case.return_val.digest());
+
+            hasher.update([discriminator::END]);
         }
-
-        hasher.update([discriminator::END]);
-
-        Digest(hasher.finalize())
-    }
-}
-
-impl SemanticHash for MatchCase {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
-
-        hasher.update([discriminator::MATCH_CASE]);
-
-        hasher.update(self.arity.to_be_bytes());
-        hasher.update(self.return_val.digest());
 
         hasher.update([discriminator::END]);
 

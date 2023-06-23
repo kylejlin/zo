@@ -114,7 +114,7 @@ pub struct Vcon {
 pub struct Match {
     pub matchee: Expr,
     pub return_type: Expr,
-    pub cases: Rc<Hashed<Box<[Rc<Hashed<MatchCase>>]>>>,
+    pub cases: Rc<Hashed<Box<[MatchCase]>>>,
 }
 
 #[derive(Debug, Clone)]

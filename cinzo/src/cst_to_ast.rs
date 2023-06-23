@@ -105,13 +105,13 @@ impl From<cst::Match> for ast::Match {
     }
 }
 
-impl From<cst::ZeroOrMoreMatchCases> for Vec<Rc<Hashed<ast::MatchCase>>> {
+impl From<cst::ZeroOrMoreMatchCases> for Vec<ast::MatchCase> {
     fn from(cst: cst::ZeroOrMoreMatchCases) -> Self {
         match cst {
             cst::ZeroOrMoreMatchCases::Nil => vec![],
             cst::ZeroOrMoreMatchCases::Cons(cases, case) => {
                 let mut match_cases: Self = (*cases).into();
-                let case = Rc::new(Hashed::new((*case).into()));
+                let case = (*case).into();
                 match_cases.push(case);
                 match_cases
             }
