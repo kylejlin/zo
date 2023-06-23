@@ -43,7 +43,7 @@ impl TypeChecker {
         expr: Expr,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Expr, TypeError> {
+    ) -> Result<NormalForm, TypeError> {
         match expr {
             Expr::Ind(e) => self.get_type_of_ind(e, tcon, scon),
             Expr::Vcon(e) => self.get_type_of_vcon(e, tcon, scon),
@@ -61,7 +61,32 @@ impl TypeChecker {
         ind: RcHashed<Ind>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Expr, TypeError> {
+    ) -> Result<NormalForm, TypeError> {
+        if let Some(result) = self.type_cache.get(&ind.digest) {
+            return result.clone();
+        }
+
+        self.get_and_cache_type_of_unseen_ind(ind, tcon, scon)
+    }
+
+    fn get_and_cache_type_of_unseen_ind(
+        &mut self,
+        ind: RcHashed<Ind>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<NormalForm, TypeError> {
+        let digest = ind.digest.clone();
+        let result = self.get_type_of_unseen_ind(ind, tcon, scon);
+        self.type_cache.insert(digest, result.clone());
+        result
+    }
+
+    fn get_type_of_unseen_ind(
+        &mut self,
+        ind: RcHashed<Ind>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<NormalForm, TypeError> {
         todo!()
     }
 
@@ -70,7 +95,7 @@ impl TypeChecker {
         vcon: RcHashed<Vcon>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Expr, TypeError> {
+    ) -> Result<NormalForm, TypeError> {
         todo!()
     }
 
@@ -79,7 +104,7 @@ impl TypeChecker {
         r#match: RcHashed<Match>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Expr, TypeError> {
+    ) -> Result<NormalForm, TypeError> {
         todo!()
     }
 
@@ -88,7 +113,7 @@ impl TypeChecker {
         fun: RcHashed<Fun>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Expr, TypeError> {
+    ) -> Result<NormalForm, TypeError> {
         todo!()
     }
 
@@ -97,7 +122,7 @@ impl TypeChecker {
         app: RcHashed<App>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Expr, TypeError> {
+    ) -> Result<NormalForm, TypeError> {
         todo!()
     }
 
@@ -106,7 +131,7 @@ impl TypeChecker {
         r#for: RcHashed<For>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Expr, TypeError> {
+    ) -> Result<NormalForm, TypeError> {
         todo!()
     }
 
@@ -115,7 +140,7 @@ impl TypeChecker {
         deb: RcHashed<Deb>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Expr, TypeError> {
+    ) -> Result<NormalForm, TypeError> {
         todo!()
     }
 
@@ -124,7 +149,7 @@ impl TypeChecker {
         universe: RcHashed<Universe>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Expr, TypeError> {
+    ) -> Result<NormalForm, TypeError> {
         todo!()
     }
 }
