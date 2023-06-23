@@ -1,5 +1,3 @@
-// TODO: Reinstate the requirement that `Vcon.ind` is an `Ind`.
-//
 // TODO: Track `original`.
 
 use std::rc::Rc;
