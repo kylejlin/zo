@@ -18,11 +18,26 @@ impl ReplaceDebs for DebDownshiftSubstituter<'_> {
         let adjusted = original.value.0 - cutoff;
         let new_exprs_len = self.new_exprs.len();
         if adjusted < new_exprs_len {
-            return self.new_exprs[new_exprs_len - 1 - adjusted].clone();
+            let unshifted_new_expr = self.new_exprs[new_exprs_len - 1 - adjusted].clone();
+            return DebUpshifter { amount: cutoff }.replace_debs(unshifted_new_expr, 0);
         }
 
         let shifted = original.value.0 - new_exprs_len;
         Expr::Deb(Rc::new(Hashed::new(Deb(shifted))))
+    }
+}
+
+struct DebUpshifter {
+    pub amount: usize,
+}
+
+impl ReplaceDebs for DebUpshifter {
+    fn replace_deb(&self, original: RcHashed<Deb>, cutoff: usize) -> Expr {
+        if original.value.0 < cutoff {
+            return Expr::Deb(original);
+        }
+
+        Expr::Deb(Rc::new(Hashed::new(Deb(original.value.0 + self.amount))))
     }
 }
 
