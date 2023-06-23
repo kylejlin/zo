@@ -161,13 +161,27 @@ impl Evaluator {
         let vcon_digest = vcon.digest.clone();
         let vcon = &vcon.value;
         let normalized = Vcon {
-            ind: self.eval(vcon.ind.clone())?.into_raw(),
+            ind: self.eval_ind(vcon.ind.clone())?.into_raw(),
             vcon_index: vcon.vcon_index,
         };
 
         let result = Ok(Normalized(Expr::Vcon(Rc::new(Hashed::new(normalized)))));
         self.eval_expr_cache.insert(vcon_digest, result.clone());
         result
+    }
+
+    fn eval_ind(&mut self, ind: RcHashed<Ind>) -> Result<Normalized<RcHashed<Ind>>, EvalError> {
+        if let Some(result) = self.eval_expr_cache.get(&ind.digest) {
+            result.clone().map(|nf| match nf.into_raw() {
+                Expr::Ind(ind) => Normalized(ind),
+                _ => unreachable!(),
+            })
+        } else {
+            self.eval_unseen_ind(ind).map(|nf| match nf.into_raw() {
+                Expr::Ind(ind) => Normalized(ind),
+                _ => unreachable!(),
+            })
+        }
     }
 
     fn eval_unseen_match(&mut self, m: RcHashed<Match>) -> Result<NormalForm, EvalError> {
@@ -452,7 +466,7 @@ impl DebSubstituter<'_> {
     ) -> RcHashed<Vcon> {
         let original = &original.value;
         Rc::new(Hashed::new(Vcon {
-            ind: self.substitute_and_downshift_with_cutoff(original.ind.clone(), cutoff),
+            ind: self.substitute_and_downshift_ind_with_cutoff(original.ind.clone(), cutoff),
             vcon_index: original.vcon_index,
         }))
     }

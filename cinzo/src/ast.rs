@@ -106,7 +106,7 @@ pub struct VconDef {
 
 #[derive(Debug, Clone)]
 pub struct Vcon {
-    pub ind: Expr,
+    pub ind: Rc<Hashed<Ind>>,
     pub vcon_index: usize,
 }
 

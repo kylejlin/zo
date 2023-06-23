@@ -63,7 +63,7 @@ struct Vcon {
     lparen: $LParen
 
     _: $VconKw
-    ind: Expr
+    ind: Ind
     vcon_index: $Number
 
     rparen: $RParen

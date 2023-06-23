@@ -87,7 +87,7 @@ impl From<cst::VconDef> for ast::VconDef {
 impl From<cst::Vcon> for ast::Vcon {
     fn from(cst: cst::Vcon) -> Self {
         ast::Vcon {
-            ind: (*cst.ind.clone()).into(),
+            ind: Rc::new(Hashed::new((*cst.ind.clone()).into())),
             vcon_index: cst.vcon_index.value,
         }
     }
