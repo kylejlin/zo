@@ -1,0 +1,19 @@
+---
+source: src/parser_tests/vcon.rs
+expression: "&err"
+---
+Some(
+    Number(
+        NumberLiteral {
+            value: 0,
+            span: (
+                ByteIndex(
+                    25,
+                ),
+                ByteIndex(
+                    26,
+                ),
+            ),
+        },
+    ),
+)
