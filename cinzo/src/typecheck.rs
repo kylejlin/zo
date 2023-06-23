@@ -1,4 +1,4 @@
-use crate::{ast::*, eval::NormalForm, nohash_hashmap::NoHashHashMap};
+use crate::{ast::*, eval::NormalForm};
 
 use std::rc::Rc;
 
@@ -27,9 +27,7 @@ pub struct LazySubstitution<'a> {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct TypeChecker {
-    pub type_cache: NoHashHashMap<Digest, Result<NormalForm, TypeError>>,
-}
+pub struct TypeChecker {}
 
 impl TypeChecker {
     pub fn new() -> Self {
@@ -57,31 +55,6 @@ impl TypeChecker {
     }
 
     fn get_type_of_ind(
-        &mut self,
-        ind: RcHashed<Ind>,
-        tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
-    ) -> Result<NormalForm, TypeError> {
-        if let Some(result) = self.type_cache.get(&ind.digest) {
-            return result.clone();
-        }
-
-        self.get_and_cache_type_of_unseen_ind(ind, tcon, scon)
-    }
-
-    fn get_and_cache_type_of_unseen_ind(
-        &mut self,
-        ind: RcHashed<Ind>,
-        tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
-    ) -> Result<NormalForm, TypeError> {
-        let digest = ind.digest.clone();
-        let result = self.get_type_of_unseen_ind(ind, tcon, scon);
-        self.type_cache.insert(digest, result.clone());
-        result
-    }
-
-    fn get_type_of_unseen_ind(
         &mut self,
         ind: RcHashed<Ind>,
         tcon: LazyTypeContext,
