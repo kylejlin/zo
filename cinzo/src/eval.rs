@@ -4,10 +4,6 @@
 //
 // TODO: Rename `VariantConstructorDef` to `VconDef`.
 //
-// TODO: Only unfold a function application
-// if it is nonrecursive or if the decreasing arg
-// is `(vcon ...)` or `((vcon ...) arg1 arg2 ...)`.
-//
 // TODO: Reinstate the requirement that `Vcon.ind` is an `Ind`.
 //
 // TODO: Track `original`.
@@ -282,20 +278,22 @@ impl Evaluator {
         let normalized_args = self.eval_expressions(app.value.args.clone())?.into_raw();
 
         if let Expr::Fun(callee) = &normalized_callee {
-            let unsubstituted = callee.value.return_val.clone();
-            let new_exprs: Vec<Expr> = normalized_args
-                .value
-                .iter()
-                .cloned()
-                .chain(std::iter::once(normalized_callee))
-                .collect();
-            let substituted = self.substitute_and_downshift(
-                unsubstituted,
-                ReverseExprSlice {
-                    unprocessed: &new_exprs,
-                },
-            );
-            return self.eval(substituted);
+            if can_unfold_app(callee.clone(), normalized_args.clone()) {
+                let unsubstituted = callee.value.return_val.clone();
+                let new_exprs: Vec<Expr> = normalized_args
+                    .value
+                    .iter()
+                    .cloned()
+                    .chain(std::iter::once(normalized_callee))
+                    .collect();
+                let substituted = self.substitute_and_downshift(
+                    unsubstituted,
+                    ReverseExprSlice {
+                        unprocessed: &new_exprs,
+                    },
+                );
+                return self.eval(substituted);
+            }
         }
 
         let app_digest = app.digest.clone();
@@ -324,6 +322,36 @@ impl Evaluator {
 
     fn substitute_and_downshift(&mut self, expr: Expr, new_exprs: ReverseExprSlice) -> Expr {
         DebSubstituter::new(new_exprs).substitute_and_downshift(expr)
+    }
+}
+
+fn can_unfold_app(callee: RcHashed<Fun>, args: RcExprs) -> bool {
+    let Some(decreasing_index) = callee.value.decreasing_index else {
+        // If there is no decreasing param index,
+        // the function is non-recursive.
+        // We can always unfold non-recursive functions.
+        return true;
+    };
+
+    let Some(decreasing_arg) = args.value.get(decreasing_index) else {
+        // If there is no argument at the decreasing index,
+        // the application is ill-typed.
+        // So, we do not unfold, in order to minimize
+        // the chance of infinite loops.
+        return false;
+    };
+
+    is_vconlike(decreasing_arg.clone())
+}
+
+fn is_vconlike(expr: Expr) -> bool {
+    match expr {
+        Expr::Vcon(_) => true,
+        Expr::App(app) => match &app.value.callee {
+            Expr::Vcon(_) => true,
+            _other_callee => false,
+        },
+        _ => false,
     }
 }
 
@@ -917,7 +945,6 @@ mod tests {
         assert_eq!(expected.digest(), actual.digest());
     }
 
-    #[ignore]
     #[test]
     fn recursive_fun_app_stops_unfolding_when_decreasing_arg_not_vconlike() {
         let nat_def = (
