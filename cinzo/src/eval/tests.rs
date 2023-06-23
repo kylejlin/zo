@@ -600,6 +600,66 @@ fn recursive_fun_app_stops_unfolding_when_decreasing_arg_not_vconlike() {
     assert_eq!(expected.digest(), actual.digest());
 }
 
+#[ignore]
+#[test]
+fn substitution_upshifts_new_expr_debs() {
+    let dummy_ind_def = (
+        "<DUMMY_IND>",
+        r#"
+(
+    ind
+
+    Type0
+
+    "DummyInd"
+
+    ()
+
+    (
+        ((200) ())
+        ((220 240) ())
+    )
+)"#,
+    );
+    let match_src = substitute_with_compounding(
+        [dummy_ind_def],
+        r#"
+(
+    match ((vcon <DUMMY_IND> 1) 5 ((vcon <DUMMY_IND> 0) 100)) 120 (
+        (1 140)
+
+        (
+            2
+
+            (
+                match 0 160 (
+                    (1 2)
+
+                    (2 180)
+                )
+            )
+        )
+    )
+)"#,
+    );
+    let deb_5_src = "5";
+
+    let actual = {
+        let tokens = crate::lexer::lex(&match_src).unwrap();
+        let cst = crate::parser::parse(tokens).unwrap();
+        let ast: Expr = cst.into();
+        Evaluator::default().eval(ast).unwrap().into_raw()
+    };
+
+    let expected = {
+        let tokens = crate::lexer::lex(&deb_5_src).unwrap();
+        let cst = crate::parser::parse(tokens).unwrap();
+        Expr::from(cst)
+    };
+
+    assert_eq!(expected.digest(), actual.digest());
+}
+
 fn substitute_with_compounding<'a>(
     iter: impl IntoIterator<Item = (&'a str, &'a str)>,
     last: &'a str,
