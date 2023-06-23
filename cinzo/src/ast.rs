@@ -92,14 +92,14 @@ pub struct Ind {
     pub name: Rc<StringValue>,
     pub universe_level: usize,
     pub index_types: Rc<Hashed<Box<[Expr]>>>,
-    pub constructor_defs: Rc<Hashed<Box<[Rc<Hashed<VariantConstructorDef>>]>>>,
+    pub vcon_defs: Rc<Hashed<Box<[VconDef]>>>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct StringValue(pub String);
 
 #[derive(Debug, Clone)]
-pub struct VariantConstructorDef {
+pub struct VconDef {
     pub param_types: Rc<Hashed<Box<[Expr]>>>,
     pub index_args: Rc<Hashed<Box<[Expr]>>>,
 }

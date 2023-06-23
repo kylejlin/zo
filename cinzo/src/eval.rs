@@ -38,7 +38,6 @@ impl<T> Normalized<T> {
 pub struct Evaluator {
     pub eval_expr_cache: NoHashHashMap<Digest, Result<NormalForm, EvalError>>,
     pub eval_exprs_cache: NoHashHashMap<Digest, Result<Normalized<RcExprs>, EvalError>>,
-    pub eval_vcon_def_cache: NoHashHashMap<Digest, Result<Normalized<RcVconDef>, EvalError>>,
     pub eval_vcon_defs_cache: NoHashHashMap<Digest, Result<Normalized<RcVconDefs>, EvalError>>,
 }
 
@@ -50,8 +49,7 @@ impl Evaluator {
 
 type RcHashed<T> = Rc<Hashed<T>>;
 type RcExprs = RcHashed<Box<[Expr]>>;
-type RcVconDef = RcHashed<VariantConstructorDef>;
-type RcVconDefs = RcHashed<Box<[RcVconDef]>>;
+type RcVconDefs = RcHashed<Box<[VconDef]>>;
 type RcMatchCases = RcHashed<Box<[MatchCase]>>;
 
 impl Evaluator {
@@ -85,8 +83,8 @@ impl Evaluator {
             index_types: self
                 .eval_expressions(ind.index_types.clone())
                 .map(Normalized::into_raw)?,
-            constructor_defs: self
-                .eval_vcon_defs(ind.constructor_defs.clone())
+            vcon_defs: self
+                .eval_vcon_defs(ind.vcon_defs.clone())
                 .map(Normalized::into_raw)?,
         };
 
@@ -135,7 +133,7 @@ impl Evaluator {
     ) -> Result<Normalized<RcVconDefs>, EvalError> {
         let defs_digest = defs.digest.clone();
         let defs = &defs.value;
-        let normalized: Vec<RcVconDef> = defs
+        let normalized: Vec<VconDef> = defs
             .iter()
             .map(|def| self.eval_vcon_def(def.clone()).map(Normalized::into_raw))
             .collect::<Result<Vec<_>, _>>()?;
@@ -148,25 +146,21 @@ impl Evaluator {
         result
     }
 
-    fn eval_vcon_def(&mut self, def: RcVconDef) -> Result<Normalized<RcVconDef>, EvalError> {
-        if let Some(result) = self.eval_vcon_def_cache.get(&def.digest) {
-            result.clone()
-        } else {
-            self.eval_unseen_vcon_def(def)
-        }
+    fn eval_vcon_def(&mut self, def: VconDef) -> Result<Normalized<VconDef>, EvalError> {
+        // It's not worth caching vcon defs,
+        // so we'll just reevaluate them every time.
+        // This is not actually that expensive,
+        // because the underlying expressions _are_ cached.
+        self.eval_unseen_vcon_def(def)
     }
 
-    fn eval_unseen_vcon_def(&mut self, def: RcVconDef) -> Result<Normalized<RcVconDef>, EvalError> {
-        let def_digest = def.digest.clone();
-        let def = &def.value;
-        let normalized = VariantConstructorDef {
+    fn eval_unseen_vcon_def(&mut self, def: VconDef) -> Result<Normalized<VconDef>, EvalError> {
+        let normalized = VconDef {
             param_types: self.eval_expressions(def.param_types.clone())?.into_raw(),
             index_args: self.eval_expressions(def.index_args.clone())?.into_raw(),
         };
 
-        let result = Ok(Normalized(Rc::new(Hashed::new(normalized))));
-        self.eval_vcon_def_cache.insert(def_digest, result.clone());
-        result
+        Ok(Normalized(normalized))
     }
 
     fn eval_unseen_vcon(&mut self, vcon: RcHashed<Vcon>) -> Result<NormalForm, EvalError> {
@@ -401,8 +395,8 @@ impl DebSubstituter<'_> {
                 original.index_types.clone(),
                 cutoff,
             ),
-            constructor_defs: self.substitute_and_downshift_vcon_defs_with_cutoff(
-                original.constructor_defs.clone(),
+            vcon_defs: self.substitute_and_downshift_vcon_defs_with_cutoff(
+                original.vcon_defs.clone(),
                 cutoff + 1,
             ),
         }))
@@ -432,7 +426,7 @@ impl DebSubstituter<'_> {
         original: RcVconDefs,
         cutoff: usize,
     ) -> RcVconDefs {
-        let shifted: Vec<RcHashed<VariantConstructorDef>> = original
+        let shifted: Vec<VconDef> = original
             .value
             .iter()
             .map(|def| self.substitute_and_downshift_vcon_def_with_cutoff(def.clone(), cutoff))
@@ -442,11 +436,10 @@ impl DebSubstituter<'_> {
 
     fn substitute_and_downshift_vcon_def_with_cutoff(
         &self,
-        original: RcHashed<VariantConstructorDef>,
+        original: VconDef,
         cutoff: usize,
-    ) -> RcHashed<VariantConstructorDef> {
-        let original = &original.value;
-        Rc::new(Hashed::new(VariantConstructorDef {
+    ) -> VconDef {
+        VconDef {
             param_types: self.substitute_and_downshift_expressions_with_increasing_cutoff(
                 original.param_types.clone(),
                 cutoff,
@@ -455,7 +448,7 @@ impl DebSubstituter<'_> {
                 original.index_args.clone(),
                 cutoff + original.param_types.value.len(),
             ),
-        }))
+        }
     }
 
     fn substitute_and_downshift_vcon_with_cutoff(

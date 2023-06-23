@@ -37,8 +37,8 @@ impl From<cst::Ind> for ast::Ind {
             index_types: Rc::new(Hashed::new(
                 Vec::from(*cst.index_types.clone()).into_boxed_slice(),
             )),
-            constructor_defs: Rc::new(Hashed::new(
-                Vec::from(*cst.constructor_defs.clone()).into_boxed_slice(),
+            vcon_defs: Rc::new(Hashed::new(
+                Vec::from(*cst.vcon_defs.clone()).into_boxed_slice(),
             )),
         }
     }
@@ -57,13 +57,13 @@ impl From<cst::ZeroOrMoreExprs> for Vec<ast::Expr> {
     }
 }
 
-impl From<cst::ZeroOrMoreVariantConstructorDefs> for Vec<Rc<Hashed<ast::VariantConstructorDef>>> {
-    fn from(cst: cst::ZeroOrMoreVariantConstructorDefs) -> Self {
+impl From<cst::ZeroOrMoreVconDefs> for Vec<ast::VconDef> {
+    fn from(cst: cst::ZeroOrMoreVconDefs) -> Self {
         match cst {
-            cst::ZeroOrMoreVariantConstructorDefs::Nil => vec![],
-            cst::ZeroOrMoreVariantConstructorDefs::Cons(defs, def) => {
+            cst::ZeroOrMoreVconDefs::Nil => vec![],
+            cst::ZeroOrMoreVconDefs::Cons(defs, def) => {
                 let mut variant_constructor_defs: Self = (*defs).into();
-                let def = Rc::new(Hashed::new((*def).into()));
+                let def = (*def).into();
                 variant_constructor_defs.push(def);
                 variant_constructor_defs
             }
@@ -71,9 +71,9 @@ impl From<cst::ZeroOrMoreVariantConstructorDefs> for Vec<Rc<Hashed<ast::VariantC
     }
 }
 
-impl From<cst::VariantConstructorDef> for ast::VariantConstructorDef {
-    fn from(cst: cst::VariantConstructorDef) -> Self {
-        ast::VariantConstructorDef {
+impl From<cst::VconDef> for ast::VconDef {
+    fn from(cst: cst::VconDef) -> Self {
+        ast::VconDef {
             param_types: Rc::new(Hashed::new(
                 Vec::from(*cst.param_types.clone()).into_boxed_slice(),
             )),

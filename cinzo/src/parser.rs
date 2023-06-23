@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 82029b7e92d76ef973492a868501d1d7deb06d5fbe668139c331e58211098a26
+// @sha256 91d45fd31462bdbdaf0c5a8b255e3bdedf761fdbaa8fbd452b9b3f9e387f6bd2
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -64,9 +64,9 @@ pub struct Ind {
     pub index_types_lparen: crate::token::ByteIndex,
     pub index_types: Box<ZeroOrMoreExprs>,
     pub index_types_rparen: crate::token::ByteIndex,
-    pub constructor_defs_lparen: crate::token::ByteIndex,
-    pub constructor_defs: Box<ZeroOrMoreVariantConstructorDefs>,
-    pub constructor_defs_rparen: crate::token::ByteIndex,
+    pub vcon_defs_lparen: crate::token::ByteIndex,
+    pub vcon_defs: Box<ZeroOrMoreVconDefs>,
+    pub vcon_defs_rparen: crate::token::ByteIndex,
     pub rparen: crate::token::ByteIndex,
 }
 
@@ -80,16 +80,16 @@ pub enum ZeroOrMoreExprs {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ZeroOrMoreVariantConstructorDefs {
+pub enum ZeroOrMoreVconDefs {
     Nil,
     Cons(
-        Box<ZeroOrMoreVariantConstructorDefs>,
-        Box<VariantConstructorDef>,
+        Box<ZeroOrMoreVconDefs>,
+        Box<VconDef>,
     ),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct VariantConstructorDef {
+pub struct VconDef {
     pub lparen: crate::token::ByteIndex,
     pub param_types_lparen: crate::token::ByteIndex,
     pub param_types: Box<ZeroOrMoreExprs>,
@@ -242,8 +242,8 @@ enum NonterminalKind {
     Expr = 0,
     Ind = 1,
     ZeroOrMoreExprs = 2,
-    ZeroOrMoreVariantConstructorDefs = 3,
-    VariantConstructorDef = 4,
+    ZeroOrMoreVconDefs = 3,
+    VconDef = 4,
     Vcon = 5,
     Match = 6,
     ZeroOrMoreMatchCases = 7,
@@ -328,8 +328,8 @@ enum Node {
     Expr(Expr),
     Ind(Ind),
     ZeroOrMoreExprs(ZeroOrMoreExprs),
-    ZeroOrMoreVariantConstructorDefs(ZeroOrMoreVariantConstructorDefs),
-    VariantConstructorDef(VariantConstructorDef),
+    ZeroOrMoreVconDefs(ZeroOrMoreVconDefs),
+    VconDef(VconDef),
     Vcon(Vcon),
     Match(Match),
     ZeroOrMoreMatchCases(ZeroOrMoreMatchCases),
@@ -487,9 +487,9 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R8 => {
             let rparen_10 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
-            let constructor_defs_rparen_9 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
-            let constructor_defs_8 = Box::new(ZeroOrMoreVariantConstructorDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let constructor_defs_lparen_7 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
+            let vcon_defs_rparen_9 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
+            let vcon_defs_8 = Box::new(ZeroOrMoreVconDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let vcon_defs_lparen_7 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             let index_types_rparen_6 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
             let index_types_5 = Box::new(ZeroOrMoreExprs::try_from(nodes.pop().unwrap()).ok().unwrap());
             let index_types_lparen_4 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
@@ -508,9 +508,9 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
                     index_types_lparen: index_types_lparen_4,
                     index_types: index_types_5,
                     index_types_rparen: index_types_rparen_6,
-                    constructor_defs_lparen: constructor_defs_lparen_7,
-                    constructor_defs: constructor_defs_8,
-                    constructor_defs_rparen: constructor_defs_rparen_9,
+                    vcon_defs_lparen: vcon_defs_lparen_7,
+                    vcon_defs: vcon_defs_8,
+                    vcon_defs_rparen: vcon_defs_rparen_9,
                     rparen: rparen_10,
                 }),
                 NonterminalKind::Ind,
@@ -538,22 +538,22 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R11 => {
             (
-                Node::ZeroOrMoreVariantConstructorDefs(ZeroOrMoreVariantConstructorDefs::Nil),
-                NonterminalKind::ZeroOrMoreVariantConstructorDefs,
+                Node::ZeroOrMoreVconDefs(ZeroOrMoreVconDefs::Nil),
+                NonterminalKind::ZeroOrMoreVconDefs,
             )
         }
         RuleKind::R12 => {
-            let t1 = Box::new(VariantConstructorDef::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let t0 = Box::new(ZeroOrMoreVariantConstructorDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t1 = Box::new(VconDef::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(ZeroOrMoreVconDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 2);
             
             (
-                Node::ZeroOrMoreVariantConstructorDefs(ZeroOrMoreVariantConstructorDefs::Cons(
+                Node::ZeroOrMoreVconDefs(ZeroOrMoreVconDefs::Cons(
                     t0,
                     t1,
                 )),
-                NonterminalKind::ZeroOrMoreVariantConstructorDefs,
+                NonterminalKind::ZeroOrMoreVconDefs,
             )
         }
         RuleKind::R13 => {
@@ -569,7 +569,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 8);
             
             (
-                Node::VariantConstructorDef(VariantConstructorDef {
+                Node::VconDef(VconDef {
                     lparen: lparen_0,
                     param_types_lparen: param_types_lparen_1,
                     param_types: param_types_2,
@@ -579,7 +579,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
                     index_args_rparen: index_args_rparen_6,
                     rparen: rparen_7,
                 }),
-                NonterminalKind::VariantConstructorDef,
+                NonterminalKind::VconDef,
             )
         }
         RuleKind::R14 => {
@@ -2772,23 +2772,23 @@ impl TryFrom<Node> for ZeroOrMoreExprs {
     }
 }
 
-impl TryFrom<Node> for ZeroOrMoreVariantConstructorDefs {
+impl TryFrom<Node> for ZeroOrMoreVconDefs {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::ZeroOrMoreVariantConstructorDefs(n) => Ok(n),
+            Node::ZeroOrMoreVconDefs(n) => Ok(n),
             _ => Err(node),
         }
     }
 }
 
-impl TryFrom<Node> for VariantConstructorDef {
+impl TryFrom<Node> for VconDef {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::VariantConstructorDef(n) => Ok(n),
+            Node::VconDef(n) => Ok(n),
             _ => Err(node),
         }
     }

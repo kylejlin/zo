@@ -5,7 +5,6 @@ use hmac_sha256::Hash as Sha256;
 use std::{
     fmt::{Debug, Formatter},
     hash::{Hash, Hasher},
-    rc::Rc,
 };
 
 #[derive(Clone, Debug)]
@@ -73,7 +72,7 @@ impl SemanticHash for Ind {
 
         hasher.update(&self.index_types.digest);
 
-        hasher.update(&self.constructor_defs.digest);
+        hasher.update(&self.vcon_defs.digest);
 
         hasher.update([discriminator::END]);
 
@@ -213,30 +212,20 @@ impl SemanticHash for Box<[Expr]> {
     }
 }
 
-impl SemanticHash for Box<[Rc<Hashed<VariantConstructorDef>>]> {
+impl SemanticHash for Box<[VconDef]> {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256::new();
 
         hasher.update([discriminator::VARIANT_CONSTRUCTOR_DEF_SLICE]);
 
         for def in self.iter() {
-            hasher.update(&def.digest);
+            hasher.update([discriminator::VARIANT_CONSTRUCTOR_DEF]);
+
+            hasher.update(&def.param_types.digest);
+            hasher.update(&def.index_args.digest);
+
+            hasher.update([discriminator::END]);
         }
-
-        hasher.update([discriminator::END]);
-
-        Digest(hasher.finalize())
-    }
-}
-
-impl SemanticHash for VariantConstructorDef {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
-
-        hasher.update([discriminator::VARIANT_CONSTRUCTOR_DEF]);
-
-        hasher.update(&self.param_types.digest);
-        hasher.update(&self.index_args.digest);
 
         hasher.update([discriminator::END]);
 

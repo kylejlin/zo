@@ -24,9 +24,9 @@ struct Ind {
     index_types: ZeroOrMoreExprs
     index_types_rparen: $RParen
 
-    constructor_defs_lparen: $LParen
-    constructor_defs: ZeroOrMoreVariantConstructorDefs
-    constructor_defs_rparen: $RParen
+    vcon_defs_lparen: $LParen
+    vcon_defs: ZeroOrMoreVconDefs
+    vcon_defs_rparen: $RParen
 
     rparen: $RParen
 }
@@ -38,13 +38,13 @@ enum ZeroOrMoreExprs {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum ZeroOrMoreVariantConstructorDefs {
+enum ZeroOrMoreVconDefs {
     Nil
-    Cons(ZeroOrMoreVariantConstructorDefs VariantConstructorDef)
+    Cons(ZeroOrMoreVconDefs VconDef)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct VariantConstructorDef {
+struct VconDef {
     lparen: $LParen
 
     param_types_lparen: $LParen

@@ -31,13 +31,13 @@ Ind(
         index_types_rparen: ByteIndex(
             38,
         ),
-        constructor_defs_lparen: ByteIndex(
+        vcon_defs_lparen: ByteIndex(
             69,
         ),
-        constructor_defs: Cons(
+        vcon_defs: Cons(
             Cons(
                 Nil,
-                VariantConstructorDef {
+                VconDef {
                     lparen: ByteIndex(
                         75,
                     ),
@@ -60,7 +60,7 @@ Ind(
                     ),
                 },
             ),
-            VariantConstructorDef {
+            VconDef {
                 lparen: ByteIndex(
                     87,
                 ),
@@ -98,7 +98,7 @@ Ind(
                 ),
             },
         ),
-        constructor_defs_rparen: ByteIndex(
+        vcon_defs_rparen: ByteIndex(
             96,
         ),
         rparen: ByteIndex(
