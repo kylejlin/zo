@@ -337,7 +337,6 @@ fn rev_1_2_3() {
     assert_eq!(expected.digest(), actual.digest());
 }
 
-#[ignore]
 #[test]
 fn polymorphic_rev_1_2_3() {
     let nat_def = (
@@ -539,10 +538,6 @@ fn polymorphic_rev_1_2_3() {
         let cst = crate::parser::parse(tokens).unwrap();
         Expr::from(cst)
     };
-
-    // TODO: Delete
-    // std::fs::write("actual.txt", format!("{actual:#?}")).expect("failed to write file");
-    // std::fs::write("expected.txt", format!("{expected:#?}")).expect("failed to write file");
 
     assert_eq!(expected.digest(), actual.digest());
 }
