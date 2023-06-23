@@ -7,9 +7,9 @@ use crate::{ast::*, nohash_hashmap::NoHashHashMap};
 #[cfg(test)]
 mod tests;
 
-mod deb_substituter;
+mod replace_debs;
 
-use deb_substituter::*;
+use replace_debs::*;
 
 #[derive(Clone, Debug)]
 pub enum EvalError {
@@ -211,11 +211,9 @@ impl Evaluator {
                 }
 
                 let unsubstituted = match_.cases.value[vcon_index].return_val.clone();
-                let substituted = self.substitute_and_downshift(
+                let substituted = self.substitute_and_downshift_debs(
                     unsubstituted,
-                    ReverseExprSlice {
-                        unprocessed: &normalized_matchee.value.args.value,
-                    },
+                    &normalized_matchee.value.args.value,
                 );
                 return self.eval(substituted);
             }
@@ -292,12 +290,7 @@ impl Evaluator {
                     .cloned()
                     .chain(std::iter::once(normalized_callee))
                     .collect();
-                let substituted = self.substitute_and_downshift(
-                    unsubstituted,
-                    ReverseExprSlice {
-                        unprocessed: &new_exprs,
-                    },
-                );
+                let substituted = self.substitute_and_downshift_debs(unsubstituted, &new_exprs);
                 return self.eval(substituted);
             }
         }
@@ -326,8 +319,8 @@ impl Evaluator {
         result
     }
 
-    fn substitute_and_downshift(&mut self, expr: Expr, new_exprs: ReverseExprSlice) -> Expr {
-        DebSubstituter::new(new_exprs).substitute_and_downshift(expr)
+    fn substitute_and_downshift_debs(&mut self, expr: Expr, new_exprs: &[Expr]) -> Expr {
+        DebDownshiftSubstituter { new_exprs }.replace_debs(expr, 0)
     }
 }
 
