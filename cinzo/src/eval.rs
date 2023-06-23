@@ -1,9 +1,3 @@
-// TODO: Make `MatchCase` and `VariantConstructorDef`
-// not hashed. It's not worth the trouble.
-// At least for `MatchCase`.
-//
-// TODO: Rename `VariantConstructorDef` to `VconDef`.
-//
 // TODO: Reinstate the requirement that `Vcon.ind` is an `Ind`.
 //
 // TODO: Track `original`.
