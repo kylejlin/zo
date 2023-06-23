@@ -917,6 +917,60 @@ mod tests {
         assert_eq!(expected.digest(), actual.digest());
     }
 
+    #[ignore]
+    #[test]
+    fn recursive_fun_app_stops_unfolding_when_decreasing_arg_not_vconlike() {
+        let nat_def = (
+            "<NAT>",
+            r#"(ind Type0 "Nat" () (
+(() ())
+((0) ())
+))"#,
+        );
+        let zero_def = ("<ZERO>", "(vcon <NAT> 0)");
+        let succ_def = ("<SUCC>", "(vcon <NAT> 1)");
+        let recursive_identity_def = (
+            "<RECURSIVE_IDENTITY>",
+            r#"
+(
+    fun
+
+    0
+
+    (<NAT>)
+
+    <NAT>
+
+    (
+        match 1 <NAT> (
+            (0 <ZERO>)
+            (1 (<SUCC> (1 0)))
+        )
+    )
+)"#,
+        );
+        let defs = [nat_def, zero_def, succ_def, recursive_identity_def];
+        let ident_succ_deb_123_src =
+            substitute_with_compounding(defs, r#"(<RECURSIVE_IDENTITY> (<SUCC> 123))"#);
+        let succ_ident_deb_123_src =
+            substitute_with_compounding(defs, "(<SUCC> (<RECURSIVE_IDENTITY> 123))");
+
+        let actual = {
+            let tokens = crate::lexer::lex(&ident_succ_deb_123_src).unwrap();
+            let cst = crate::parser::parse(tokens).unwrap();
+            let ast: Expr = cst.into();
+            Evaluator::default().eval(ast).unwrap().into_raw()
+        };
+
+        let expected = {
+            let tokens = crate::lexer::lex(&succ_ident_deb_123_src).unwrap();
+            let cst = crate::parser::parse(tokens).unwrap();
+            Expr::from(cst)
+        };
+
+        assert_eq!(expected.digest(), actual.digest());
+    }
+
     fn substitute_with_compounding<'a>(
         iter: impl IntoIterator<Item = (&'a str, &'a str)>,
         last: &'a str,
