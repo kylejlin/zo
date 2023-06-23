@@ -6,6 +6,7 @@ pub mod lexer;
 pub mod nohash_hashmap;
 pub mod semantic_hash;
 pub mod token;
+pub mod typecheck;
 
 mod parser;
 /// Since the `parser` module
