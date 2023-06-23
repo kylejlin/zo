@@ -600,7 +600,6 @@ fn recursive_fun_app_stops_unfolding_when_decreasing_arg_not_vconlike() {
     assert_eq!(expected.digest(), actual.digest());
 }
 
-#[ignore]
 #[test]
 fn substitution_upshifts_new_expr_debs() {
     let dummy_ind_def = (
