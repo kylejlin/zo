@@ -248,15 +248,9 @@ impl TypeChecker {
         let normalized_index_types = self
             .evaluator
             .eval_expressions(ind.value.index_types.clone())
-            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE)
-            .into_raw();
-        let return_type = self.get_ind_return_type(ind).into_raw();
-        let already_normalized = For {
-            param_types: normalized_index_types,
-            return_type,
-        }
-        .collapse_if_nullary();
-        self.assert_normal_form_or_panic(already_normalized)
+            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE);
+        let return_type = self.get_ind_return_type(ind);
+        Normalized::for_(normalized_index_types, return_type).collapse_if_nullary()
     }
 
     fn get_ind_return_type(&mut self, ind: RcHashed<Ind>) -> NormalForm {
@@ -408,17 +402,6 @@ impl TypeChecker {
         }
 
         Ok(Rc::new(Hashed::new(out.into_boxed_slice())))
-    }
-
-    fn assert_normal_form_or_panic(&mut self, expr: Expr) -> NormalForm {
-        let original_digest = expr.digest().clone();
-        let normal_form = self
-            .evaluator
-            .eval(expr)
-            .expect("The input should already be in normal form.");
-        let new_digest = normal_form.raw().digest();
-        assert_eq!(original_digest, *new_digest);
-        normal_form
     }
 }
 
