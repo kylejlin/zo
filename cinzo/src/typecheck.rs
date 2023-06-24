@@ -157,8 +157,7 @@ impl TypeChecker {
         assert_every_expr_is_universe(&index_type_types.raw()).map_err(|offender_index| {
             TypeError::UnexpectedNonTypeExpression {
                 expr: ind.value.index_types.value[offender_index].clone(),
-                type_: self
-                    .assert_normal_form_or_panic(index_type_types.raw()[offender_index].clone()),
+                type_: index_type_types.index(offender_index).cloned(),
             }
         })?;
 

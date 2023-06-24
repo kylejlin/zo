@@ -34,6 +34,22 @@ impl<T> Normalized<&[T]> {
     pub fn get(&self, index: usize) -> Option<Normalized<&T>> {
         self.0.get(index).map(Normalized)
     }
+
+    /// A panicking version of `get`.
+    pub fn index(&self, index: usize) -> Normalized<&T> {
+        Normalized(&self.0[index])
+    }
+}
+
+impl<T> Normalized<Vec<T>> {
+    pub fn get(&self, index: usize) -> Option<Normalized<&T>> {
+        self.0.get(index).map(Normalized)
+    }
+
+    /// A panicking version of `get`.
+    pub fn index(&self, index: usize) -> Normalized<&T> {
+        Normalized(&self.0[index])
+    }
 }
 
 impl<T> FromIterator<Normalized<T>> for Normalized<Vec<T>> {
