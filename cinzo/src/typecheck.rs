@@ -321,7 +321,7 @@ impl TypeChecker {
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         let matchee_type = self.get_type(match_.value.matchee.clone(), tcon, scon)?;
-        let Some((matchee_type_ind, matchee_type_args)) = matchee_type.clone().ind_or_ind_app() else {
+        let Some((well_typed_matchee_type_ind, well_typed_matchee_type_args)) = matchee_type.clone().ind_or_ind_app() else {
             return Err(TypeError::NonInductiveMatcheeType {
                 expr: match_.value.matchee.clone(),
                 type_: matchee_type,
@@ -336,16 +336,27 @@ impl TypeChecker {
             });
         }
 
-        let vcon_count = matchee_type_ind.raw().value.vcon_defs.value.len();
+        let vcon_count = well_typed_matchee_type_ind
+            .raw()
+            .value
+            .vcon_defs
+            .value
+            .len();
         let match_case_count = match_.value.cases.value.len();
         if vcon_count != match_case_count {
             return Err(TypeError::WrongNumberOfMatchCases {
                 match_: match_.clone(),
-                matchee_type_ind: matchee_type_ind.clone(),
+                matchee_type_ind: well_typed_matchee_type_ind.clone(),
             });
         }
 
-        self.perform_match_cases_precheck(match_, matchee_type_ind, matchee_type_args, tcon, scon)?;
+        self.perform_match_cases_precheck(
+            match_,
+            well_typed_matchee_type_ind,
+            well_typed_matchee_type_args,
+            tcon,
+            scon,
+        )?;
 
         Ok(())
     }
@@ -353,12 +364,12 @@ impl TypeChecker {
     fn perform_match_cases_precheck(
         &mut self,
         match_: RcHashed<Match>,
-        matchee_type_ind: Normalized<RcHashed<Ind>>,
-        matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,
+        well_typed_matchee_type_ind: Normalized<RcHashed<Ind>>,
+        well_typed_matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        for (vcon_def, match_case) in matchee_type_ind
+        for (well_typed_vcon_def, match_case) in well_typed_matchee_type_ind
             .raw()
             .value
             .vcon_defs
@@ -368,10 +379,10 @@ impl TypeChecker {
         {
             self.perform_match_case_precheck(
                 match_case,
-                vcon_def,
+                well_typed_vcon_def,
                 match_.clone(),
-                matchee_type_ind.clone(),
-                matchee_type_args.clone(),
+                well_typed_matchee_type_ind.clone(),
+                well_typed_matchee_type_args.clone(),
                 tcon,
                 scon,
             )?;
@@ -383,10 +394,10 @@ impl TypeChecker {
     fn perform_match_case_precheck(
         &mut self,
         match_case: &MatchCase,
-        vcon_def: &VconDef,
+        well_typed_vcon_def: &VconDef,
         match_: RcHashed<Match>,
-        matchee_type_ind: Normalized<RcHashed<Ind>>,
-        matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,
+        well_typed_matchee_type_ind: Normalized<RcHashed<Ind>>,
+        well_typed_matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
