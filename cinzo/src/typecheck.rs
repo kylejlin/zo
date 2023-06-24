@@ -143,18 +143,7 @@ impl TypeChecker {
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         self.perform_ind_precheck(ind.clone(), tcon, scon)?;
-
-        let normalized_index_types = self
-            .eval_expressions(ind.value.index_types.clone())
-            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE)
-            .into_raw();
-        let return_type = self.get_ind_return_type(ind).into_raw();
-        let already_normalized = For {
-            param_types: normalized_index_types,
-            return_type,
-        }
-        .collapse_if_nullary();
-        Ok(self.assert_normal_form_or_panic(already_normalized))
+        Ok(self.get_ind_type_assuming_ind_is_well_typed(ind))
     }
 
     fn perform_ind_precheck(
@@ -173,6 +162,10 @@ impl TypeChecker {
             }
         })?;
 
+        // Once we verify that the index types are all well-typed,
+        // it is safe to construct a predicted type for the ind type.
+        let predicted_ind_type = self.get_ind_type_assuming_ind_is_well_typed(ind.clone());
+
         assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
             &index_type_types.value,
             ind.value.universe_level,
@@ -185,7 +178,7 @@ impl TypeChecker {
             }
         })?;
 
-        self.assert_ind_vcon_defs_are_well_typed(ind, tcon, scon)?;
+        self.assert_ind_vcon_defs_are_well_typed(ind, predicted_ind_type, tcon, scon)?;
 
         Ok(())
     }
@@ -193,11 +186,18 @@ impl TypeChecker {
     fn assert_ind_vcon_defs_are_well_typed(
         &mut self,
         ind: RcHashed<Ind>,
+        predicted_ind_type: NormalForm,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         for def in ind.value.vcon_defs.value.iter() {
-            self.assert_ind_vcon_def_is_well_typed(ind.clone(), def, tcon, scon)?;
+            self.assert_ind_vcon_def_is_well_typed(
+                ind.clone(),
+                predicted_ind_type,
+                def,
+                tcon,
+                scon,
+            )?;
         }
         Ok(())
     }
@@ -205,11 +205,12 @@ impl TypeChecker {
     fn assert_ind_vcon_def_is_well_typed(
         &mut self,
         ind: RcHashed<Ind>,
+        predicted_ind_type: NormalForm,
         def: &VconDef,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        let tcon_with_recursive_ind_entry = LazyTypeContext::Snoc(&tcon, &[trusted_ind_type_todo]);
+        let tcon_with_recursive_ind_entry = LazyTypeContext::Snoc(&tcon, &[predicted_ind_type]);
         let param_type_types = self.get_types_of_dependent_expressions(
             def.param_types.clone(),
             tcon_with_recursive_ind_entry,
@@ -256,6 +257,25 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         // TODO: Actually check positivity.
         Ok(())
+    }
+
+    /// This function assumes that the index types are well-typed.
+    /// If they are not, this will cause (probably undetectable) bugs.
+    ///
+    /// However, you may safely call this function even if the vcon defs
+    /// are ill-typed.
+    fn get_ind_type_assuming_ind_is_well_typed(&mut self, ind: RcHashed<Ind>) -> NormalForm {
+        let normalized_index_types = self
+            .eval_expressions(ind.value.index_types.clone())
+            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE)
+            .into_raw();
+        let return_type = self.get_ind_return_type(ind).into_raw();
+        let already_normalized = For {
+            param_types: normalized_index_types,
+            return_type,
+        }
+        .collapse_if_nullary();
+        self.assert_normal_form_or_panic(already_normalized)
     }
 
     fn get_ind_return_type(&mut self, ind: RcHashed<Ind>) -> NormalForm {
