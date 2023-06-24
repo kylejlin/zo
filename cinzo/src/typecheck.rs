@@ -13,6 +13,7 @@ pub enum TypeError {
         deb: RcHashed<DebNode>,
         tcon_len: usize,
     },
+    InvalidVconIndex(RcHashed<Vcon>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -68,6 +69,28 @@ impl LazySubstitutionContext<'_> {
     }
 }
 
+impl App {
+    fn collapse_if_nullary(self) -> Expr {
+        if self.args.value.is_empty() {
+            self.callee
+        } else {
+            Expr::App(Rc::new(Hashed::new(self)))
+        }
+    }
+}
+
+impl For {
+    fn collapse_if_nullary(self) -> Expr {
+        if self.param_types.value.is_empty() {
+            self.return_type
+        } else {
+            Expr::For(Rc::new(Hashed::new(self)))
+        }
+    }
+}
+
+const TRIVIALLY_EVALUATABLE_FOR_MESSAGE: &str = "A forall with normalized param types and return type should be normalized, and thus trivially evaluatable.";
+
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
@@ -104,11 +127,17 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        if ind.value.index_types.value.is_empty() {
-            self.get_ind_return_type(ind)
-        } else {
-            self.get_type_of_indexed_ind(ind, tcon, scon)
+        let param_types =
+            self.get_type_of_dependent_expressions(ind.value.index_types.clone(), tcon, scon)?;
+        let return_type = self.get_ind_return_type(ind)?.into_raw();
+        let already_normalized = For {
+            param_types,
+            return_type,
         }
+        .collapse_if_nullary();
+        return Ok(self
+            .eval(already_normalized)
+            .expect(TRIVIALLY_EVALUATABLE_FOR_MESSAGE));
     }
 
     fn get_ind_return_type(&mut self, ind: RcHashed<Ind>) -> Result<NormalForm, TypeError> {
@@ -117,23 +146,6 @@ impl TypeChecker {
                 level: ind.value.universe_level,
             }))))
             .expect("A universe should always evaluate to itself."))
-    }
-
-    fn get_type_of_indexed_ind(
-        &mut self,
-        ind: RcHashed<Ind>,
-        tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
-    ) -> Result<NormalForm, TypeError> {
-        let param_types =
-            self.get_type_of_dependent_expressions(ind.value.index_types.clone(), tcon, scon)?;
-        let return_type = self.get_ind_return_type(ind)?.into_raw();
-        return Ok(self
-            .eval(Expr::For(Rc::new(Hashed::new(For {
-                param_types,
-                return_type,
-            }))))
-            .expect("A forall with normalized param types and return type should be normalized, and thus trivially evaluatable."));
     }
 
     fn get_type_of_dependent_expressions(
@@ -161,7 +173,37 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        todo!()
+        let vcon_index = vcon.value.vcon_index;
+        let defs: &[VconDef] = &vcon.value.ind.value.vcon_defs.value;
+        let Some(def) = defs.get(vcon_index) else {
+            return Err(TypeError::InvalidVconIndex(vcon));
+        };
+        self.get_type_of_vcon_def(def, vcon.value.ind.clone(), tcon, scon)
+    }
+
+    fn get_type_of_vcon_def(
+        &mut self,
+        def: &VconDef,
+        ind: RcHashed<Ind>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<NormalForm, TypeError> {
+        let param_types =
+            self.get_type_of_dependent_expressions(def.param_types.clone(), tcon, scon)?;
+        let return_type = App {
+            callee: Expr::Ind(ind),
+            args: def.index_args.clone(),
+        }
+        .collapse_if_nullary();
+        let already_normalized = For {
+            param_types,
+            return_type,
+        }
+        .collapse_if_nullary();
+        let trivially_normalized = self
+            .eval(already_normalized)
+            .expect(TRIVIALLY_EVALUATABLE_FOR_MESSAGE);
+        Ok(trivially_normalized)
     }
 
     fn get_type_of_match(
