@@ -47,19 +47,19 @@ So read it at your own risk.
 
 4. We abbreviate "De Bruijn" index as "DB index".
 
-5. We use two contexts: a _type context_ and an _equality context_.
-   We abbreviate these as "tcontext" and "econtext", respectively.
+5. We use two contexts: a _type context_ and an _substitution context_.
+   We abbreviate these as "tcontext" and "scontext", respectively.
 
    The tcontext is a stack of expressions,
    corresponding to the types of the DB indices.
 
-   The econtext is a stack of pairs of expressions.
+   The scontext is a stack of pairs of expressions.
    Each pair's elements are judgmentally equal.
-   For example, if `econtext = [(0, 1), (6, 4)]`,
+   For example, if `scontext = [(0, 1), (6, 4)]`,
    then `0` and `1` are judgmentally equal,
    and `6` and `4` are judgmentally equal.
 
-   You must take care to shift the econtext when
+   You must take care to shift the scontext when
    you modify the tcontext.
 
 6. `(@shift <shift_amount> <cutoff> <expression>)` shifts DB indices.
@@ -515,11 +515,11 @@ this expression must meet the following conditions:
    `<matchee>`.
 4. For every `<return_val_i>`:
    1. `<return_val_i>` has some type `return_type_i`
-      under the extended tcontext and econtext.
+      under the extended tcontext and scontext.
    2. `return_type_i` is compatible with `<return_type>`
-      under the extended tcontext and econtext.
+      under the extended tcontext and scontext.
 
-### Extending the tcontext and econtext
+### Extending the tcontext and scontext
 
 Suppose we have
 
@@ -554,12 +554,12 @@ First, we define the following:
 Then:
 
 1. Add `vcon_param_type0`, ..., `vcon_param_type_p` to the tcontext.
-2. Upshift the econtext by `p+1`.
+2. Upshift the scontext by `p+1`.
 3. Add `(vcon_index0 |-> (@shift p+1 0 matchee_index0))`,
    `(vcon_index1 |-> (@shift p+1 0 matchee_index1))`,
    ... `(vcon_index_n |-> (@shift p+1 0 matchee_index_n))`
-   to the econtext.
-4. Add `((@shift p+1 0 <matchee>) |-> (@capp (vcon <ind_type> i) (0 1 2 ... p)))` to the econtext.
+   to the scontext.
+4. Add `((@shift p+1 0 <matchee>) |-> (@capp (vcon <ind_type> i) (0 1 2 ... p)))` to the scontext.
 
 ### TODO Examples
 
