@@ -188,6 +188,19 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
+        for def in ind.value.vcon_defs.value.iter() {
+            self.assert_ind_vcon_def_is_well_typed(ind.clone(), def, tcon, scon)?;
+        }
+        Ok(())
+    }
+
+    fn assert_ind_vcon_def_is_well_typed(
+        &mut self,
+        ind: RcHashed<Ind>,
+        def: &VconDef,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
         todo!()
     }
 
