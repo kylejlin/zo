@@ -105,19 +105,18 @@ impl TypeChecker {
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         if ind.value.index_types.value.is_empty() {
-            self.get_type_of_unindexed_ind(ind, tcon, scon)
+            self.get_type_of_unindexed_ind(ind)
         } else {
             self.get_type_of_indexed_ind(ind, tcon, scon)
         }
     }
 
-    fn get_type_of_unindexed_ind(
-        &mut self,
-        ind: RcHashed<Ind>,
-        tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
-    ) -> Result<NormalForm, TypeError> {
-        todo!()
+    fn get_type_of_unindexed_ind(&mut self, ind: RcHashed<Ind>) -> Result<NormalForm, TypeError> {
+        return Ok(self
+            .eval(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
+                level: ind.value.universe_level,
+            }))))
+            .expect("A universe should always evaluate to itself."));
     }
 
     fn get_type_of_indexed_ind(
