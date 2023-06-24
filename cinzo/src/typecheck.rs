@@ -230,10 +230,10 @@ impl TypeChecker {
 
     fn assert_vcon_def_is_strictly_positive(
         &mut self,
-        ind: RcHashed<Ind>,
-        def: &VconDef,
-        tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
+        _ind: RcHashed<Ind>,
+        _def: &VconDef,
+        _tcon: LazyTypeContext,
+        _scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         // TODO: Actually check positivity.
         Ok(())
