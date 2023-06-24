@@ -108,3 +108,44 @@ impl Normalized<For> {
         Normalized(self.0.collapse_if_nullary())
     }
 }
+
+pub(in crate::eval) use unchecked::*;
+mod unchecked {
+    use super::*;
+
+    pub trait WrapInNormalized: Sized {
+        fn wrap_in_normalized(self) -> Normalized<Self>;
+    }
+
+    impl<T> WrapInNormalized for T {
+        fn wrap_in_normalized(self) -> Normalized<T> {
+            Normalized(self)
+        }
+    }
+
+    pub trait ConvertToExprAndWrapInNormalized {
+        fn convert_to_expr_and_wrap_in_normalized(self) -> NormalForm;
+    }
+
+    impl<T> ConvertToExprAndWrapInNormalized for T
+    where
+        T: Into<Expr>,
+    {
+        fn convert_to_expr_and_wrap_in_normalized(self) -> NormalForm {
+            Normalized(self.into())
+        }
+    }
+
+    pub trait RcHashAndWrapInNormalized: Sized {
+        fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcHashed<Self>>;
+    }
+
+    impl<T> RcHashAndWrapInNormalized for T
+    where
+        T: SemanticHash,
+    {
+        fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcHashed<Self>> {
+            Normalized(rc_hash(self))
+        }
+    }
+}

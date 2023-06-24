@@ -350,39 +350,3 @@ fn is_vconlike(expr: Expr) -> bool {
         _ => false,
     }
 }
-
-trait WrapInNormalized: Sized {
-    fn wrap_in_normalized(self) -> Normalized<Self>;
-}
-
-impl<T> WrapInNormalized for T {
-    fn wrap_in_normalized(self) -> Normalized<T> {
-        Normalized(self)
-    }
-}
-
-trait ConvertToExprAndWrapInNormalized {
-    fn convert_to_expr_and_wrap_in_normalized(self) -> NormalForm;
-}
-
-impl<T> ConvertToExprAndWrapInNormalized for T
-where
-    T: Into<Expr>,
-{
-    fn convert_to_expr_and_wrap_in_normalized(self) -> NormalForm {
-        Normalized(self.into())
-    }
-}
-
-trait RcHashAndWrapInNormalized: Sized {
-    fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcHashed<Self>>;
-}
-
-impl<T> RcHashAndWrapInNormalized for T
-where
-    T: SemanticHash,
-{
-    fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcHashed<Self>> {
-        Normalized(rc_hash(self))
-    }
-}
