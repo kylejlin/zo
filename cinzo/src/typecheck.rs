@@ -72,15 +72,15 @@ impl LazyTypeContext<'_> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum LazySubstitutionContext<'a> {
-    Base(&'a [LazySubstitution<'a>]),
-    Snoc(&'a LazySubstitutionContext<'a>, &'a [LazySubstitution<'a>]),
+    Base(&'a [LazySubstitution]),
+    Snoc(&'a LazySubstitutionContext<'a>, &'a [LazySubstitution]),
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct LazySubstitution<'a> {
+#[derive(Debug, Clone)]
+pub struct LazySubstitution {
     pub tcon_len: usize,
-    pub left: &'a NormalForm,
-    pub right: &'a NormalForm,
+    pub left: NormalForm,
+    pub right: NormalForm,
 }
 
 impl LazySubstitutionContext<'_> {
