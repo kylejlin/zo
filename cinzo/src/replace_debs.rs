@@ -70,18 +70,15 @@ pub trait ReplaceDebs {
         Rc::new(Hashed::new(Ind {
             name: original.name.clone(),
             universe_level: original.universe_level,
-            index_types: self.substitute_and_downshift_expressions_with_increasing_cutoff(
+            index_types: self.replace_debs_in_expressions_with_increasing_cutoff(
                 original.index_types.clone(),
                 cutoff,
             ),
-            vcon_defs: self.substitute_and_downshift_vcon_defs_with_cutoff(
-                original.vcon_defs.clone(),
-                cutoff + 1,
-            ),
+            vcon_defs: self.replace_debs_in_vcon_defs(original.vcon_defs.clone(), cutoff + 1),
         }))
     }
 
-    fn substitute_and_downshift_expressions_with_increasing_cutoff(
+    fn replace_debs_in_expressions_with_increasing_cutoff(
         &self,
         original: RcExprs,
         starting_cutoff: usize,
@@ -95,30 +92,22 @@ pub trait ReplaceDebs {
         Rc::new(Hashed::new(shifted.into_boxed_slice()))
     }
 
-    fn substitute_and_downshift_vcon_defs_with_cutoff(
-        &self,
-        original: RcVconDefs,
-        cutoff: usize,
-    ) -> RcVconDefs {
+    fn replace_debs_in_vcon_defs(&self, original: RcVconDefs, cutoff: usize) -> RcVconDefs {
         let shifted: Vec<VconDef> = original
             .value
             .iter()
-            .map(|def| self.substitute_and_downshift_vcon_def_with_cutoff(def.clone(), cutoff))
+            .map(|def| self.replace_debs_in_vcon_def(def.clone(), cutoff))
             .collect();
         Rc::new(Hashed::new(shifted.into_boxed_slice()))
     }
 
-    fn substitute_and_downshift_vcon_def_with_cutoff(
-        &self,
-        original: VconDef,
-        cutoff: usize,
-    ) -> VconDef {
+    fn replace_debs_in_vcon_def(&self, original: VconDef, cutoff: usize) -> VconDef {
         VconDef {
-            param_types: self.substitute_and_downshift_expressions_with_increasing_cutoff(
+            param_types: self.replace_debs_in_expressions_with_increasing_cutoff(
                 original.param_types.clone(),
                 cutoff,
             ),
-            index_args: self.substitute_and_downshift_expressions_with_constant_cutoff(
+            index_args: self.replace_debs_in_expressions_with_constant_cutoff(
                 original.index_args.clone(),
                 cutoff + original.param_types.value.len(),
             ),
@@ -138,29 +127,20 @@ pub trait ReplaceDebs {
         Rc::new(Hashed::new(Match {
             matchee: self.replace_debs(original.matchee.clone(), cutoff),
             return_type: self.replace_debs(original.return_type.clone(), cutoff),
-            cases: self
-                .substitute_and_downshift_match_cases_with_cutoff(original.cases.clone(), cutoff),
+            cases: self.replace_debs_in_match_cases(original.cases.clone(), cutoff),
         }))
     }
 
-    fn substitute_and_downshift_match_cases_with_cutoff(
-        &self,
-        original: RcMatchCases,
-        cutoff: usize,
-    ) -> RcMatchCases {
+    fn replace_debs_in_match_cases(&self, original: RcMatchCases, cutoff: usize) -> RcMatchCases {
         let shifted: Vec<MatchCase> = original
             .value
             .iter()
-            .map(|case| self.substitute_and_downshift_match_case_with_cutoff(case.clone(), cutoff))
+            .map(|case| self.replace_debs_in_match_case(case.clone(), cutoff))
             .collect();
         Rc::new(Hashed::new(shifted.into_boxed_slice()))
     }
 
-    fn substitute_and_downshift_match_case_with_cutoff(
-        &self,
-        original: MatchCase,
-        cutoff: usize,
-    ) -> MatchCase {
+    fn replace_debs_in_match_case(&self, original: MatchCase, cutoff: usize) -> MatchCase {
         MatchCase {
             arity: original.arity,
             return_val: self.replace_debs(original.return_val, cutoff + original.arity),
@@ -171,7 +151,7 @@ pub trait ReplaceDebs {
         let original = &original.value;
         Rc::new(Hashed::new(Fun {
             decreasing_index: original.decreasing_index,
-            param_types: self.substitute_and_downshift_expressions_with_increasing_cutoff(
+            param_types: self.replace_debs_in_expressions_with_increasing_cutoff(
                 original.param_types.clone(),
                 cutoff,
             ),
@@ -190,14 +170,12 @@ pub trait ReplaceDebs {
         let original = &original.value;
         Rc::new(Hashed::new(App {
             callee: self.replace_debs(original.callee.clone(), cutoff),
-            args: self.substitute_and_downshift_expressions_with_constant_cutoff(
-                original.args.clone(),
-                cutoff,
-            ),
+            args: self
+                .replace_debs_in_expressions_with_constant_cutoff(original.args.clone(), cutoff),
         }))
     }
 
-    fn substitute_and_downshift_expressions_with_constant_cutoff(
+    fn replace_debs_in_expressions_with_constant_cutoff(
         &self,
         original: RcExprs,
         cutoff: usize,
@@ -213,7 +191,7 @@ pub trait ReplaceDebs {
     fn replace_debs_in_for(&self, original: RcHashed<For>, cutoff: usize) -> RcHashed<For> {
         let original = &original.value;
         Rc::new(Hashed::new(For {
-            param_types: self.substitute_and_downshift_expressions_with_increasing_cutoff(
+            param_types: self.replace_debs_in_expressions_with_increasing_cutoff(
                 original.param_types.clone(),
                 cutoff,
             ),

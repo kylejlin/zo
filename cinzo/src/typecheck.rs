@@ -1,6 +1,7 @@
 use crate::{
     ast::*,
     eval::{Evaluator, NormalForm, Normalized},
+    replace_debs::*,
 };
 
 use std::rc::Rc;
