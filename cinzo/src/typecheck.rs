@@ -1,6 +1,6 @@
 use crate::{
     ast::*,
-    eval::{EvalError, Evaluator, NormalForm, Normalized},
+    eval::{EvalError, Evaluator, NormalForm},
 };
 
 use std::rc::Rc;
