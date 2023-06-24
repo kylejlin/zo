@@ -73,7 +73,7 @@ impl LazyTypeContext<'_> {
 #[derive(Debug, Clone, Copy)]
 pub enum LazySubstitutionContext<'a> {
     Base(&'a [LazySubstitution<'a>]),
-    Cons(&'a [LazySubstitution<'a>], &'a LazySubstitutionContext<'a>),
+    Snoc(&'a LazySubstitutionContext<'a>, &'a [LazySubstitution<'a>]),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -87,7 +87,7 @@ impl LazySubstitutionContext<'_> {
     pub fn len(&self) -> usize {
         match self {
             LazySubstitutionContext::Base(subs) => subs.len(),
-            LazySubstitutionContext::Cons(subs, rest) => subs.len() + rest.len(),
+            LazySubstitutionContext::Snoc(subs, rest) => subs.len() + rest.len(),
         }
     }
 }
