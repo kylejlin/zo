@@ -279,9 +279,9 @@ impl TypeChecker {
     }
 
     fn get_ind_return_type(&mut self, ind: RcHashed<Ind>) -> NormalForm {
-        self.assert_normal_form_or_panic(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
+        Normalized::universe(UniverseNode {
             level: ind.value.universe_level,
-        }))))
+        })
     }
 
     fn get_type_of_vcon(

@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::ast::*;
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -69,5 +71,11 @@ impl<T> Normalized<Vec<T>> {
 
     pub fn push(&mut self, item: Normalized<T>) {
         self.0.push(item.into_raw())
+    }
+}
+
+impl NormalForm {
+    pub fn universe(universe: UniverseNode) -> Self {
+        Normalized(Expr::Universe(Rc::new(Hashed::new(universe))))
     }
 }
