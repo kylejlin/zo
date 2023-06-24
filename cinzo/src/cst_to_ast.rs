@@ -37,7 +37,7 @@ impl From<cst::Ind> for ast::Ind {
     fn from(cst: cst::Ind) -> Self {
         ast::Ind {
             name: Rc::new(ast::StringValue(cst.name.value.clone())),
-            universe_level: cst.type_.level.clone(),
+            universe_level: ast::UniverseLevel(cst.type_.level),
             index_types: Rc::new(Hashed::new(
                 Vec::from(*cst.index_types.clone()).into_boxed_slice(),
             )),

@@ -90,7 +90,7 @@ impl Expr {
 #[derive(Clone, Debug)]
 pub struct Ind {
     pub name: Rc<StringValue>,
-    pub universe_level: usize,
+    pub universe_level: UniverseLevel,
     pub index_types: Rc<Hashed<Box<[Expr]>>>,
     pub vcon_defs: Rc<Hashed<Box<[VconDef]>>>,
 }

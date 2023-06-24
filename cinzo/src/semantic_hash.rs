@@ -67,7 +67,7 @@ impl SemanticHash for Ind {
         hasher.update(&self.name.0);
 
         hasher.update([discriminator::IND_UNIVERSE]);
-        hasher.update(&self.universe_level.to_be_bytes());
+        hasher.update(&self.universe_level.0.to_be_bytes());
         hasher.update([discriminator::END]);
 
         hasher.update(&self.index_types.digest);
