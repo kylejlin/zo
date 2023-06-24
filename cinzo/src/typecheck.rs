@@ -97,6 +97,19 @@ impl LazySubstitutionContext<'_> {
             LazySubstitutionContext::Snoc(subs, rest) => subs.len() + rest.len(),
         }
     }
+
+    pub fn into_concrete_noncompounded_substitutions(
+        self,
+        current_tcon_len: usize,
+    ) -> Vec<ConcreteSubstitution> {
+        todo!()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ConcreteSubstitution {
+    pub left: NormalForm,
+    pub right: NormalForm,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -480,6 +493,7 @@ impl TypeChecker {
                 expr: match_case.return_val.clone(),
                 expected_type: match_return_type,
                 actual_type: match_case_return_type.clone(),
+                tcon_len: extended_tcon_len,
             },
             extended_scon,
         )?;
@@ -583,13 +597,14 @@ impl TypeChecker {
             expr,
             expected_type,
             actual_type,
+            tcon_len,
         } = expected_equality;
         if actual_type.raw().digest() == expected_type.raw().digest() {
             return Ok(());
         }
 
         let (subbed_expected, subbed_actual) =
-            self.apply_scon(expected_type.clone(), actual_type.clone(), scon);
+            self.apply_scon(scon, tcon_len, expected_type.clone(), actual_type.clone());
 
         if subbed_expected.raw().digest() == subbed_actual.raw().digest() {
             return Ok(());
@@ -606,10 +621,28 @@ impl TypeChecker {
 
     fn apply_scon(
         &mut self,
-        expr1: NormalForm,
-        expr2: NormalForm,
         scon: LazySubstitutionContext,
+        tcon_len: usize,
+        mut expr1: NormalForm,
+        mut expr2: NormalForm,
     ) -> (NormalForm, NormalForm) {
+        let mut subs = scon.into_concrete_noncompounded_substitutions(tcon_len);
+
+        loop {
+            let HasChanged(has_changed) =
+                self.perform_substitution_iteration(&mut subs, &mut expr1, &mut expr2);
+            if !has_changed {
+                return (expr1, expr2);
+            }
+        }
+    }
+
+    fn perform_substitution_iteration(
+        &mut self,
+        subs: &mut [ConcreteSubstitution],
+        expr1: &mut NormalForm,
+        expr2: &mut NormalForm,
+    ) -> HasChanged {
         todo!()
     }
 }
@@ -656,4 +689,8 @@ struct ExpectedTypeEquality {
     pub expr: Expr,
     pub expected_type: NormalForm,
     pub actual_type: NormalForm,
+    pub tcon_len: usize,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+struct HasChanged(pub bool);
