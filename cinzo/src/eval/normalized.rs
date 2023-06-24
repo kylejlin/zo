@@ -158,20 +158,33 @@ impl Normalized<For> {
 impl NormalForm {
     /// Returns an expression of the form
     /// ```zolike
-    /// (@capp (@capp <ind> <index_args>) (
-    ///     <capp_capp_arg_count>
-    ///     <capp_capp_arg_count - 1>
-    ///     <capp_capp_arg_count - 2>
+    /// (@capp (vcon <ind> <vcon_index>) (
+    ///     <arg_count - 1>
+    ///     <arg_count - 2>
     ///     ...
     ///     0
     /// ))
     /// ```
-    pub fn ind_capp_capp(
+    pub fn vcon_capp(
         ind: Normalized<RcHashed<Ind>>,
-        index_args: Normalized<RcHashed<Box<[Expr]>>>,
-        capp_capp_arg_count: usize,
+        vcon_index: usize,
+        arg_count: usize,
     ) -> NormalForm {
-        todo!()
+        let vcon = Vcon {
+            ind: ind.into_raw(),
+            vcon_index,
+        };
+        let args: Vec<Expr> = (0..arg_count)
+            .into_iter()
+            .rev()
+            .map(|i| DebNode { deb: Deb(i) }.into())
+            .collect();
+        let capp = App {
+            callee: vcon.into(),
+            args: rc_hash(args.into_boxed_slice()),
+        }
+        .collapse_if_nullary();
+        Normalized(capp)
     }
 }
 

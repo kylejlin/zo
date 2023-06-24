@@ -377,11 +377,12 @@ impl TypeChecker {
         let vcon_defs = vcon_defs.without_digest();
         let vcon_defs = vcon_defs.as_slice();
 
-        for i in 0..match_.value.cases.value.len() {
-            let well_typed_vcon_def = vcon_defs.index(i);
-            let match_case = &match_.value.cases.value[i];
+        for match_case_index in 0..match_.value.cases.value.len() {
+            let well_typed_vcon_def = vcon_defs.index(match_case_index);
+            let match_case = &match_.value.cases.value[match_case_index];
             self.perform_match_case_precheck(
                 match_case,
+                match_case_index,
                 well_typed_vcon_def,
                 match_.clone(),
                 match_return_type.clone(),
@@ -398,6 +399,7 @@ impl TypeChecker {
     fn perform_match_case_precheck(
         &mut self,
         match_case: &MatchCase,
+        match_case_index: usize,
         well_typed_vcon_def: Normalized<&VconDef>,
         match_: RcHashed<Match>,
         match_return_type: NormalForm,
@@ -431,9 +433,9 @@ impl TypeChecker {
         let upshifted_matchee =
             DebUpshifter(match_case_param_count).replace_debs(match_.value.matchee.clone(), 0);
         let upshifted_normalized_matchee = self.evaluator.eval(upshifted_matchee);
-        let parameterized_ind_capp_capp = Normalized::ind_capp_capp(
+        let parameterized_vcon_capp = Normalized::vcon_capp(
             well_typed_matchee_type_ind,
-            well_typed_matchee_type_args,
+            match_case_index,
             match_case_param_count,
         );
         let new_substitutions: Vec<LazySubstitution> =
@@ -458,7 +460,7 @@ impl TypeChecker {
                 .chain(std::iter::once(LazySubstitution {
                     tcon_len: extended_tcon_len,
                     left: upshifted_normalized_matchee,
-                    right: parameterized_ind_capp_capp,
+                    right: parameterized_vcon_capp,
                 }))
                 .collect();
         let extended_scon = LazySubstitutionContext::Snoc(&scon, &new_substitutions);
