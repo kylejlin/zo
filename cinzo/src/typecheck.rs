@@ -4,7 +4,7 @@ use crate::{
     replace_debs::*,
 };
 
-use std::rc::Rc;
+use std::{ops::BitOrAssign, rc::Rc};
 
 type RcHashed<T> = Rc<Hashed<T>>;
 
@@ -643,6 +643,40 @@ impl TypeChecker {
         expr1: &mut NormalForm,
         expr2: &mut NormalForm,
     ) -> HasChanged {
+        let mut has_changed = HasChanged(false);
+        for applied_sub_index in 0..subs.len() {
+            let applied_sub = subs[applied_sub_index].clone();
+            for target_sub_index in 0..subs.len() {
+                if target_sub_index == applied_sub_index {
+                    continue;
+                }
+
+                has_changed |= self.perform_substitution_on_substitution(
+                    &applied_sub,
+                    &mut subs[target_sub_index],
+                );
+
+                has_changed |= self.perform_substitution_on_expr(&applied_sub, expr1);
+                has_changed |= self.perform_substitution_on_expr(&applied_sub, expr2);
+            }
+        }
+
+        has_changed
+    }
+
+    fn perform_substitution_on_substitution(
+        &mut self,
+        applied_sub: &ConcreteSubstitution,
+        target_sub: &mut ConcreteSubstitution,
+    ) -> HasChanged {
+        todo!()
+    }
+
+    fn perform_substitution_on_expr(
+        &mut self,
+        applied_sub: &ConcreteSubstitution,
+        expr: &mut NormalForm,
+    ) -> HasChanged {
         todo!()
     }
 }
@@ -694,3 +728,9 @@ struct ExpectedTypeEquality {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 struct HasChanged(pub bool);
+
+impl BitOrAssign for HasChanged {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
+    }
+}
