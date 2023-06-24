@@ -13,4 +13,6 @@ with the ordinary definitions.
   Unless otherwise specified, "digest" refers to
   a SHA256 digest.
 - ind: inductive data type definition
+- scon: substitution context
+- tcon: type context
 - vcon: variant constructor
