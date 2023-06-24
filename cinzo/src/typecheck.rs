@@ -32,29 +32,29 @@ pub enum TypeError {
 
 #[derive(Debug, Clone, Copy)]
 pub enum LazyTypeContext<'a> {
-    Base(&'a [NormalForm]),
-    Snoc(&'a LazyTypeContext<'a>, &'a [NormalForm]),
+    Base(Normalized<&'a [Expr]>),
+    Snoc(&'a LazyTypeContext<'a>, Normalized<&'a [Expr]>),
 }
 
 impl LazyTypeContext<'_> {
     pub fn len(&self) -> usize {
         match self {
-            LazyTypeContext::Base(types) => types.len(),
-            LazyTypeContext::Snoc(subcontext, types) => subcontext.len() + types.len(),
+            LazyTypeContext::Base(types) => types.raw().len(),
+            LazyTypeContext::Snoc(subcontext, types) => subcontext.len() + types.raw().len(),
         }
     }
 
     pub fn get(&self, deb: Deb) -> Option<NormalForm> {
         match self {
             LazyTypeContext::Base(types) => {
-                let index = (types.len() - 1).checked_sub(deb.0)?;
-                types.get(index).cloned()
+                let index = (types.raw().len() - 1).checked_sub(deb.0)?;
+                types.get(index).map(Normalized::cloned)
             }
             LazyTypeContext::Snoc(subcontext, types) => {
-                if let Some(index) = (types.len() - 1).checked_sub(deb.0) {
-                    types.get(index).cloned()
+                if let Some(index) = (types.raw().len() - 1).checked_sub(deb.0) {
+                    types.get(index).map(Normalized::cloned)
                 } else {
-                    subcontext.get(Deb(deb.0 - types.len()))
+                    subcontext.get(Deb(deb.0 - types.raw().len()))
                 }
             }
         }
@@ -154,11 +154,11 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         let index_type_types =
             self.get_types_of_dependent_expressions(ind.value.index_types.clone(), tcon, scon)?;
-        assert_every_expr_is_universe(&index_type_types.value).map_err(|offender_index| {
+        assert_every_expr_is_universe(&index_type_types.raw()).map_err(|offender_index| {
             TypeError::UnexpectedNonTypeExpression {
                 expr: ind.value.index_types.value[offender_index].clone(),
                 type_: self
-                    .assert_normal_form_or_panic(index_type_types.value[offender_index].clone()),
+                    .assert_normal_form_or_panic(index_type_types.raw()[offender_index].clone()),
             }
         })?;
 
@@ -167,7 +167,7 @@ impl TypeChecker {
         let predicted_ind_type = self.get_ind_type_assuming_ind_is_well_typed(ind.clone());
 
         assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
-            &index_type_types.value,
+            &index_type_types.raw(),
             ind.value.universe_level,
         )
         .map_err(|(offender_index, offender_level)| {
@@ -210,25 +210,18 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        let recursive_ind_entry = [predicted_ind_type];
-        let tcon_with_recursive_ind_entry = LazyTypeContext::Snoc(&tcon, &recursive_ind_entry);
+        let recursive_ind_entry: Normalized<Vec<Expr>> =
+            std::iter::once(predicted_ind_type).collect();
+        let tcon_with_recursive_ind_entry =
+            LazyTypeContext::Snoc(&tcon, recursive_ind_entry.as_slice());
         let param_type_types = self.get_types_of_dependent_expressions(
             def.param_types.clone(),
             tcon_with_recursive_ind_entry,
             scon,
         )?;
 
-        let param_type_types_wrapped_to_satisfy_rustc_typechecker: Vec<NormalForm> =
-            param_type_types
-                .value
-                .iter()
-                .cloned()
-                .map(|expr| self.assert_normal_form_or_panic(expr))
-                .collect();
-        let tcon_with_params = LazyTypeContext::Snoc(
-            &tcon_with_recursive_ind_entry,
-            &param_type_types_wrapped_to_satisfy_rustc_typechecker,
-        );
+        let tcon_with_params =
+            LazyTypeContext::Snoc(&tcon_with_recursive_ind_entry, param_type_types.as_slice());
         self.get_types_of_independent_expressions(def.index_args.clone(), tcon_with_params, scon)?;
 
         if ind.value.index_types.value.len() != def.index_args.value.len() {
@@ -240,7 +233,7 @@ impl TypeChecker {
         }
 
         assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
-            &param_type_types.value,
+            &param_type_types.raw(),
             ind.value.universe_level,
         )
         .map_err(|(offender_index, offender_level)| {
@@ -408,18 +401,17 @@ impl TypeChecker {
         exprs: RcHashed<Box<[Expr]>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<RcHashed<Box<[Expr]>>, TypeError> {
-        let mut out: Vec<NormalForm> = Vec::with_capacity(exprs.value.len());
+    ) -> Result<Normalized<Vec<Expr>>, TypeError> {
+        let mut out: Normalized<Vec<Expr>> =
+            Normalized::transpose_from_vec(Vec::with_capacity(exprs.value.len()));
 
         for expr in exprs.value.iter() {
-            let current_tcon = LazyTypeContext::Snoc(&tcon, &out);
+            let current_tcon = LazyTypeContext::Snoc(&tcon, out.as_slice());
             let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
             out.push(type_);
         }
 
-        let out: Vec<Expr> = out.into_iter().map(NormalForm::into_raw).collect();
-
-        Ok(Rc::new(Hashed::new(out.into_boxed_slice())))
+        Ok(out)
     }
 
     fn get_types_of_independent_expressions(

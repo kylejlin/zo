@@ -1,6 +1,6 @@
 use crate::ast::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Normalized<T>(pub(in crate::eval) T);
 
 pub type NormalForm = Normalized<Expr>;
@@ -18,5 +18,40 @@ impl<T> Normalized<T> {
 
     pub fn raw(&self) -> &T {
         &self.0
+    }
+}
+
+impl<T> Normalized<&T> {
+    pub fn cloned(self) -> Normalized<T>
+    where
+        T: Clone,
+    {
+        Normalized(self.0.clone())
+    }
+}
+
+impl<T> Normalized<&[T]> {
+    pub fn get(&self, index: usize) -> Option<Normalized<&T>> {
+        self.0.get(index).map(Normalized)
+    }
+}
+
+impl<T> FromIterator<Normalized<T>> for Normalized<Vec<T>> {
+    fn from_iter<I: IntoIterator<Item = Normalized<T>>>(iter: I) -> Self {
+        Normalized(iter.into_iter().map(Normalized::into_raw).collect())
+    }
+}
+
+impl<T> Normalized<Vec<T>> {
+    pub fn as_slice(&self) -> Normalized<&[T]> {
+        Normalized(&self.0)
+    }
+
+    pub fn transpose_from_vec(v: Vec<Normalized<T>>) -> Normalized<Vec<T>> {
+        Normalized(v.into_iter().map(Normalized::into_raw).collect())
+    }
+
+    pub fn push(&mut self, item: Normalized<T>) {
+        self.0.push(item.into_raw())
     }
 }
