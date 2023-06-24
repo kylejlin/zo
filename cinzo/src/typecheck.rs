@@ -677,7 +677,15 @@ impl TypeChecker {
         applied_sub: &ConcreteSubstitution,
         expr: &mut NormalForm,
     ) -> HasChanged {
-        todo!()
+        let subbed = applied_sub.apply(expr.raw().clone());
+        let normalized = self.evaluator.eval(subbed);
+
+        if expr.raw().digest() == normalized.raw().digest() {
+            return HasChanged(false);
+        }
+
+        *expr = normalized;
+        HasChanged(true)
     }
 }
 
@@ -732,5 +740,11 @@ struct HasChanged(pub bool);
 impl BitOrAssign for HasChanged {
     fn bitor_assign(&mut self, rhs: Self) {
         self.0 |= rhs.0;
+    }
+}
+
+impl ConcreteSubstitution {
+    pub fn apply(&self, expr: Expr) -> Expr {
+        todo!()
     }
 }
