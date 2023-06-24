@@ -8,17 +8,17 @@ use std::rc::Rc;
 impl From<cst::Expr> for ast::Expr {
     fn from(cst: cst::Expr) -> Self {
         match cst {
-            cst::Expr::Ind(cst) => ast::Expr::Ind(rc_hash((*cst).into())),
+            cst::Expr::Ind(cst) => ast::Ind::from(*cst).into(),
 
-            cst::Expr::Vcon(cst) => ast::Expr::Vcon(rc_hash((*cst).into())),
+            cst::Expr::Vcon(cst) => ast::Vcon::from(*cst).into(),
 
-            cst::Expr::Match(cst) => ast::Expr::Match(rc_hash((*cst).into())),
+            cst::Expr::Match(cst) => ast::Match::from(*cst).into(),
 
-            cst::Expr::Fun(cst) => ast::Expr::Fun(rc_hash((*cst).into())),
+            cst::Expr::Fun(cst) => ast::Fun::from(*cst).into(),
 
-            cst::Expr::App(cst) => ast::Expr::App(rc_hash((*cst).into())),
+            cst::Expr::App(cst) => ast::App::from(*cst).into(),
 
-            cst::Expr::For(cst) => ast::Expr::For(rc_hash((*cst).into())),
+            cst::Expr::For(cst) => ast::For::from(*cst).into(),
 
             cst::Expr::Deb(cst) => ast::Expr::Deb(rc_hash(ast::DebNode {
                 deb: ast::Deb(cst.value),
