@@ -237,8 +237,9 @@ impl TypeChecker {
         vcon: RcHashed<Vcon>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<NormalForm, TypeError> {
-        todo!()
+    ) -> Result<(), TypeError> {
+        self.get_type_of_ind(vcon.value.ind.clone(), tcon, scon)?;
+        Ok(())
     }
 
     fn get_type_of_vcon_def(
