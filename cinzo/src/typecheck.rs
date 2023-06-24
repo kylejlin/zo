@@ -193,7 +193,7 @@ impl TypeChecker {
         for def in ind.value.vcon_defs.value.iter() {
             self.assert_ind_vcon_def_is_well_typed(
                 ind.clone(),
-                predicted_ind_type,
+                predicted_ind_type.clone(),
                 def,
                 tcon,
                 scon,
@@ -210,16 +210,24 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        let tcon_with_recursive_ind_entry = LazyTypeContext::Snoc(&tcon, &[predicted_ind_type]);
+        let recursive_ind_entry = [predicted_ind_type];
+        let tcon_with_recursive_ind_entry = LazyTypeContext::Snoc(&tcon, &recursive_ind_entry);
         let param_type_types = self.get_types_of_dependent_expressions(
             def.param_types.clone(),
             tcon_with_recursive_ind_entry,
             scon,
         )?;
 
+        let param_type_types_wrapped_to_satisfy_rustc_typechecker: Vec<NormalForm> =
+            param_type_types
+                .value
+                .iter()
+                .cloned()
+                .map(|expr| self.assert_normal_form_or_panic(expr))
+                .collect();
         let tcon_with_params = LazyTypeContext::Snoc(
             &tcon_with_recursive_ind_entry,
-            todo_assert_nf_or_panic(&param_type_types.value),
+            &param_type_types_wrapped_to_satisfy_rustc_typechecker,
         );
         self.get_types_of_independent_expressions(def.index_args.clone(), tcon_with_params, scon)?;
 
