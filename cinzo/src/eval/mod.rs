@@ -70,9 +70,10 @@ impl Evaluator {
             vcon_defs: self
                 .eval_vcon_defs(ind.vcon_defs.clone())
                 .map(Normalized::into_raw)?,
-        };
+        }
+        .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(Normalized(Expr::Ind(Rc::new(Hashed::new(normalized)))));
+        let result = Ok(normalized);
         self.eval_expr_cache.insert(ind_digest, result.clone());
         result
     }
@@ -91,14 +92,14 @@ impl Evaluator {
     ) -> Result<Normalized<RcExprs>, EvalError> {
         let exprs_digest = exprs.digest.clone();
         let exprs = &exprs.value;
-        let normalized: Vec<Expr> = exprs
+        let normalized = exprs
             .iter()
             .map(|expr| self.eval(expr.clone()).map(Normalized::into_raw))
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()?
+            .into_boxed_slice()
+            .rc_hash_and_wrap_in_normalized();
 
-        let result = Ok(Normalized(Rc::new(Hashed::new(
-            normalized.into_boxed_slice(),
-        ))));
+        let result = Ok(normalized);
         self.eval_exprs_cache.insert(exprs_digest, result.clone());
         result
     }
@@ -117,14 +118,14 @@ impl Evaluator {
     ) -> Result<Normalized<RcVconDefs>, EvalError> {
         let defs_digest = defs.digest.clone();
         let defs = &defs.value;
-        let normalized: Vec<VconDef> = defs
+        let normalized = defs
             .iter()
             .map(|def| self.eval_vcon_def(def.clone()).map(Normalized::into_raw))
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()?
+            .into_boxed_slice()
+            .rc_hash_and_wrap_in_normalized();
 
-        let result = Ok(Normalized(Rc::new(Hashed::new(
-            normalized.into_boxed_slice(),
-        ))));
+        let result = Ok(normalized);
         self.eval_vcon_defs_cache
             .insert(defs_digest, result.clone());
         result
@@ -153,9 +154,10 @@ impl Evaluator {
         let normalized = Vcon {
             ind: self.eval_ind(vcon.ind.clone())?.into_raw(),
             vcon_index: vcon.vcon_index,
-        };
+        }
+        .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(Normalized(Expr::Vcon(Rc::new(Hashed::new(normalized)))));
+        let result = Ok(normalized);
         self.eval_expr_cache.insert(vcon_digest, result.clone());
         result
     }
@@ -215,9 +217,10 @@ impl Evaluator {
             matchee: normalized_matchee,
             return_type: self.eval(match_.return_type.clone())?.into_raw(),
             cases: self.eval_match_cases(match_.cases.clone())?.into_raw(),
-        };
+        }
+        .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(Normalized(Expr::Match(Rc::new(Hashed::new(normalized)))));
+        let result = Ok(normalized);
         self.eval_expr_cache.insert(match_digest, result.clone());
         result
     }
@@ -238,7 +241,7 @@ impl Evaluator {
         cases: RcMatchCases,
     ) -> Result<Normalized<RcMatchCases>, EvalError> {
         let cases = &cases.value;
-        let normalized: Vec<MatchCase> = cases
+        let normalized = cases
             .iter()
             .map(|original| {
                 Ok(MatchCase {
@@ -246,11 +249,11 @@ impl Evaluator {
                     return_val: self.eval(original.return_val.clone())?.into_raw(),
                 })
             })
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()?
+            .into_boxed_slice()
+            .rc_hash_and_wrap_in_normalized();
 
-        Ok(Normalized(Rc::new(Hashed::new(
-            normalized.into_boxed_slice(),
-        ))))
+        Ok(normalized)
     }
 
     fn eval_unseen_fun(&mut self, fun: RcHashed<Fun>) -> Result<NormalForm, EvalError> {
@@ -261,9 +264,10 @@ impl Evaluator {
             param_types: self.eval_expressions(fun.param_types.clone())?.into_raw(),
             return_type: self.eval(fun.return_type.clone())?.into_raw(),
             return_val: self.eval(fun.return_val.clone())?.into_raw(),
-        };
+        }
+        .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(Normalized(Expr::Fun(Rc::new(Hashed::new(normalized)))));
+        let result = Ok(normalized);
         self.eval_expr_cache.insert(fun_digest, result.clone());
         result
     }
@@ -290,9 +294,10 @@ impl Evaluator {
         let normalized = App {
             callee: normalized_callee,
             args: normalized_args,
-        };
+        }
+        .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(Normalized(Expr::App(Rc::new(Hashed::new(normalized)))));
+        let result = Ok(normalized);
         self.eval_expr_cache.insert(app_digest, result.clone());
         result
     }
@@ -303,9 +308,10 @@ impl Evaluator {
         let normalized = For {
             param_types: self.eval_expressions(for_.param_types.clone())?.into_raw(),
             return_type: self.eval(for_.return_type.clone())?.into_raw(),
-        };
+        }
+        .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(Normalized(Expr::For(Rc::new(Hashed::new(normalized)))));
+        let result = Ok(normalized);
         self.eval_expr_cache.insert(for_digest, result.clone());
         result
     }
@@ -342,5 +348,41 @@ fn is_vconlike(expr: Expr) -> bool {
             _other_callee => false,
         },
         _ => false,
+    }
+}
+
+trait WrapInNormalized: Sized {
+    fn wrap_in_normalized(self) -> Normalized<Self>;
+}
+
+impl<T> WrapInNormalized for T {
+    fn wrap_in_normalized(self) -> Normalized<T> {
+        Normalized(self)
+    }
+}
+
+trait ConvertToExprAndWrapInNormalized {
+    fn convert_to_expr_and_wrap_in_normalized(self) -> NormalForm;
+}
+
+impl<T> ConvertToExprAndWrapInNormalized for T
+where
+    T: Into<Expr>,
+{
+    fn convert_to_expr_and_wrap_in_normalized(self) -> NormalForm {
+        Normalized(self.into())
+    }
+}
+
+trait RcHashAndWrapInNormalized: Sized {
+    fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcHashed<Self>>;
+}
+
+impl<T> RcHashAndWrapInNormalized for T
+where
+    T: SemanticHash,
+{
+    fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcHashed<Self>> {
+        Normalized(rc_hash(self))
     }
 }

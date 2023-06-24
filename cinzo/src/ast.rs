@@ -1,5 +1,7 @@
 use std::rc::Rc;
 
+pub use crate::semantic_hash::*;
+
 #[derive(Clone, Debug)]
 pub enum Expr {
     Ind(RcHashed<Ind>),
@@ -27,7 +29,87 @@ impl Expr {
     }
 }
 
-pub use crate::semantic_hash::*;
+impl From<RcHashed<Ind>> for Expr {
+    fn from(ind: RcHashed<Ind>) -> Self {
+        Expr::Ind(ind)
+    }
+}
+impl From<RcHashed<Vcon>> for Expr {
+    fn from(vcon: RcHashed<Vcon>) -> Self {
+        Expr::Vcon(vcon)
+    }
+}
+impl From<RcHashed<Match>> for Expr {
+    fn from(match_: RcHashed<Match>) -> Self {
+        Expr::Match(match_)
+    }
+}
+impl From<RcHashed<Fun>> for Expr {
+    fn from(fun: RcHashed<Fun>) -> Self {
+        Expr::Fun(fun)
+    }
+}
+impl From<RcHashed<App>> for Expr {
+    fn from(app: RcHashed<App>) -> Self {
+        Expr::App(app)
+    }
+}
+impl From<RcHashed<For>> for Expr {
+    fn from(for_: RcHashed<For>) -> Self {
+        Expr::For(for_)
+    }
+}
+impl From<RcHashed<DebNode>> for Expr {
+    fn from(deb: RcHashed<DebNode>) -> Self {
+        Expr::Deb(deb)
+    }
+}
+impl From<RcHashed<UniverseNode>> for Expr {
+    fn from(universe: RcHashed<UniverseNode>) -> Self {
+        Expr::Universe(universe)
+    }
+}
+
+impl From<Ind> for Expr {
+    fn from(ind: Ind) -> Self {
+        rc_hash(ind).into()
+    }
+}
+impl From<Vcon> for Expr {
+    fn from(vcon: Vcon) -> Self {
+        rc_hash(vcon).into()
+    }
+}
+impl From<Match> for Expr {
+    fn from(match_: Match) -> Self {
+        rc_hash(match_).into()
+    }
+}
+impl From<Fun> for Expr {
+    fn from(fun: Fun) -> Self {
+        rc_hash(fun).into()
+    }
+}
+impl From<App> for Expr {
+    fn from(app: App) -> Self {
+        rc_hash(app).into()
+    }
+}
+impl From<For> for Expr {
+    fn from(for_: For) -> Self {
+        rc_hash(for_).into()
+    }
+}
+impl From<DebNode> for Expr {
+    fn from(deb: DebNode) -> Self {
+        rc_hash(deb).into()
+    }
+}
+impl From<UniverseNode> for Expr {
+    fn from(universe: UniverseNode) -> Self {
+        rc_hash(universe).into()
+    }
+}
 
 impl Expr {
     pub fn try_into_ind(self) -> Result<RcHashed<Ind>, Self> {
