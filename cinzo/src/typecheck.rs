@@ -222,12 +222,23 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
+        self.perform_vcon_precheck(vcon.clone(), tcon, scon)?;
+
         let vcon_index = vcon.value.vcon_index;
         let defs: &[VconDef] = &vcon.value.ind.value.vcon_defs.value;
         let Some(def) = defs.get(vcon_index) else {
             return Err(TypeError::InvalidVconIndex(vcon));
         };
         self.get_type_of_vcon_def(def, vcon.value.ind.clone(), tcon, scon)
+    }
+
+    fn perform_vcon_precheck(
+        &mut self,
+        vcon: RcHashed<Vcon>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<NormalForm, TypeError> {
+        todo!()
     }
 
     fn get_type_of_vcon_def(
