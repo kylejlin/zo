@@ -94,7 +94,7 @@ impl TypeChecker {
             Expr::App(e) => self.get_type_of_app(e, tcon, scon),
             Expr::For(e) => self.get_type_of_for(e, tcon, scon),
             Expr::Deb(e) => self.get_type_of_deb(e, tcon, scon),
-            Expr::Universe(e) => self.get_type_of_universe(e, tcon, scon),
+            Expr::Universe(e) => self.get_type_of_universe(e),
         }
     }
 
@@ -171,8 +171,6 @@ impl TypeChecker {
     fn get_type_of_universe(
         &mut self,
         universe: RcHashed<UniverseNode>,
-        tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         return Ok(self
             .eval(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
