@@ -95,3 +95,16 @@ impl Normalized<App> {
         Normalized(self.0.collapse_if_nullary())
     }
 }
+
+impl Normalized<For> {
+    pub fn for_(param_types: Normalized<RcHashed<Box<[Expr]>>>, return_type: NormalForm) -> Self {
+        Normalized(For {
+            param_types: param_types.into_raw(),
+            return_type: return_type.into_raw(),
+        })
+    }
+
+    pub fn collapse_if_nullary(self) -> NormalForm {
+        Normalized(self.0.collapse_if_nullary())
+    }
+}

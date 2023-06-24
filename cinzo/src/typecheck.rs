@@ -299,8 +299,7 @@ impl TypeChecker {
         let normalized_param_types = self
             .evaluator
             .eval_expressions(def.param_types.clone())
-            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE)
-            .into_raw();
+            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE);
         let normalized_ind = self
             .evaluator
             .eval_ind(ind.clone())
@@ -309,16 +308,9 @@ impl TypeChecker {
             .evaluator
             .eval_expressions(def.index_args.clone())
             .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE);
-        let return_type = Normalized::ind_app(normalized_ind, normalized_index_args)
-            .collapse_if_nullary()
-            .into_raw();
-        let already_normalized = For {
-            param_types: normalized_param_types,
-            return_type,
-        }
-        .collapse_if_nullary();
-        let trivially_normalized = self.assert_normal_form_or_panic(already_normalized);
-        Ok(trivially_normalized)
+        let return_type =
+            Normalized::ind_app(normalized_ind, normalized_index_args).collapse_if_nullary();
+        Ok(Normalized::for_(normalized_param_types, return_type).collapse_if_nullary())
     }
 
     fn get_type_of_match(
