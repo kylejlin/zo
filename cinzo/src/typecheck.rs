@@ -8,12 +8,30 @@ use std::rc::Rc;
 type RcHashed<T> = Rc<Hashed<T>>;
 
 #[derive(Debug, Clone)]
-pub enum TypeError {}
+pub enum TypeError {
+    InvalidDeb {
+        deb: RcHashed<DebNode>,
+        tcon_len: usize,
+    },
+}
 
 #[derive(Debug, Clone, Copy)]
 pub enum LazyTypeContext<'a> {
-    Base(&'a [Expr]),
-    Snoc(&'a LazyTypeContext<'a>, &'a [Expr]),
+    Base(&'a [NormalForm]),
+    Snoc(&'a LazyTypeContext<'a>, &'a [NormalForm]),
+}
+
+impl LazyTypeContext<'_> {
+    pub fn len(&self) -> usize {
+        match self {
+            LazyTypeContext::Base(subcontext) => subcontext.len(),
+            LazyTypeContext::Snoc(context, subcontext) => context.len() + subcontext.len(),
+        }
+    }
+
+    pub fn get(&self, deb: Deb) -> Option<NormalForm> {
+        todo!()
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -27,6 +45,15 @@ pub struct LazySubstitution<'a> {
     pub tcon_len: usize,
     pub left: &'a Expr,
     pub right: &'a Expr,
+}
+
+impl LazySubstitutionContext<'_> {
+    pub fn len(&self) -> usize {
+        match self {
+            LazySubstitutionContext::Base(subs) => subs.len(),
+            LazySubstitutionContext::Cons(subs, rest) => subs.len() + rest.len(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -119,7 +146,14 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        todo!()
+        if let Some(expr) = tcon.get(deb.value.deb) {
+            return Ok(expr);
+        }
+
+        return Err(TypeError::InvalidDeb {
+            deb,
+            tcon_len: tcon.len(),
+        });
     }
 
     fn get_type_of_universe(
