@@ -1,4 +1,7 @@
-use crate::{ast::*, eval::NormalForm};
+use crate::{
+    ast::*,
+    eval::{EvalError, Evaluator, NormalForm},
+};
 
 use std::rc::Rc;
 
@@ -27,7 +30,9 @@ pub struct LazySubstitution<'a> {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct TypeChecker {}
+pub struct TypeChecker {
+    pub evaluator: Evaluator,
+}
 
 impl TypeChecker {
     pub fn new() -> Self {
@@ -123,6 +128,14 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        todo!()
+        return Ok(self
+            .eval(Expr::Universe(Rc::new(Hashed::new(Universe {
+                level: universe.value.level + 1,
+            }))))
+            .expect("A universe should always evaluate to itself."));
+    }
+
+    fn eval(&mut self, expr: Expr) -> Result<NormalForm, EvalError> {
+        self.evaluator.eval(expr)
     }
 }
