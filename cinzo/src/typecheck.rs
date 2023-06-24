@@ -369,14 +369,13 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        for (well_typed_vcon_def, match_case) in well_typed_matchee_type_ind
-            .raw()
-            .value
-            .vcon_defs
-            .value
-            .iter()
-            .zip(match_.value.cases.value.iter())
-        {
+        let vcon_defs = well_typed_matchee_type_ind.without_digest().vcon_defs();
+        let vcon_defs = vcon_defs.without_digest();
+        let vcon_defs = vcon_defs.as_slice();
+
+        for i in 0..match_.value.cases.value.len() {
+            let well_typed_vcon_def = vcon_defs.index(i);
+            let match_case = &match_.value.cases.value[i];
             self.perform_match_case_precheck(
                 match_case,
                 well_typed_vcon_def,
@@ -394,7 +393,7 @@ impl TypeChecker {
     fn perform_match_case_precheck(
         &mut self,
         match_case: &MatchCase,
-        well_typed_vcon_def: &VconDef,
+        well_typed_vcon_def: Normalized<&VconDef>,
         match_: RcHashed<Match>,
         well_typed_matchee_type_ind: Normalized<RcHashed<Ind>>,
         well_typed_matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,

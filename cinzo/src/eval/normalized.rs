@@ -32,6 +32,12 @@ impl<T> Normalized<&T> {
     }
 }
 
+impl<T> Normalized<RcHashed<T>> {
+    pub fn without_digest(&self) -> Normalized<&T> {
+        Normalized(&self.0.value)
+    }
+}
+
 impl<T> Normalized<&[T]> {
     pub fn get(&self, index: usize) -> Option<Normalized<&T>> {
         self.0.get(index).map(Normalized)
@@ -74,6 +80,12 @@ impl<T> Normalized<Vec<T>> {
     }
 }
 
+impl<T> Normalized<&Box<[T]>> {
+    pub fn as_slice(&self) -> Normalized<&[T]> {
+        Normalized(&self.0)
+    }
+}
+
 impl NormalForm {
     pub fn universe(universe: UniverseNode) -> Self {
         Normalized(Expr::Universe(Rc::new(Hashed::new(universe))))
@@ -99,6 +111,12 @@ impl NormalForm {
 
             _ => None,
         }
+    }
+}
+
+impl Normalized<&Ind> {
+    pub fn vcon_defs(self) -> Normalized<RcHashed<Box<[VconDef]>>> {
+        Normalized(self.0.vcon_defs.clone())
     }
 }
 
