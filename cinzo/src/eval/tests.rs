@@ -45,7 +45,7 @@ fn add_2_3() {
         let tokens = crate::lexer::lex(&add_two_three_src).unwrap();
         let cst = crate::parser::parse(tokens).unwrap();
         let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).unwrap().into_raw()
+        Evaluator::default().eval(ast).into_raw()
     };
 
     let expected = {
@@ -84,7 +84,7 @@ fn nullary_match_case() {
         let tokens = crate::lexer::lex(&match_src).unwrap();
         let cst = crate::parser::parse(tokens).unwrap();
         let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).unwrap().into_raw()
+        Evaluator::default().eval(ast).into_raw()
     };
 
     let expected = {
@@ -123,7 +123,7 @@ fn match_case_param_substitution() {
         let tokens = crate::lexer::lex(&match_src).unwrap();
         let cst = crate::parser::parse(tokens).unwrap();
         let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).unwrap().into_raw()
+        Evaluator::default().eval(ast).into_raw()
     };
 
     let expected = {
@@ -325,7 +325,7 @@ fn rev_1_2_3() {
         let tokens = crate::lexer::lex(&rev_one_two_three_src).unwrap();
         let cst = crate::parser::parse(tokens).unwrap();
         let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).unwrap().into_raw()
+        Evaluator::default().eval(ast).into_raw()
     };
 
     let expected = {
@@ -530,7 +530,7 @@ fn polymorphic_rev_1_2_3() {
         let tokens = crate::lexer::lex(&rev_one_two_three_src).unwrap();
         let cst = crate::parser::parse(tokens).unwrap();
         let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).unwrap().into_raw()
+        Evaluator::default().eval(ast).into_raw()
     };
 
     let expected = {
@@ -583,7 +583,7 @@ fn recursive_fun_app_stops_unfolding_when_decreasing_arg_not_vconlike() {
         let tokens = crate::lexer::lex(&ident_succ_deb_123_src).unwrap();
         let cst = crate::parser::parse(tokens).unwrap();
         let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).unwrap().into_raw()
+        Evaluator::default().eval(ast).into_raw()
     };
 
     let expected = {
@@ -642,7 +642,7 @@ fn substitution_upshifts_new_expr_debs() {
         let tokens = crate::lexer::lex(&match_src).unwrap();
         let cst = crate::parser::parse(tokens).unwrap();
         let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).unwrap().into_raw()
+        Evaluator::default().eval(ast).into_raw()
     };
 
     let expected = {

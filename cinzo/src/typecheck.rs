@@ -83,9 +83,6 @@ impl LazySubstitutionContext<'_> {
     }
 }
 
-const WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE: &str =
-    "A well-typed expression should be evaluatable.";
-
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
@@ -247,8 +244,7 @@ impl TypeChecker {
     fn get_ind_type_assuming_ind_is_well_typed(&mut self, ind: RcHashed<Ind>) -> NormalForm {
         let normalized_index_types = self
             .evaluator
-            .eval_expressions(ind.value.index_types.clone())
-            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE);
+            .eval_expressions(ind.value.index_types.clone());
         let return_type = self.get_ind_return_type(ind);
         Normalized::for_(normalized_index_types, return_type).collapse_if_nullary()
     }
@@ -290,18 +286,9 @@ impl TypeChecker {
         def: &VconDef,
         ind: RcHashed<Ind>,
     ) -> Result<NormalForm, TypeError> {
-        let normalized_param_types = self
-            .evaluator
-            .eval_expressions(def.param_types.clone())
-            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE);
-        let normalized_ind = self
-            .evaluator
-            .eval_ind(ind.clone())
-            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE);
-        let normalized_index_args = self
-            .evaluator
-            .eval_expressions(def.index_args.clone())
-            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE);
+        let normalized_param_types = self.evaluator.eval_expressions(def.param_types.clone());
+        let normalized_ind = self.evaluator.eval_ind(ind.clone());
+        let normalized_index_args = self.evaluator.eval_expressions(def.index_args.clone());
         let return_type = Normalized::app_with_ind_callee(normalized_ind, normalized_index_args)
             .collapse_if_nullary();
         Ok(Normalized::for_(normalized_param_types, return_type).collapse_if_nullary())
@@ -366,8 +353,7 @@ impl TypeChecker {
             .evaluator
             .eval(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
                 level: UniverseLevel(universe.value.level.0 + 1),
-            }))))
-            .expect("A universe should always evaluate to itself."));
+            })))));
     }
 
     fn get_types_of_dependent_expressions(

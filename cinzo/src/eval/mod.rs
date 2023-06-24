@@ -13,16 +13,11 @@ use replace_debs::*;
 mod normalized;
 pub use normalized::*;
 
-#[derive(Clone, Debug)]
-pub enum EvalError {
-    TooFewMatchCases(RcHashed<Match>),
-}
-
 #[derive(Clone, Debug, Default)]
 pub struct Evaluator {
-    pub eval_expr_cache: NoHashHashMap<Digest, Result<NormalForm, EvalError>>,
-    pub eval_exprs_cache: NoHashHashMap<Digest, Result<Normalized<RcExprs>, EvalError>>,
-    pub eval_vcon_defs_cache: NoHashHashMap<Digest, Result<Normalized<RcVconDefs>, EvalError>>,
+    pub eval_expr_cache: NoHashHashMap<Digest, NormalForm>,
+    pub eval_exprs_cache: NoHashHashMap<Digest, Normalized<RcExprs>>,
+    pub eval_vcon_defs_cache: NoHashHashMap<Digest, Normalized<RcVconDefs>>,
 }
 
 impl Evaluator {
@@ -37,7 +32,7 @@ type RcVconDefs = RcHashed<Box<[VconDef]>>;
 type RcMatchCases = RcHashed<Box<[MatchCase]>>;
 
 impl Evaluator {
-    pub fn eval(&mut self, expr: Expr) -> Result<NormalForm, EvalError> {
+    pub fn eval(&mut self, expr: Expr) -> NormalForm {
         if let Some(result) = self.eval_expr_cache.get(&expr.digest()) {
             result.clone()
         } else {
@@ -45,7 +40,7 @@ impl Evaluator {
         }
     }
 
-    fn eval_unseen_expr(&mut self, expr: Expr) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_expr(&mut self, expr: Expr) -> NormalForm {
         match expr {
             Expr::Ind(e) => self.eval_unseen_ind(e),
             Expr::Vcon(e) => self.eval_unseen_vcon(e),
@@ -54,31 +49,26 @@ impl Evaluator {
             Expr::App(e) => self.eval_unseen_app(e),
             Expr::For(e) => self.eval_unseen_for(e),
 
-            Expr::Deb(_) | Expr::Universe(_) => Ok(Normalized(expr)),
+            Expr::Deb(_) | Expr::Universe(_) => Normalized(expr),
         }
     }
 
-    fn eval_unseen_ind(&mut self, ind: RcHashed<Ind>) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_ind(&mut self, ind: RcHashed<Ind>) -> NormalForm {
         let ind_digest = ind.digest.clone();
         let ind = &ind.value;
         let normalized = Ind {
             name: ind.name.clone(),
             universe_level: ind.universe_level,
-            index_types: self
-                .eval_expressions(ind.index_types.clone())
-                .map(Normalized::into_raw)?,
-            vcon_defs: self
-                .eval_vcon_defs(ind.vcon_defs.clone())
-                .map(Normalized::into_raw)?,
+            index_types: self.eval_expressions(ind.index_types.clone()).into_raw(),
+            vcon_defs: self.eval_vcon_defs(ind.vcon_defs.clone()).into_raw(),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(normalized);
-        self.eval_expr_cache.insert(ind_digest, result.clone());
-        result
+        self.eval_expr_cache.insert(ind_digest, normalized.clone());
+        normalized
     }
 
-    pub fn eval_expressions(&mut self, exprs: RcExprs) -> Result<Normalized<RcExprs>, EvalError> {
+    pub fn eval_expressions(&mut self, exprs: RcExprs) -> Normalized<RcExprs> {
         if let Some(result) = self.eval_exprs_cache.get(&exprs.digest) {
             result.clone()
         } else {
@@ -86,25 +76,22 @@ impl Evaluator {
         }
     }
 
-    fn eval_unseen_expressions(
-        &mut self,
-        exprs: RcExprs,
-    ) -> Result<Normalized<RcExprs>, EvalError> {
+    fn eval_unseen_expressions(&mut self, exprs: RcExprs) -> Normalized<RcExprs> {
         let exprs_digest = exprs.digest.clone();
         let exprs = &exprs.value;
         let normalized = exprs
             .iter()
-            .map(|expr| self.eval(expr.clone()).map(Normalized::into_raw))
-            .collect::<Result<Vec<_>, _>>()?
+            .map(|expr| self.eval(expr.clone()).into_raw())
+            .collect::<Vec<_>>()
             .into_boxed_slice()
             .rc_hash_and_wrap_in_normalized();
 
-        let result = Ok(normalized);
-        self.eval_exprs_cache.insert(exprs_digest, result.clone());
-        result
+        self.eval_exprs_cache
+            .insert(exprs_digest, normalized.clone());
+        normalized
     }
 
-    fn eval_vcon_defs(&mut self, defs: RcVconDefs) -> Result<Normalized<RcVconDefs>, EvalError> {
+    fn eval_vcon_defs(&mut self, defs: RcVconDefs) -> Normalized<RcVconDefs> {
         if let Some(result) = self.eval_vcon_defs_cache.get(&defs.digest) {
             result.clone()
         } else {
@@ -112,26 +99,22 @@ impl Evaluator {
         }
     }
 
-    fn eval_unseen_vcon_defs(
-        &mut self,
-        defs: RcVconDefs,
-    ) -> Result<Normalized<RcVconDefs>, EvalError> {
+    fn eval_unseen_vcon_defs(&mut self, defs: RcVconDefs) -> Normalized<RcVconDefs> {
         let defs_digest = defs.digest.clone();
         let defs = &defs.value;
         let normalized = defs
             .iter()
-            .map(|def| self.eval_vcon_def(def.clone()).map(Normalized::into_raw))
-            .collect::<Result<Vec<_>, _>>()?
+            .map(|def| self.eval_vcon_def(def.clone()).into_raw())
+            .collect::<Vec<_>>()
             .into_boxed_slice()
             .rc_hash_and_wrap_in_normalized();
 
-        let result = Ok(normalized);
         self.eval_vcon_defs_cache
-            .insert(defs_digest, result.clone());
-        result
+            .insert(defs_digest, normalized.clone());
+        normalized
     }
 
-    fn eval_vcon_def(&mut self, def: VconDef) -> Result<Normalized<VconDef>, EvalError> {
+    fn eval_vcon_def(&mut self, def: VconDef) -> Normalized<VconDef> {
         // It's not worth caching vcon defs,
         // so we'll just reevaluate them every time.
         // This is not actually that expensive,
@@ -139,57 +122,56 @@ impl Evaluator {
         self.eval_unseen_vcon_def(def)
     }
 
-    fn eval_unseen_vcon_def(&mut self, def: VconDef) -> Result<Normalized<VconDef>, EvalError> {
-        let normalized = VconDef {
-            param_types: self.eval_expressions(def.param_types.clone())?.into_raw(),
-            index_args: self.eval_expressions(def.index_args.clone())?.into_raw(),
-        };
-
-        Ok(Normalized(normalized))
+    fn eval_unseen_vcon_def(&mut self, def: VconDef) -> Normalized<VconDef> {
+        Normalized(VconDef {
+            param_types: self.eval_expressions(def.param_types.clone()).into_raw(),
+            index_args: self.eval_expressions(def.index_args.clone()).into_raw(),
+        })
     }
 
-    fn eval_unseen_vcon(&mut self, vcon: RcHashed<Vcon>) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_vcon(&mut self, vcon: RcHashed<Vcon>) -> NormalForm {
         let vcon_digest = vcon.digest.clone();
         let vcon = &vcon.value;
         let normalized = Vcon {
-            ind: self.eval_ind(vcon.ind.clone())?.into_raw(),
+            ind: self.eval_ind(vcon.ind.clone()).into_raw(),
             vcon_index: vcon.vcon_index,
         }
         .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(normalized);
-        self.eval_expr_cache.insert(vcon_digest, result.clone());
-        result
+        self.eval_expr_cache.insert(vcon_digest, normalized.clone());
+        normalized
     }
 
-    pub fn eval_ind(&mut self, ind: RcHashed<Ind>) -> Result<Normalized<RcHashed<Ind>>, EvalError> {
+    pub fn eval_ind(&mut self, ind: RcHashed<Ind>) -> Normalized<RcHashed<Ind>> {
         if let Some(result) = self.eval_expr_cache.get(&ind.digest) {
-            result.clone().map(|nf| {
-                Normalized(
-                    nf.into_raw()
-                        .try_into_ind()
-                        .expect("Evaluating an ind should always return an ind"),
-                )
-            })
+            Normalized(
+                result
+                    .clone()
+                    .into_raw()
+                    .try_into_ind()
+                    .expect("Evaluating an ind should always return an ind"),
+            )
         } else {
-            self.eval_unseen_ind(ind).map(|nf| {
-                Normalized(
-                    nf.into_raw()
-                        .try_into_ind()
-                        .expect("Evaluating an ind should always return an ind"),
-                )
-            })
+            Normalized(
+                self.eval_unseen_ind(ind)
+                    .clone()
+                    .into_raw()
+                    .try_into_ind()
+                    .expect("Evaluating an ind should always return an ind"),
+            )
         }
     }
 
-    fn eval_unseen_match(&mut self, m: RcHashed<Match>) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_match(&mut self, m: RcHashed<Match>) -> NormalForm {
         let match_ = &m.value;
-        let normalized_matchee = self.eval(match_.matchee.clone())?.into_raw();
+        let normalized_matchee = self.eval(match_.matchee.clone()).into_raw();
 
         if let Expr::Vcon(vcon) = &normalized_matchee {
             let vcon_index = vcon.value.vcon_index;
             if vcon_index >= match_.cases.value.len() {
-                return Err(EvalError::TooFewMatchCases(m));
+                // This is a "stuck" term.
+                // Since we don't emit errors, we just return it as-is.
+                return m.convert_to_expr_and_wrap_in_normalized();
             }
 
             let match_return_value = match_.cases.value[vcon_index].return_val.clone();
@@ -200,7 +182,9 @@ impl Evaluator {
             if let Expr::Vcon(vcon) = &normalized_matchee.value.callee {
                 let vcon_index = vcon.value.vcon_index;
                 if vcon_index >= match_.cases.value.len() {
-                    return Err(EvalError::TooFewMatchCases(m));
+                    // This is a "stuck" term.
+                    // Since we don't emit errors, we just return it as-is.
+                    return m.convert_to_expr_and_wrap_in_normalized();
                 }
 
                 let unsubstituted = match_.cases.value[vcon_index].return_val.clone();
@@ -215,20 +199,17 @@ impl Evaluator {
         let match_digest = m.digest.clone();
         let normalized = Match {
             matchee: normalized_matchee,
-            return_type: self.eval(match_.return_type.clone())?.into_raw(),
-            cases: self.eval_match_cases(match_.cases.clone())?.into_raw(),
+            return_type: self.eval(match_.return_type.clone()).into_raw(),
+            cases: self.eval_match_cases(match_.cases.clone()).into_raw(),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(normalized);
-        self.eval_expr_cache.insert(match_digest, result.clone());
-        result
+        self.eval_expr_cache
+            .insert(match_digest, normalized.clone());
+        normalized
     }
 
-    fn eval_match_cases(
-        &mut self,
-        cases: RcMatchCases,
-    ) -> Result<Normalized<RcMatchCases>, EvalError> {
+    fn eval_match_cases(&mut self, cases: RcMatchCases) -> Normalized<RcMatchCases> {
         // It's not worth caching match cases,
         // so we'll just re-evaluate them every time.
         // This isn't actually that expensive,
@@ -236,45 +217,37 @@ impl Evaluator {
         self.eval_unseen_match_cases(cases)
     }
 
-    fn eval_unseen_match_cases(
-        &mut self,
-        cases: RcMatchCases,
-    ) -> Result<Normalized<RcMatchCases>, EvalError> {
+    fn eval_unseen_match_cases(&mut self, cases: RcMatchCases) -> Normalized<RcMatchCases> {
         let cases = &cases.value;
-        let normalized = cases
+        cases
             .iter()
-            .map(|original| {
-                Ok(MatchCase {
-                    arity: original.arity,
-                    return_val: self.eval(original.return_val.clone())?.into_raw(),
-                })
+            .map(|original| MatchCase {
+                arity: original.arity,
+                return_val: self.eval(original.return_val.clone()).into_raw(),
             })
-            .collect::<Result<Vec<_>, _>>()?
+            .collect::<Vec<_>>()
             .into_boxed_slice()
-            .rc_hash_and_wrap_in_normalized();
-
-        Ok(normalized)
+            .rc_hash_and_wrap_in_normalized()
     }
 
-    fn eval_unseen_fun(&mut self, fun: RcHashed<Fun>) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_fun(&mut self, fun: RcHashed<Fun>) -> NormalForm {
         let fun_digest = fun.digest.clone();
         let fun = &fun.value;
         let normalized = Fun {
             decreasing_index: fun.decreasing_index,
-            param_types: self.eval_expressions(fun.param_types.clone())?.into_raw(),
-            return_type: self.eval(fun.return_type.clone())?.into_raw(),
-            return_val: self.eval(fun.return_val.clone())?.into_raw(),
+            param_types: self.eval_expressions(fun.param_types.clone()).into_raw(),
+            return_type: self.eval(fun.return_type.clone()).into_raw(),
+            return_val: self.eval(fun.return_val.clone()).into_raw(),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(normalized);
-        self.eval_expr_cache.insert(fun_digest, result.clone());
-        result
+        self.eval_expr_cache.insert(fun_digest, normalized.clone());
+        normalized
     }
 
-    fn eval_unseen_app(&mut self, app: RcHashed<App>) -> Result<NormalForm, EvalError> {
-        let normalized_callee = self.eval(app.value.callee.clone())?.into_raw();
-        let normalized_args = self.eval_expressions(app.value.args.clone())?.into_raw();
+    fn eval_unseen_app(&mut self, app: RcHashed<App>) -> NormalForm {
+        let normalized_callee = self.eval(app.value.callee.clone()).into_raw();
+        let normalized_args = self.eval_expressions(app.value.args.clone()).into_raw();
 
         if let Expr::Fun(callee) = &normalized_callee {
             if can_unfold_app(callee.clone(), normalized_args.clone()) {
@@ -297,23 +270,21 @@ impl Evaluator {
         }
         .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(normalized);
-        self.eval_expr_cache.insert(app_digest, result.clone());
-        result
+        self.eval_expr_cache.insert(app_digest, normalized.clone());
+        normalized
     }
 
-    fn eval_unseen_for(&mut self, for_: RcHashed<For>) -> Result<NormalForm, EvalError> {
+    fn eval_unseen_for(&mut self, for_: RcHashed<For>) -> NormalForm {
         let for_digest = for_.digest.clone();
         let for_ = &for_.value;
         let normalized = For {
-            param_types: self.eval_expressions(for_.param_types.clone())?.into_raw(),
-            return_type: self.eval(for_.return_type.clone())?.into_raw(),
+            param_types: self.eval_expressions(for_.param_types.clone()).into_raw(),
+            return_type: self.eval(for_.return_type.clone()).into_raw(),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
-        let result = Ok(normalized);
-        self.eval_expr_cache.insert(for_digest, result.clone());
-        result
+        self.eval_expr_cache.insert(for_digest, normalized.clone());
+        normalized
     }
 
     fn substitute_and_downshift_debs(&mut self, expr: Expr, new_exprs: &[Expr]) -> Expr {
