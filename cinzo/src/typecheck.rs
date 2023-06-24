@@ -351,8 +351,10 @@ impl TypeChecker {
             });
         }
 
+        let normalized_match_return_type = self.evaluator.eval(match_.value.return_type.clone());
         self.perform_match_cases_precheck(
             match_,
+            normalized_match_return_type,
             well_typed_matchee_type_ind,
             well_typed_matchee_type_args,
             tcon,
@@ -365,6 +367,7 @@ impl TypeChecker {
     fn perform_match_cases_precheck(
         &mut self,
         match_: RcHashed<Match>,
+        match_return_type: NormalForm,
         well_typed_matchee_type_ind: Normalized<RcHashed<Ind>>,
         well_typed_matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,
         tcon: LazyTypeContext,
@@ -381,6 +384,7 @@ impl TypeChecker {
                 match_case,
                 well_typed_vcon_def,
                 match_.clone(),
+                match_return_type.clone(),
                 well_typed_matchee_type_ind.clone(),
                 well_typed_matchee_type_args.clone(),
                 tcon,
@@ -396,12 +400,40 @@ impl TypeChecker {
         match_case: &MatchCase,
         well_typed_vcon_def: Normalized<&VconDef>,
         match_: RcHashed<Match>,
+        match_return_type: NormalForm,
         well_typed_matchee_type_ind: Normalized<RcHashed<Ind>>,
         well_typed_matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        todo!()
+        let ind_singleton: [Expr; 1] = [well_typed_matchee_type_ind.clone().into_raw().into()];
+        let match_case_param_types = DebDownshiftSubstituter {
+            new_exprs: &ind_singleton,
+        }
+        .replace_debs_in_expressions_with_increasing_cutoff(
+            well_typed_vcon_def.raw().param_types.clone(),
+            0,
+        );
+        let match_case_param_types = self.evaluator.eval_expressions(match_case_param_types);
+        let match_case_param_types = match_case_param_types.without_digest();
+
+        let extended_tcon = LazyTypeContext::Snoc(&tcon, match_case_param_types.as_slice());
+        let extended_scon = todo_();
+
+        fn todo_<T>() -> T {
+            todo!()
+        }
+
+        let match_case_return_type =
+            self.get_type(match_case.return_val.clone(), extended_tcon, extended_scon)?;
+
+        self.assert_exprs_are_equal_after_applying_scon(
+            match_return_type,
+            match_case_return_type,
+            extended_scon,
+        )?;
+
+        Ok(())
     }
 
     fn get_type_of_fun(
@@ -489,6 +521,15 @@ impl TypeChecker {
         }
 
         Ok(Rc::new(Hashed::new(out.into_boxed_slice())))
+    }
+
+    fn assert_exprs_are_equal_after_applying_scon(
+        &mut self,
+        expected: NormalForm,
+        actual: NormalForm,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
+        todo!()
     }
 }
 
