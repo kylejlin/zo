@@ -93,7 +93,7 @@ impl TypeChecker {
             Expr::Fun(e) => self.get_type_of_fun(e, tcon, scon),
             Expr::App(e) => self.get_type_of_app(e, tcon, scon),
             Expr::For(e) => self.get_type_of_for(e, tcon, scon),
-            Expr::Deb(e) => self.get_type_of_deb(e, tcon, scon),
+            Expr::Deb(e) => self.get_type_of_deb(e, tcon),
             Expr::Universe(e) => self.get_type_of_universe(e),
         }
     }
@@ -156,7 +156,6 @@ impl TypeChecker {
         &mut self,
         deb: RcHashed<DebNode>,
         tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         if let Some(expr) = tcon.get(deb.value.deb) {
             return Ok(expr);
