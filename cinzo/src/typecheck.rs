@@ -1,6 +1,6 @@
 use crate::{
     ast::*,
-    eval::{EvalError, Evaluator, NormalForm},
+    eval::{EvalError, Evaluator, NormalForm, Normalized},
 };
 
 use std::rc::Rc;
@@ -112,11 +112,15 @@ impl TypeChecker {
     }
 
     fn get_type_of_unindexed_ind(&mut self, ind: RcHashed<Ind>) -> Result<NormalForm, TypeError> {
-        return Ok(self
+        self.get_ind_return_type(ind)
+    }
+
+    fn get_ind_return_type(&mut self, ind: RcHashed<Ind>) -> Result<NormalForm, TypeError> {
+        Ok(self
             .eval(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
                 level: ind.value.universe_level,
             }))))
-            .expect("A universe should always evaluate to itself."));
+            .expect("A universe should always evaluate to itself."))
     }
 
     fn get_type_of_indexed_ind(
@@ -125,6 +129,23 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
+        let param_types =
+            self.get_type_of_dependent_expressions(ind.value.index_types.clone(), tcon, scon)?;
+        let return_type = self.get_ind_return_type(ind)?.into_raw();
+        return Ok(self
+            .eval(Expr::For(Rc::new(Hashed::new(For {
+                param_types,
+                return_type,
+            }))))
+            .expect("A forall with normalized param types and return type should be normalized, and thus trivially evaluatable."));
+    }
+
+    fn get_type_of_dependent_expressions(
+        &mut self,
+        exprs: RcHashed<Box<[Expr]>>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<RcHashed<Box<[Expr]>>, TypeError> {
         todo!()
     }
 
