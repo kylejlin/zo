@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::ast::*;
+use crate::{ast::*, replace_debs::*};
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Normalized<T>(pub(in crate::eval) T);
@@ -120,6 +120,12 @@ impl Normalized<&Ind> {
     }
 }
 
+impl Normalized<&VconDef> {
+    pub fn index_args(self) -> Normalized<RcHashed<Box<[Expr]>>> {
+        Normalized(self.0.index_args.clone())
+    }
+}
+
 impl Normalized<App> {
     pub fn app_with_ind_callee(
         callee: Normalized<RcHashed<Ind>>,
@@ -146,6 +152,52 @@ impl Normalized<For> {
 
     pub fn collapse_if_nullary(self) -> NormalForm {
         Normalized(self.0.collapse_if_nullary())
+    }
+}
+
+impl NormalForm {
+    /// Returns an expression of the form
+    /// ```zolike
+    /// (@capp (@capp <ind> <index_args>) (
+    ///     <capp_capp_arg_count>
+    ///     <capp_capp_arg_count - 1>
+    ///     <capp_capp_arg_count - 2>
+    ///     ...
+    ///     0
+    /// ))
+    /// ```
+    pub fn ind_capp_capp(
+        ind: Normalized<RcHashed<Ind>>,
+        index_args: Normalized<RcHashed<Box<[Expr]>>>,
+        capp_capp_arg_count: usize,
+    ) -> NormalForm {
+        todo!()
+    }
+}
+
+impl NormalForm {
+    pub fn upshift_expressions_with_constant_cutoff(self, amount: usize) -> Self {
+        Normalized(DebUpshifter(amount).replace_debs(self.0, 0))
+    }
+}
+
+impl Normalized<RcHashed<Box<[Expr]>>> {
+    pub fn upshift_expressions_with_constant_cutoff(self, amount: usize) -> Self {
+        Normalized(DebUpshifter(amount).replace_debs_in_expressions_with_constant_cutoff(self.0, 0))
+    }
+
+    pub fn replace_deb0_with_ind_with_increasing_cutoff(
+        self,
+        ind: Normalized<RcHashed<Ind>>,
+    ) -> Self {
+        let ind_singleton: [Expr; 1] = [ind.raw().clone().into()];
+        let ind_singleton_deb_substituter = DebDownshiftSubstituter {
+            new_exprs: &ind_singleton,
+        };
+        Normalized(
+            ind_singleton_deb_substituter
+                .replace_debs_in_expressions_with_increasing_cutoff(self.0, 0),
+        )
     }
 }
 

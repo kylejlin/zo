@@ -42,7 +42,7 @@ impl ReplaceDebs for DebUpshifter {
         }
 
         Expr::Deb(Rc::new(Hashed::new(DebNode {
-            deb: Deb(original.value.deb.0 + self.amount),
+            deb: Deb(original.value.deb.0 + self.0),
         })))
     }
 }

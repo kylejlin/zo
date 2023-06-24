@@ -420,32 +420,47 @@ impl TypeChecker {
         let match_case_param_types = match_case_param_types.without_digest();
         let extended_tcon = LazyTypeContext::Snoc(&tcon, match_case_param_types.as_slice());
 
-        let substituted_vcon_index_args = ind_singleton_deb_substituter
-            .replace_debs_in_expressions_with_constant_cutoff(
-                well_typed_vcon_def.raw().index_args.clone(),
-                0,
-            );
-        let upshifted_matchee_type_args = DebUpshifter(match_case_param_types.raw().len())
-            .replace_debs_in_expressions_with_constant_cutoff(
-                well_typed_matchee_type_args.clone().into_raw(),
-                0,
-            );
+        let match_case_param_count = match_case_param_types.raw().len();
+        let substituted_vcon_index_args = well_typed_vcon_def
+            .index_args()
+            .replace_deb0_with_ind_with_increasing_cutoff(well_typed_matchee_type_ind.clone());
+        let upshifted_matchee_type_args = well_typed_matchee_type_args
+            .clone()
+            .upshift_expressions_with_constant_cutoff(match_case_param_count);
         let extended_tcon_len = extended_tcon.len();
-        let new_substitutions: Vec<LazySubstitution> = substituted_vcon_index_args
-            .value
-            .iter()
-            .zip(upshifted_matchee_type_args.value.iter())
-            .map(|(vcon_index_arg, matchee_index_arg)| LazySubstitution {
-                tcon_len: extended_tcon_len,
-                left: vcon_index_arg,
-                right: matchee_index_arg,
-            })
-            .chain(std::iter::once(LazySubstitution {
-                tcon_len: extended_tcon_len,
-                left: upshifted_matchee,
-                right: parameterized_ind_capp_capp,
-            }))
-            .collect();
+        let upshifted_matchee =
+            DebUpshifter(match_case_param_count).replace_debs(match_.value.matchee.clone(), 0);
+        let upshifted_normalized_matchee = self.evaluator.eval(upshifted_matchee);
+        let parameterized_ind_capp_capp = Normalized::ind_capp_capp(
+            well_typed_matchee_type_ind,
+            well_typed_matchee_type_args,
+            match_case_param_count,
+        );
+        let new_substitutions: Vec<LazySubstitution> =
+            (0..substituted_vcon_index_args.raw().value.len())
+                .map(|i| {
+                    let vcon_index_arg = substituted_vcon_index_args
+                        .without_digest()
+                        .as_slice()
+                        .index(i)
+                        .cloned();
+                    let matchee_index_arg = upshifted_matchee_type_args
+                        .without_digest()
+                        .as_slice()
+                        .index(i)
+                        .cloned();
+                    LazySubstitution {
+                        tcon_len: extended_tcon_len,
+                        left: vcon_index_arg,
+                        right: matchee_index_arg,
+                    }
+                })
+                .chain(std::iter::once(LazySubstitution {
+                    tcon_len: extended_tcon_len,
+                    left: upshifted_normalized_matchee,
+                    right: parameterized_ind_capp_capp,
+                }))
+                .collect();
         let extended_scon = LazySubstitutionContext::Snoc(&scon, &new_substitutions);
 
         let match_case_return_type =
