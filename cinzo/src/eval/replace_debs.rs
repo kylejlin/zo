@@ -10,20 +10,20 @@ pub struct DebDownshiftSubstituter<'a> {
 }
 
 impl ReplaceDebs for DebDownshiftSubstituter<'_> {
-    fn replace_deb(&self, original: RcHashed<Deb>, cutoff: usize) -> Expr {
-        if original.value.0 < cutoff {
+    fn replace_deb(&self, original: RcHashed<DebNode>, cutoff: usize) -> Expr {
+        if original.value.deb.0 < cutoff {
             return Expr::Deb(original);
         }
 
-        let adjusted = original.value.0 - cutoff;
+        let adjusted = original.value.deb.0 - cutoff;
         let new_exprs_len = self.new_exprs.len();
         if adjusted < new_exprs_len {
             let unshifted_new_expr = self.new_exprs[new_exprs_len - 1 - adjusted].clone();
             return DebUpshifter { amount: cutoff }.replace_debs(unshifted_new_expr, 0);
         }
 
-        let shifted = original.value.0 - new_exprs_len;
-        Expr::Deb(Rc::new(Hashed::new(Deb(shifted))))
+        let shifted = Deb(original.value.deb.0 - new_exprs_len);
+        Expr::Deb(Rc::new(Hashed::new(DebNode { deb: shifted })))
     }
 }
 
@@ -32,17 +32,19 @@ struct DebUpshifter {
 }
 
 impl ReplaceDebs for DebUpshifter {
-    fn replace_deb(&self, original: RcHashed<Deb>, cutoff: usize) -> Expr {
-        if original.value.0 < cutoff {
+    fn replace_deb(&self, original: RcHashed<DebNode>, cutoff: usize) -> Expr {
+        if original.value.deb.0 < cutoff {
             return Expr::Deb(original);
         }
 
-        Expr::Deb(Rc::new(Hashed::new(Deb(original.value.0 + self.amount))))
+        Expr::Deb(Rc::new(Hashed::new(DebNode {
+            deb: Deb(original.value.deb.0 + self.amount),
+        })))
     }
 }
 
 pub trait ReplaceDebs {
-    fn replace_deb(&self, original: RcHashed<Deb>, cutoff: usize) -> Expr;
+    fn replace_deb(&self, original: RcHashed<DebNode>, cutoff: usize) -> Expr;
 
     fn replace_debs(&self, original: Expr, cutoff: usize) -> Expr {
         match original {

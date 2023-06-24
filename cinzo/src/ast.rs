@@ -8,8 +8,8 @@ pub enum Expr {
     Fun(Rc<Hashed<Fun>>),
     App(Rc<Hashed<App>>),
     For(Rc<Hashed<For>>),
-    Deb(Rc<Hashed<Deb>>),
-    Universe(Rc<Hashed<Universe>>),
+    Deb(Rc<Hashed<DebNode>>),
+    Universe(Rc<Hashed<UniverseNode>>),
 }
 
 impl Expr {
@@ -72,14 +72,14 @@ impl Expr {
         }
     }
 
-    pub fn try_into_deb(self) -> Result<Rc<Hashed<Deb>>, Self> {
+    pub fn try_into_deb(self) -> Result<Rc<Hashed<DebNode>>, Self> {
         match self {
             Expr::Deb(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_universe(self) -> Result<Rc<Hashed<Universe>>, Self> {
+    pub fn try_into_universe(self) -> Result<Rc<Hashed<UniverseNode>>, Self> {
         match self {
             Expr::Universe(e) => Ok(e),
             _ => Err(self),
@@ -143,10 +143,18 @@ pub struct For {
     pub return_type: Expr,
 }
 
+#[derive(Debug, Clone)]
+pub struct DebNode {
+    pub deb: Deb,
+}
+
+#[derive(Debug, Clone)]
+pub struct UniverseNode {
+    pub level: UniverseLevel,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct Deb(pub usize);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
-pub struct Universe {
-    pub level: usize,
-}
+pub struct UniverseLevel(pub usize);

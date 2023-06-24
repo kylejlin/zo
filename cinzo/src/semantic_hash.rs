@@ -168,13 +168,13 @@ impl SemanticHash for For {
     }
 }
 
-impl SemanticHash for Deb {
+impl SemanticHash for DebNode {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256::new();
 
         hasher.update([discriminator::DEB]);
 
-        hasher.update(self.0.to_be_bytes());
+        hasher.update(self.deb.0.to_be_bytes());
 
         hasher.update([discriminator::END]);
 
@@ -182,13 +182,13 @@ impl SemanticHash for Deb {
     }
 }
 
-impl SemanticHash for Universe {
+impl SemanticHash for UniverseNode {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256::new();
 
         hasher.update([discriminator::UNIVERSE]);
 
-        hasher.update(self.level.to_be_bytes());
+        hasher.update(self.level.0.to_be_bytes());
 
         hasher.update([discriminator::END]);
 

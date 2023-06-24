@@ -20,10 +20,14 @@ impl From<cst::Expr> for ast::Expr {
 
             cst::Expr::For(cst) => ast::Expr::For(Rc::new(Hashed::new((*cst).into()))),
 
-            cst::Expr::Deb(cst) => ast::Expr::Deb(Rc::new(Hashed::new(ast::Deb(cst.value)))),
+            cst::Expr::Deb(cst) => ast::Expr::Deb(Rc::new(Hashed::new(ast::DebNode {
+                deb: ast::Deb(cst.value),
+            }))),
 
             cst::Expr::Universe(cst) => {
-                ast::Expr::Universe(Rc::new(Hashed::new(ast::Universe { level: cst.level })))
+                ast::Expr::Universe(Rc::new(Hashed::new(ast::UniverseNode {
+                    level: ast::UniverseLevel(cst.level),
+                })))
             }
         }
     }

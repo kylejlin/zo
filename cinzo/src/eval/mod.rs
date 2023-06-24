@@ -177,14 +177,20 @@ impl Evaluator {
 
     fn eval_ind(&mut self, ind: RcHashed<Ind>) -> Result<Normalized<RcHashed<Ind>>, EvalError> {
         if let Some(result) = self.eval_expr_cache.get(&ind.digest) {
-            result.clone().map(|nf| match nf.into_raw() {
-                Expr::Ind(ind) => Normalized(ind),
-                _ => unreachable!(),
+            result.clone().map(|nf| {
+                Normalized(
+                    nf.into_raw()
+                        .try_into_ind()
+                        .expect("Evaluating an ind should always return an ind"),
+                )
             })
         } else {
-            self.eval_unseen_ind(ind).map(|nf| match nf.into_raw() {
-                Expr::Ind(ind) => Normalized(ind),
-                _ => unreachable!(),
+            self.eval_unseen_ind(ind).map(|nf| {
+                Normalized(
+                    nf.into_raw()
+                        .try_into_ind()
+                        .expect("Evaluating an ind should always return an ind"),
+                )
             })
         }
     }

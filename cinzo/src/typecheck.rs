@@ -115,7 +115,7 @@ impl TypeChecker {
 
     fn get_type_of_deb(
         &mut self,
-        deb: RcHashed<Deb>,
+        deb: RcHashed<DebNode>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -124,13 +124,13 @@ impl TypeChecker {
 
     fn get_type_of_universe(
         &mut self,
-        universe: RcHashed<Universe>,
+        universe: RcHashed<UniverseNode>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         return Ok(self
-            .eval(Expr::Universe(Rc::new(Hashed::new(Universe {
-                level: universe.value.level + 1,
+            .eval(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
+                level: UniverseLevel(universe.value.level.0 + 1),
             }))))
             .expect("A universe should always evaluate to itself."));
     }
