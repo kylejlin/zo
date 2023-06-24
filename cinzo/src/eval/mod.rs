@@ -8,33 +8,14 @@ use crate::{ast::*, nohash_hashmap::NoHashHashMap};
 mod tests;
 
 mod replace_debs;
-
 use replace_debs::*;
+
+mod normalized;
+pub use normalized::*;
 
 #[derive(Clone, Debug)]
 pub enum EvalError {
     TooFewMatchCases(RcHashed<Match>),
-}
-
-#[derive(Clone, Debug)]
-pub struct Normalized<T>(T);
-
-pub type NormalForm = Normalized<Expr>;
-
-impl From<NormalForm> for Expr {
-    fn from(nf: NormalForm) -> Self {
-        nf.0
-    }
-}
-
-impl<T> Normalized<T> {
-    pub fn into_raw(self) -> T {
-        self.0
-    }
-
-    pub fn raw(&self) -> &T {
-        &self.0
-    }
 }
 
 #[derive(Clone, Debug, Default)]
