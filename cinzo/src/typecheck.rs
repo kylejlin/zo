@@ -108,8 +108,8 @@ impl LazySubstitutionContext<'_> {
 
 #[derive(Debug, Clone)]
 pub struct ConcreteSubstitution {
-    pub left: NormalForm,
-    pub right: NormalForm,
+    pub from: NormalForm,
+    pub to: NormalForm,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -669,7 +669,10 @@ impl TypeChecker {
         applied_sub: &ConcreteSubstitution,
         target_sub: &mut ConcreteSubstitution,
     ) -> HasChanged {
-        todo!()
+        let mut has_changed = HasChanged(false);
+        has_changed |= self.perform_substitution_on_expr(applied_sub, &mut target_sub.from);
+        has_changed |= self.perform_substitution_on_expr(applied_sub, &mut target_sub.to);
+        has_changed
     }
 
     fn perform_substitution_on_expr(
