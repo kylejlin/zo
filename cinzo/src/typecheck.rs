@@ -308,8 +308,8 @@ impl TypeChecker {
             .evaluator
             .eval_expressions(def.index_args.clone())
             .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE);
-        let return_type =
-            Normalized::ind_app(normalized_ind, normalized_index_args).collapse_if_nullary();
+        let return_type = Normalized::app_with_ind_callee(normalized_ind, normalized_index_args)
+            .collapse_if_nullary();
         Ok(Normalized::for_(normalized_param_types, return_type).collapse_if_nullary())
     }
 

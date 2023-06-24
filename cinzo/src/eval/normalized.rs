@@ -81,7 +81,7 @@ impl NormalForm {
 }
 
 impl Normalized<App> {
-    pub fn ind_app(
+    pub fn app_with_ind_callee(
         callee: Normalized<RcHashed<Ind>>,
         args: Normalized<RcHashed<Box<[Expr]>>>,
     ) -> Self {
