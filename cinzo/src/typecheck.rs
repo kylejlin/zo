@@ -300,6 +300,18 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
+        self.perform_match_precheck(match_.clone(), tcon, scon)?;
+
+        let normalized_return_type = self.evaluator.eval(match_.value.return_type.clone());
+        Ok(normalized_return_type)
+    }
+
+    fn perform_match_precheck(
+        &mut self,
+        match_: RcHashed<Match>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
         todo!()
     }
 
