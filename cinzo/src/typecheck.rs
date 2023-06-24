@@ -24,13 +24,25 @@ pub enum LazyTypeContext<'a> {
 impl LazyTypeContext<'_> {
     pub fn len(&self) -> usize {
         match self {
-            LazyTypeContext::Base(subcontext) => subcontext.len(),
-            LazyTypeContext::Snoc(context, subcontext) => context.len() + subcontext.len(),
+            LazyTypeContext::Base(types) => types.len(),
+            LazyTypeContext::Snoc(subcontext, types) => subcontext.len() + types.len(),
         }
     }
 
     pub fn get(&self, deb: Deb) -> Option<NormalForm> {
-        todo!()
+        match self {
+            LazyTypeContext::Base(types) => {
+                let index = (types.len() - 1).checked_sub(deb.0)?;
+                types.get(index).cloned()
+            }
+            LazyTypeContext::Snoc(subcontext, types) => {
+                if let Some(index) = (types.len() - 1).checked_sub(deb.0) {
+                    types.get(index).cloned()
+                } else {
+                    subcontext.get(Deb(deb.0 - types.len()))
+                }
+            }
+        }
     }
 }
 
