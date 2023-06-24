@@ -358,6 +358,38 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
+        for (vcon_def, match_case) in matchee_type_ind
+            .raw()
+            .value
+            .vcon_defs
+            .value
+            .iter()
+            .zip(match_.value.cases.value.iter())
+        {
+            self.perform_match_case_precheck(
+                match_case,
+                vcon_def,
+                match_.clone(),
+                matchee_type_ind.clone(),
+                matchee_type_args.clone(),
+                tcon,
+                scon,
+            )?;
+        }
+
+        Ok(())
+    }
+
+    fn perform_match_case_precheck(
+        &mut self,
+        match_case: &MatchCase,
+        vcon_def: &VconDef,
+        match_: RcHashed<Match>,
+        matchee_type_ind: Normalized<RcHashed<Ind>>,
+        matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
         todo!()
     }
 
