@@ -70,8 +70,8 @@ pub enum LazySubstitutionContext<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct LazySubstitution<'a> {
     pub tcon_len: usize,
-    pub left: &'a Expr,
-    pub right: &'a Expr,
+    pub left: &'a NormalForm,
+    pub right: &'a NormalForm,
 }
 
 impl LazySubstitutionContext<'_> {
