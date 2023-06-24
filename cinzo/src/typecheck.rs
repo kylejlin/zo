@@ -28,6 +28,14 @@ pub enum TypeError {
         expected: usize,
         actual: usize,
     },
+    NonInductiveMatcheeType {
+        expr: Expr,
+        type_: NormalForm,
+    },
+    WrongNumberOfMatchCases {
+        match_: RcHashed<Match>,
+        matchee_type_ind: Normalized<RcHashed<Ind>>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -309,6 +317,44 @@ impl TypeChecker {
     fn perform_match_precheck(
         &mut self,
         match_: RcHashed<Match>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
+        let matchee_type = self.get_type(match_.value.matchee.clone(), tcon, scon)?;
+        let Some((matchee_type_ind, matchee_type_args)) = matchee_type.clone().ind_or_ind_app() else {
+            return Err(TypeError::NonInductiveMatcheeType {
+                expr: match_.value.matchee.clone(),
+                type_: matchee_type,
+            });
+        };
+
+        let return_type_type = self.get_type(match_.value.return_type.clone(), tcon, scon)?;
+        if !return_type_type.raw().is_universe() {
+            return Err(TypeError::UnexpectedNonTypeExpression {
+                expr: match_.value.return_type.clone(),
+                type_: return_type_type,
+            });
+        }
+
+        let vcon_count = matchee_type_ind.raw().value.vcon_defs.value.len();
+        let match_case_count = match_.value.cases.value.len();
+        if vcon_count != match_case_count {
+            return Err(TypeError::WrongNumberOfMatchCases {
+                match_: match_.clone(),
+                matchee_type_ind: matchee_type_ind.clone(),
+            });
+        }
+
+        self.perform_match_cases_precheck(match_, matchee_type_ind, matchee_type_args, tcon, scon)?;
+
+        Ok(())
+    }
+
+    fn perform_match_cases_precheck(
+        &mut self,
+        match_: RcHashed<Match>,
+        matchee_type_ind: Normalized<RcHashed<Ind>>,
+        matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {

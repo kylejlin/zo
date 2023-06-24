@@ -80,6 +80,28 @@ impl NormalForm {
     }
 }
 
+impl NormalForm {
+    pub fn ind_or_ind_app(
+        self,
+    ) -> Option<(Normalized<RcHashed<Ind>>, Normalized<RcHashed<Box<[Expr]>>>)> {
+        match self.0 {
+            Expr::Ind(ind) => Some((
+                Normalized(ind),
+                Normalized(Rc::new(Hashed::new(Box::new([])))),
+            )),
+
+            Expr::App(app) => match &app.value.callee {
+                Expr::Ind(ind) => {
+                    Some((Normalized(ind.clone()), Normalized(app.value.args.clone())))
+                }
+                _other_callee => None,
+            },
+
+            _ => None,
+        }
+    }
+}
+
 impl Normalized<App> {
     pub fn app_with_ind_callee(
         callee: Normalized<RcHashed<Ind>>,
