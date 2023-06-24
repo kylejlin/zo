@@ -37,6 +37,13 @@ pub enum TypeError {
         match_: RcHashed<Match>,
         matchee_type_ind: Normalized<RcHashed<Ind>>,
     },
+    TypeMismatch {
+        expr: Expr,
+        expected_type: NormalForm,
+        actual_type: NormalForm,
+        subbed_expected: NormalForm,
+        subbed_actual: NormalForm,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -468,9 +475,12 @@ impl TypeChecker {
         let match_case_return_type =
             self.get_type(match_case.return_val.clone(), extended_tcon, extended_scon)?;
 
-        self.assert_exprs_are_equal_after_applying_scon(
-            match_return_type,
-            match_case_return_type,
+        self.assert_expected_type_equality_holds_after_applying_scon(
+            ExpectedTypeEquality {
+                expr: match_case.return_val.clone(),
+                expected_type: match_return_type,
+                actual_type: match_case_return_type.clone(),
+            },
             extended_scon,
         )?;
 
@@ -564,12 +574,42 @@ impl TypeChecker {
         Ok(Rc::new(Hashed::new(out.into_boxed_slice())))
     }
 
-    fn assert_exprs_are_equal_after_applying_scon(
+    fn assert_expected_type_equality_holds_after_applying_scon(
         &mut self,
-        expected: NormalForm,
-        actual: NormalForm,
+        expected_equality: ExpectedTypeEquality,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
+        let ExpectedTypeEquality {
+            expr,
+            expected_type,
+            actual_type,
+        } = expected_equality;
+        if actual_type.raw().digest() == expected_type.raw().digest() {
+            return Ok(());
+        }
+
+        let (subbed_expected, subbed_actual) =
+            self.apply_scon(expected_type.clone(), actual_type.clone(), scon);
+
+        if subbed_expected.raw().digest() == subbed_actual.raw().digest() {
+            return Ok(());
+        }
+
+        return Err(TypeError::TypeMismatch {
+            expr,
+            expected_type,
+            actual_type,
+            subbed_expected,
+            subbed_actual,
+        });
+    }
+
+    fn apply_scon(
+        &mut self,
+        expr1: NormalForm,
+        expr2: NormalForm,
+        scon: LazySubstitutionContext,
+    ) -> (NormalForm, NormalForm) {
         todo!()
     }
 }
@@ -609,4 +649,11 @@ fn assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
     }
 
     Ok(())
+}
+
+#[derive(Clone, Debug)]
+struct ExpectedTypeEquality {
+    pub expr: Expr,
+    pub expected_type: NormalForm,
+    pub actual_type: NormalForm,
 }
