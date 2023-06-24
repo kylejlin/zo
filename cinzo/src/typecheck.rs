@@ -142,7 +142,17 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<RcHashed<Box<[Expr]>>, TypeError> {
-        todo!()
+        let mut out: Vec<NormalForm> = Vec::with_capacity(exprs.value.len());
+
+        for expr in exprs.value.iter() {
+            let current_tcon = LazyTypeContext::Snoc(&tcon, &out);
+            let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
+            out.push(type_);
+        }
+
+        let out: Vec<Expr> = out.into_iter().map(NormalForm::into_raw).collect();
+
+        Ok(Rc::new(Hashed::new(out.into_boxed_slice())))
     }
 
     fn get_type_of_vcon(
