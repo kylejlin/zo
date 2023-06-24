@@ -208,7 +208,7 @@ impl TypeChecker {
 
     fn get_type_of_match(
         &mut self,
-        r#match: RcHashed<Match>,
+        match_: RcHashed<Match>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -235,7 +235,7 @@ impl TypeChecker {
 
     fn get_type_of_for(
         &mut self,
-        r#for: RcHashed<For>,
+        for_: RcHashed<For>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
