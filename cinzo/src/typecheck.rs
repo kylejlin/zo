@@ -83,26 +83,6 @@ impl LazySubstitutionContext<'_> {
     }
 }
 
-impl App {
-    fn collapse_if_nullary(self) -> Expr {
-        if self.args.value.is_empty() {
-            self.callee
-        } else {
-            Expr::App(Rc::new(Hashed::new(self)))
-        }
-    }
-}
-
-impl For {
-    fn collapse_if_nullary(self) -> Expr {
-        if self.param_types.value.is_empty() {
-            self.return_type
-        } else {
-            Expr::For(Rc::new(Hashed::new(self)))
-        }
-    }
-}
-
 const WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE: &str =
     "A well-typed expression should be evaluatable.";
 
@@ -266,6 +246,7 @@ impl TypeChecker {
     /// are ill-typed.
     fn get_ind_type_assuming_ind_is_well_typed(&mut self, ind: RcHashed<Ind>) -> NormalForm {
         let normalized_index_types = self
+            .evaluator
             .eval_expressions(ind.value.index_types.clone())
             .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE)
             .into_raw();
@@ -316,14 +297,21 @@ impl TypeChecker {
         ind: RcHashed<Ind>,
     ) -> Result<NormalForm, TypeError> {
         let normalized_param_types = self
+            .evaluator
             .eval_expressions(def.param_types.clone())
             .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE)
             .into_raw();
-        let return_type = App {
-            callee: Expr::Ind(ind),
-            args: def.index_args.clone(),
-        }
-        .collapse_if_nullary();
+        let normalized_ind = self
+            .evaluator
+            .eval_ind(ind.clone())
+            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE);
+        let normalized_index_args = self
+            .evaluator
+            .eval_expressions(def.index_args.clone())
+            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE);
+        let return_type = Normalized::ind_app(normalized_ind, normalized_index_args)
+            .collapse_if_nullary()
+            .into_raw();
         let already_normalized = For {
             param_types: normalized_param_types,
             return_type,
@@ -389,6 +377,7 @@ impl TypeChecker {
         universe: RcHashed<UniverseNode>,
     ) -> Result<NormalForm, TypeError> {
         return Ok(self
+            .evaluator
             .eval(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
                 level: UniverseLevel(universe.value.level.0 + 1),
             }))))
@@ -427,17 +416,6 @@ impl TypeChecker {
         }
 
         Ok(Rc::new(Hashed::new(out.into_boxed_slice())))
-    }
-
-    fn eval(&mut self, expr: Expr) -> Result<NormalForm, EvalError> {
-        self.evaluator.eval(expr)
-    }
-
-    fn eval_expressions(
-        &mut self,
-        exprs: RcHashed<Box<[Expr]>>,
-    ) -> Result<Normalized<RcHashed<Box<[Expr]>>>, EvalError> {
-        self.evaluator.eval_expressions(exprs)
     }
 
     fn assert_normal_form_or_panic(&mut self, expr: Expr) -> NormalForm {

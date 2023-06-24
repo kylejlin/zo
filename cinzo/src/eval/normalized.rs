@@ -79,3 +79,19 @@ impl NormalForm {
         Normalized(Expr::Universe(Rc::new(Hashed::new(universe))))
     }
 }
+
+impl Normalized<App> {
+    pub fn ind_app(
+        callee: Normalized<RcHashed<Ind>>,
+        args: Normalized<RcHashed<Box<[Expr]>>>,
+    ) -> Self {
+        Normalized(App {
+            callee: Expr::Ind(callee.into_raw()),
+            args: args.into_raw(),
+        })
+    }
+
+    pub fn collapse_if_nullary(self) -> NormalForm {
+        Normalized(self.0.collapse_if_nullary())
+    }
+}

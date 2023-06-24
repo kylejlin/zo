@@ -160,7 +160,7 @@ impl Evaluator {
         result
     }
 
-    fn eval_ind(&mut self, ind: RcHashed<Ind>) -> Result<Normalized<RcHashed<Ind>>, EvalError> {
+    pub fn eval_ind(&mut self, ind: RcHashed<Ind>) -> Result<Normalized<RcHashed<Ind>>, EvalError> {
         if let Some(result) = self.eval_expr_cache.get(&ind.digest) {
             result.clone().map(|nf| {
                 Normalized(
