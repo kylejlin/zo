@@ -104,6 +104,28 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
+        if ind.value.index_types.value.is_empty() {
+            self.get_type_of_unindexed_ind(ind, tcon, scon)
+        } else {
+            self.get_type_of_indexed_ind(ind, tcon, scon)
+        }
+    }
+
+    fn get_type_of_unindexed_ind(
+        &mut self,
+        ind: RcHashed<Ind>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<NormalForm, TypeError> {
+        todo!()
+    }
+
+    fn get_type_of_indexed_ind(
+        &mut self,
+        ind: RcHashed<Ind>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<NormalForm, TypeError> {
         todo!()
     }
 
