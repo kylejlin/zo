@@ -18,6 +18,11 @@ pub enum TypeError {
         expr: Expr,
         type_: NormalForm,
     },
+    UniverseInconsistencyInIndDef {
+        expr: Expr,
+        level: UniverseLevel,
+        max_permitted_level: UniverseLevel,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -154,28 +159,26 @@ impl TypeChecker {
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         let index_type_types =
-            self.get_type_of_dependent_expressions(ind.value.index_types.clone(), tcon, scon)?;
-        assert_every_expr_is_universe(&index_type_types.value).map_err(
-            |offending_index_type_index| TypeError::UnexpectedNonTypeExpression {
-                expr: ind.value.index_types.value[offending_index_type_index].clone(),
-                type_: self.assert_normal_form_or_panic(
-                    index_type_types.value[offending_index_type_index].clone(),
-                ),
-            },
-        )?;
+            self.get_types_of_dependent_expressions(ind.value.index_types.clone(), tcon, scon)?;
+        assert_every_expr_is_universe(&index_type_types.value).map_err(|offender_index| {
+            TypeError::UnexpectedNonTypeExpression {
+                expr: ind.value.index_types.value[offender_index].clone(),
+                type_: self
+                    .assert_normal_form_or_panic(index_type_types.value[offender_index].clone()),
+            }
+        })?;
 
         assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
             &index_type_types.value,
             ind.value.universe_level,
         )
-        .map_err(
-            |offending_index_type_index| TypeError::UnexpectedNonTypeExpression {
-                expr: ind.value.index_types.value[offending_index_type_index].clone(),
-                type_: self.assert_normal_form_or_panic(
-                    index_type_types.value[offending_index_type_index].clone(),
-                ),
-            },
-        )?;
+        .map_err(|(offender_index, offender_level)| {
+            TypeError::UniverseInconsistencyInIndDef {
+                expr: ind.value.index_types.value[offender_index].clone(),
+                level: offender_level,
+                max_permitted_level: ind.value.universe_level,
+            }
+        })?;
 
         self.assert_ind_vcon_defs_are_well_typed(ind, tcon, scon)?;
 
@@ -201,7 +204,52 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        todo!()
+        let tcon_with_recursive_ind_entry = LazyTypeContext::Snoc(&tcon, &[trusted_ind_type_todo]);
+        let param_type_types = self.get_types_of_dependent_expressions(
+            def.param_types.clone(),
+            tcon_with_recursive_ind_entry,
+            scon,
+        )?;
+
+        let tcon_with_params = LazyTypeContext::Snoc(
+            &tcon_with_recursive_ind_entry,
+            todo_assert_nf_or_panic(&param_type_types.value),
+        );
+        self.get_types_of_independent_expressions(def.index_args.clone(), tcon_with_params, scon)?;
+
+        if ind.value.index_types.value.len() != def.index_args.value.len() {
+            return Err(TypeError::WrongNumberOfIndexArguments {
+                expected: ind.value.index_types.value.len(),
+                actual: def.index_args.value.len(),
+            });
+        }
+
+        assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
+            &param_type_types.value,
+            ind.value.universe_level,
+        )
+        .map_err(|(offender_index, offender_level)| {
+            TypeError::UniverseInconsistencyInIndDef {
+                expr: def.param_types.value[offender_index].clone(),
+                level: offender_level,
+                max_permitted_level: ind.value.universe_level,
+            }
+        })?;
+
+        self.assert_vcon_def_is_strictly_positive(ind, def, tcon, scon)?;
+
+        Ok(())
+    }
+
+    fn assert_vcon_def_is_strictly_positive(
+        &mut self,
+        ind: RcHashed<Ind>,
+        def: &VconDef,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
+        // TODO: Actually check positivity.
+        Ok(())
     }
 
     fn get_ind_return_type(&mut self, ind: RcHashed<Ind>) -> NormalForm {
@@ -210,7 +258,7 @@ impl TypeChecker {
         }))))
     }
 
-    fn get_type_of_dependent_expressions(
+    fn get_types_of_dependent_expressions(
         &mut self,
         exprs: RcHashed<Box<[Expr]>>,
         tcon: LazyTypeContext,
@@ -385,7 +433,7 @@ impl Expr {
 fn assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
     lhs: &[Expr],
     rhs: UniverseLevel,
-) -> Result<(), usize> {
+) -> Result<(), (usize, UniverseLevel)> {
     for (i, expr) in lhs.iter().enumerate() {
         let lhs_level = match expr {
             Expr::Universe(universe) => universe.value.level,
@@ -393,7 +441,7 @@ fn assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
         };
 
         if lhs_level > rhs {
-            return Err(i);
+            return Err((i, lhs_level));
         }
     }
 
