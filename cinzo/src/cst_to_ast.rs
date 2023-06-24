@@ -1,5 +1,5 @@
 use crate::{
-    ast::{self, Hashed},
+    ast::{self, rc_hash},
     cst,
 };
 
@@ -8,27 +8,25 @@ use std::rc::Rc;
 impl From<cst::Expr> for ast::Expr {
     fn from(cst: cst::Expr) -> Self {
         match cst {
-            cst::Expr::Ind(cst) => ast::Expr::Ind(Rc::new(Hashed::new((*cst).into()))),
+            cst::Expr::Ind(cst) => ast::Expr::Ind(rc_hash((*cst).into())),
 
-            cst::Expr::Vcon(cst) => ast::Expr::Vcon(Rc::new(Hashed::new((*cst).into()))),
+            cst::Expr::Vcon(cst) => ast::Expr::Vcon(rc_hash((*cst).into())),
 
-            cst::Expr::Match(cst) => ast::Expr::Match(Rc::new(Hashed::new((*cst).into()))),
+            cst::Expr::Match(cst) => ast::Expr::Match(rc_hash((*cst).into())),
 
-            cst::Expr::Fun(cst) => ast::Expr::Fun(Rc::new(Hashed::new((*cst).into()))),
+            cst::Expr::Fun(cst) => ast::Expr::Fun(rc_hash((*cst).into())),
 
-            cst::Expr::App(cst) => ast::Expr::App(Rc::new(Hashed::new((*cst).into()))),
+            cst::Expr::App(cst) => ast::Expr::App(rc_hash((*cst).into())),
 
-            cst::Expr::For(cst) => ast::Expr::For(Rc::new(Hashed::new((*cst).into()))),
+            cst::Expr::For(cst) => ast::Expr::For(rc_hash((*cst).into())),
 
-            cst::Expr::Deb(cst) => ast::Expr::Deb(Rc::new(Hashed::new(ast::DebNode {
+            cst::Expr::Deb(cst) => ast::Expr::Deb(rc_hash(ast::DebNode {
                 deb: ast::Deb(cst.value),
-            }))),
+            })),
 
-            cst::Expr::Universe(cst) => {
-                ast::Expr::Universe(Rc::new(Hashed::new(ast::UniverseNode {
-                    level: ast::UniverseLevel(cst.level),
-                })))
-            }
+            cst::Expr::Universe(cst) => ast::Expr::Universe(rc_hash(ast::UniverseNode {
+                level: ast::UniverseLevel(cst.level),
+            })),
         }
     }
 }
@@ -38,12 +36,8 @@ impl From<cst::Ind> for ast::Ind {
         ast::Ind {
             name: Rc::new(ast::StringValue(cst.name.value.clone())),
             universe_level: ast::UniverseLevel(cst.type_.level),
-            index_types: Rc::new(Hashed::new(
-                Vec::from(*cst.index_types.clone()).into_boxed_slice(),
-            )),
-            vcon_defs: Rc::new(Hashed::new(
-                Vec::from(*cst.vcon_defs.clone()).into_boxed_slice(),
-            )),
+            index_types: rc_hash(Vec::from(*cst.index_types.clone()).into_boxed_slice()),
+            vcon_defs: rc_hash(Vec::from(*cst.vcon_defs.clone()).into_boxed_slice()),
         }
     }
 }
@@ -78,12 +72,8 @@ impl From<cst::ZeroOrMoreVconDefs> for Vec<ast::VconDef> {
 impl From<cst::VconDef> for ast::VconDef {
     fn from(cst: cst::VconDef) -> Self {
         ast::VconDef {
-            param_types: Rc::new(Hashed::new(
-                Vec::from(*cst.param_types.clone()).into_boxed_slice(),
-            )),
-            index_args: Rc::new(Hashed::new(
-                Vec::from(*cst.index_args.clone()).into_boxed_slice(),
-            )),
+            param_types: rc_hash(Vec::from(*cst.param_types.clone()).into_boxed_slice()),
+            index_args: rc_hash(Vec::from(*cst.index_args.clone()).into_boxed_slice()),
         }
     }
 }
@@ -91,7 +81,7 @@ impl From<cst::VconDef> for ast::VconDef {
 impl From<cst::Vcon> for ast::Vcon {
     fn from(cst: cst::Vcon) -> Self {
         ast::Vcon {
-            ind: Rc::new(Hashed::new((*cst.ind.clone()).into())),
+            ind: rc_hash((*cst.ind.clone()).into()),
             vcon_index: cst.vcon_index.value,
         }
     }
@@ -102,9 +92,7 @@ impl From<cst::Match> for ast::Match {
         ast::Match {
             matchee: (*cst.matchee.clone()).into(),
             return_type: (*cst.return_type.clone()).into(),
-            cases: Rc::new(Hashed::new(
-                Vec::from(*cst.cases.clone()).into_boxed_slice(),
-            )),
+            cases: rc_hash(Vec::from(*cst.cases.clone()).into_boxed_slice()),
         }
     }
 }
@@ -139,9 +127,7 @@ impl From<cst::Fun> for ast::Fun {
                 cst::NumberOrNonrecKw::Number(numlit) => Some(numlit.value),
                 cst::NumberOrNonrecKw::NonrecKw(_) => None,
             },
-            param_types: Rc::new(Hashed::new(
-                Vec::from(*cst.param_types.clone()).into_boxed_slice(),
-            )),
+            param_types: rc_hash(Vec::from(*cst.param_types.clone()).into_boxed_slice()),
             return_type: (*cst.return_type.clone()).into(),
             return_val: (*cst.return_val.clone()).into(),
         }
@@ -152,7 +138,7 @@ impl From<cst::App> for ast::App {
     fn from(cst: cst::App) -> Self {
         ast::App {
             callee: (*cst.callee.clone()).into(),
-            args: Rc::new(Hashed::new(Vec::from(*cst.args.clone()).into_boxed_slice())),
+            args: rc_hash(Vec::from(*cst.args.clone()).into_boxed_slice()),
         }
     }
 }
@@ -160,9 +146,7 @@ impl From<cst::App> for ast::App {
 impl From<cst::For> for ast::For {
     fn from(cst: cst::For) -> Self {
         ast::For {
-            param_types: Rc::new(Hashed::new(
-                Vec::from(*cst.param_types.clone()).into_boxed_slice(),
-            )),
+            param_types: rc_hash(Vec::from(*cst.param_types.clone()).into_boxed_slice()),
             return_type: (*cst.return_type.clone()).into(),
         }
     }
