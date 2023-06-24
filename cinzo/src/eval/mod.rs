@@ -31,6 +31,10 @@ impl<T> Normalized<T> {
     pub fn into_raw(self) -> T {
         self.0
     }
+
+    pub fn raw(&self) -> &T {
+        &self.0
+    }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -92,7 +96,7 @@ impl Evaluator {
         result
     }
 
-    fn eval_expressions(&mut self, exprs: RcExprs) -> Result<Normalized<RcExprs>, EvalError> {
+    pub fn eval_expressions(&mut self, exprs: RcExprs) -> Result<Normalized<RcExprs>, EvalError> {
         if let Some(result) = self.eval_exprs_cache.get(&exprs.digest) {
             result.clone()
         } else {

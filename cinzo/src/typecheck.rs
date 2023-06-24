@@ -1,6 +1,6 @@
 use crate::{
     ast::*,
-    eval::{EvalError, Evaluator, NormalForm},
+    eval::{EvalError, Evaluator, NormalForm, Normalized},
 };
 
 use std::rc::Rc;
@@ -14,6 +14,10 @@ pub enum TypeError {
         tcon_len: usize,
     },
     InvalidVconIndex(RcHashed<Vcon>),
+    UnexpectedNonTypeExpression {
+        expr: Expr,
+        type_: NormalForm,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -89,7 +93,8 @@ impl For {
     }
 }
 
-const TRIVIALLY_EVALUATABLE_FOR_MESSAGE: &str = "A forall with normalized param types and return type should be normalized, and thus trivially evaluatable.";
+const WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE: &str =
+    "A well-typed expression should be evaluatable.";
 
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
@@ -127,25 +132,69 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        let param_types =
-            self.get_type_of_dependent_expressions(ind.value.index_types.clone(), tcon, scon)?;
-        let return_type = self.get_ind_return_type(ind)?.into_raw();
+        self.perform_ind_precheck(ind.clone(), tcon, scon)?;
+
+        let normalized_index_types = self
+            .eval_expressions(ind.value.index_types.clone())
+            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE)
+            .into_raw();
+        let return_type = self.get_ind_return_type(ind).into_raw();
         let already_normalized = For {
-            param_types,
+            param_types: normalized_index_types,
             return_type,
         }
         .collapse_if_nullary();
-        return Ok(self
-            .eval(already_normalized)
-            .expect(TRIVIALLY_EVALUATABLE_FOR_MESSAGE));
+        Ok(self.assert_normal_form_or_panic(already_normalized))
     }
 
-    fn get_ind_return_type(&mut self, ind: RcHashed<Ind>) -> Result<NormalForm, TypeError> {
-        Ok(self
-            .eval(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
-                level: ind.value.universe_level,
-            }))))
-            .expect("A universe should always evaluate to itself."))
+    fn perform_ind_precheck(
+        &mut self,
+        ind: RcHashed<Ind>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
+        let index_type_types =
+            self.get_type_of_dependent_expressions(ind.value.index_types.clone(), tcon, scon)?;
+        assert_every_expr_is_universe(&index_type_types.value).map_err(
+            |offending_index_type_index| TypeError::UnexpectedNonTypeExpression {
+                expr: ind.value.index_types.value[offending_index_type_index].clone(),
+                type_: self.assert_normal_form_or_panic(
+                    index_type_types.value[offending_index_type_index].clone(),
+                ),
+            },
+        )?;
+
+        assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
+            &index_type_types.value,
+            ind.value.universe_level,
+        )
+        .map_err(
+            |offending_index_type_index| TypeError::UnexpectedNonTypeExpression {
+                expr: ind.value.index_types.value[offending_index_type_index].clone(),
+                type_: self.assert_normal_form_or_panic(
+                    index_type_types.value[offending_index_type_index].clone(),
+                ),
+            },
+        )?;
+
+        self.assert_ind_vcon_defs_are_well_typed(ind, tcon, scon)?;
+
+        Ok(())
+    }
+
+    fn assert_ind_vcon_defs_are_well_typed(
+        &mut self,
+        ind: RcHashed<Ind>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
+        todo!()
+    }
+
+    fn get_ind_return_type(&mut self, ind: RcHashed<Ind>) -> NormalForm {
+        self.assert_normal_form_or_panic(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
+            level: ind.value.universe_level,
+        }))))
     }
 
     fn get_type_of_dependent_expressions(
@@ -200,9 +249,7 @@ impl TypeChecker {
             return_type,
         }
         .collapse_if_nullary();
-        let trivially_normalized = self
-            .eval(already_normalized)
-            .expect(TRIVIALLY_EVALUATABLE_FOR_MESSAGE);
+        let trivially_normalized = self.assert_normal_form_or_panic(already_normalized);
         Ok(trivially_normalized)
     }
 
@@ -271,4 +318,59 @@ impl TypeChecker {
     fn eval(&mut self, expr: Expr) -> Result<NormalForm, EvalError> {
         self.evaluator.eval(expr)
     }
+
+    fn eval_expressions(
+        &mut self,
+        exprs: RcHashed<Box<[Expr]>>,
+    ) -> Result<Normalized<RcHashed<Box<[Expr]>>>, EvalError> {
+        self.evaluator.eval_expressions(exprs)
+    }
+
+    fn assert_normal_form_or_panic(&mut self, expr: Expr) -> NormalForm {
+        let original_digest = expr.digest().clone();
+        let normal_form = self
+            .evaluator
+            .eval(expr)
+            .expect("The input should already be in normal form.");
+        let new_digest = normal_form.raw().digest();
+        assert_eq!(original_digest, *new_digest);
+        normal_form
+    }
+}
+
+fn assert_every_expr_is_universe(exprs: &[Expr]) -> Result<(), usize> {
+    for (i, expr) in exprs.iter().enumerate() {
+        if !expr.is_universe() {
+            return Err(i);
+        }
+    }
+
+    Ok(())
+}
+
+impl Expr {
+    fn is_universe(&self) -> bool {
+        match self {
+            Expr::Universe(_) => true,
+            _ => false,
+        }
+    }
+}
+
+fn assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
+    lhs: &[Expr],
+    rhs: UniverseLevel,
+) -> Result<(), usize> {
+    for (i, expr) in lhs.iter().enumerate() {
+        let lhs_level = match expr {
+            Expr::Universe(universe) => universe.value.level,
+            _ => continue,
+        };
+
+        if lhs_level > rhs {
+            return Err(i);
+        }
+    }
+
+    Ok(())
 }
