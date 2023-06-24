@@ -229,7 +229,7 @@ impl TypeChecker {
         let Some(def) = defs.get(vcon_index) else {
             return Err(TypeError::InvalidVconIndex(vcon));
         };
-        self.get_type_of_vcon_def(def, vcon.value.ind.clone(), tcon, scon)
+        self.get_type_of_trusted_vcon_def(def, vcon.value.ind.clone())
     }
 
     fn perform_vcon_precheck(
@@ -242,22 +242,22 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn get_type_of_vcon_def(
+    fn get_type_of_trusted_vcon_def(
         &mut self,
         def: &VconDef,
         ind: RcHashed<Ind>,
-        tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        let param_types =
-            self.get_type_of_dependent_expressions(def.param_types.clone(), tcon, scon)?;
+        let normalized_param_types = self
+            .eval_expressions(def.param_types.clone())
+            .expect(WELL_TYPED_IMPLIES_EVALUATABLE_MESSAGE)
+            .into_raw();
         let return_type = App {
             callee: Expr::Ind(ind),
             args: def.index_args.clone(),
         }
         .collapse_if_nullary();
         let already_normalized = For {
-            param_types,
+            param_types: normalized_param_types,
             return_type,
         }
         .collapse_if_nullary();
