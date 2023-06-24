@@ -23,6 +23,11 @@ pub enum TypeError {
         level: UniverseLevel,
         max_permitted_level: UniverseLevel,
     },
+    WrongNumberOfIndexArguments {
+        def: VconDef,
+        expected: usize,
+        actual: usize,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -219,6 +224,7 @@ impl TypeChecker {
 
         if ind.value.index_types.value.len() != def.index_args.value.len() {
             return Err(TypeError::WrongNumberOfIndexArguments {
+                def: def.clone(),
                 expected: ind.value.index_types.value.len(),
                 actual: def.index_args.value.len(),
             });
@@ -256,25 +262,6 @@ impl TypeChecker {
         self.assert_normal_form_or_panic(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
             level: ind.value.universe_level,
         }))))
-    }
-
-    fn get_types_of_dependent_expressions(
-        &mut self,
-        exprs: RcHashed<Box<[Expr]>>,
-        tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
-    ) -> Result<RcHashed<Box<[Expr]>>, TypeError> {
-        let mut out: Vec<NormalForm> = Vec::with_capacity(exprs.value.len());
-
-        for expr in exprs.value.iter() {
-            let current_tcon = LazyTypeContext::Snoc(&tcon, &out);
-            let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
-            out.push(type_);
-        }
-
-        let out: Vec<Expr> = out.into_iter().map(NormalForm::into_raw).collect();
-
-        Ok(Rc::new(Hashed::new(out.into_boxed_slice())))
     }
 
     fn get_type_of_vcon(
@@ -386,6 +373,41 @@ impl TypeChecker {
                 level: UniverseLevel(universe.value.level.0 + 1),
             }))))
             .expect("A universe should always evaluate to itself."));
+    }
+
+    fn get_types_of_dependent_expressions(
+        &mut self,
+        exprs: RcHashed<Box<[Expr]>>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<RcHashed<Box<[Expr]>>, TypeError> {
+        let mut out: Vec<NormalForm> = Vec::with_capacity(exprs.value.len());
+
+        for expr in exprs.value.iter() {
+            let current_tcon = LazyTypeContext::Snoc(&tcon, &out);
+            let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
+            out.push(type_);
+        }
+
+        let out: Vec<Expr> = out.into_iter().map(NormalForm::into_raw).collect();
+
+        Ok(Rc::new(Hashed::new(out.into_boxed_slice())))
+    }
+
+    fn get_types_of_independent_expressions(
+        &mut self,
+        exprs: RcHashed<Box<[Expr]>>,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<RcHashed<Box<[Expr]>>, TypeError> {
+        let mut out: Vec<Expr> = Vec::with_capacity(exprs.value.len());
+
+        for expr in exprs.value.iter() {
+            let type_ = self.get_type(expr.clone(), tcon, scon)?.into_raw();
+            out.push(type_);
+        }
+
+        Ok(Rc::new(Hashed::new(out.into_boxed_slice())))
     }
 
     fn eval(&mut self, expr: Expr) -> Result<NormalForm, EvalError> {
