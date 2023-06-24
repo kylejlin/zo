@@ -509,7 +509,7 @@ By definition, it must have the form
 In order to have a type,
 this expression must meet the following conditions:
 
-1. `<matchee>` is well-typed, and its type is an `ind` expression.
+1. `<matchee>` is well-typed, and its type is an `ind` expression or `ind` app.
 2. `<return_type>` is well-typed, and its type is a `Type` expression.
 3. The number of `<return_val>`s equals the number of variants in the
    `<matchee>`.
