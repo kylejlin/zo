@@ -4,6 +4,7 @@ pub mod cst_to_ast;
 pub mod eval;
 pub mod lexer;
 pub mod nohash_hashmap;
+pub mod replace_debs;
 pub mod semantic_hash;
 pub mod token;
 pub mod typecheck;

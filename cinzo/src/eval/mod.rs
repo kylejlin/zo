@@ -2,13 +2,10 @@
 
 use std::rc::Rc;
 
-use crate::{ast::*, nohash_hashmap::NoHashHashMap};
+use crate::{ast::*, nohash_hashmap::NoHashHashMap, replace_debs::*};
 
 #[cfg(test)]
 mod tests;
-
-mod replace_debs;
-use replace_debs::*;
 
 mod normalized;
 pub use normalized::*;

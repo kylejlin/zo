@@ -1,4 +1,10 @@
-use super::*;
+use crate::ast::*;
+
+use std::rc::Rc;
+
+type RcExprs = RcHashed<Box<[Expr]>>;
+type RcVconDefs = RcHashed<Box<[VconDef]>>;
+type RcMatchCases = RcHashed<Box<[MatchCase]>>;
 
 /// Replaces `0` with the last element of in `new_exprs`,
 /// `1` with the second to last element,
