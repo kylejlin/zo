@@ -25,7 +25,7 @@ impl ReplaceDebs for DebDownshiftSubstituter<'_> {
         let new_exprs_len = self.new_exprs.len();
         if adjusted < new_exprs_len {
             let unshifted_new_expr = self.new_exprs[new_exprs_len - 1 - adjusted].clone();
-            return DebUpshifter { amount: cutoff }.replace_debs(unshifted_new_expr, 0);
+            return DebUpshifter(cutoff).replace_debs(unshifted_new_expr, 0);
         }
 
         let shifted = Deb(original.value.deb.0 - new_exprs_len);
@@ -33,9 +33,7 @@ impl ReplaceDebs for DebDownshiftSubstituter<'_> {
     }
 }
 
-struct DebUpshifter {
-    pub amount: usize,
-}
+pub struct DebUpshifter(pub usize);
 
 impl ReplaceDebs for DebUpshifter {
     fn replace_deb(&self, original: RcHashed<DebNode>, cutoff: usize) -> Expr {
