@@ -1262,7 +1262,7 @@ impl Substitute for RcHashed<For> {
 impl Substitute for RcHashed<DebNode> {
     type Output = Expr;
 
-    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
+    fn substitute_in_children(self, _: &ConcreteSubstitution) -> Self::Output {
         self.into()
     }
 }
@@ -1270,7 +1270,7 @@ impl Substitute for RcHashed<DebNode> {
 impl Substitute for RcHashed<UniverseNode> {
     type Output = Expr;
 
-    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
+    fn substitute_in_children(self, _: &ConcreteSubstitution) -> Self::Output {
         self.into()
     }
 }
