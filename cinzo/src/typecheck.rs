@@ -1303,7 +1303,15 @@ impl Substitute for RcHashed<For> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
-        todo!()
+        For {
+            param_types: DependentExprs(&self.value.param_types.value).substitute_in_children(sub),
+            return_type: self
+                .value
+                .return_type
+                .clone()
+                .substitute(&sub.upshift(self.value.param_types.value.len())),
+        }
+        .into()
     }
 }
 
