@@ -593,6 +593,10 @@ the expression must meet the following requirements:
 4. `<return_type>` has a type of `Type<q_return>`.
 5. `<body>` has a type of `<return_type>`.
 
+> Note: Requirements (1) and (2) are checked by the recursion checker.
+> The recursion checker runs in a separate phase, before the typechecking
+> phase.
+
 If the following conditions are met,
 this expression has the type
 
