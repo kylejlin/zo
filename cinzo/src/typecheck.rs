@@ -1263,7 +1263,7 @@ impl Substitute for RcHashed<DebNode> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
-        todo!()
+        self.into()
     }
 }
 
@@ -1271,6 +1271,6 @@ impl Substitute for RcHashed<UniverseNode> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
-        todo!()
+        self.into()
     }
 }
