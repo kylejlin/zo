@@ -1173,7 +1173,10 @@ impl Substitute for VconDef {
     type Output = Self;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
-        todo!()
+        VconDef {
+            param_types: self.param_types.substitute_in_children(sub),
+            index_args: self.index_args.substitute_in_children(sub),
+        }
     }
 }
 
