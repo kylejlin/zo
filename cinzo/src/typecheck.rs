@@ -591,7 +591,7 @@ impl TypeChecker {
         scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<Expr>>, TypeError> {
         let mut out: Normalized<Vec<Expr>> =
-            Normalized::transpose_from_vec(Vec::with_capacity(exprs.value.len()));
+            Normalized::from_vec_normalized(Vec::with_capacity(exprs.value.len()));
 
         for expr in exprs.value.iter() {
             let current_tcon = LazyTypeContext::Snoc(&tcon, out.as_slice());

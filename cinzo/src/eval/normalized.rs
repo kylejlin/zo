@@ -53,12 +53,18 @@ impl<T> FromIterator<Normalized<T>> for Normalized<Vec<T>> {
 }
 
 impl<T> Normalized<Vec<T>> {
-    pub fn as_slice(&self) -> Normalized<&[T]> {
-        Normalized(&self.0)
+    pub fn from_vec_normalized(v: Vec<Normalized<T>>) -> Self {
+        Normalized(v.into_iter().map(Normalized::into_raw).collect())
     }
 
-    pub fn transpose_from_vec(v: Vec<Normalized<T>>) -> Normalized<Vec<T>> {
-        Normalized(v.into_iter().map(Normalized::into_raw).collect())
+    pub fn into_vec_normalized(self) -> Vec<Normalized<T>> {
+        self.0.into_iter().map(Normalized).collect()
+    }
+}
+
+impl<T> Normalized<Vec<T>> {
+    pub fn as_slice(&self) -> Normalized<&[T]> {
+        Normalized(&self.0)
     }
 
     pub fn push(&mut self, item: Normalized<T>) {
