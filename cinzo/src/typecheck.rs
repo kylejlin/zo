@@ -1131,13 +1131,16 @@ impl Substitute for RcHashed<Ind> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
-        Ind {
-            name: self.value.name.clone(),
-            universe_level: self.value.universe_level,
-            index_types: self.value.index_types.clone().substitute_in_children(sub),
-            vcon_defs: self.value.vcon_defs.clone().substitute_in_children(sub),
-        }
-        .into()
+        substitute_in_ind_children(self, sub).into()
+    }
+}
+
+fn substitute_in_ind_children(ind: RcHashed<Ind>, sub: &ConcreteSubstitution) -> Ind {
+    Ind {
+        name: ind.value.name.clone(),
+        universe_level: ind.value.universe_level,
+        index_types: ind.value.index_types.clone().substitute_in_children(sub),
+        vcon_defs: ind.value.vcon_defs.clone().substitute_in_children(sub),
     }
 }
 
@@ -1184,7 +1187,11 @@ impl Substitute for RcHashed<Vcon> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
-        todo!()
+        Vcon {
+            ind: rc_hash(substitute_in_ind_children(self.value.ind.clone(), sub)),
+            vcon_index: self.value.vcon_index,
+        }
+        .into()
     }
 }
 
