@@ -62,6 +62,13 @@ where
     pub fn index(&self, index: usize) -> Normalized<&T> {
         Normalized(&self.0[index])
     }
+
+    pub fn to_vec_normalized(&self) -> Vec<Normalized<T>>
+    where
+        T: Clone,
+    {
+        self.0.into_iter().cloned().map(Normalized).collect()
+    }
 }
 
 impl<T> FromIterator<Normalized<T>> for Normalized<Vec<T>> {
@@ -275,6 +282,47 @@ impl NormalForm {
             Expr::Universe(u) => Ok(Normalized(u)),
             _ => Err(self),
         }
+    }
+}
+
+impl From<Normalized<Ind>> for NormalForm {
+    fn from(e: Normalized<Ind>) -> Self {
+        Normalized(e.0.into())
+    }
+}
+impl From<Normalized<Vcon>> for NormalForm {
+    fn from(e: Normalized<Vcon>) -> Self {
+        Normalized(e.0.into())
+    }
+}
+impl From<Normalized<Match>> for NormalForm {
+    fn from(e: Normalized<Match>) -> Self {
+        Normalized(e.0.into())
+    }
+}
+impl From<Normalized<Fun>> for NormalForm {
+    fn from(e: Normalized<Fun>) -> Self {
+        Normalized(e.0.into())
+    }
+}
+impl From<Normalized<App>> for NormalForm {
+    fn from(e: Normalized<App>) -> Self {
+        Normalized(e.0.into())
+    }
+}
+impl From<Normalized<For>> for NormalForm {
+    fn from(e: Normalized<For>) -> Self {
+        Normalized(e.0.into())
+    }
+}
+impl From<Normalized<DebNode>> for NormalForm {
+    fn from(e: Normalized<DebNode>) -> Self {
+        Normalized(e.0.into())
+    }
+}
+impl From<Normalized<UniverseNode>> for NormalForm {
+    fn from(e: Normalized<UniverseNode>) -> Self {
+        Normalized(e.0.into())
     }
 }
 

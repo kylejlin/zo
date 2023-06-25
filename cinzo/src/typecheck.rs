@@ -549,7 +549,61 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        todo!()
+        let param_type_types =
+            self.get_types_of_dependent_expressions(fun.value.param_types.clone(), tcon, scon)?;
+        assert_every_expr_is_universe(param_type_types.raw()).map_err(|offender_index| {
+            TypeError::UnexpectedNonTypeExpression {
+                expr: fun.value.param_types.value[offender_index].clone(),
+                type_: param_type_types.index(offender_index).cloned(),
+            }
+        })?;
+        let normalized_param_types = self
+            .evaluator
+            .eval_expressions(fun.value.param_types.clone());
+
+        let return_type_type = self.get_type(fun.value.return_type.clone(), tcon, scon)?;
+        if !return_type_type.raw().is_universe() {
+            return Err(TypeError::UnexpectedNonTypeExpression {
+                expr: fun.value.return_type.clone(),
+                type_: return_type_type,
+            });
+        }
+        let normalized_return_type = self.evaluator.eval(fun.value.return_type.clone());
+
+        let only_possible_fun_type: NormalForm = Normalized::for_(
+            normalized_param_types.clone(),
+            normalized_return_type.clone(),
+        )
+        .into();
+
+        let param_types_and_recursive_fun_param_type: Normalized<Vec<Expr>> =
+            normalized_param_types
+                .without_digest()
+                .derefed()
+                .to_vec_normalized()
+                .into_iter()
+                .chain(std::iter::once(only_possible_fun_type.clone()))
+                .collect();
+        let tcon_extended_with_params_and_recursive_fun_param =
+            LazyTypeContext::Snoc(&tcon, param_types_and_recursive_fun_param_type.to_derefed());
+
+        let return_val_type = self.get_type(
+            fun.value.return_val.clone(),
+            tcon_extended_with_params_and_recursive_fun_param,
+            scon,
+        )?;
+
+        self.assert_expected_type_equality_holds_after_applying_scon(
+            ExpectedTypeEquality {
+                expr: fun.value.return_val.clone(),
+                expected_type: normalized_return_type.clone(),
+                actual_type: return_val_type,
+                tcon_len: tcon.len(),
+            },
+            scon,
+        )?;
+
+        Ok(only_possible_fun_type)
     }
 
     fn get_type_of_app(
