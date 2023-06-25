@@ -78,14 +78,6 @@ impl<T> Normalized<Vec<T>> {
     pub fn into_vec_normalized(self) -> Vec<Normalized<T>> {
         self.0.into_iter().map(Normalized).collect()
     }
-
-    // TODO: Delete
-    // pub fn into_rc_hashed_boxed_slice(self) -> Normalized<RcHashed<Box<[T]>>>
-    // where
-    //     Box<[T]>: SemanticHash,
-    // {
-    //     Normalized(rc_hash(self.0.into_boxed_slice()))
-    // }
 }
 
 impl<T> Normalized<Vec<T>> {
