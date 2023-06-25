@@ -557,7 +557,35 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        todo!()
+        let param_type_types =
+            self.get_types_of_dependent_expressions(for_.value.param_types.clone(), tcon, scon)?;
+        assert_every_expr_is_universe(param_type_types.raw()).map_err(|offender_index| {
+            TypeError::UnexpectedNonTypeExpression {
+                expr: for_.value.param_types.value[offender_index].clone(),
+                type_: param_type_types.index(offender_index).cloned(),
+            }
+        })?;
+
+        let tcon_extended_with_params = LazyTypeContext::Snoc(&tcon, param_type_types.to_derefed());
+        let return_type_type = self.get_type(
+            for_.value.return_type.clone(),
+            tcon_extended_with_params,
+            scon,
+        )?;
+        let return_type_type_universe_level = match return_type_type.raw() {
+            Expr::Universe(universe_node) => universe_node.value.level,
+
+            _ => {
+                return Err(TypeError::UnexpectedNonTypeExpression {
+                    expr: for_.value.return_type.clone(),
+                    type_: return_type_type,
+                })
+            }
+        };
+
+        let max_level = return_type_type_universe_level
+            .max_or_self(get_max_universe_level(param_type_types.raw()));
+        Ok(Normalized::universe(UniverseNode { level: max_level }))
     }
 
     fn get_type_of_deb(
@@ -759,6 +787,32 @@ fn assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
     }
 
     Ok(())
+}
+
+fn get_max_universe_level<'a>(exprs: impl IntoIterator<Item = &'a Expr>) -> Option<UniverseLevel> {
+    exprs
+        .into_iter()
+        .filter_map(|expr| match expr {
+            Expr::Universe(universe) => Some(universe.value.level),
+            _ => None,
+        })
+        .max()
+}
+
+trait MaxOrSelf: Sized {
+    fn max_or_self(self, other: Option<Self>) -> Self;
+}
+
+impl<T> MaxOrSelf for T
+where
+    T: Ord,
+{
+    fn max_or_self(self, other: Option<Self>) -> Self {
+        match other {
+            Some(other) => self.max(other),
+            None => self,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
