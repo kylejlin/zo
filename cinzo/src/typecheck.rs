@@ -152,6 +152,15 @@ pub struct ConcreteSubstitution {
     pub to: NormalForm,
 }
 
+impl ConcreteSubstitution {
+    pub fn upshift(&self, amount: usize) -> Self {
+        Self {
+            from: self.from.clone().upshift(amount),
+            to: self.to.clone().upshift(amount),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
@@ -1139,17 +1148,39 @@ fn substitute_in_ind_children(ind: RcHashed<Ind>, sub: &ConcreteSubstitution) ->
     Ind {
         name: ind.value.name.clone(),
         universe_level: ind.value.universe_level,
-        index_types: ind.value.index_types.clone().substitute_in_children(sub),
-        vcon_defs: ind.value.vcon_defs.clone().substitute_in_children(sub),
+        index_types: DependentExprs(&ind.value.index_types.value).substitute_in_children(sub),
+        vcon_defs: ind
+            .value
+            .vcon_defs
+            .clone()
+            .substitute_in_children(&sub.upshift(1)),
     }
 }
 
-impl Substitute for RcHashed<Box<[Expr]>> {
-    type Output = Self;
+struct DependentExprs<'a>(&'a [Expr]);
+struct IndependentExprs<'a>(&'a [Expr]);
+
+impl Substitute for DependentExprs<'_> {
+    type Output = RcHashed<Box<[Expr]>>;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         let subbed = self
-            .value
+            .0
+            .iter()
+            .cloned()
+            .enumerate()
+            .map(|(i, e)| e.substitute(&sub.upshift(i)))
+            .collect::<Vec<_>>();
+        rc_hash(subbed.into_boxed_slice())
+    }
+}
+
+impl Substitute for IndependentExprs<'_> {
+    type Output = RcHashed<Box<[Expr]>>;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
+        let subbed = self
+            .0
             .iter()
             .cloned()
             .map(|e| e.substitute(sub))
@@ -1177,8 +1208,9 @@ impl Substitute for VconDef {
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         VconDef {
-            param_types: self.param_types.substitute_in_children(sub),
-            index_args: self.index_args.substitute_in_children(sub),
+            param_types: DependentExprs(&self.param_types.value).substitute_in_children(sub),
+            index_args: IndependentExprs(&self.index_args.value)
+                .substitute_in_children(&sub.upshift(self.param_types.value.len())),
         }
     }
 }
