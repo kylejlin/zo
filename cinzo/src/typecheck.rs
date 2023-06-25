@@ -1291,7 +1291,11 @@ impl Substitute for RcHashed<App> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
-        todo!()
+        App {
+            callee: self.value.callee.clone().substitute(sub),
+            args: IndependentExprs(&self.value.args.value).substitute_in_children(sub),
+        }
+        .into()
     }
 }
 
