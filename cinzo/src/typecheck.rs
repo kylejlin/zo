@@ -1231,7 +1231,37 @@ impl Substitute for RcHashed<Match> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
-        todo!()
+        Match {
+            matchee: self.value.matchee.clone().substitute(sub),
+            return_type: self.value.return_type.clone().substitute(sub),
+            cases: self.value.cases.clone().substitute_in_children(sub),
+        }
+        .into()
+    }
+}
+
+impl Substitute for RcHashed<Box<[MatchCase]>> {
+    type Output = Self;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
+        let subbed = self
+            .value
+            .iter()
+            .cloned()
+            .map(|case| case.substitute_in_children(sub))
+            .collect::<Vec<_>>();
+        rc_hash(subbed.into_boxed_slice())
+    }
+}
+
+impl Substitute for MatchCase {
+    type Output = Self;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
+        MatchCase {
+            arity: self.arity,
+            return_val: self.return_val.substitute(&sub.upshift(self.arity)),
+        }
     }
 }
 
