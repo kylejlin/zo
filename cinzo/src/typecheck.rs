@@ -1109,14 +1109,14 @@ trait Substitute: Sized {
 impl Substitute for Expr {
     fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
         match self {
-            Expr::Ind(e) => e.substitute(sub),
-            Expr::Vcon(e) => e.substitute(sub),
-            Expr::Match(e) => e.substitute(sub),
-            Expr::Fun(e) => e.substitute(sub),
-            Expr::App(e) => e.substitute(sub),
-            Expr::For(e) => e.substitute(sub),
-            Expr::Deb(e) => e.substitute(sub),
-            Expr::Universe(e) => e.substitute(sub),
+            Expr::Ind(e) => e.substitute_assuming_self_does_not_equal_from(sub),
+            Expr::Vcon(e) => e.substitute_assuming_self_does_not_equal_from(sub),
+            Expr::Match(e) => e.substitute_assuming_self_does_not_equal_from(sub),
+            Expr::Fun(e) => e.substitute_assuming_self_does_not_equal_from(sub),
+            Expr::App(e) => e.substitute_assuming_self_does_not_equal_from(sub),
+            Expr::For(e) => e.substitute_assuming_self_does_not_equal_from(sub),
+            Expr::Deb(e) => e.substitute_assuming_self_does_not_equal_from(sub),
+            Expr::Universe(e) => e.substitute_assuming_self_does_not_equal_from(sub),
         }
     }
 }
