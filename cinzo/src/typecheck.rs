@@ -1269,7 +1269,21 @@ impl Substitute for RcHashed<Fun> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
-        todo!()
+        Fun {
+            decreasing_index: self.value.decreasing_index,
+            param_types: DependentExprs(&self.value.param_types.value).substitute_in_children(sub),
+            return_type: self
+                .value
+                .return_type
+                .clone()
+                .substitute(&sub.upshift(self.value.param_types.value.len())),
+            return_val: self
+                .value
+                .return_val
+                .clone()
+                .substitute(&sub.upshift(self.value.param_types.value.len() + 1)),
+        }
+        .into()
     }
 }
 
