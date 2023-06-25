@@ -44,6 +44,16 @@ pub enum TypeError {
         subbed_expected: NormalForm,
         subbed_actual: NormalForm,
     },
+    CalleeTypeIsNotAForExpression {
+        app: RcHashed<App>,
+        callee_type: NormalForm,
+    },
+    WrongNumberOfAppArguments {
+        app: RcHashed<App>,
+        callee_type: Normalized<RcHashed<For>>,
+        expected: usize,
+        actual: usize,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -548,6 +558,57 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
+        let callee_type = self
+            .get_type(app.value.callee.clone(), tcon, scon)?
+            .try_into_for()
+            .map_err(|original| TypeError::CalleeTypeIsNotAForExpression {
+                app: app.clone(),
+                callee_type: original,
+            })?;
+
+        let arg_count = app.value.args.value.len();
+        let param_count = callee_type.raw().value.param_types.value.len();
+        if arg_count != param_count {
+            return Err(TypeError::WrongNumberOfAppArguments {
+                app,
+                callee_type,
+                expected: param_count,
+                actual: arg_count,
+            });
+        }
+
+        let arg_types =
+            self.get_types_of_independent_expressions(app.value.args.clone(), tcon, scon)?;
+        let normalized_args = self.evaluator.eval_expressions(app.value.args.clone());
+
+        let substituted_param_types = self.substitute_param_types(
+            callee_type.without_digest().param_types(),
+            normalized_args.clone(),
+        );
+        self.assert_expected_type_equalities_holds_after_applying_scon(
+            ExpectedTypeEqualities {
+                exprs: app.value.args.clone(),
+                expected_types: substituted_param_types,
+                actual_types: arg_types,
+                tcon_len: tcon.len(),
+            },
+            scon,
+        )?;
+
+        let arg_substituter = DebDownshiftSubstituter {
+            new_exprs: &normalized_args.raw().value,
+        };
+        let unnormalized_substituted_return_type =
+            arg_substituter.replace_debs(callee_type.raw().value.return_type.clone(), 0);
+        let substituted_return_type = self.evaluator.eval(unnormalized_substituted_return_type);
+        Ok(substituted_return_type)
+    }
+
+    fn substitute_param_types(
+        &mut self,
+        unsubstituted_param_types: Normalized<RcHashed<Box<[Expr]>>>,
+        normalized_args: Normalized<RcHashed<Box<[Expr]>>>,
+    ) -> Normalized<Vec<Expr>> {
         todo!()
     }
 
@@ -637,15 +698,28 @@ impl TypeChecker {
         exprs: RcHashed<Box<[Expr]>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<RcHashed<Box<[Expr]>>, TypeError> {
-        let mut out: Vec<Expr> = Vec::with_capacity(exprs.value.len());
+    ) -> Result<Normalized<Vec<Expr>>, TypeError> {
+        let mut out: Normalized<Vec<Expr>> =
+            Normalized::from_vec_normalized(Vec::with_capacity(exprs.value.len()));
 
         for expr in exprs.value.iter() {
-            let type_ = self.get_type(expr.clone(), tcon, scon)?.into_raw();
+            let type_ = self.get_type(expr.clone(), tcon, scon)?;
             out.push(type_);
         }
 
-        Ok(Rc::new(Hashed::new(out.into_boxed_slice())))
+        Ok(out)
+    }
+
+    fn assert_expected_type_equalities_holds_after_applying_scon(
+        &mut self,
+        equalities: ExpectedTypeEqualities,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
+        for equality in equalities.zip() {
+            self.assert_expected_type_equality_holds_after_applying_scon(equality, scon)?;
+        }
+
+        Ok(())
     }
 
     fn assert_expected_type_equality_holds_after_applying_scon(
@@ -821,6 +895,36 @@ struct ExpectedTypeEquality {
     pub expected_type: NormalForm,
     pub actual_type: NormalForm,
     pub tcon_len: usize,
+}
+
+/// `exprs`, `expected_types`, and `actual_types` **must** all have the same length.
+#[derive(Clone, Debug)]
+struct ExpectedTypeEqualities {
+    pub exprs: RcHashed<Box<[Expr]>>,
+    pub expected_types: Normalized<Vec<Expr>>,
+    pub actual_types: Normalized<Vec<Expr>>,
+    pub tcon_len: usize,
+}
+
+impl ExpectedTypeEqualities {
+    pub fn zip(self) -> impl Iterator<Item = ExpectedTypeEquality> {
+        let tcon_len = self.tcon_len;
+        (0..self.len()).into_iter().map(move |i| {
+            let expr = self.exprs.value[i].clone();
+            let expected_type = self.expected_types.index(i).cloned();
+            let actual_type = self.actual_types.index(i).cloned();
+            ExpectedTypeEquality {
+                expr,
+                expected_type,
+                actual_type,
+                tcon_len,
+            }
+        })
+    }
+
+    pub fn len(&self) -> usize {
+        self.exprs.value.len()
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

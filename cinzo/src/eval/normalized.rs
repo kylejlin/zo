@@ -78,6 +78,14 @@ impl<T> Normalized<Vec<T>> {
     pub fn into_vec_normalized(self) -> Vec<Normalized<T>> {
         self.0.into_iter().map(Normalized).collect()
     }
+
+    // TODO: Delete
+    // pub fn into_rc_hashed_boxed_slice(self) -> Normalized<RcHashed<Box<[T]>>>
+    // where
+    //     Box<[T]>: SemanticHash,
+    // {
+    //     Normalized(rc_hash(self.0.into_boxed_slice()))
+    // }
 }
 
 impl<T> Normalized<Vec<T>> {
@@ -139,6 +147,12 @@ impl Normalized<App> {
 
     pub fn collapse_if_nullary(self) -> NormalForm {
         Normalized(self.0.collapse_if_nullary())
+    }
+}
+
+impl Normalized<&For> {
+    pub fn param_types(self) -> Normalized<RcHashed<Box<[Expr]>>> {
+        Normalized(self.0.param_types.clone())
     }
 }
 
@@ -211,6 +225,64 @@ impl Normalized<RcHashed<Box<[Expr]>>> {
             ind_singleton_deb_substituter
                 .replace_debs_in_expressions_with_increasing_cutoff(self.0, 0),
         )
+    }
+}
+
+impl NormalForm {
+    pub fn try_into_ind(self) -> Result<Normalized<RcHashed<Ind>>, NormalForm> {
+        match self.0 {
+            Expr::Ind(ind) => Ok(Normalized(ind)),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_vcon(self) -> Result<Normalized<RcHashed<Vcon>>, NormalForm> {
+        match self.0 {
+            Expr::Vcon(vcon) => Ok(Normalized(vcon)),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_match(self) -> Result<Normalized<RcHashed<Match>>, NormalForm> {
+        match self.0 {
+            Expr::Match(m) => Ok(Normalized(m)),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_fun(self) -> Result<Normalized<RcHashed<Fun>>, NormalForm> {
+        match self.0 {
+            Expr::Fun(f) => Ok(Normalized(f)),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_app(self) -> Result<Normalized<RcHashed<App>>, NormalForm> {
+        match self.0 {
+            Expr::App(a) => Ok(Normalized(a)),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_for(self) -> Result<Normalized<RcHashed<For>>, NormalForm> {
+        match self.0 {
+            Expr::For(f) => Ok(Normalized(f)),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_deb(self) -> Result<Normalized<RcHashed<DebNode>>, NormalForm> {
+        match self.0 {
+            Expr::Deb(d) => Ok(Normalized(d)),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_universe(self) -> Result<Normalized<RcHashed<UniverseNode>>, NormalForm> {
+        match self.0 {
+            Expr::Universe(u) => Ok(Normalized(u)),
+            _ => Err(self),
+        }
     }
 }
 
