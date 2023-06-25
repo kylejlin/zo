@@ -42,6 +42,10 @@ impl Debug for Digest {
 
 impl nohash_hasher::IsEnabled for Digest {}
 
+pub trait GetDigest {
+    fn digest(&self) -> &Digest;
+}
+
 pub trait SemanticHash {
     fn semantic_hash(&self) -> Digest;
 }

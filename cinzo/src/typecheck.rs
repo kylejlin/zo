@@ -885,7 +885,7 @@ impl TypeChecker {
         applied_sub: &ConcreteSubstitution,
         expr: &mut NormalForm,
     ) -> HasChanged {
-        let subbed = applied_sub.apply(expr.raw().clone());
+        let subbed = expr.raw().clone().substitute(applied_sub);
         let normalized = self.evaluator.eval(subbed);
 
         if expr.raw().digest() == normalized.raw().digest() {
@@ -1007,9 +1007,164 @@ impl BitOrAssign for HasChanged {
     }
 }
 
-impl ConcreteSubstitution {
-    pub fn apply(&self, expr: Expr) -> Expr {
-        // Don't forget to upshift `from` and `to`!
+trait Substitute: Sized {
+    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr;
+
+    fn substitute(self, sub: &ConcreteSubstitution) -> Expr
+    where
+        Self: GetDigest,
+    {
+        if self.digest() == sub.from.raw().digest() {
+            return sub.to.raw().clone();
+        }
+
+        self.substitute_assuming_self_does_not_equal_from(sub)
+    }
+}
+
+// #[derive(Clone, Debug)]
+// pub enum Expr {
+//     Ind(RcHashed<Ind>),
+//     Vcon(RcHashed<Vcon>),
+//     Match(RcHashed<Match>),
+//     Fun(RcHashed<Fun>),
+//     App(RcHashed<App>),
+//     For(RcHashed<For>),
+//     Deb(RcHashed<DebNode>),
+//     Universe(RcHashed<UniverseNode>),
+// }
+
+// #[derive(Clone, Debug)]
+// pub struct Ind {
+//     pub name: Rc<StringValue>,
+//     pub universe_level: UniverseLevel,
+//     pub index_types: RcHashed<Box<[Expr]>>,
+//     pub vcon_defs: RcHashed<Box<[VconDef]>>,
+// }
+
+// #[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
+// pub struct StringValue(pub String);
+
+// #[derive(Debug, Clone)]
+// pub struct VconDef {
+//     pub param_types: RcHashed<Box<[Expr]>>,
+//     pub index_args: RcHashed<Box<[Expr]>>,
+// }
+
+// #[derive(Debug, Clone)]
+// pub struct Vcon {
+//     pub ind: RcHashed<Ind>,
+//     pub vcon_index: usize,
+// }
+
+// #[derive(Debug, Clone)]
+// pub struct Match {
+//     pub matchee: Expr,
+//     pub return_type: Expr,
+//     pub cases: RcHashed<Box<[MatchCase]>>,
+// }
+
+// #[derive(Debug, Clone)]
+// pub struct MatchCase {
+//     pub arity: usize,
+//     pub return_val: Expr,
+// }
+
+// #[derive(Debug, Clone)]
+// pub struct Fun {
+//     pub decreasing_index: Option<usize>,
+//     pub param_types: RcHashed<Box<[Expr]>>,
+//     pub return_type: Expr,
+//     pub return_val: Expr,
+// }
+
+// #[derive(Debug, Clone)]
+// pub struct App {
+//     pub callee: Expr,
+//     pub args: RcHashed<Box<[Expr]>>,
+// }
+
+// #[derive(Debug, Clone)]
+// pub struct For {
+//     pub param_types: RcHashed<Box<[Expr]>>,
+//     pub return_type: Expr,
+// }
+
+// #[derive(Debug, Clone)]
+// pub struct DebNode {
+//     pub deb: Deb,
+// }
+
+// #[derive(Debug, Clone)]
+// pub struct UniverseNode {
+//     pub level: UniverseLevel,
+// }
+
+// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+// pub struct Deb(pub usize);
+
+// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+// pub struct UniverseLevel(pub usize);
+
+impl Substitute for Expr {
+    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+        match self {
+            Expr::Ind(e) => e.substitute(sub),
+            Expr::Vcon(e) => e.substitute(sub),
+            Expr::Match(e) => e.substitute(sub),
+            Expr::Fun(e) => e.substitute(sub),
+            Expr::App(e) => e.substitute(sub),
+            Expr::For(e) => e.substitute(sub),
+            Expr::Deb(e) => e.substitute(sub),
+            Expr::Universe(e) => e.substitute(sub),
+        }
+    }
+}
+
+impl Substitute for RcHashed<Ind> {
+    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+        todo!()
+    }
+}
+
+impl Substitute for RcHashed<Vcon> {
+    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+        todo!()
+    }
+}
+
+impl Substitute for RcHashed<Match> {
+    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+        todo!()
+    }
+}
+
+impl Substitute for RcHashed<Fun> {
+    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+        todo!()
+    }
+}
+
+impl Substitute for RcHashed<App> {
+    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+        todo!()
+    }
+}
+
+impl Substitute for RcHashed<For> {
+    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+        todo!()
+    }
+}
+
+impl Substitute for RcHashed<DebNode> {
+    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+        todo!()
+    }
+}
+
+impl Substitute for RcHashed<UniverseNode> {
+    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
         todo!()
     }
 }
