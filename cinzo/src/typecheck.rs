@@ -86,15 +86,15 @@ pub enum LazySubstitutionContext<'a> {
 #[derive(Debug, Clone)]
 pub struct LazySubstitution {
     pub tcon_len: usize,
-    pub left: NormalForm,
-    pub right: NormalForm,
+    pub from: NormalForm,
+    pub to: NormalForm,
 }
 
 impl LazySubstitutionContext<'_> {
     pub fn len(&self) -> usize {
         match self {
             LazySubstitutionContext::Base(subs) => subs.len(),
-            LazySubstitutionContext::Snoc(subs, rest) => subs.len() + rest.len(),
+            LazySubstitutionContext::Snoc(first, subs) => first.len() + subs.len(),
         }
     }
 
@@ -102,8 +102,38 @@ impl LazySubstitutionContext<'_> {
         self,
         current_tcon_len: usize,
     ) -> Vec<ConcreteSubstitution> {
-        todo!()
+        match self {
+            LazySubstitutionContext::Base(subs) => {
+                lazy_substitution_slice_to_concrete_noncompounded_substitutions(
+                    subs,
+                    current_tcon_len,
+                )
+                .collect()
+            }
+
+            LazySubstitutionContext::Snoc(first, subs) => {
+                let mut first = first.into_concrete_noncompounded_substitutions(current_tcon_len);
+                let rest = lazy_substitution_slice_to_concrete_noncompounded_substitutions(
+                    subs,
+                    current_tcon_len,
+                );
+                first.extend(rest);
+                first
+            }
+        }
     }
+}
+
+fn lazy_substitution_slice_to_concrete_noncompounded_substitutions(
+    subs: &[LazySubstitution],
+    current_tcon_len: usize,
+) -> impl Iterator<Item = ConcreteSubstitution> + '_ {
+    subs.iter().map(move |sub| {
+        let upshift_amount = current_tcon_len - sub.tcon_len;
+        let from = sub.from.clone().upshift(upshift_amount);
+        let to = sub.to.clone().upshift(upshift_amount);
+        ConcreteSubstitution { from, to }
+    })
 }
 
 #[derive(Debug, Clone)]
@@ -473,14 +503,14 @@ impl TypeChecker {
                         .cloned();
                     LazySubstitution {
                         tcon_len: extended_tcon_len,
-                        left: vcon_index_arg,
-                        right: matchee_index_arg,
+                        from: vcon_index_arg,
+                        to: matchee_index_arg,
                     }
                 })
                 .chain(std::iter::once(LazySubstitution {
                     tcon_len: extended_tcon_len,
-                    left: upshifted_normalized_matchee,
-                    right: parameterized_vcon_capp,
+                    from: upshifted_normalized_matchee,
+                    to: parameterized_vcon_capp,
                 }))
                 .collect();
         let extended_scon = LazySubstitutionContext::Snoc(&scon, &new_substitutions);

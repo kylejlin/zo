@@ -189,7 +189,7 @@ impl NormalForm {
 }
 
 impl NormalForm {
-    pub fn upshift_expressions_with_constant_cutoff(self, amount: usize) -> Self {
+    pub fn upshift(self, amount: usize) -> Self {
         Normalized(DebUpshifter(amount).replace_debs(self.0, 0))
     }
 }
