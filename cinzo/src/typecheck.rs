@@ -609,7 +609,24 @@ impl TypeChecker {
         unsubstituted_param_types: Normalized<RcHashed<Box<[Expr]>>>,
         normalized_args: Normalized<RcHashed<Box<[Expr]>>>,
     ) -> Normalized<Vec<Expr>> {
-        todo!()
+        let len = normalized_args.raw().value.len();
+
+        let out: Vec<NormalForm> = (0..len)
+            .map(|param_index| {
+                let unsubstituted_param_type = unsubstituted_param_types
+                    .without_digest()
+                    .derefed()
+                    .index(param_index)
+                    .cloned();
+                let substituter = DebDownshiftSubstituter {
+                    new_exprs: &normalized_args.raw().value[0..param_index],
+                };
+                let substituted = substituter.replace_debs(unsubstituted_param_type.into_raw(), 0);
+                self.evaluator.eval(substituted)
+            })
+            .collect();
+
+        Normalized::from_vec_normalized(out)
     }
 
     fn get_type_of_for(
