@@ -1008,17 +1008,21 @@ impl BitOrAssign for HasChanged {
 }
 
 trait Substitute: Sized {
-    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr;
+    type Output;
 
-    fn substitute(self, sub: &ConcreteSubstitution) -> Expr
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output;
+
+    fn substitute(self, sub: &ConcreteSubstitution) -> Self::Output
     where
         Self: GetDigest,
+        Self::Output: From<Expr>,
+        Self::Output: Into<Expr>,
     {
         if self.digest() == sub.from.raw().digest() {
-            return sub.to.raw().clone();
+            return sub.to.raw().clone().into();
         }
 
-        self.substitute_assuming_self_does_not_equal_from(sub)
+        self.substitute_in_children(sub)
     }
 }
 
@@ -1107,64 +1111,124 @@ trait Substitute: Sized {
 // pub struct UniverseLevel(pub usize);
 
 impl Substitute for Expr {
-    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+    type Output = Expr;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         match self {
-            Expr::Ind(e) => e.substitute_assuming_self_does_not_equal_from(sub),
-            Expr::Vcon(e) => e.substitute_assuming_self_does_not_equal_from(sub),
-            Expr::Match(e) => e.substitute_assuming_self_does_not_equal_from(sub),
-            Expr::Fun(e) => e.substitute_assuming_self_does_not_equal_from(sub),
-            Expr::App(e) => e.substitute_assuming_self_does_not_equal_from(sub),
-            Expr::For(e) => e.substitute_assuming_self_does_not_equal_from(sub),
-            Expr::Deb(e) => e.substitute_assuming_self_does_not_equal_from(sub),
-            Expr::Universe(e) => e.substitute_assuming_self_does_not_equal_from(sub),
+            Expr::Ind(e) => e.substitute_in_children(sub),
+            Expr::Vcon(e) => e.substitute_in_children(sub),
+            Expr::Match(e) => e.substitute_in_children(sub),
+            Expr::Fun(e) => e.substitute_in_children(sub),
+            Expr::App(e) => e.substitute_in_children(sub),
+            Expr::For(e) => e.substitute_in_children(sub),
+            Expr::Deb(e) => e.substitute_in_children(sub),
+            Expr::Universe(e) => e.substitute_in_children(sub),
         }
     }
 }
 
 impl Substitute for RcHashed<Ind> {
-    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+    type Output = Expr;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
+        Ind {
+            name: self.value.name.clone(),
+            universe_level: self.value.universe_level,
+            index_types: self.value.index_types.clone().substitute_in_children(sub),
+            vcon_defs: self.value.vcon_defs.clone().substitute_in_children(sub),
+        }
+        .into()
+    }
+}
+
+impl Substitute for RcHashed<Box<[Expr]>> {
+    type Output = Self;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
+        let subbed = self
+            .value
+            .iter()
+            .cloned()
+            .map(|e| e.substitute(sub))
+            .collect::<Vec<_>>();
+        rc_hash(subbed.into_boxed_slice())
+    }
+}
+
+impl Substitute for RcHashed<Box<[VconDef]>> {
+    type Output = Self;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
+        let subbed = self
+            .value
+            .iter()
+            .cloned()
+            .map(|def| def.substitute_in_children(sub))
+            .collect::<Vec<_>>();
+        rc_hash(subbed.into_boxed_slice())
+    }
+}
+
+impl Substitute for VconDef {
+    type Output = Self;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         todo!()
     }
 }
 
 impl Substitute for RcHashed<Vcon> {
-    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+    type Output = Expr;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         todo!()
     }
 }
 
 impl Substitute for RcHashed<Match> {
-    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+    type Output = Expr;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         todo!()
     }
 }
 
 impl Substitute for RcHashed<Fun> {
-    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+    type Output = Expr;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         todo!()
     }
 }
 
 impl Substitute for RcHashed<App> {
-    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+    type Output = Expr;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         todo!()
     }
 }
 
 impl Substitute for RcHashed<For> {
-    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+    type Output = Expr;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         todo!()
     }
 }
 
 impl Substitute for RcHashed<DebNode> {
-    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+    type Output = Expr;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         todo!()
     }
 }
 
 impl Substitute for RcHashed<UniverseNode> {
-    fn substitute_assuming_self_does_not_equal_from(self, sub: &ConcreteSubstitution) -> Expr {
+    type Output = Expr;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         todo!()
     }
 }
