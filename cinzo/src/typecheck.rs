@@ -248,15 +248,17 @@ impl TypeChecker {
         let recursive_ind_entry: Normalized<Vec<Expr>> =
             std::iter::once(predicted_ind_type).collect();
         let tcon_with_recursive_ind_entry =
-            LazyTypeContext::Snoc(&tcon, recursive_ind_entry.as_slice());
+            LazyTypeContext::Snoc(&tcon, recursive_ind_entry.to_derefed());
         let param_type_types = self.get_types_of_dependent_expressions(
             def.param_types.clone(),
             tcon_with_recursive_ind_entry,
             scon,
         )?;
 
-        let tcon_with_params =
-            LazyTypeContext::Snoc(&tcon_with_recursive_ind_entry, param_type_types.as_slice());
+        let tcon_with_params = LazyTypeContext::Snoc(
+            &tcon_with_recursive_ind_entry,
+            param_type_types.to_derefed(),
+        );
         self.get_types_of_independent_expressions(def.index_args.clone(), tcon_with_params, scon)?;
 
         if ind.value.index_types.value.len() != def.index_args.value.len() {
@@ -425,7 +427,7 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         let vcon_defs = well_typed_matchee_type_ind.without_digest().vcon_defs();
         let vcon_defs = vcon_defs.without_digest();
-        let vcon_defs = vcon_defs.as_slice();
+        let vcon_defs = vcon_defs.derefed();
 
         for match_case_index in 0..match_.value.cases.value.len() {
             let well_typed_vcon_def = vcon_defs.index(match_case_index);
@@ -470,7 +472,7 @@ impl TypeChecker {
             );
         let match_case_param_types = self.evaluator.eval_expressions(match_case_param_types);
         let match_case_param_types = match_case_param_types.without_digest();
-        let extended_tcon = LazyTypeContext::Snoc(&tcon, match_case_param_types.as_slice());
+        let extended_tcon = LazyTypeContext::Snoc(&tcon, match_case_param_types.derefed());
 
         let match_case_param_count = match_case_param_types.raw().len();
         let substituted_vcon_index_args = well_typed_vcon_def
@@ -493,12 +495,12 @@ impl TypeChecker {
                 .map(|i| {
                     let vcon_index_arg = substituted_vcon_index_args
                         .without_digest()
-                        .as_slice()
+                        .derefed()
                         .index(i)
                         .cloned();
                     let matchee_index_arg = upshifted_matchee_type_args
                         .without_digest()
-                        .as_slice()
+                        .derefed()
                         .index(i)
                         .cloned();
                     LazySubstitution {
@@ -594,7 +596,7 @@ impl TypeChecker {
             Normalized::from_vec_normalized(Vec::with_capacity(exprs.value.len()));
 
         for expr in exprs.value.iter() {
-            let current_tcon = LazyTypeContext::Snoc(&tcon, out.as_slice());
+            let current_tcon = LazyTypeContext::Snoc(&tcon, out.to_derefed());
             let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
             out.push(type_);
         }

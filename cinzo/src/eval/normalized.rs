@@ -15,6 +15,17 @@ impl<T> Normalized<T> {
     pub fn raw(&self) -> &T {
         &self.0
     }
+
+    pub fn as_ref(&self) -> Normalized<&T> {
+        Normalized(&self.0)
+    }
+
+    pub fn to_derefed(&self) -> Normalized<&T::Target>
+    where
+        T: Deref,
+    {
+        Normalized(self.0.deref())
+    }
 }
 
 impl<T> Normalized<&T> {
@@ -23,6 +34,13 @@ impl<T> Normalized<&T> {
         T: Clone,
     {
         Normalized(self.0.clone())
+    }
+
+    pub fn derefed(&self) -> Normalized<&T::Target>
+    where
+        T: Deref,
+    {
+        Normalized(self.0.deref())
     }
 }
 
@@ -63,18 +81,8 @@ impl<T> Normalized<Vec<T>> {
 }
 
 impl<T> Normalized<Vec<T>> {
-    pub fn as_slice(&self) -> Normalized<&[T]> {
-        Normalized(&self.0)
-    }
-
     pub fn push(&mut self, item: Normalized<T>) {
         self.0.push(item.into_raw())
-    }
-}
-
-impl<T> Normalized<&Box<[T]>> {
-    pub fn as_slice(&self) -> Normalized<&[T]> {
-        Normalized(&self.0)
     }
 }
 
