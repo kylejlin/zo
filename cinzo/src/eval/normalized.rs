@@ -1,6 +1,6 @@
-use std::rc::Rc;
-
 use crate::{ast::*, replace_debs::*};
+
+use std::{ops::Deref, rc::Rc};
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Normalized<T>(pub(in crate::eval) T);
@@ -32,20 +32,12 @@ impl<T> Normalized<RcHashed<T>> {
     }
 }
 
-impl<T> Normalized<&[T]> {
+impl<T, S> Normalized<S>
+where
+    S: Deref<Target = [T]>,
+{
     pub fn get(&self, index: usize) -> Option<Normalized<&T>> {
-        self.0.get(index).map(Normalized)
-    }
-
-    /// A panicking version of `get`.
-    pub fn index(&self, index: usize) -> Normalized<&T> {
-        Normalized(&self.0[index])
-    }
-}
-
-impl<T> Normalized<Vec<T>> {
-    pub fn get(&self, index: usize) -> Option<Normalized<&T>> {
-        self.0.get(index).map(Normalized)
+        self.0.deref().get(index).map(Normalized)
     }
 
     /// A panicking version of `get`.
