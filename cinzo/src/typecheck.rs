@@ -778,6 +778,7 @@ impl BitOrAssign for HasChanged {
 
 impl ConcreteSubstitution {
     pub fn apply(&self, expr: Expr) -> Expr {
+        // Don't forget to upshift `from` and `to`!
         todo!()
     }
 }
