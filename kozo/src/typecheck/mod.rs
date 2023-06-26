@@ -6,8 +6,6 @@ use crate::{
 
 use std::{ops::BitOrAssign, rc::Rc};
 
-type RcHashed<T> = Rc<SemanticHashed<T>>;
-
 mod concrete_substitution;
 use concrete_substitution::*;
 
