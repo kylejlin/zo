@@ -1,6 +1,10 @@
 use std::rc::Rc;
 
-pub use crate::{hashed::*, semantic_hash::*};
+pub use crate::{
+    hashed::*,
+    rch_cst::{rc_sem_hashed, RcSemHashed},
+    semantic_hash::*,
+};
 
 #[derive(Clone, Debug)]
 pub enum Expr {
@@ -280,13 +284,6 @@ pub struct Deb(pub usize);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct UniverseLevel(pub usize);
-
-/// Reference-counted semantically hashed.
-pub type RcSemHashed<T> = Rc<SemanticallyHashed<T>>;
-
-pub fn rc_sem_hashed<T: SemanticHash>(t: T) -> RcSemHashed<T> {
-    Rc::new(Sha256Hashed::new(t))
-}
 
 impl App {
     pub fn collapse_if_nullary(self) -> Expr {
