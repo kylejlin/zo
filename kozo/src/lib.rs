@@ -2,6 +2,7 @@ pub mod ast;
 pub mod cst;
 pub mod cst_to_ast;
 pub mod eval;
+pub mod hashed;
 pub mod lexer;
 pub mod nohash_hashmap;
 pub mod replace_debs;

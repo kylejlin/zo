@@ -1,7 +1,5 @@
 // TODO: Track `original`.
 
-use std::rc::Rc;
-
 use crate::{ast::*, nohash_hashmap::NoHashHashMap, replace_debs::*};
 
 #[cfg(test)]
@@ -23,10 +21,9 @@ impl Evaluator {
     }
 }
 
-type RcHashed<T> = Rc<SemanticHashed<T>>;
-type RcExprs = RcHashed<Box<[Expr]>>;
-type RcVconDefs = RcHashed<Box<[VconDef]>>;
-type RcMatchCases = RcHashed<Box<[MatchCase]>>;
+type RcExprs = RcSemHashed<Box<[Expr]>>;
+type RcVconDefs = RcSemHashed<Box<[VconDef]>>;
+type RcMatchCases = RcSemHashed<Box<[MatchCase]>>;
 
 impl Evaluator {
     pub fn eval(&mut self, expr: Expr) -> NormalForm {
@@ -50,7 +47,7 @@ impl Evaluator {
         }
     }
 
-    fn eval_unseen_ind(&mut self, ind: RcHashed<Ind>) -> NormalForm {
+    fn eval_unseen_ind(&mut self, ind: RcSemHashed<Ind>) -> NormalForm {
         let ind_digest = ind.digest.clone();
         let ind = &ind.value;
         let normalized = Ind {
@@ -126,7 +123,7 @@ impl Evaluator {
         })
     }
 
-    fn eval_unseen_vcon(&mut self, vcon: RcHashed<Vcon>) -> NormalForm {
+    fn eval_unseen_vcon(&mut self, vcon: RcSemHashed<Vcon>) -> NormalForm {
         let vcon_digest = vcon.digest.clone();
         let vcon = &vcon.value;
         let normalized = Vcon {
@@ -139,7 +136,7 @@ impl Evaluator {
         normalized
     }
 
-    pub fn eval_ind(&mut self, ind: RcHashed<Ind>) -> Normalized<RcHashed<Ind>> {
+    pub fn eval_ind(&mut self, ind: RcSemHashed<Ind>) -> Normalized<RcSemHashed<Ind>> {
         if let Some(result) = self.eval_expr_cache.get(&ind.digest) {
             Normalized(
                 result
@@ -159,7 +156,7 @@ impl Evaluator {
         }
     }
 
-    fn eval_unseen_match(&mut self, m: RcHashed<Match>) -> NormalForm {
+    fn eval_unseen_match(&mut self, m: RcSemHashed<Match>) -> NormalForm {
         let match_ = &m.value;
         let normalized_matchee = self.eval(match_.matchee.clone()).into_raw();
 
@@ -227,7 +224,7 @@ impl Evaluator {
             .rc_hash_and_wrap_in_normalized()
     }
 
-    fn eval_unseen_fun(&mut self, fun: RcHashed<Fun>) -> NormalForm {
+    fn eval_unseen_fun(&mut self, fun: RcSemHashed<Fun>) -> NormalForm {
         let fun_digest = fun.digest.clone();
         let fun = &fun.value;
         let normalized = Fun {
@@ -242,7 +239,7 @@ impl Evaluator {
         normalized
     }
 
-    fn eval_unseen_app(&mut self, app: RcHashed<App>) -> NormalForm {
+    fn eval_unseen_app(&mut self, app: RcSemHashed<App>) -> NormalForm {
         let normalized_callee = self.eval(app.value.callee.clone()).into_raw();
         let normalized_args = self.eval_expressions(app.value.args.clone()).into_raw();
 
@@ -271,7 +268,7 @@ impl Evaluator {
         normalized
     }
 
-    fn eval_unseen_for(&mut self, for_: RcHashed<For>) -> NormalForm {
+    fn eval_unseen_for(&mut self, for_: RcSemHashed<For>) -> NormalForm {
         let for_digest = for_.digest.clone();
         let for_ = &for_.value;
         let normalized = For {
@@ -289,7 +286,7 @@ impl Evaluator {
     }
 }
 
-fn can_unfold_app(callee: RcHashed<Fun>, args: RcExprs) -> bool {
+fn can_unfold_app(callee: RcSemHashed<Fun>, args: RcExprs) -> bool {
     let Some(decreasing_index) = callee.value.decreasing_index else {
         // If there is no decreasing param index,
         // the function is non-recursive.

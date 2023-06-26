@@ -44,7 +44,7 @@ impl<T> Normalized<&T> {
     }
 }
 
-impl<T> Normalized<RcHashed<T>> {
+impl<T: SemanticHash> Normalized<RcSemHashed<T>> {
     pub fn without_digest(&self) -> Normalized<&T> {
         Normalized(&self.0.value)
     }
@@ -95,18 +95,23 @@ impl<T> Normalized<Vec<T>> {
 
 impl NormalForm {
     pub fn universe(universe: UniverseNode) -> Self {
-        Normalized(Expr::Universe(Rc::new(SemanticHashed::new(universe))))
+        Normalized(Expr::Universe(Rc::new(Hashed::semantically_hashed(
+            universe,
+        ))))
     }
 }
 
 impl NormalForm {
     pub fn ind_or_ind_app(
         self,
-    ) -> Option<(Normalized<RcHashed<Ind>>, Normalized<RcHashed<Box<[Expr]>>>)> {
+    ) -> Option<(
+        Normalized<RcSemHashed<Ind>>,
+        Normalized<RcSemHashed<Box<[Expr]>>>,
+    )> {
         match self.0 {
             Expr::Ind(ind) => Some((
                 Normalized(ind),
-                Normalized(Rc::new(SemanticHashed::new(Box::new([])))),
+                Normalized(Rc::new(Hashed::semantically_hashed(Box::new([])))),
             )),
 
             Expr::App(app) => match &app.value.callee {
@@ -122,21 +127,21 @@ impl NormalForm {
 }
 
 impl Normalized<&Ind> {
-    pub fn vcon_defs(self) -> Normalized<RcHashed<Box<[VconDef]>>> {
+    pub fn vcon_defs(self) -> Normalized<RcSemHashed<Box<[VconDef]>>> {
         Normalized(self.0.vcon_defs.clone())
     }
 }
 
 impl Normalized<&VconDef> {
-    pub fn index_args(self) -> Normalized<RcHashed<Box<[Expr]>>> {
+    pub fn index_args(self) -> Normalized<RcSemHashed<Box<[Expr]>>> {
         Normalized(self.0.index_args.clone())
     }
 }
 
 impl Normalized<App> {
     pub fn app_with_ind_callee(
-        callee: Normalized<RcHashed<Ind>>,
-        args: Normalized<RcHashed<Box<[Expr]>>>,
+        callee: Normalized<RcSemHashed<Ind>>,
+        args: Normalized<RcSemHashed<Box<[Expr]>>>,
     ) -> Self {
         Normalized(App {
             callee: Expr::Ind(callee.into_raw()),
@@ -150,13 +155,16 @@ impl Normalized<App> {
 }
 
 impl Normalized<&For> {
-    pub fn param_types(self) -> Normalized<RcHashed<Box<[Expr]>>> {
+    pub fn param_types(self) -> Normalized<RcSemHashed<Box<[Expr]>>> {
         Normalized(self.0.param_types.clone())
     }
 }
 
 impl Normalized<For> {
-    pub fn for_(param_types: Normalized<RcHashed<Box<[Expr]>>>, return_type: NormalForm) -> Self {
+    pub fn for_(
+        param_types: Normalized<RcSemHashed<Box<[Expr]>>>,
+        return_type: NormalForm,
+    ) -> Self {
         Normalized(For {
             param_types: param_types.into_raw(),
             return_type: return_type.into_raw(),
@@ -179,7 +187,7 @@ impl NormalForm {
     /// ))
     /// ```
     pub fn vcon_capp(
-        ind: Normalized<RcHashed<Ind>>,
+        ind: Normalized<RcSemHashed<Ind>>,
         vcon_index: usize,
         arg_count: usize,
     ) -> NormalForm {
@@ -194,7 +202,7 @@ impl NormalForm {
             .collect();
         let capp = App {
             callee: vcon.into(),
-            args: rc_hash(args.into_boxed_slice()),
+            args: rc_sem_hashed(args.into_boxed_slice()),
         }
         .collapse_if_nullary();
         Normalized(capp)
@@ -207,14 +215,14 @@ impl NormalForm {
     }
 }
 
-impl Normalized<RcHashed<Box<[Expr]>>> {
+impl Normalized<RcSemHashed<Box<[Expr]>>> {
     pub fn upshift_expressions_with_constant_cutoff(self, amount: usize) -> Self {
         Normalized(DebUpshifter(amount).replace_debs_in_expressions_with_constant_cutoff(self.0, 0))
     }
 
     pub fn replace_deb0_with_ind_with_increasing_cutoff(
         self,
-        ind: Normalized<RcHashed<Ind>>,
+        ind: Normalized<RcSemHashed<Ind>>,
     ) -> Self {
         let ind_singleton: [Expr; 1] = [ind.raw().clone().into()];
         let ind_singleton_deb_substituter = DebDownshiftSubstituter {
@@ -228,56 +236,56 @@ impl Normalized<RcHashed<Box<[Expr]>>> {
 }
 
 impl NormalForm {
-    pub fn try_into_ind(self) -> Result<Normalized<RcHashed<Ind>>, NormalForm> {
+    pub fn try_into_ind(self) -> Result<Normalized<RcSemHashed<Ind>>, NormalForm> {
         match self.0 {
             Expr::Ind(ind) => Ok(Normalized(ind)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_vcon(self) -> Result<Normalized<RcHashed<Vcon>>, NormalForm> {
+    pub fn try_into_vcon(self) -> Result<Normalized<RcSemHashed<Vcon>>, NormalForm> {
         match self.0 {
             Expr::Vcon(vcon) => Ok(Normalized(vcon)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_match(self) -> Result<Normalized<RcHashed<Match>>, NormalForm> {
+    pub fn try_into_match(self) -> Result<Normalized<RcSemHashed<Match>>, NormalForm> {
         match self.0 {
             Expr::Match(m) => Ok(Normalized(m)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_fun(self) -> Result<Normalized<RcHashed<Fun>>, NormalForm> {
+    pub fn try_into_fun(self) -> Result<Normalized<RcSemHashed<Fun>>, NormalForm> {
         match self.0 {
             Expr::Fun(f) => Ok(Normalized(f)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_app(self) -> Result<Normalized<RcHashed<App>>, NormalForm> {
+    pub fn try_into_app(self) -> Result<Normalized<RcSemHashed<App>>, NormalForm> {
         match self.0 {
             Expr::App(a) => Ok(Normalized(a)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_for(self) -> Result<Normalized<RcHashed<For>>, NormalForm> {
+    pub fn try_into_for(self) -> Result<Normalized<RcSemHashed<For>>, NormalForm> {
         match self.0 {
             Expr::For(f) => Ok(Normalized(f)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_deb(self) -> Result<Normalized<RcHashed<DebNode>>, NormalForm> {
+    pub fn try_into_deb(self) -> Result<Normalized<RcSemHashed<DebNode>>, NormalForm> {
         match self.0 {
             Expr::Deb(d) => Ok(Normalized(d)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_universe(self) -> Result<Normalized<RcHashed<UniverseNode>>, NormalForm> {
+    pub fn try_into_universe(self) -> Result<Normalized<RcSemHashed<UniverseNode>>, NormalForm> {
         match self.0 {
             Expr::Universe(u) => Ok(Normalized(u)),
             _ => Err(self),
@@ -353,16 +361,16 @@ mod unchecked {
         }
     }
 
-    pub trait RcHashAndWrapInNormalized: Sized {
-        fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcHashed<Self>>;
+    pub trait RcHashAndWrapInNormalized: Sized + SemanticHash {
+        fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcSemHashed<Self>>;
     }
 
     impl<T> RcHashAndWrapInNormalized for T
     where
         T: SemanticHash,
     {
-        fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcHashed<Self>> {
-            Normalized(rc_hash(self))
+        fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcSemHashed<Self>> {
+            Normalized(rc_sem_hashed(self))
         }
     }
 }

@@ -3,10 +3,10 @@ use super::*;
 #[derive(Debug, Clone)]
 pub enum TypeError {
     InvalidDeb {
-        deb: RcHashed<DebNode>,
+        deb: RcSemHashed<DebNode>,
         tcon_len: usize,
     },
-    InvalidVconIndex(RcHashed<Vcon>),
+    InvalidVconIndex(RcSemHashed<Vcon>),
     UnexpectedNonTypeExpression {
         expr: Expr,
         type_: NormalForm,
@@ -26,8 +26,8 @@ pub enum TypeError {
         type_: NormalForm,
     },
     WrongNumberOfMatchCases {
-        match_: RcHashed<Match>,
-        matchee_type_ind: Normalized<RcHashed<Ind>>,
+        match_: RcSemHashed<Match>,
+        matchee_type_ind: Normalized<RcSemHashed<Ind>>,
     },
     TypeMismatch {
         expr: Expr,
@@ -37,12 +37,12 @@ pub enum TypeError {
         subbed_actual: NormalForm,
     },
     CalleeTypeIsNotAForExpression {
-        app: RcHashed<App>,
+        app: RcSemHashed<App>,
         callee_type: NormalForm,
     },
     WrongNumberOfAppArguments {
-        app: RcHashed<App>,
-        callee_type: Normalized<RcHashed<For>>,
+        app: RcSemHashed<App>,
+        callee_type: Normalized<RcSemHashed<For>>,
         expected: usize,
         actual: usize,
     },

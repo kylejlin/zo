@@ -11,7 +11,7 @@ pub struct ExpectedTypeEquality {
 /// `exprs`, `expected_types`, and `actual_types` **must** all have the same length.
 #[derive(Clone, Debug)]
 pub struct ExpectedTypeEqualities {
-    pub exprs: RcHashed<Box<[Expr]>>,
+    pub exprs: RcSemHashed<Box<[Expr]>>,
     pub expected_types: Normalized<Vec<Expr>>,
     pub actual_types: Normalized<Vec<Expr>>,
     pub tcon_len: usize,

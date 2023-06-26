@@ -1,44 +1,8 @@
 use crate::{ast::*, sha256_hasher::*};
 
-use std::{
-    fmt::{Debug, Formatter},
-    hash::Hash,
-};
+use std::hash::Hash;
 
-#[derive(Clone, Debug)]
-pub struct SemanticHashed<T> {
-    pub value: T,
-    pub digest: Digest,
-}
-
-#[derive(Clone, PartialEq, Eq, Default, PartialOrd, Ord)]
-pub struct Digest(pub [u8; 32]);
-
-impl AsRef<[u8]> for Digest {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
-    }
-}
-
-impl Hash for Digest {
-    fn hash<H: Hasher>(&self, hasher: &mut H) {
-        hasher.write_u64(u64::from_ne_bytes([
-            self.0[0], self.0[1], self.0[2], self.0[3], self.0[4], self.0[5], self.0[6], self.0[7],
-        ]));
-    }
-}
-
-impl Debug for Digest {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "0x")?;
-        for byte in self.0.iter() {
-            write!(f, "{:02x}", byte)?;
-        }
-        Ok(())
-    }
-}
-
-impl nohash_hasher::IsEnabled for Digest {}
+pub use crate::hashed::*;
 
 pub trait GetDigest {
     fn digest(&self) -> &Digest;
@@ -48,11 +12,62 @@ pub trait SemanticHash {
     fn semantic_hash(&self) -> Digest;
 }
 
-impl<T> SemanticHashed<T>
+pub struct SemanticHashAlgorithm<T: SemanticHash>(std::marker::PhantomData<T>);
+
+impl<T: SemanticHash> Clone for SemanticHashAlgorithm<T> {
+    fn clone(&self) -> Self {
+        Self(std::marker::PhantomData)
+    }
+}
+impl<T: SemanticHash> Copy for SemanticHashAlgorithm<T> {}
+impl<T: SemanticHash> Default for SemanticHashAlgorithm<T> {
+    fn default() -> Self {
+        Self(std::marker::PhantomData)
+    }
+}
+impl<T: SemanticHash> std::fmt::Debug for SemanticHashAlgorithm<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let type_name = std::any::type_name::<Self>();
+        f.write_str(type_name)
+    }
+}
+impl<T: SemanticHash> PartialEq for SemanticHashAlgorithm<T> {
+    fn eq(&self, _: &Self) -> bool {
+        true
+    }
+}
+impl<T: SemanticHash> PartialOrd for SemanticHashAlgorithm<T> {
+    fn partial_cmp(&self, _: &Self) -> Option<std::cmp::Ordering> {
+        Some(std::cmp::Ordering::Equal)
+    }
+}
+impl<T: SemanticHash> Ord for SemanticHashAlgorithm<T> {
+    fn cmp(&self, _: &Self) -> std::cmp::Ordering {
+        std::cmp::Ordering::Equal
+    }
+}
+impl<T: SemanticHash> Eq for SemanticHashAlgorithm<T> {}
+impl<T: SemanticHash> Hash for SemanticHashAlgorithm<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        std::any::type_name::<T>().hash(state);
+    }
+}
+
+impl<T: SemanticHash> HashAlgorithm<T> for SemanticHashAlgorithm<T> {
+    type Digest = Digest;
+
+    fn digest(input: &T) -> Self::Digest {
+        input.semantic_hash()
+    }
+}
+
+pub type SemanticallyHashed<T> = Hashed<T, SemanticHashAlgorithm<T>>;
+
+impl<T> SemanticallyHashed<T>
 where
     T: SemanticHash,
 {
-    pub fn new(value: T) -> Self {
+    pub fn semantically_hashed(value: T) -> Self {
         Self {
             digest: value.semantic_hash(),
             value,

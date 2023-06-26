@@ -53,7 +53,7 @@ impl TypeChecker {
 
     fn get_type_of_ind(
         &mut self,
-        ind: RcHashed<Ind>,
+        ind: RcSemHashed<Ind>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -63,7 +63,7 @@ impl TypeChecker {
 
     fn perform_ind_precheck(
         &mut self,
-        ind: RcHashed<Ind>,
+        ind: RcSemHashed<Ind>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -99,7 +99,7 @@ impl TypeChecker {
 
     fn assert_ind_vcon_defs_are_well_typed(
         &mut self,
-        ind: RcHashed<Ind>,
+        ind: RcSemHashed<Ind>,
         predicted_ind_type: NormalForm,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
@@ -118,7 +118,7 @@ impl TypeChecker {
 
     fn assert_ind_vcon_def_is_well_typed(
         &mut self,
-        ind: RcHashed<Ind>,
+        ind: RcSemHashed<Ind>,
         predicted_ind_type: NormalForm,
         def: &VconDef,
         tcon: LazyTypeContext,
@@ -167,7 +167,7 @@ impl TypeChecker {
 
     fn assert_vcon_def_is_strictly_positive(
         &mut self,
-        _ind: RcHashed<Ind>,
+        _ind: RcSemHashed<Ind>,
         _def: &VconDef,
         _tcon: LazyTypeContext,
         _scon: LazySubstitutionContext,
@@ -181,7 +181,7 @@ impl TypeChecker {
     ///
     /// However, you may safely call this function even if the vcon defs
     /// are ill-typed.
-    fn get_ind_type_assuming_ind_is_well_typed(&mut self, ind: RcHashed<Ind>) -> NormalForm {
+    fn get_ind_type_assuming_ind_is_well_typed(&mut self, ind: RcSemHashed<Ind>) -> NormalForm {
         let normalized_index_types = self
             .evaluator
             .eval_expressions(ind.value.index_types.clone());
@@ -189,7 +189,7 @@ impl TypeChecker {
         Normalized::for_(normalized_index_types, return_type).collapse_if_nullary()
     }
 
-    fn get_ind_return_type(&mut self, ind: RcHashed<Ind>) -> NormalForm {
+    fn get_ind_return_type(&mut self, ind: RcSemHashed<Ind>) -> NormalForm {
         Normalized::universe(UniverseNode {
             level: ind.value.universe_level,
         })
@@ -197,7 +197,7 @@ impl TypeChecker {
 
     fn get_type_of_vcon(
         &mut self,
-        vcon: RcHashed<Vcon>,
+        vcon: RcSemHashed<Vcon>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -213,7 +213,7 @@ impl TypeChecker {
 
     fn perform_vcon_precheck(
         &mut self,
-        vcon: RcHashed<Vcon>,
+        vcon: RcSemHashed<Vcon>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -224,7 +224,7 @@ impl TypeChecker {
     fn get_type_of_trusted_vcon_def(
         &mut self,
         def: &VconDef,
-        ind: RcHashed<Ind>,
+        ind: RcSemHashed<Ind>,
     ) -> Result<NormalForm, TypeError> {
         let normalized_param_types = self.evaluator.eval_expressions(def.param_types.clone());
         let normalized_ind = self.evaluator.eval_ind(ind.clone());
@@ -236,7 +236,7 @@ impl TypeChecker {
 
     fn get_type_of_match(
         &mut self,
-        match_: RcHashed<Match>,
+        match_: RcSemHashed<Match>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -248,7 +248,7 @@ impl TypeChecker {
 
     fn perform_match_precheck(
         &mut self,
-        match_: RcHashed<Match>,
+        match_: RcSemHashed<Match>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -297,10 +297,10 @@ impl TypeChecker {
 
     fn perform_match_cases_precheck(
         &mut self,
-        match_: RcHashed<Match>,
+        match_: RcSemHashed<Match>,
         match_return_type: NormalForm,
-        well_typed_matchee_type_ind: Normalized<RcHashed<Ind>>,
-        well_typed_matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,
+        well_typed_matchee_type_ind: Normalized<RcSemHashed<Ind>>,
+        well_typed_matchee_type_args: Normalized<RcSemHashed<Box<[Expr]>>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -332,10 +332,10 @@ impl TypeChecker {
         match_case: &MatchCase,
         match_case_index: usize,
         well_typed_vcon_def: Normalized<&VconDef>,
-        match_: RcHashed<Match>,
+        match_: RcSemHashed<Match>,
         match_return_type: NormalForm,
-        well_typed_matchee_type_ind: Normalized<RcHashed<Ind>>,
-        well_typed_matchee_type_args: Normalized<RcHashed<Box<[Expr]>>>,
+        well_typed_matchee_type_ind: Normalized<RcSemHashed<Ind>>,
+        well_typed_matchee_type_args: Normalized<RcSemHashed<Box<[Expr]>>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -414,7 +414,7 @@ impl TypeChecker {
 
     fn get_type_of_fun(
         &mut self,
-        fun: RcHashed<Fun>,
+        fun: RcSemHashed<Fun>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -477,7 +477,7 @@ impl TypeChecker {
 
     fn get_type_of_app(
         &mut self,
-        app: RcHashed<App>,
+        app: RcSemHashed<App>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -529,8 +529,8 @@ impl TypeChecker {
 
     fn substitute_param_types(
         &mut self,
-        unsubstituted_param_types: Normalized<RcHashed<Box<[Expr]>>>,
-        normalized_args: Normalized<RcHashed<Box<[Expr]>>>,
+        unsubstituted_param_types: Normalized<RcSemHashed<Box<[Expr]>>>,
+        normalized_args: Normalized<RcSemHashed<Box<[Expr]>>>,
     ) -> Normalized<Vec<Expr>> {
         let len = normalized_args.raw().value.len();
 
@@ -554,7 +554,7 @@ impl TypeChecker {
 
     fn get_type_of_for(
         &mut self,
-        for_: RcHashed<For>,
+        for_: RcSemHashed<For>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -591,7 +591,7 @@ impl TypeChecker {
 
     fn get_type_of_deb(
         &mut self,
-        deb: RcHashed<DebNode>,
+        deb: RcSemHashed<DebNode>,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         if let Some(expr) = tcon.get(deb.value.deb) {
@@ -606,18 +606,20 @@ impl TypeChecker {
 
     fn get_type_of_universe(
         &mut self,
-        universe: RcHashed<UniverseNode>,
+        universe: RcSemHashed<UniverseNode>,
     ) -> Result<NormalForm, TypeError> {
         return Ok(self
             .evaluator
-            .eval(Expr::Universe(Rc::new(SemanticHashed::new(UniverseNode {
-                level: UniverseLevel(universe.value.level.0 + 1),
-            })))));
+            .eval(Expr::Universe(Rc::new(Hashed::semantically_hashed(
+                UniverseNode {
+                    level: UniverseLevel(universe.value.level.0 + 1),
+                },
+            )))));
     }
 
     fn get_types_of_dependent_expressions(
         &mut self,
-        exprs: RcHashed<Box<[Expr]>>,
+        exprs: RcSemHashed<Box<[Expr]>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<Expr>>, TypeError> {
@@ -635,7 +637,7 @@ impl TypeChecker {
 
     fn get_types_of_independent_expressions(
         &mut self,
-        exprs: RcHashed<Box<[Expr]>>,
+        exprs: RcSemHashed<Box<[Expr]>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<Expr>>, TypeError> {
