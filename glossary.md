@@ -14,7 +14,7 @@ with the ordinary definitions.
   a SHA256 digest.
 - ind: inductive data type definition
 - rc: reference counted
-- rch: reference counted (semantically) hashed
 - scon: substitution context
+- sem hash: semantic hash
 - tcon: type context
 - vcon: variant constructor
