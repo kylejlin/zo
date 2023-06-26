@@ -6,7 +6,7 @@ pub use crate::{
 
 use std::{hash::Hash, rc::Rc};
 
-/// Reference-counted semantically hashed.
+/// Reference-counted hashed.
 pub type RcHashed<T> = Rc<Sha256Hashed<T, DefaultHashAlgorithm>>;
 
 pub fn rc_hashed<T: Hash>(t: T) -> RcHashed<T> {
