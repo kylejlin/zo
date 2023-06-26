@@ -95,9 +95,7 @@ impl<T> Normalized<Vec<T>> {
 
 impl NormalForm {
     pub fn universe(universe: UniverseNode) -> Self {
-        Normalized(Expr::Universe(Rc::new(Hashed::semantically_hashed(
-            universe,
-        ))))
+        Normalized(Expr::Universe(Rc::new(Sha256Hashed::new(universe))))
     }
 }
 
@@ -111,7 +109,7 @@ impl NormalForm {
         match self.0 {
             Expr::Ind(ind) => Some((
                 Normalized(ind),
-                Normalized(Rc::new(Hashed::semantically_hashed(Box::new([])))),
+                Normalized(Rc::new(Sha256Hashed::new(Box::new([])))),
             )),
 
             Expr::App(app) => match &app.value.callee {

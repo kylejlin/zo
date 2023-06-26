@@ -610,11 +610,9 @@ impl TypeChecker {
     ) -> Result<NormalForm, TypeError> {
         return Ok(self
             .evaluator
-            .eval(Expr::Universe(Rc::new(Hashed::semantically_hashed(
-                UniverseNode {
-                    level: UniverseLevel(universe.value.level.0 + 1),
-                },
-            )))));
+            .eval(Expr::Universe(Rc::new(Sha256Hashed::new(UniverseNode {
+                level: UniverseLevel(universe.value.level.0 + 1),
+            })))));
     }
 
     fn get_types_of_dependent_expressions(

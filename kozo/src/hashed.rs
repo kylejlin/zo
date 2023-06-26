@@ -1,47 +1,25 @@
-use crate::sha256_hasher::*;
+use std::fmt::Debug;
 
-use std::{
-    fmt::{Debug, Formatter},
-    hash::Hash,
-};
+pub use crate::sha256_hasher::Digest;
 
 #[derive(Clone, Debug)]
-pub struct Hashed<T, A: HashAlgorithm<T>> {
+pub struct Sha256Hashed<T, A: HashAlgorithm<T>> {
     pub value: T,
-    pub digest: A::Digest,
+    pub digest: Digest,
+    _marker: std::marker::PhantomData<A>,
+}
+
+impl<T, A: HashAlgorithm<T>> Sha256Hashed<T, A> {
+    pub fn new(value: T) -> Self {
+        let digest = A::digest(&value);
+        Self {
+            value,
+            digest,
+            _marker: std::marker::PhantomData,
+        }
+    }
 }
 
 pub trait HashAlgorithm<T> {
-    type Digest;
-
     fn digest(input: &T) -> Digest;
 }
-
-#[derive(Clone, PartialEq, Eq, Default, PartialOrd, Ord)]
-pub struct Digest(pub [u8; 32]);
-
-impl AsRef<[u8]> for Digest {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
-    }
-}
-
-impl Hash for Digest {
-    fn hash<H: Hasher>(&self, hasher: &mut H) {
-        hasher.write_u64(u64::from_ne_bytes([
-            self.0[0], self.0[1], self.0[2], self.0[3], self.0[4], self.0[5], self.0[6], self.0[7],
-        ]));
-    }
-}
-
-impl Debug for Digest {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "0x")?;
-        for byte in self.0.iter() {
-            write!(f, "{:02x}", byte)?;
-        }
-        Ok(())
-    }
-}
-
-impl nohash_hasher::IsEnabled for Digest {}

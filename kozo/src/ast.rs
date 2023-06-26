@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-pub use crate::semantic_hash::*;
+pub use crate::{hashed::*, semantic_hash::*};
 
 #[derive(Clone, Debug)]
 pub enum Expr {
@@ -285,7 +285,7 @@ pub struct UniverseLevel(pub usize);
 pub type RcSemHashed<T> = Rc<SemanticallyHashed<T>>;
 
 pub fn rc_sem_hashed<T: SemanticHash>(t: T) -> RcSemHashed<T> {
-    Rc::new(Hashed::semantically_hashed(t))
+    Rc::new(Sha256Hashed::new(t))
 }
 
 impl App {
@@ -293,7 +293,7 @@ impl App {
         if self.args.value.is_empty() {
             self.callee
         } else {
-            Expr::App(Rc::new(Hashed::semantically_hashed(self)))
+            Expr::App(Rc::new(Sha256Hashed::new(self)))
         }
     }
 }
@@ -303,7 +303,7 @@ impl For {
         if self.param_types.value.is_empty() {
             self.return_type
         } else {
-            Expr::For(Rc::new(Hashed::semantically_hashed(self)))
+            Expr::For(Rc::new(Sha256Hashed::new(self)))
         }
     }
 }

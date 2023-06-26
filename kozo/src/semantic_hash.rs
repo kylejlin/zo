@@ -54,26 +54,12 @@ impl<T: SemanticHash> Hash for SemanticHashAlgorithm<T> {
 }
 
 impl<T: SemanticHash> HashAlgorithm<T> for SemanticHashAlgorithm<T> {
-    type Digest = Digest;
-
-    fn digest(input: &T) -> Self::Digest {
+    fn digest(input: &T) -> Digest {
         input.semantic_hash()
     }
 }
 
-pub type SemanticallyHashed<T> = Hashed<T, SemanticHashAlgorithm<T>>;
-
-impl<T> SemanticallyHashed<T>
-where
-    T: SemanticHash,
-{
-    pub fn semantically_hashed(value: T) -> Self {
-        Self {
-            digest: value.semantic_hash(),
-            value,
-        }
-    }
-}
+pub type SemanticallyHashed<T> = Sha256Hashed<T, SemanticHashAlgorithm<T>>;
 
 impl SemanticHash for Ind {
     fn semantic_hash(&self) -> Digest {
