@@ -62,6 +62,9 @@ pub enum TypeError {
     },
 }
 
+/// This type context is "lazy" in the sense
+/// that it doesn't store the shifted types.
+/// Instead, it lazily performs the shifting.
 #[derive(Debug, Clone, Copy)]
 pub enum LazyTypeContext<'a> {
     Base(Normalized<&'a [Expr]>),
@@ -80,25 +83,34 @@ impl LazyTypeContext<'_> {
         match self {
             LazyTypeContext::Base(types) => {
                 let index = (types.raw().len() - 1).checked_sub(deb.0)?;
-                types.get(index).map(Normalized::cloned)
+                let unshifted = types.get(index)?.cloned();
+                Some(unshifted.upshift(deb.0 + 1))
             }
             LazyTypeContext::Snoc(subcontext, types) => {
                 if let Some(index) = (types.raw().len() - 1).checked_sub(deb.0) {
-                    types.get(index).map(Normalized::cloned)
+                    let unshifted = types.get(index)?.cloned();
+                    Some(unshifted.upshift(deb.0 + 1))
                 } else {
-                    subcontext.get(Deb(deb.0 - types.raw().len()))
+                    let partially_shifted = subcontext.get(Deb(deb.0 - types.raw().len()))?;
+                    Some(partially_shifted.upshift(types.raw().len()))
                 }
             }
         }
     }
 }
 
+/// This substitution context is "lazy" in the sense
+/// that it doesn't store the shifted substitutions.
+/// Instead, it lazily performs the shifting.
 #[derive(Debug, Clone, Copy)]
 pub enum LazySubstitutionContext<'a> {
     Base(&'a [LazySubstitution]),
     Snoc(&'a LazySubstitutionContext<'a>, &'a [LazySubstitution]),
 }
 
+/// This substitution is "lazy" in the sense
+/// that it doesn't store the shifted `from` and `to`.
+/// Instead, it lazily performs the shifting.
 #[derive(Debug, Clone)]
 pub struct LazySubstitution {
     pub tcon_len: usize,
