@@ -297,18 +297,3 @@ mod discriminator {
 
     pub const END: u8 = 64;
 }
-
-pub trait SemanticHashIsSameAsHash: Hash {}
-
-impl<T> SemanticHash for T
-where
-    T: SemanticHashIsSameAsHash,
-{
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
-        self.hash(&mut hasher);
-
-        hasher.digest()
-    }
-}
