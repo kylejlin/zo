@@ -1,70 +1,33 @@
-use crate::{ast::*, sha256_hasher::*};
-
-use std::hash::Hash;
+use crate::ast::*;
 
 pub use crate::hashed::*;
+
+use std::hash::Hasher;
 
 pub trait GetDigest {
     fn digest(&self) -> &Digest;
 }
 
 pub trait SemanticHash {
-    fn semantic_hash(&self) -> Digest;
+    fn hash<H: Hasher>(&self, hasher: &mut H);
 }
 
-pub struct SemanticHashAlgorithm<T: SemanticHash>(std::marker::PhantomData<T>);
+#[derive(Clone, Copy, Default, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SemanticHashAlgorithm;
 
-impl<T: SemanticHash> Clone for SemanticHashAlgorithm<T> {
-    fn clone(&self) -> Self {
-        Self(std::marker::PhantomData)
-    }
-}
-impl<T: SemanticHash> Copy for SemanticHashAlgorithm<T> {}
-impl<T: SemanticHash> Default for SemanticHashAlgorithm<T> {
-    fn default() -> Self {
-        Self(std::marker::PhantomData)
-    }
-}
-impl<T: SemanticHash> std::fmt::Debug for SemanticHashAlgorithm<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let type_name = std::any::type_name::<Self>();
-        f.write_str(type_name)
-    }
-}
-impl<T: SemanticHash> PartialEq for SemanticHashAlgorithm<T> {
-    fn eq(&self, _: &Self) -> bool {
-        true
-    }
-}
-impl<T: SemanticHash> PartialOrd for SemanticHashAlgorithm<T> {
-    fn partial_cmp(&self, _: &Self) -> Option<std::cmp::Ordering> {
-        Some(std::cmp::Ordering::Equal)
-    }
-}
-impl<T: SemanticHash> Ord for SemanticHashAlgorithm<T> {
-    fn cmp(&self, _: &Self) -> std::cmp::Ordering {
-        std::cmp::Ordering::Equal
-    }
-}
-impl<T: SemanticHash> Eq for SemanticHashAlgorithm<T> {}
-impl<T: SemanticHash> Hash for SemanticHashAlgorithm<T> {
+pub type SemanticallyHashed<T> = Sha256Hashed<T, SemanticHashAlgorithm>;
+
+impl<T> HashWithAlgorithm<SemanticHashAlgorithm> for T
+where
+    T: SemanticHash,
+{
     fn hash<H: Hasher>(&self, state: &mut H) {
-        std::any::type_name::<T>().hash(state);
+        SemanticHash::hash(self, state);
     }
 }
-
-impl<T: SemanticHash> HashAlgorithm<T> for SemanticHashAlgorithm<T> {
-    fn digest(input: &T) -> Digest {
-        input.semantic_hash()
-    }
-}
-
-pub type SemanticallyHashed<T> = Sha256Hashed<T, SemanticHashAlgorithm<T>>;
 
 impl SemanticHash for Ind {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::IND);
 
         hasher.write(self.name.0.as_ref());
@@ -78,15 +41,11 @@ impl SemanticHash for Ind {
         hasher.write(self.vcon_defs.digest.as_ref());
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 
 impl SemanticHash for Vcon {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::VCON);
 
         hasher.write(self.ind.digest.as_ref());
@@ -96,15 +55,11 @@ impl SemanticHash for Vcon {
         hasher.write_u8(discriminator::END);
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 
 impl SemanticHash for Match {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::MATCH);
 
         hasher.write(self.matchee.digest().as_ref());
@@ -112,15 +67,11 @@ impl SemanticHash for Match {
         hasher.write(self.cases.digest.as_ref());
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 
 impl SemanticHash for Fun {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::FUN);
 
         if let Some(i) = self.decreasing_index {
@@ -136,73 +87,53 @@ impl SemanticHash for Fun {
         hasher.write(self.return_val.digest().as_ref());
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 
 impl SemanticHash for App {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::APP);
 
         hasher.write(self.callee.digest().as_ref());
         hasher.write(self.args.digest.as_ref());
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 
 impl SemanticHash for For {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::FOR);
 
         hasher.write(self.param_types.digest.as_ref());
         hasher.write(self.return_type.digest().as_ref());
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 
 impl SemanticHash for DebNode {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::DEB);
 
         hasher.write_usize(self.deb.0);
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 
 impl SemanticHash for UniverseNode {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::UNIVERSE);
 
         hasher.write_usize(self.level.0);
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 
 impl SemanticHash for Box<[Expr]> {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::EXPR_SLICE);
 
         for expr in self.iter() {
@@ -210,15 +141,11 @@ impl SemanticHash for Box<[Expr]> {
         }
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 
 impl SemanticHash for Box<[VconDef]> {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::VARIANT_CONSTRUCTOR_DEF_SLICE);
 
         for def in self.iter() {
@@ -231,15 +158,11 @@ impl SemanticHash for Box<[VconDef]> {
         }
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 
 impl SemanticHash for Box<[MatchCase]> {
-    fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256Hasher::new();
-
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::MATCH_CASE_SLICE);
 
         for case in self.iter() {
@@ -252,8 +175,6 @@ impl SemanticHash for Box<[MatchCase]> {
         }
 
         hasher.write_u8(discriminator::END);
-
-        hasher.digest()
     }
 }
 

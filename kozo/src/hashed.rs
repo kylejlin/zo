@@ -1,17 +1,26 @@
-use std::fmt::Debug;
+use std::{
+    fmt::Debug,
+    hash::{Hash, Hasher},
+};
 
-pub use crate::sha256_hasher::Digest;
+pub use crate::sha256_hasher::*;
 
 #[derive(Clone, Debug)]
-pub struct Sha256Hashed<T, A: HashAlgorithm<T>> {
+pub struct Sha256Hashed<T, A> {
     pub value: T,
     pub digest: Digest,
     _marker: std::marker::PhantomData<A>,
 }
 
-impl<T, A: HashAlgorithm<T>> Sha256Hashed<T, A> {
+impl<T, A> Sha256Hashed<T, A>
+where
+    T: HashWithAlgorithm<A>,
+{
     pub fn new(value: T) -> Self {
-        let digest = A::digest(&value);
+        let mut hasher = Sha256Hasher::new();
+        value.hash(&mut hasher);
+        let digest = hasher.digest();
+
         Self {
             value,
             digest,
@@ -20,6 +29,18 @@ impl<T, A: HashAlgorithm<T>> Sha256Hashed<T, A> {
     }
 }
 
-pub trait HashAlgorithm<T> {
-    fn digest(input: &T) -> Digest;
+pub trait HashWithAlgorithm<A> {
+    fn hash<H: Hasher>(&self, state: &mut H);
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct DefaultHashAlgorithm;
+
+impl<T> HashWithAlgorithm<DefaultHashAlgorithm> for T
+where
+    T: Hash,
+{
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        Hash::hash(self, state);
+    }
 }
