@@ -7,6 +7,7 @@ pub mod hashed;
 pub mod lexer;
 pub mod nohash_hashmap;
 pub mod rch_cst;
+pub mod rch_cst_to_ast;
 pub mod replace_debs;
 pub mod semantic_hash;
 pub mod sha256_hasher;
