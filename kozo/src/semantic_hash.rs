@@ -60,28 +60,6 @@ where
     }
 }
 
-// impl SemanticHash for Ind {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::IND]);
-
-//         hasher.write(&self.name.0);
-
-//         hasher.write([discriminator::IND_UNIVERSE]);
-//         hasher.write(&self.universe_level.0.to_be_bytes());
-//         hasher.write([discriminator::END]);
-
-//         hasher.write(&self.index_types.digest);
-
-//         hasher.write(&self.vcon_defs.digest);
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
-
 impl SemanticHash for Ind {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
@@ -104,23 +82,6 @@ impl SemanticHash for Ind {
     }
 }
 
-// impl SemanticHash for Vcon {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::VCON]);
-
-//         hasher.write(&self.ind.digest);
-
-//         hasher.write([discriminator::VCON_INDEX]);
-//         hasher.write(&self.vcon_index.to_be_bytes());
-//         hasher.write([discriminator::END]);
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
 impl SemanticHash for Vcon {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
@@ -139,21 +100,6 @@ impl SemanticHash for Vcon {
     }
 }
 
-// impl SemanticHash for Match {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::MATCH]);
-
-//         hasher.write(self.matchee.digest());
-//         hasher.write(self.return_type.digest());
-//         hasher.write(&self.cases.digest);
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
 impl SemanticHash for Match {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
@@ -170,29 +116,6 @@ impl SemanticHash for Match {
     }
 }
 
-// impl SemanticHash for Fun {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::FUN]);
-
-//         if let Some(i) = self.decreasing_index {
-//             hasher.write([discriminator::SOME]);
-//             hasher.write(i.to_be_bytes());
-//         } else {
-//             hasher.write([discriminator::NONE]);
-//             hasher.write(0usize.to_be_bytes());
-//         }
-
-//         hasher.write(&self.param_types.digest);
-//         hasher.write(self.return_type.digest());
-//         hasher.write(self.return_val.digest());
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
 impl SemanticHash for Fun {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
@@ -217,20 +140,6 @@ impl SemanticHash for Fun {
     }
 }
 
-// impl SemanticHash for App {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::APP]);
-
-//         hasher.write(self.callee.digest());
-//         hasher.write(&self.args.digest);
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
 impl SemanticHash for App {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
@@ -246,20 +155,6 @@ impl SemanticHash for App {
     }
 }
 
-// impl SemanticHash for For {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::FOR]);
-
-//         hasher.write(&self.param_types.digest);
-//         hasher.write(self.return_type.digest());
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
 impl SemanticHash for For {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
@@ -275,19 +170,6 @@ impl SemanticHash for For {
     }
 }
 
-// impl SemanticHash for DebNode {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::DEB]);
-
-//         hasher.write(self.deb.0.to_be_bytes());
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
 impl SemanticHash for DebNode {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
@@ -302,19 +184,6 @@ impl SemanticHash for DebNode {
     }
 }
 
-// impl SemanticHash for UniverseNode {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::UNIVERSE]);
-
-//         hasher.write(self.level.0.to_be_bytes());
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
 impl SemanticHash for UniverseNode {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
@@ -329,21 +198,6 @@ impl SemanticHash for UniverseNode {
     }
 }
 
-// impl SemanticHash for Box<[Expr]> {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::EXPR_SLICE]);
-
-//         for expr in self.iter() {
-//             hasher.write(expr.digest());
-//         }
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
 impl SemanticHash for Box<[Expr]> {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
@@ -360,26 +214,6 @@ impl SemanticHash for Box<[Expr]> {
     }
 }
 
-// impl SemanticHash for Box<[VconDef]> {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::VARIANT_CONSTRUCTOR_DEF_SLICE]);
-
-//         for def in self.iter() {
-//             hasher.write([discriminator::VARIANT_CONSTRUCTOR_DEF]);
-
-//             hasher.write(&def.param_types.digest);
-//             hasher.write(&def.index_args.digest);
-
-//             hasher.write([discriminator::END]);
-//         }
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
 impl SemanticHash for Box<[VconDef]> {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
@@ -401,26 +235,6 @@ impl SemanticHash for Box<[VconDef]> {
     }
 }
 
-// impl SemanticHash for Box<[MatchCase]> {
-//     fn semantic_hash(&self) -> Digest {
-//         let mut hasher = Sha256Hasher::new();
-
-//         hasher.write([discriminator::MATCH_CASE_SLICE]);
-
-//         for case in self.iter() {
-//             hasher.write([discriminator::MATCH_CASE]);
-
-//             hasher.write(case.arity.to_be_bytes());
-//             hasher.write(case.return_val.digest());
-
-//             hasher.write([discriminator::END]);
-//         }
-
-//         hasher.write([discriminator::END]);
-
-//         Digest(hasher.finalize())
-//     }
-// }
 impl SemanticHash for Box<[MatchCase]> {
     fn semantic_hash(&self) -> Digest {
         let mut hasher = Sha256Hasher::new();
