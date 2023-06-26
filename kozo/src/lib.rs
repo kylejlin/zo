@@ -6,6 +6,7 @@ pub mod lexer;
 pub mod nohash_hashmap;
 pub mod replace_debs;
 pub mod semantic_hash;
+pub mod sha256_hasher;
 pub mod token;
 pub mod typecheck;
 

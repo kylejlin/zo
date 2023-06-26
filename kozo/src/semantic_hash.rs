@@ -1,10 +1,8 @@
-use crate::ast::*;
-
-use hmac_sha256::Hash as Sha256;
+use crate::{ast::*, sha256_hasher::*};
 
 use std::{
     fmt::{Debug, Formatter},
-    hash::{Hash, Hasher},
+    hash::Hash,
 };
 
 #[derive(Clone, Debug)]
@@ -14,7 +12,7 @@ pub struct SemanticHashed<T> {
 }
 
 #[derive(Clone, PartialEq, Eq, Default, PartialOrd, Ord)]
-pub struct Digest([u8; 32]);
+pub struct Digest(pub [u8; 32]);
 
 impl AsRef<[u8]> for Digest {
     fn as_ref(&self) -> &[u8] {
@@ -62,199 +60,385 @@ where
     }
 }
 
+// impl SemanticHash for Ind {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::IND]);
+
+//         hasher.write(&self.name.0);
+
+//         hasher.write([discriminator::IND_UNIVERSE]);
+//         hasher.write(&self.universe_level.0.to_be_bytes());
+//         hasher.write([discriminator::END]);
+
+//         hasher.write(&self.index_types.digest);
+
+//         hasher.write(&self.vcon_defs.digest);
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
+
 impl SemanticHash for Ind {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::IND]);
+        hasher.write_u8(discriminator::IND);
 
-        hasher.update(&self.name.0);
+        hasher.write(self.name.0.as_ref());
 
-        hasher.update([discriminator::IND_UNIVERSE]);
-        hasher.update(&self.universe_level.0.to_be_bytes());
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::IND_UNIVERSE);
+        hasher.write_usize(self.universe_level.0);
+        hasher.write_u8(discriminator::END);
 
-        hasher.update(&self.index_types.digest);
+        hasher.write(self.index_types.digest.as_ref());
 
-        hasher.update(&self.vcon_defs.digest);
+        hasher.write(self.vcon_defs.digest.as_ref());
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
+// impl SemanticHash for Vcon {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::VCON]);
+
+//         hasher.write(&self.ind.digest);
+
+//         hasher.write([discriminator::VCON_INDEX]);
+//         hasher.write(&self.vcon_index.to_be_bytes());
+//         hasher.write([discriminator::END]);
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
 impl SemanticHash for Vcon {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::VCON]);
+        hasher.write_u8(discriminator::VCON);
 
-        hasher.update(&self.ind.digest);
+        hasher.write(self.ind.digest.as_ref());
 
-        hasher.update([discriminator::VCON_INDEX]);
-        hasher.update(&self.vcon_index.to_be_bytes());
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::VCON_INDEX);
+        hasher.write_usize(self.vcon_index);
+        hasher.write_u8(discriminator::END);
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
+// impl SemanticHash for Match {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::MATCH]);
+
+//         hasher.write(self.matchee.digest());
+//         hasher.write(self.return_type.digest());
+//         hasher.write(&self.cases.digest);
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
 impl SemanticHash for Match {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::MATCH]);
+        hasher.write_u8(discriminator::MATCH);
 
-        hasher.update(self.matchee.digest());
-        hasher.update(self.return_type.digest());
-        hasher.update(&self.cases.digest);
+        hasher.write(self.matchee.digest().as_ref());
+        hasher.write(self.return_type.digest().as_ref());
+        hasher.write(self.cases.digest.as_ref());
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
+// impl SemanticHash for Fun {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::FUN]);
+
+//         if let Some(i) = self.decreasing_index {
+//             hasher.write([discriminator::SOME]);
+//             hasher.write(i.to_be_bytes());
+//         } else {
+//             hasher.write([discriminator::NONE]);
+//             hasher.write(0usize.to_be_bytes());
+//         }
+
+//         hasher.write(&self.param_types.digest);
+//         hasher.write(self.return_type.digest());
+//         hasher.write(self.return_val.digest());
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
 impl SemanticHash for Fun {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::FUN]);
+        hasher.write_u8(discriminator::FUN);
 
         if let Some(i) = self.decreasing_index {
-            hasher.update([discriminator::SOME]);
-            hasher.update(i.to_be_bytes());
+            hasher.write_u8(discriminator::SOME);
+            hasher.write_usize(i);
         } else {
-            hasher.update([discriminator::NONE]);
-            hasher.update(0usize.to_be_bytes());
+            hasher.write_u8(discriminator::NONE);
+            hasher.write_usize(0);
         }
 
-        hasher.update(&self.param_types.digest);
-        hasher.update(self.return_type.digest());
-        hasher.update(self.return_val.digest());
+        hasher.write(self.param_types.digest.as_ref());
+        hasher.write(self.return_type.digest().as_ref());
+        hasher.write(self.return_val.digest().as_ref());
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
+// impl SemanticHash for App {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::APP]);
+
+//         hasher.write(self.callee.digest());
+//         hasher.write(&self.args.digest);
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
 impl SemanticHash for App {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::APP]);
+        hasher.write_u8(discriminator::APP);
 
-        hasher.update(self.callee.digest());
-        hasher.update(&self.args.digest);
+        hasher.write(self.callee.digest().as_ref());
+        hasher.write(self.args.digest.as_ref());
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
+// impl SemanticHash for For {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::FOR]);
+
+//         hasher.write(&self.param_types.digest);
+//         hasher.write(self.return_type.digest());
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
 impl SemanticHash for For {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::FOR]);
+        hasher.write_u8(discriminator::FOR);
 
-        hasher.update(&self.param_types.digest);
-        hasher.update(self.return_type.digest());
+        hasher.write(self.param_types.digest.as_ref());
+        hasher.write(self.return_type.digest().as_ref());
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
+// impl SemanticHash for DebNode {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::DEB]);
+
+//         hasher.write(self.deb.0.to_be_bytes());
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
 impl SemanticHash for DebNode {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::DEB]);
+        hasher.write_u8(discriminator::DEB);
 
-        hasher.update(self.deb.0.to_be_bytes());
+        hasher.write_usize(self.deb.0);
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
+// impl SemanticHash for UniverseNode {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::UNIVERSE]);
+
+//         hasher.write(self.level.0.to_be_bytes());
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
 impl SemanticHash for UniverseNode {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::UNIVERSE]);
+        hasher.write_u8(discriminator::UNIVERSE);
 
-        hasher.update(self.level.0.to_be_bytes());
+        hasher.write_usize(self.level.0);
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
+// impl SemanticHash for Box<[Expr]> {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::EXPR_SLICE]);
+
+//         for expr in self.iter() {
+//             hasher.write(expr.digest());
+//         }
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
 impl SemanticHash for Box<[Expr]> {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::EXPR_SLICE]);
+        hasher.write_u8(discriminator::EXPR_SLICE);
 
         for expr in self.iter() {
-            hasher.update(expr.digest());
+            hasher.write(expr.digest().as_ref());
         }
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
+// impl SemanticHash for Box<[VconDef]> {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::VARIANT_CONSTRUCTOR_DEF_SLICE]);
+
+//         for def in self.iter() {
+//             hasher.write([discriminator::VARIANT_CONSTRUCTOR_DEF]);
+
+//             hasher.write(&def.param_types.digest);
+//             hasher.write(&def.index_args.digest);
+
+//             hasher.write([discriminator::END]);
+//         }
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
 impl SemanticHash for Box<[VconDef]> {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::VARIANT_CONSTRUCTOR_DEF_SLICE]);
+        hasher.write_u8(discriminator::VARIANT_CONSTRUCTOR_DEF_SLICE);
 
         for def in self.iter() {
-            hasher.update([discriminator::VARIANT_CONSTRUCTOR_DEF]);
+            hasher.write_u8(discriminator::VARIANT_CONSTRUCTOR_DEF);
 
-            hasher.update(&def.param_types.digest);
-            hasher.update(&def.index_args.digest);
+            hasher.write(def.param_types.digest.as_ref());
+            hasher.write(def.index_args.digest.as_ref());
 
-            hasher.update([discriminator::END]);
+            hasher.write_u8(discriminator::END);
         }
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
+// impl SemanticHash for Box<[MatchCase]> {
+//     fn semantic_hash(&self) -> Digest {
+//         let mut hasher = Sha256Hasher::new();
+
+//         hasher.write([discriminator::MATCH_CASE_SLICE]);
+
+//         for case in self.iter() {
+//             hasher.write([discriminator::MATCH_CASE]);
+
+//             hasher.write(case.arity.to_be_bytes());
+//             hasher.write(case.return_val.digest());
+
+//             hasher.write([discriminator::END]);
+//         }
+
+//         hasher.write([discriminator::END]);
+
+//         Digest(hasher.finalize())
+//     }
+// }
 impl SemanticHash for Box<[MatchCase]> {
     fn semantic_hash(&self) -> Digest {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha256Hasher::new();
 
-        hasher.update([discriminator::MATCH_CASE_SLICE]);
+        hasher.write_u8(discriminator::MATCH_CASE_SLICE);
 
         for case in self.iter() {
-            hasher.update([discriminator::MATCH_CASE]);
+            hasher.write_u8(discriminator::MATCH_CASE);
 
-            hasher.update(case.arity.to_be_bytes());
-            hasher.update(case.return_val.digest());
+            hasher.write_usize(case.arity);
+            hasher.write(case.return_val.digest().as_ref());
 
-            hasher.update([discriminator::END]);
+            hasher.write_u8(discriminator::END);
         }
 
-        hasher.update([discriminator::END]);
+        hasher.write_u8(discriminator::END);
 
-        Digest(hasher.finalize())
+        hasher.digest()
     }
 }
 
@@ -283,4 +467,19 @@ mod discriminator {
     pub const MATCH_CASE: u8 = 17;
 
     pub const END: u8 = 64;
+}
+
+pub trait SemanticHashIsSameAsHash: Hash {}
+
+impl<T> SemanticHash for T
+where
+    T: SemanticHashIsSameAsHash,
+{
+    fn semantic_hash(&self) -> Digest {
+        let mut hasher = Sha256Hasher::new();
+
+        self.hash(&mut hasher);
+
+        hasher.digest()
+    }
 }
