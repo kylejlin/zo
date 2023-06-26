@@ -281,10 +281,10 @@ pub struct Deb(pub usize);
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct UniverseLevel(pub usize);
 
-pub type RcHashed<T> = Rc<Hashed<T>>;
+pub type RcHashed<T> = Rc<SemanticHashed<T>>;
 
 pub fn rc_hash<T: SemanticHash>(t: T) -> RcHashed<T> {
-    Rc::new(Hashed::new(t))
+    Rc::new(SemanticHashed::new(t))
 }
 
 impl App {
@@ -292,7 +292,7 @@ impl App {
         if self.args.value.is_empty() {
             self.callee
         } else {
-            Expr::App(Rc::new(Hashed::new(self)))
+            Expr::App(Rc::new(SemanticHashed::new(self)))
         }
     }
 }
@@ -302,7 +302,7 @@ impl For {
         if self.param_types.value.is_empty() {
             self.return_type
         } else {
-            Expr::For(Rc::new(Hashed::new(self)))
+            Expr::For(Rc::new(SemanticHashed::new(self)))
         }
     }
 }

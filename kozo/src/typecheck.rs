@@ -6,7 +6,7 @@ use crate::{
 
 use std::{ops::BitOrAssign, rc::Rc};
 
-type RcHashed<T> = Rc<Hashed<T>>;
+type RcHashed<T> = Rc<SemanticHashed<T>>;
 
 #[derive(Debug, Clone)]
 pub enum TypeError {
@@ -750,7 +750,7 @@ impl TypeChecker {
     ) -> Result<NormalForm, TypeError> {
         return Ok(self
             .evaluator
-            .eval(Expr::Universe(Rc::new(Hashed::new(UniverseNode {
+            .eval(Expr::Universe(Rc::new(SemanticHashed::new(UniverseNode {
                 level: UniverseLevel(universe.value.level.0 + 1),
             })))));
     }

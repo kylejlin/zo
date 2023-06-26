@@ -29,7 +29,7 @@ impl ReplaceDebs for DebDownshiftSubstituter<'_> {
         }
 
         let shifted = Deb(original.value.deb.0 - new_exprs_len);
-        Expr::Deb(Rc::new(Hashed::new(DebNode { deb: shifted })))
+        Expr::Deb(Rc::new(SemanticHashed::new(DebNode { deb: shifted })))
     }
 }
 
@@ -41,7 +41,7 @@ impl ReplaceDebs for DebUpshifter {
             return Expr::Deb(original);
         }
 
-        Expr::Deb(Rc::new(Hashed::new(DebNode {
+        Expr::Deb(Rc::new(SemanticHashed::new(DebNode {
             deb: Deb(original.value.deb.0 + self.0),
         })))
     }
@@ -65,7 +65,7 @@ pub trait ReplaceDebs {
 
     fn replace_debs_in_ind(&self, original: RcHashed<Ind>, cutoff: usize) -> RcHashed<Ind> {
         let original = &original.value;
-        Rc::new(Hashed::new(Ind {
+        Rc::new(SemanticHashed::new(Ind {
             name: original.name.clone(),
             universe_level: original.universe_level,
             index_types: self.replace_debs_in_expressions_with_increasing_cutoff(
@@ -87,7 +87,7 @@ pub trait ReplaceDebs {
             .enumerate()
             .map(|(expr_index, expr)| self.replace_debs(expr.clone(), starting_cutoff + expr_index))
             .collect();
-        Rc::new(Hashed::new(shifted.into_boxed_slice()))
+        Rc::new(SemanticHashed::new(shifted.into_boxed_slice()))
     }
 
     fn replace_debs_in_vcon_defs(&self, original: RcVconDefs, cutoff: usize) -> RcVconDefs {
@@ -96,7 +96,7 @@ pub trait ReplaceDebs {
             .iter()
             .map(|def| self.replace_debs_in_vcon_def(def.clone(), cutoff))
             .collect();
-        Rc::new(Hashed::new(shifted.into_boxed_slice()))
+        Rc::new(SemanticHashed::new(shifted.into_boxed_slice()))
     }
 
     fn replace_debs_in_vcon_def(&self, original: VconDef, cutoff: usize) -> VconDef {
@@ -114,7 +114,7 @@ pub trait ReplaceDebs {
 
     fn replace_debs_in_vcon(&self, original: RcHashed<Vcon>, cutoff: usize) -> RcHashed<Vcon> {
         let original = &original.value;
-        Rc::new(Hashed::new(Vcon {
+        Rc::new(SemanticHashed::new(Vcon {
             ind: self.replace_debs_in_ind(original.ind.clone(), cutoff),
             vcon_index: original.vcon_index,
         }))
@@ -122,7 +122,7 @@ pub trait ReplaceDebs {
 
     fn replace_debs_in_match(&self, original: RcHashed<Match>, cutoff: usize) -> RcHashed<Match> {
         let original = &original.value;
-        Rc::new(Hashed::new(Match {
+        Rc::new(SemanticHashed::new(Match {
             matchee: self.replace_debs(original.matchee.clone(), cutoff),
             return_type: self.replace_debs(original.return_type.clone(), cutoff),
             cases: self.replace_debs_in_match_cases(original.cases.clone(), cutoff),
@@ -135,7 +135,7 @@ pub trait ReplaceDebs {
             .iter()
             .map(|case| self.replace_debs_in_match_case(case.clone(), cutoff))
             .collect();
-        Rc::new(Hashed::new(shifted.into_boxed_slice()))
+        Rc::new(SemanticHashed::new(shifted.into_boxed_slice()))
     }
 
     fn replace_debs_in_match_case(&self, original: MatchCase, cutoff: usize) -> MatchCase {
@@ -147,7 +147,7 @@ pub trait ReplaceDebs {
 
     fn replace_debs_in_fun(&self, original: RcHashed<Fun>, cutoff: usize) -> RcHashed<Fun> {
         let original = &original.value;
-        Rc::new(Hashed::new(Fun {
+        Rc::new(SemanticHashed::new(Fun {
             decreasing_index: original.decreasing_index,
             param_types: self.replace_debs_in_expressions_with_increasing_cutoff(
                 original.param_types.clone(),
@@ -166,7 +166,7 @@ pub trait ReplaceDebs {
 
     fn replace_debs_in_app(&self, original: RcHashed<App>, cutoff: usize) -> RcHashed<App> {
         let original = &original.value;
-        Rc::new(Hashed::new(App {
+        Rc::new(SemanticHashed::new(App {
             callee: self.replace_debs(original.callee.clone(), cutoff),
             args: self
                 .replace_debs_in_expressions_with_constant_cutoff(original.args.clone(), cutoff),
@@ -183,12 +183,12 @@ pub trait ReplaceDebs {
             .iter()
             .map(|expr| self.replace_debs(expr.clone(), cutoff))
             .collect();
-        Rc::new(Hashed::new(shifted.into_boxed_slice()))
+        Rc::new(SemanticHashed::new(shifted.into_boxed_slice()))
     }
 
     fn replace_debs_in_for(&self, original: RcHashed<For>, cutoff: usize) -> RcHashed<For> {
         let original = &original.value;
-        Rc::new(Hashed::new(For {
+        Rc::new(SemanticHashed::new(For {
             param_types: self.replace_debs_in_expressions_with_increasing_cutoff(
                 original.param_types.clone(),
                 cutoff,

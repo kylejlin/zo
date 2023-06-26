@@ -23,7 +23,7 @@ impl Evaluator {
     }
 }
 
-type RcHashed<T> = Rc<Hashed<T>>;
+type RcHashed<T> = Rc<SemanticHashed<T>>;
 type RcExprs = RcHashed<Box<[Expr]>>;
 type RcVconDefs = RcHashed<Box<[VconDef]>>;
 type RcMatchCases = RcHashed<Box<[MatchCase]>>;

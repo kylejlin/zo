@@ -8,7 +8,7 @@ use std::{
 };
 
 #[derive(Clone, Debug)]
-pub struct Hashed<T> {
+pub struct SemanticHashed<T> {
     pub value: T,
     pub digest: Digest,
 }
@@ -50,7 +50,7 @@ pub trait SemanticHash {
     fn semantic_hash(&self) -> Digest;
 }
 
-impl<T> Hashed<T>
+impl<T> SemanticHashed<T>
 where
     T: SemanticHash,
 {
