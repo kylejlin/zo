@@ -1,10 +1,13 @@
 use std::rc::Rc;
 
-pub use crate::{
-    hashed::*,
-    rch_cst::{rc_sem_hashed, RcSemHashed},
-    semantic_hash::*,
-};
+pub use crate::{hashed::*, semantic_hash::*};
+
+/// Reference-counted semantically hashed.
+pub type RcSemHashed<T> = Rc<SemanticallyHashed<T>>;
+
+pub fn rc_sem_hashed<T: SemanticHash>(t: T) -> RcSemHashed<T> {
+    Rc::new(Sha256Hashed::new(t))
+}
 
 #[derive(Clone, Debug)]
 pub enum Expr {
