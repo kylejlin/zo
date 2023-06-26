@@ -13,7 +13,7 @@ pub fn rc_hashed<T: Hash>(t: T) -> RcHashed<T> {
     Rc::new(Sha256Hashed::new(t))
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub enum Expr {
     Ind(RcHashed<Ind>),
     Vcon(RcHashed<Vcon>),
@@ -25,7 +25,7 @@ pub enum Expr {
     Universe(RcHashed<UniverseLiteral>),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct Ind {
     pub lparen: ByteIndex,
     pub type_: UniverseLiteral,
@@ -39,19 +39,19 @@ pub struct Ind {
     pub rparen: ByteIndex,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub enum ZeroOrMoreExprs {
     Nil,
     Cons(Box<ZeroOrMoreExprs>, Expr),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub enum ZeroOrMoreVconDefs {
     Nil,
     Cons(Box<ZeroOrMoreVconDefs>, VconDef),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct VconDef {
     pub lparen: ByteIndex,
     pub param_types_lparen: ByteIndex,
@@ -63,7 +63,7 @@ pub struct VconDef {
     pub rparen: ByteIndex,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct Vcon {
     pub lparen: ByteIndex,
     pub ind: RcHashed<Ind>,
@@ -71,7 +71,7 @@ pub struct Vcon {
     pub rparen: ByteIndex,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct Match {
     pub lparen: ByteIndex,
     pub matchee: Expr,
@@ -82,13 +82,13 @@ pub struct Match {
     pub rparen: ByteIndex,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub enum ZeroOrMoreMatchCases {
     Nil,
     Cons(Box<ZeroOrMoreMatchCases>, MatchCase),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct MatchCase {
     pub lparen: ByteIndex,
     pub arity: NumberLiteral,
@@ -96,7 +96,7 @@ pub struct MatchCase {
     pub rparen: ByteIndex,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct Fun {
     pub lparen: ByteIndex,
     pub decreasing_index: NumberOrNonrecKw,
@@ -110,7 +110,7 @@ pub struct Fun {
 
 pub use crate::cst::NumberOrNonrecKw;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct App {
     pub lparen: ByteIndex,
     pub callee: Expr,
@@ -118,7 +118,7 @@ pub struct App {
     pub rparen: ByteIndex,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct For {
     pub lparen: ByteIndex,
     pub param_types_lparen: ByteIndex,
@@ -126,4 +126,45 @@ pub struct For {
     pub param_types_rparen: ByteIndex,
     pub return_type: Expr,
     pub rparen: ByteIndex,
+}
+
+impl From<Ind> for Expr {
+    fn from(ind: Ind) -> Self {
+        Expr::Ind(rc_hashed(ind))
+    }
+}
+impl From<Vcon> for Expr {
+    fn from(vcon: Vcon) -> Self {
+        Expr::Vcon(rc_hashed(vcon))
+    }
+}
+impl From<Match> for Expr {
+    fn from(match_: Match) -> Self {
+        Expr::Match(rc_hashed(match_))
+    }
+}
+impl From<Fun> for Expr {
+    fn from(fun: Fun) -> Self {
+        Expr::Fun(rc_hashed(fun))
+    }
+}
+impl From<App> for Expr {
+    fn from(app: App) -> Self {
+        Expr::App(rc_hashed(app))
+    }
+}
+impl From<For> for Expr {
+    fn from(for_: For) -> Self {
+        Expr::For(rc_hashed(for_))
+    }
+}
+impl From<NumberLiteral> for Expr {
+    fn from(deb: NumberLiteral) -> Self {
+        Expr::Deb(rc_hashed(deb))
+    }
+}
+impl From<UniverseLiteral> for Expr {
+    fn from(universe: UniverseLiteral) -> Self {
+        Expr::Universe(rc_hashed(universe))
+    }
 }

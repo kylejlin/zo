@@ -29,6 +29,12 @@ where
     }
 }
 
+impl<T, A> Hash for Sha256Hashed<T, A> {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        hasher.write(self.digest.as_ref());
+    }
+}
+
 pub trait HashWithAlgorithm<A> {
     fn hash<H: Hasher>(&self, state: &mut H);
 }
