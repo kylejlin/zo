@@ -2,7 +2,7 @@ use super::*;
 
 #[derive(Clone, Debug)]
 pub struct ExpectedTypeEquality {
-    pub expr: Expr,
+    pub expr: cst::Expr,
     pub expected_type: NormalForm,
     pub actual_type: NormalForm,
     pub tcon_len: usize,
@@ -11,7 +11,7 @@ pub struct ExpectedTypeEquality {
 /// `exprs`, `expected_types`, and `actual_types` **must** all have the same length.
 #[derive(Clone, Debug)]
 pub struct ExpectedTypeEqualities {
-    pub exprs: Vec<Expr>,
+    pub exprs: Vec<cst::Expr>,
     pub expected_types: Normalized<Vec<ast::Expr>>,
     pub actual_types: Normalized<Vec<ast::Expr>>,
     pub tcon_len: usize,

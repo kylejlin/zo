@@ -4,10 +4,6 @@ pub use crate::hashed::*;
 
 use std::hash::Hasher;
 
-pub trait GetDigest {
-    fn digest(&self) -> &Digest;
-}
-
 pub trait SemanticHash {
     fn hash<H: Hasher>(&self, hasher: &mut H);
 }

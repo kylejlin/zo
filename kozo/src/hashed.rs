@@ -50,3 +50,7 @@ where
         Hash::hash(self, state);
     }
 }
+
+pub trait GetDigest {
+    fn digest(&self) -> &Digest;
+}
