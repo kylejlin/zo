@@ -71,7 +71,27 @@ impl RchCstToAstConverter {
         &mut self,
         cst: cst::ZeroOrMoreVconDefs,
     ) -> RcSemHashed<Box<[ast::VconDef]>> {
-        todo!()
+        let v = self.convert_vcon_defs_to_vec(cst);
+        rc_sem_hashed(v.into_boxed_slice())
+    }
+
+    fn convert_vcon_defs_to_vec(&mut self, cst: cst::ZeroOrMoreVconDefs) -> Vec<ast::VconDef> {
+        match cst {
+            cst::ZeroOrMoreVconDefs::Nil => vec![],
+            cst::ZeroOrMoreVconDefs::Cons(left, right) => {
+                let mut left = self.convert_vcon_defs_to_vec(*left);
+                let right = self.convert_vcon_def(right);
+                left.push(right);
+                left
+            }
+        }
+    }
+
+    fn convert_vcon_def(&mut self, cst: cst::VconDef) -> ast::VconDef {
+        ast::VconDef {
+            param_types: self.convert_expressions(cst.param_types),
+            index_args: self.convert_expressions(cst.index_args),
+        }
     }
 
     pub fn convert_vcon(&mut self, cst: RcHashed<cst::Vcon>) -> RcSemHashed<ast::Vcon> {
@@ -93,7 +113,10 @@ impl RchCstToAstConverter {
     }
 
     fn convert_unseen_vcon(&mut self, cst: RcHashed<cst::Vcon>) -> RcSemHashed<ast::Vcon> {
-        todo!()
+        rc_sem_hashed(ast::Vcon {
+            ind: self.convert_ind(cst.value.ind.clone()),
+            vcon_index: cst.value.vcon_index.value,
+        })
     }
 
     pub fn convert_match(&mut self, cst: RcHashed<cst::Match>) -> RcSemHashed<ast::Match> {
@@ -115,7 +138,41 @@ impl RchCstToAstConverter {
     }
 
     fn convert_unseen_match(&mut self, cst: RcHashed<cst::Match>) -> RcSemHashed<ast::Match> {
-        todo!()
+        rc_sem_hashed(ast::Match {
+            matchee: self.convert(cst.value.matchee.clone()),
+            return_type: self.convert(cst.value.return_type.clone()),
+            cases: self.convert_match_cases(cst.value.cases.clone()),
+        })
+    }
+
+    fn convert_match_cases(
+        &mut self,
+        cst: cst::ZeroOrMoreMatchCases,
+    ) -> RcSemHashed<Box<[ast::MatchCase]>> {
+        let v = self.convert_match_cases_to_vec(cst);
+        rc_sem_hashed(v.into_boxed_slice())
+    }
+
+    fn convert_match_cases_to_vec(
+        &mut self,
+        cst: cst::ZeroOrMoreMatchCases,
+    ) -> Vec<ast::MatchCase> {
+        match cst {
+            cst::ZeroOrMoreMatchCases::Nil => vec![],
+            cst::ZeroOrMoreMatchCases::Cons(left, right) => {
+                let mut left = self.convert_match_cases_to_vec(*left);
+                let right = self.convert_match_case(right);
+                left.push(right);
+                left
+            }
+        }
+    }
+
+    fn convert_match_case(&mut self, cst: cst::MatchCase) -> ast::MatchCase {
+        ast::MatchCase {
+            arity: cst.arity.value,
+            return_val: self.convert(cst.return_val),
+        }
     }
 
     pub fn convert_fun(&mut self, cst: RcHashed<cst::Fun>) -> RcSemHashed<ast::Fun> {
@@ -134,7 +191,15 @@ impl RchCstToAstConverter {
     }
 
     fn convert_unseen_fun(&mut self, cst: RcHashed<cst::Fun>) -> RcSemHashed<ast::Fun> {
-        todo!()
+        rc_sem_hashed(ast::Fun {
+            decreasing_index: match cst.value.decreasing_index {
+                cst::NumberOrNonrecKw::NonrecKw(_) => None,
+                cst::NumberOrNonrecKw::Number(n) => Some(n.value),
+            },
+            param_types: self.convert_expressions(cst.value.param_types.clone()),
+            return_type: self.convert(cst.value.return_type.clone()),
+            return_val: self.convert(cst.value.return_val.clone()),
+        })
     }
 
     pub fn convert_app(&mut self, cst: RcHashed<cst::App>) -> RcSemHashed<ast::App> {
@@ -153,7 +218,10 @@ impl RchCstToAstConverter {
     }
 
     fn convert_unseen_app(&mut self, cst: RcHashed<cst::App>) -> RcSemHashed<ast::App> {
-        todo!()
+        rc_sem_hashed(ast::App {
+            callee: self.convert(cst.value.callee.clone()),
+            args: self.convert_expressions(cst.value.args.clone()),
+        })
     }
 
     pub fn convert_for(&mut self, cst: RcHashed<cst::For>) -> RcSemHashed<ast::For> {
@@ -172,13 +240,29 @@ impl RchCstToAstConverter {
     }
 
     fn convert_unseen_for(&mut self, cst: RcHashed<cst::For>) -> RcSemHashed<ast::For> {
-        todo!()
+        rc_sem_hashed(ast::For {
+            param_types: self.convert_expressions(cst.value.param_types.clone()),
+            return_type: self.convert(cst.value.return_type.clone()),
+        })
     }
 
     pub fn convert_expressions(
         &mut self,
         cst: cst::ZeroOrMoreExprs,
     ) -> RcSemHashed<Box<[ast::Expr]>> {
-        todo!()
+        let v = self.convert_expressions_to_vec(cst);
+        rc_sem_hashed(v.into_boxed_slice())
+    }
+
+    fn convert_expressions_to_vec(&mut self, cst: cst::ZeroOrMoreExprs) -> Vec<ast::Expr> {
+        match cst {
+            cst::ZeroOrMoreExprs::Nil => vec![],
+            cst::ZeroOrMoreExprs::Cons(left, right) => {
+                let mut left = self.convert_expressions_to_vec(*left);
+                let right = self.convert(right);
+                left.push(right);
+                left
+            }
+        }
     }
 }
