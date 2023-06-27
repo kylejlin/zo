@@ -1,16 +1,15 @@
 pub use crate::{
-    hashed::*,
-    semantic_hash::*,
+    hash::{sha256::*, *},
     token::{ByteIndex, NumberLiteral, StringLiteral, UniverseLiteral},
 };
 
 use std::{hash::Hash, rc::Rc};
 
 /// Reference-counted hashed.
-pub type RcHashed<T> = Rc<Sha256Hashed<T, DefaultHashAlgorithm>>;
+pub type RcHashed<T> = Rc<Hashed<T, DefaultHashAlgorithm>>;
 
 pub fn rc_hashed<T: Hash>(t: T) -> RcHashed<T> {
-    Rc::new(Sha256Hashed::new(t))
+    Rc::new(Hashed::new(t))
 }
 
 #[derive(Debug, Clone, Hash)]

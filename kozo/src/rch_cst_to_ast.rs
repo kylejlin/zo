@@ -1,8 +1,7 @@
 use crate::{
     ast::{self, rc_sem_hashed, Deb, RcSemHashed, UniverseLevel},
-    nohash_hashmap::*,
+    hash::{sha256::*, *},
     rch_cst::{self as cst, RcHashed},
-    sha256_hasher::*,
 };
 
 use std::rc::Rc;

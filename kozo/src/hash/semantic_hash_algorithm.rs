@@ -1,17 +1,11 @@
-use crate::ast::*;
+use super::*;
 
-pub use crate::hashed::*;
+use crate::ast::*;
 
 use std::hash::Hasher;
 
-pub trait SemanticHash {
-    fn hash<H: Hasher>(&self, hasher: &mut H);
-}
-
 #[derive(Clone, Copy, Default, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SemanticHashAlgorithm;
-
-pub type SemanticallyHashed<T> = Sha256Hashed<T, SemanticHashAlgorithm>;
 
 impl<T> HashWithAlgorithm<SemanticHashAlgorithm> for T
 where
@@ -20,6 +14,10 @@ where
     fn hash<H: Hasher>(&self, state: &mut H) {
         SemanticHash::hash(self, state);
     }
+}
+
+trait SemanticHash {
+    fn hash<H: Hasher>(&self, hasher: &mut H);
 }
 
 impl SemanticHash for Ind {

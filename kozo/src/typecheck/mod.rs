@@ -1,7 +1,7 @@
 use crate::{
     ast::{self, Deb, RcSemHashed, UniverseLevel},
     eval::{Evaluator, NormalForm, Normalized},
-    hashed::*,
+    hash::sha256::*,
     rch_cst::{self as cst, RcHashed},
     rch_cst_to_ast::RchCstToAstConverter,
     replace_debs::*,
@@ -631,13 +631,11 @@ impl TypeChecker {
         &mut self,
         universe: RcHashed<UniverseLiteral>,
     ) -> Result<NormalForm, TypeError> {
-        return Ok(self
-            .evaluator
-            .eval(ast::Expr::Universe(Rc::new(Sha256Hashed::new(
-                ast::UniverseNode {
-                    level: UniverseLevel(universe.value.level + 1),
-                },
-            )))));
+        return Ok(self.evaluator.eval(ast::Expr::Universe(Rc::new(Hashed::new(
+            ast::UniverseNode {
+                level: UniverseLevel(universe.value.level + 1),
+            },
+        )))));
     }
 
     fn get_types_of_dependent_expressions(

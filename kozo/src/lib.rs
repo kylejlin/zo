@@ -1,15 +1,12 @@
 pub mod ast;
 pub mod eval;
-pub mod hashed;
+pub mod hash;
 pub mod lexer;
 pub mod nh_cst;
 pub mod nh_cst_to_rch_cst;
-pub mod nohash_hashmap;
 pub mod rch_cst;
 pub mod rch_cst_to_ast;
 pub mod replace_debs;
-pub mod semantic_hash;
-pub mod sha256_hasher;
 pub mod token;
 pub mod typecheck;
 

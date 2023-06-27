@@ -1,12 +1,12 @@
 use std::rc::Rc;
 
-pub use crate::{hashed::*, semantic_hash::*};
+pub use crate::hash::{sha256::*, *};
 
 /// Reference-counted semantically hashed.
 pub type RcSemHashed<T> = Rc<SemanticallyHashed<T>>;
 
-pub fn rc_sem_hashed<T: SemanticHash>(t: T) -> RcSemHashed<T> {
-    Rc::new(Sha256Hashed::new(t))
+pub fn rc_sem_hashed<T: HashWithAlgorithm<SemanticHashAlgorithm>>(t: T) -> RcSemHashed<T> {
+    Rc::new(Hashed::new(t))
 }
 
 #[derive(Clone, Debug)]
@@ -293,7 +293,7 @@ impl App {
         if self.args.value.is_empty() {
             self.callee
         } else {
-            Expr::App(Rc::new(Sha256Hashed::new(self)))
+            Expr::App(Rc::new(Hashed::new(self)))
         }
     }
 }
@@ -303,7 +303,7 @@ impl For {
         if self.param_types.value.is_empty() {
             self.return_type
         } else {
-            Expr::For(Rc::new(Sha256Hashed::new(self)))
+            Expr::For(Rc::new(Hashed::new(self)))
         }
     }
 }

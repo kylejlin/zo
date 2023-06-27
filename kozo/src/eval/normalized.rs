@@ -44,7 +44,7 @@ impl<T> Normalized<&T> {
     }
 }
 
-impl<T: SemanticHash> Normalized<RcSemHashed<T>> {
+impl<T> Normalized<RcSemHashed<T>> {
     pub fn without_digest(&self) -> Normalized<&T> {
         Normalized(&self.0.value)
     }
@@ -95,7 +95,7 @@ impl<T> Normalized<Vec<T>> {
 
 impl NormalForm {
     pub fn universe(universe: UniverseNode) -> Self {
-        Normalized(Expr::Universe(Rc::new(Sha256Hashed::new(universe))))
+        Normalized(Expr::Universe(Rc::new(Hashed::new(universe))))
     }
 }
 
@@ -109,7 +109,7 @@ impl NormalForm {
         match self.0 {
             Expr::Ind(ind) => Some((
                 Normalized(ind),
-                Normalized(Rc::new(Sha256Hashed::new(Box::new([])))),
+                Normalized(Rc::new(Hashed::new(Box::new([])))),
             )),
 
             Expr::App(app) => match &app.value.callee {
@@ -359,13 +359,13 @@ mod unchecked {
         }
     }
 
-    pub trait RcHashAndWrapInNormalized: Sized + SemanticHash {
+    pub trait RcSemHashAndWrapInNormalized: Sized {
         fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcSemHashed<Self>>;
     }
 
-    impl<T> RcHashAndWrapInNormalized for T
+    impl<T> RcSemHashAndWrapInNormalized for T
     where
-        T: SemanticHash,
+        T: HashWithAlgorithm<SemanticHashAlgorithm>,
     {
         fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcSemHashed<Self>> {
             Normalized(rc_sem_hashed(self))
