@@ -14,4 +14,4 @@ insta = "1.29.0"
 [build-dependencies]
 kiki = "7"
 walkdir = "2"
-sha256 = "1.1.4"
+sha256-string = { package = "sha256", version = "1.1.4" }

@@ -1,5 +1,5 @@
 extern crate kiki;
-extern crate sha256;
+extern crate sha256_string;
 extern crate walkdir;
 
 use kiki::RustSrcRef;
@@ -15,7 +15,7 @@ fn main() {
 
         if entry.path().extension() == Some(OsStr::new("kiki")) {
             let file_contents = fs::read_to_string(entry.path()).unwrap();
-            let file_hash = sha256::digest(&*file_contents);
+            let file_hash = sha256_string::digest(&*file_contents);
 
             let rs_path = entry
                 .path()
