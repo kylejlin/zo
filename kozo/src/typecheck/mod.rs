@@ -1,7 +1,10 @@
 use crate::{
-    ast::*,
+    ast::{self, Deb, RcSemHashed, UniverseLevel},
     eval::{Evaluator, NormalForm, Normalized},
+    rch_cst::*,
+    rch_cst_to_ast::RchCstToAstConverter,
     replace_debs::*,
+    token::*,
 };
 
 use std::{ops::BitOrAssign, rc::Rc};
@@ -21,9 +24,15 @@ use scon::*;
 mod tcon;
 use tcon::*;
 
+// TODO: Delete `use rch_cst::*;`,
+// and replace it with `use rch_cst as cst;`.
+// The current `use rch_cst::*;` makes many
+// type errors initially confusing.
+
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
+    pub cst_converter: RchCstToAstConverter,
 }
 
 impl TypeChecker {
@@ -53,7 +62,7 @@ impl TypeChecker {
 
     fn get_type_of_ind(
         &mut self,
-        ind: RcSemHashed<Ind>,
+        ind: RcHashed<Ind>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -63,7 +72,7 @@ impl TypeChecker {
 
     fn perform_ind_precheck(
         &mut self,
-        ind: RcSemHashed<Ind>,
+        ind: RcHashed<Ind>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -71,7 +80,7 @@ impl TypeChecker {
             self.get_types_of_dependent_expressions(ind.value.index_types.clone(), tcon, scon)?;
         assert_every_expr_is_universe(&index_type_types.raw()).map_err(|offender_index| {
             TypeError::UnexpectedNonTypeExpression {
-                expr: ind.value.index_types.value[offender_index].clone(),
+                expr: ind.value.index_types[offender_index].clone(),
                 type_: index_type_types.index(offender_index).cloned(),
             }
         })?;
@@ -82,13 +91,13 @@ impl TypeChecker {
 
         assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
             &index_type_types.raw(),
-            ind.value.universe_level,
+            UniverseLevel(ind.value.type_.level),
         )
         .map_err(|(offender_index, offender_level)| {
             TypeError::UniverseInconsistencyInIndDef {
-                expr: ind.value.index_types.value[offender_index].clone(),
+                index_or_param_type: ind.value.index_types[offender_index].clone(),
                 level: offender_level,
-                max_permitted_level: ind.value.universe_level,
+                ind: ind.value.clone(),
             }
         })?;
 
@@ -99,12 +108,12 @@ impl TypeChecker {
 
     fn assert_ind_vcon_defs_are_well_typed(
         &mut self,
-        ind: RcSemHashed<Ind>,
+        ind: RcHashed<Ind>,
         predicted_ind_type: NormalForm,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        for def in ind.value.vcon_defs.value.iter() {
+        for def in ind.value.vcon_defs.iter() {
             self.assert_ind_vcon_def_is_well_typed(
                 ind.clone(),
                 predicted_ind_type.clone(),
@@ -118,13 +127,13 @@ impl TypeChecker {
 
     fn assert_ind_vcon_def_is_well_typed(
         &mut self,
-        ind: RcSemHashed<Ind>,
+        ind: RcHashed<Ind>,
         predicted_ind_type: NormalForm,
         def: &VconDef,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        let recursive_ind_entry: Normalized<Vec<Expr>> =
+        let recursive_ind_entry: Normalized<Vec<ast::Expr>> =
             std::iter::once(predicted_ind_type).collect();
         let tcon_with_recursive_ind_entry =
             LazyTypeContext::Snoc(&tcon, recursive_ind_entry.to_derefed());
@@ -140,23 +149,23 @@ impl TypeChecker {
         );
         self.get_types_of_independent_expressions(def.index_args.clone(), tcon_with_params, scon)?;
 
-        if ind.value.index_types.value.len() != def.index_args.value.len() {
+        if ind.value.index_types.len() != def.index_args.len() {
             return Err(TypeError::WrongNumberOfIndexArguments {
                 def: def.clone(),
-                expected: ind.value.index_types.value.len(),
-                actual: def.index_args.value.len(),
+                expected: ind.value.index_types.len(),
+                actual: def.index_args.len(),
             });
         }
 
         assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
             &param_type_types.raw(),
-            ind.value.universe_level,
+            UniverseLevel(ind.value.type_.level),
         )
         .map_err(|(offender_index, offender_level)| {
             TypeError::UniverseInconsistencyInIndDef {
-                expr: def.param_types.value[offender_index].clone(),
+                index_or_param_type: def.param_types[offender_index].clone(),
                 level: offender_level,
-                max_permitted_level: ind.value.universe_level,
+                ind: ind.value.clone(),
             }
         })?;
 
@@ -167,7 +176,7 @@ impl TypeChecker {
 
     fn assert_vcon_def_is_strictly_positive(
         &mut self,
-        _ind: RcSemHashed<Ind>,
+        _ind: RcHashed<Ind>,
         _def: &VconDef,
         _tcon: LazyTypeContext,
         _scon: LazySubstitutionContext,
@@ -181,39 +190,40 @@ impl TypeChecker {
     ///
     /// However, you may safely call this function even if the vcon defs
     /// are ill-typed.
-    fn get_ind_type_assuming_ind_is_well_typed(&mut self, ind: RcSemHashed<Ind>) -> NormalForm {
-        let normalized_index_types = self
-            .evaluator
-            .eval_expressions(ind.value.index_types.clone());
+    fn get_ind_type_assuming_ind_is_well_typed(&mut self, ind: RcHashed<Ind>) -> NormalForm {
+        let index_types_ast = self
+            .cst_converter
+            .convert_expressions(ind.value.index_types.clone());
+        let normalized_index_types = self.evaluator.eval_expressions(index_types_ast);
         let return_type = self.get_ind_return_type(ind);
         Normalized::for_(normalized_index_types, return_type).collapse_if_nullary()
     }
 
-    fn get_ind_return_type(&mut self, ind: RcSemHashed<Ind>) -> NormalForm {
-        Normalized::universe(UniverseNode {
-            level: ind.value.universe_level,
+    fn get_ind_return_type(&mut self, ind: RcHashed<Ind>) -> NormalForm {
+        Normalized::universe(ast::UniverseNode {
+            level: UniverseLevel(ind.value.type_.level),
         })
     }
 
     fn get_type_of_vcon(
         &mut self,
-        vcon: RcSemHashed<Vcon>,
+        vcon: RcHashed<Vcon>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         self.perform_vcon_precheck(vcon.clone(), tcon, scon)?;
 
         let vcon_index = vcon.value.vcon_index;
-        let defs: &[VconDef] = &vcon.value.ind.value.vcon_defs.value;
-        let Some(def) = defs.get(vcon_index) else {
-            return Err(TypeError::InvalidVconIndex(vcon));
+        let defs: &ZeroOrMoreVconDefs = &vcon.value.ind.value.vcon_defs;
+        let Some(def) = defs.get(vcon_index.value) else {
+            return Err(TypeError::InvalidVconIndex(vcon.value.clone()));
         };
         self.get_type_of_trusted_vcon_def(def, vcon.value.ind.clone())
     }
 
     fn perform_vcon_precheck(
         &mut self,
-        vcon: RcSemHashed<Vcon>,
+        vcon: RcHashed<Vcon>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -224,11 +234,19 @@ impl TypeChecker {
     fn get_type_of_trusted_vcon_def(
         &mut self,
         def: &VconDef,
-        ind: RcSemHashed<Ind>,
+        ind: RcHashed<Ind>,
     ) -> Result<NormalForm, TypeError> {
-        let normalized_param_types = self.evaluator.eval_expressions(def.param_types.clone());
-        let normalized_ind = self.evaluator.eval_ind(ind.clone());
-        let normalized_index_args = self.evaluator.eval_expressions(def.index_args.clone());
+        let param_types_ast = self
+            .cst_converter
+            .convert_expressions(def.param_types.clone());
+        let index_args_ast = self
+            .cst_converter
+            .convert_expressions(def.index_args.clone());
+        let ind_ast = self.cst_converter.convert_ind(ind);
+
+        let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
+        let normalized_ind = self.evaluator.eval_ind(ind_ast);
+        let normalized_index_args = self.evaluator.eval_expressions(index_args_ast);
         let return_type = Normalized::app_with_ind_callee(normalized_ind, normalized_index_args)
             .collapse_if_nullary();
         Ok(Normalized::for_(normalized_param_types, return_type).collapse_if_nullary())
@@ -236,19 +254,20 @@ impl TypeChecker {
 
     fn get_type_of_match(
         &mut self,
-        match_: RcSemHashed<Match>,
+        match_: RcHashed<Match>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         self.perform_match_precheck(match_.clone(), tcon, scon)?;
 
-        let normalized_return_type = self.evaluator.eval(match_.value.return_type.clone());
+        let return_type_ast = self.cst_converter.convert(match_.value.return_type.clone());
+        let normalized_return_type = self.evaluator.eval(return_type_ast);
         Ok(normalized_return_type)
     }
 
     fn perform_match_precheck(
         &mut self,
-        match_: RcSemHashed<Match>,
+        match_: RcHashed<Match>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -274,15 +293,16 @@ impl TypeChecker {
             .vcon_defs
             .value
             .len();
-        let match_case_count = match_.value.cases.value.len();
+        let match_case_count = match_.value.cases.len();
         if vcon_count != match_case_count {
             return Err(TypeError::WrongNumberOfMatchCases {
-                match_: match_.clone(),
-                matchee_type_ind: well_typed_matchee_type_ind.clone(),
+                match_: match_.value.clone(),
+                matchee_type_ind: well_typed_matchee_type_ind.without_digest().cloned(),
             });
         }
 
-        let normalized_match_return_type = self.evaluator.eval(match_.value.return_type.clone());
+        let return_type_ast = self.cst_converter.convert(match_.value.return_type.clone());
+        let normalized_match_return_type = self.evaluator.eval(return_type_ast);
         self.perform_match_cases_precheck(
             match_,
             normalized_match_return_type,
@@ -297,10 +317,10 @@ impl TypeChecker {
 
     fn perform_match_cases_precheck(
         &mut self,
-        match_: RcSemHashed<Match>,
+        match_: RcHashed<Match>,
         match_return_type: NormalForm,
-        well_typed_matchee_type_ind: Normalized<RcSemHashed<Ind>>,
-        well_typed_matchee_type_args: Normalized<RcSemHashed<Box<[Expr]>>>,
+        well_typed_matchee_type_ind: Normalized<RcSemHashed<ast::Ind>>,
+        well_typed_matchee_type_args: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -308,9 +328,9 @@ impl TypeChecker {
         let vcon_defs = vcon_defs.without_digest();
         let vcon_defs = vcon_defs.derefed();
 
-        for match_case_index in 0..match_.value.cases.value.len() {
+        for match_case_index in 0..match_.value.cases.len() {
             let well_typed_vcon_def = vcon_defs.index(match_case_index);
-            let match_case = &match_.value.cases.value[match_case_index];
+            let match_case = &match_.value.cases[match_case_index];
             self.perform_match_case_precheck(
                 match_case,
                 match_case_index,
@@ -331,15 +351,15 @@ impl TypeChecker {
         &mut self,
         match_case: &MatchCase,
         match_case_index: usize,
-        well_typed_vcon_def: Normalized<&VconDef>,
-        match_: RcSemHashed<Match>,
+        well_typed_vcon_def: Normalized<&ast::VconDef>,
+        match_: RcHashed<Match>,
         match_return_type: NormalForm,
-        well_typed_matchee_type_ind: Normalized<RcSemHashed<Ind>>,
-        well_typed_matchee_type_args: Normalized<RcSemHashed<Box<[Expr]>>>,
+        well_typed_matchee_type_ind: Normalized<RcSemHashed<ast::Ind>>,
+        well_typed_matchee_type_args: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        let ind_singleton: [Expr; 1] = [well_typed_matchee_type_ind.clone().into_raw().into()];
+        let ind_singleton: [ast::Expr; 1] = [well_typed_matchee_type_ind.clone().into_raw().into()];
         let ind_singleton_deb_substituter = DebDownshiftSubstituter {
             new_exprs: &ind_singleton,
         };
@@ -361,8 +381,8 @@ impl TypeChecker {
             .clone()
             .upshift_expressions_with_constant_cutoff(match_case_param_count);
         let extended_tcon_len = extended_tcon.len();
-        let upshifted_matchee =
-            DebUpshifter(match_case_param_count).replace_debs(match_.value.matchee.clone(), 0);
+        let matchee_ast = self.cst_converter.convert(match_.value.matchee.clone());
+        let upshifted_matchee = DebUpshifter(match_case_param_count).replace_debs(matchee_ast, 0);
         let upshifted_normalized_matchee = self.evaluator.eval(upshifted_matchee);
         let parameterized_vcon_capp = Normalized::vcon_capp(
             well_typed_matchee_type_ind,
@@ -414,7 +434,7 @@ impl TypeChecker {
 
     fn get_type_of_fun(
         &mut self,
-        fun: RcSemHashed<Fun>,
+        fun: RcHashed<Fun>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -422,13 +442,14 @@ impl TypeChecker {
             self.get_types_of_dependent_expressions(fun.value.param_types.clone(), tcon, scon)?;
         assert_every_expr_is_universe(param_type_types.raw()).map_err(|offender_index| {
             TypeError::UnexpectedNonTypeExpression {
-                expr: fun.value.param_types.value[offender_index].clone(),
+                expr: fun.value.param_types[offender_index].clone(),
                 type_: param_type_types.index(offender_index).cloned(),
             }
         })?;
-        let normalized_param_types = self
-            .evaluator
-            .eval_expressions(fun.value.param_types.clone());
+        let param_types_ast = self
+            .cst_converter
+            .convert_expressions(fun.value.param_types.clone());
+        let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
 
         let return_type_type = self.get_type(fun.value.return_type.clone(), tcon, scon)?;
         if !return_type_type.raw().is_universe() {
@@ -437,7 +458,8 @@ impl TypeChecker {
                 type_: return_type_type,
             });
         }
-        let normalized_return_type = self.evaluator.eval(fun.value.return_type.clone());
+        let return_type_ast = self.cst_converter.convert(fun.value.return_type.clone());
+        let normalized_return_type = self.evaluator.eval(return_type_ast);
 
         let only_possible_fun_type: NormalForm = Normalized::for_(
             normalized_param_types.clone(),
@@ -445,7 +467,7 @@ impl TypeChecker {
         )
         .into();
 
-        let param_types_and_recursive_fun_param_type: Normalized<Vec<Expr>> =
+        let param_types_and_recursive_fun_param_type: Normalized<Vec<ast::Expr>> =
             normalized_param_types
                 .without_digest()
                 .derefed()
@@ -477,7 +499,7 @@ impl TypeChecker {
 
     fn get_type_of_app(
         &mut self,
-        app: RcSemHashed<App>,
+        app: RcHashed<App>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -485,16 +507,16 @@ impl TypeChecker {
             .get_type(app.value.callee.clone(), tcon, scon)?
             .try_into_for()
             .map_err(|original| TypeError::CalleeTypeIsNotAForExpression {
-                app: app.clone(),
+                app: app.value.clone(),
                 callee_type: original,
             })?;
 
-        let arg_count = app.value.args.value.len();
+        let arg_count = app.value.args.len();
         let param_count = callee_type.raw().value.param_types.value.len();
         if arg_count != param_count {
             return Err(TypeError::WrongNumberOfAppArguments {
-                app,
-                callee_type,
+                app: app.value.clone(),
+                callee_type: callee_type.without_digest().cloned(),
                 expected: param_count,
                 actual: arg_count,
             });
@@ -502,7 +524,10 @@ impl TypeChecker {
 
         let arg_types =
             self.get_types_of_independent_expressions(app.value.args.clone(), tcon, scon)?;
-        let normalized_args = self.evaluator.eval_expressions(app.value.args.clone());
+        let args_ast = self
+            .cst_converter
+            .convert_expressions(app.value.args.clone());
+        let normalized_args = self.evaluator.eval_expressions(args_ast);
 
         let substituted_param_types = self.substitute_param_types(
             callee_type.without_digest().param_types(),
@@ -510,7 +535,7 @@ impl TypeChecker {
         );
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
-                exprs: app.value.args.clone(),
+                exprs: app.value.args.to_vec_of_cloned(),
                 expected_types: substituted_param_types,
                 actual_types: arg_types,
                 tcon_len: tcon.len(),
@@ -529,9 +554,9 @@ impl TypeChecker {
 
     fn substitute_param_types(
         &mut self,
-        unsubstituted_param_types: Normalized<RcSemHashed<Box<[Expr]>>>,
-        normalized_args: Normalized<RcSemHashed<Box<[Expr]>>>,
-    ) -> Normalized<Vec<Expr>> {
+        unsubstituted_param_types: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
+        normalized_args: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
+    ) -> Normalized<Vec<ast::Expr>> {
         let len = normalized_args.raw().value.len();
 
         let out: Vec<NormalForm> = (0..len)
@@ -554,7 +579,7 @@ impl TypeChecker {
 
     fn get_type_of_for(
         &mut self,
-        for_: RcSemHashed<For>,
+        for_: RcHashed<For>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
@@ -562,7 +587,7 @@ impl TypeChecker {
             self.get_types_of_dependent_expressions(for_.value.param_types.clone(), tcon, scon)?;
         assert_every_expr_is_universe(param_type_types.raw()).map_err(|offender_index| {
             TypeError::UnexpectedNonTypeExpression {
-                expr: for_.value.param_types.value[offender_index].clone(),
+                expr: for_.value.param_types[offender_index].clone(),
                 type_: param_type_types.index(offender_index).cloned(),
             }
         })?;
@@ -574,7 +599,7 @@ impl TypeChecker {
             scon,
         )?;
         let return_type_type_universe_level = match return_type_type.raw() {
-            Expr::Universe(universe_node) => universe_node.value.level,
+            ast::Expr::Universe(universe_node) => universe_node.value.level,
 
             _ => {
                 return Err(TypeError::UnexpectedNonTypeExpression {
@@ -586,45 +611,47 @@ impl TypeChecker {
 
         let max_level = return_type_type_universe_level
             .max_or_self(get_max_universe_level(param_type_types.raw()));
-        Ok(Normalized::universe(UniverseNode { level: max_level }))
+        Ok(Normalized::universe(ast::UniverseNode { level: max_level }))
     }
 
     fn get_type_of_deb(
         &mut self,
-        deb: RcSemHashed<DebNode>,
+        deb: RcHashed<NumberLiteral>,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
-        if let Some(expr) = tcon.get(deb.value.deb) {
+        if let Some(expr) = tcon.get(Deb(deb.value.value)) {
             return Ok(expr);
         }
 
         return Err(TypeError::InvalidDeb {
-            deb,
+            deb: deb.value.clone(),
             tcon_len: tcon.len(),
         });
     }
 
     fn get_type_of_universe(
         &mut self,
-        universe: RcSemHashed<UniverseNode>,
+        universe: RcHashed<UniverseLiteral>,
     ) -> Result<NormalForm, TypeError> {
         return Ok(self
             .evaluator
-            .eval(Expr::Universe(Rc::new(Sha256Hashed::new(UniverseNode {
-                level: UniverseLevel(universe.value.level.0 + 1),
-            })))));
+            .eval(ast::Expr::Universe(Rc::new(Sha256Hashed::new(
+                ast::UniverseNode {
+                    level: UniverseLevel(universe.value.level + 1),
+                },
+            )))));
     }
 
     fn get_types_of_dependent_expressions(
         &mut self,
-        exprs: RcSemHashed<Box<[Expr]>>,
+        exprs: ZeroOrMoreExprs,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Normalized<Vec<Expr>>, TypeError> {
-        let mut out: Normalized<Vec<Expr>> =
-            Normalized::from_vec_normalized(Vec::with_capacity(exprs.value.len()));
+    ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
+        let mut out: Normalized<Vec<ast::Expr>> =
+            Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
 
-        for expr in exprs.value.iter() {
+        for expr in exprs.iter() {
             let current_tcon = LazyTypeContext::Snoc(&tcon, out.to_derefed());
             let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
             out.push(type_);
@@ -635,14 +662,14 @@ impl TypeChecker {
 
     fn get_types_of_independent_expressions(
         &mut self,
-        exprs: RcSemHashed<Box<[Expr]>>,
+        exprs: ZeroOrMoreExprs,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Normalized<Vec<Expr>>, TypeError> {
-        let mut out: Normalized<Vec<Expr>> =
-            Normalized::from_vec_normalized(Vec::with_capacity(exprs.value.len()));
+    ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
+        let mut out: Normalized<Vec<ast::Expr>> =
+            Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
 
-        for expr in exprs.value.iter() {
+        for expr in exprs.iter() {
             let type_ = self.get_type(expr.clone(), tcon, scon)?;
             out.push(type_);
         }
@@ -651,7 +678,7 @@ impl TypeChecker {
     }
 }
 
-fn assert_every_expr_is_universe(exprs: &[Expr]) -> Result<(), usize> {
+fn assert_every_expr_is_universe(exprs: &[ast::Expr]) -> Result<(), usize> {
     for (i, expr) in exprs.iter().enumerate() {
         if !expr.is_universe() {
             return Err(i);
@@ -661,22 +688,22 @@ fn assert_every_expr_is_universe(exprs: &[Expr]) -> Result<(), usize> {
     Ok(())
 }
 
-impl Expr {
+impl ast::Expr {
     fn is_universe(&self) -> bool {
         match self {
-            Expr::Universe(_) => true,
+            ast::Expr::Universe(_) => true,
             _ => false,
         }
     }
 }
 
 fn assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
-    lhs: &[Expr],
+    lhs: &[ast::Expr],
     rhs: UniverseLevel,
 ) -> Result<(), (usize, UniverseLevel)> {
     for (i, expr) in lhs.iter().enumerate() {
         let lhs_level = match expr {
-            Expr::Universe(universe) => universe.value.level,
+            ast::Expr::Universe(universe) => universe.value.level,
             _ => continue,
         };
 
@@ -688,11 +715,13 @@ fn assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
     Ok(())
 }
 
-fn get_max_universe_level<'a>(exprs: impl IntoIterator<Item = &'a Expr>) -> Option<UniverseLevel> {
+fn get_max_universe_level<'a>(
+    exprs: impl IntoIterator<Item = &'a ast::Expr>,
+) -> Option<UniverseLevel> {
     exprs
         .into_iter()
         .filter_map(|expr| match expr {
-            Expr::Universe(universe) => Some(universe.value.level),
+            ast::Expr::Universe(universe) => Some(universe.value.level),
             _ => None,
         })
         .max()
@@ -710,6 +739,177 @@ where
         match other {
             Some(other) => self.max(other),
             None => self,
+        }
+    }
+}
+
+// TODO: Move to different module?
+
+impl ZeroOrMoreExprs {
+    pub fn to_vec_of_cloned(&self) -> Vec<Expr> {
+        match self {
+            Self::Nil => vec![],
+            Self::Cons(left, right) => {
+                let mut left = left.to_vec_of_cloned();
+                left.push(right.clone());
+                left
+            }
+        }
+    }
+}
+
+impl ZeroOrMoreExprs {
+    pub fn iter(&self) -> impl Iterator<Item = &Expr> {
+        let v = self.to_vec();
+        v.into_iter().rev()
+    }
+
+    pub fn to_vec(&self) -> Vec<&Expr> {
+        match self {
+            Self::Nil => vec![],
+            Self::Cons(left, right) => {
+                let mut left = left.to_vec();
+                left.push(right);
+                left
+            }
+        }
+    }
+}
+
+impl std::ops::Index<usize> for ZeroOrMoreExprs {
+    type Output = Expr;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        if let Some(out) = self.get(index) {
+            return out;
+        }
+
+        let len = self.len();
+        panic!("index out of bounds: the len is {len} but the index is {index}");
+    }
+}
+
+impl ZeroOrMoreExprs {
+    pub fn get(&self, index: usize) -> Option<&Expr> {
+        let index_from_back = self.len().checked_sub(index + 1)?;
+        self.get_from_back(index_from_back)
+    }
+
+    pub fn get_from_back(&self, index: usize) -> Option<&Expr> {
+        match self {
+            ZeroOrMoreExprs::Nil => None,
+            ZeroOrMoreExprs::Cons(left, right) => {
+                if index == 0 {
+                    Some(&right)
+                } else {
+                    left.get_from_back(index - 1)
+                }
+            }
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        match self {
+            ZeroOrMoreExprs::Nil => 0,
+            ZeroOrMoreExprs::Cons(left, _) => 1 + left.len(),
+        }
+    }
+}
+
+impl ZeroOrMoreVconDefs {
+    pub fn iter(&self) -> impl Iterator<Item = &VconDef> {
+        let v = self.to_vec();
+        v.into_iter().rev()
+    }
+
+    pub fn to_vec(&self) -> Vec<&VconDef> {
+        match self {
+            Self::Nil => vec![],
+            Self::Cons(left, right) => {
+                let mut left = left.to_vec();
+                left.push(right);
+                left
+            }
+        }
+    }
+}
+
+impl std::ops::Index<usize> for ZeroOrMoreVconDefs {
+    type Output = VconDef;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        if let Some(out) = self.get(index) {
+            return out;
+        }
+
+        let len = self.len();
+        panic!("index out of bounds: the len is {len} but the index is {index}");
+    }
+}
+
+impl ZeroOrMoreVconDefs {
+    pub fn get(&self, index: usize) -> Option<&VconDef> {
+        let index_from_back = self.len().checked_sub(index + 1)?;
+        self.get_from_back(index_from_back)
+    }
+
+    pub fn get_from_back(&self, index: usize) -> Option<&VconDef> {
+        match self {
+            ZeroOrMoreVconDefs::Nil => None,
+            ZeroOrMoreVconDefs::Cons(left, right) => {
+                if index == 0 {
+                    Some(&right)
+                } else {
+                    left.get_from_back(index - 1)
+                }
+            }
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        match self {
+            ZeroOrMoreVconDefs::Nil => 0,
+            ZeroOrMoreVconDefs::Cons(left, _) => 1 + left.len(),
+        }
+    }
+}
+
+impl std::ops::Index<usize> for ZeroOrMoreMatchCases {
+    type Output = MatchCase;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        if let Some(out) = self.get(index) {
+            return out;
+        }
+
+        let len = self.len();
+        panic!("index out of bounds: the len is {len} but the index is {index}");
+    }
+}
+
+impl ZeroOrMoreMatchCases {
+    pub fn get(&self, index: usize) -> Option<&MatchCase> {
+        let index_from_back = self.len().checked_sub(index + 1)?;
+        self.get_from_back(index_from_back)
+    }
+
+    pub fn get_from_back(&self, index: usize) -> Option<&MatchCase> {
+        match self {
+            ZeroOrMoreMatchCases::Nil => None,
+            ZeroOrMoreMatchCases::Cons(left, right) => {
+                if index == 0 {
+                    Some(&right)
+                } else {
+                    left.get_from_back(index - 1)
+                }
+            }
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        match self {
+            ZeroOrMoreMatchCases::Nil => 0,
+            ZeroOrMoreMatchCases::Cons(left, _) => 1 + left.len(),
         }
     }
 }

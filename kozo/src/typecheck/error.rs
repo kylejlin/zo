@@ -3,18 +3,18 @@ use super::*;
 #[derive(Debug, Clone)]
 pub enum TypeError {
     InvalidDeb {
-        deb: RcSemHashed<DebNode>,
+        deb: NumberLiteral,
         tcon_len: usize,
     },
-    InvalidVconIndex(RcSemHashed<Vcon>),
+    InvalidVconIndex(Vcon),
     UnexpectedNonTypeExpression {
         expr: Expr,
         type_: NormalForm,
     },
     UniverseInconsistencyInIndDef {
-        expr: Expr,
+        index_or_param_type: Expr,
         level: UniverseLevel,
-        max_permitted_level: UniverseLevel,
+        ind: Ind,
     },
     WrongNumberOfIndexArguments {
         def: VconDef,
@@ -26,8 +26,8 @@ pub enum TypeError {
         type_: NormalForm,
     },
     WrongNumberOfMatchCases {
-        match_: RcSemHashed<Match>,
-        matchee_type_ind: Normalized<RcSemHashed<Ind>>,
+        match_: Match,
+        matchee_type_ind: Normalized<ast::Ind>,
     },
     TypeMismatch {
         expr: Expr,
@@ -37,12 +37,12 @@ pub enum TypeError {
         subbed_actual: NormalForm,
     },
     CalleeTypeIsNotAForExpression {
-        app: RcSemHashed<App>,
+        app: App,
         callee_type: NormalForm,
     },
     WrongNumberOfAppArguments {
-        app: RcSemHashed<App>,
-        callee_type: Normalized<RcSemHashed<For>>,
+        app: App,
+        callee_type: Normalized<ast::For>,
         expected: usize,
         actual: usize,
     },

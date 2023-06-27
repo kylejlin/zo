@@ -11,9 +11,9 @@ pub struct ExpectedTypeEquality {
 /// `exprs`, `expected_types`, and `actual_types` **must** all have the same length.
 #[derive(Clone, Debug)]
 pub struct ExpectedTypeEqualities {
-    pub exprs: RcSemHashed<Box<[Expr]>>,
-    pub expected_types: Normalized<Vec<Expr>>,
-    pub actual_types: Normalized<Vec<Expr>>,
+    pub exprs: Vec<Expr>,
+    pub expected_types: Normalized<Vec<ast::Expr>>,
+    pub actual_types: Normalized<Vec<ast::Expr>>,
     pub tcon_len: usize,
 }
 
@@ -21,7 +21,7 @@ impl ExpectedTypeEqualities {
     pub fn zip(self) -> impl Iterator<Item = ExpectedTypeEquality> {
         let tcon_len = self.tcon_len;
         (0..self.len()).into_iter().map(move |i| {
-            let expr = self.exprs.value[i].clone();
+            let expr = self.exprs[i].clone();
             let expected_type = self.expected_types.index(i).cloned();
             let actual_type = self.actual_types.index(i).cloned();
             ExpectedTypeEquality {
@@ -34,7 +34,7 @@ impl ExpectedTypeEqualities {
     }
 
     pub fn len(&self) -> usize {
-        self.exprs.value.len()
+        self.exprs.len()
     }
 }
 
