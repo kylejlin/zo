@@ -1,9 +1,9 @@
 pub mod ast;
-pub mod cst;
-pub mod cst_to_rch_cst;
 pub mod eval;
 pub mod hashed;
 pub mod lexer;
+pub mod nh_cst;
+pub mod nh_cst_to_rch_cst;
 pub mod nohash_hashmap;
 pub mod rch_cst;
 pub mod rch_cst_to_ast;

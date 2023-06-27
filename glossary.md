@@ -13,9 +13,26 @@ with the ordinary definitions.
   Unless otherwise specified, "digest" refers to
   a SHA256 digest.
 - ind: inductive data type definition
-- rc: reference counted
-- rch: reference counted hashed
+- NH CST: non-hashed concrete syntax tree
+- RC: reference counted
+- RCH: reference counted hashed
+- RCH CST: reference counted hashed concrete syntax tree
 - scon: substitution context
 - sem hash: semantic hash
 - tcon: type context
 - vcon: variant constructor
+
+## Pronunciation of fully capitalized phrases
+
+You should read the fully capitalized phrases using their individual letters.
+For example, you read "CST" as "see ess tee".
+As another example, you read "RCH" as "are see eich".
+
+## Pronunciation of scon, tcon, and vcon
+
+- "ess con"
+- "tee con"
+- "vee con"
+
+In general, the first letter is pronounced as a letter.
+The "con" is pronounced like the English word (e.g., as in "pros and cons").
