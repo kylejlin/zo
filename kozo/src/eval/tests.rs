@@ -605,10 +605,13 @@ fn substitute_without_compounding(replacements: &[(&str, String)], original: &st
 }
 
 fn parse_or_panic(src: &str) -> Expr {
-    let tokens = crate::lexer::lex(src).unwrap();
-    let cst = crate::parser::parse(tokens).unwrap();
-    let rch_cst: crate::rch_cst::Expr = cst.into();
-    let mut converter = crate::rch_cst_to_ast::RchCstToAstConverter::default();
+    use crate::syntax_tree::{
+        lexer::lex, parser::parse, rch_cst, rch_cst_to_ast::RchCstToAstConverter,
+    };
+    let tokens = lex(src).unwrap();
+    let cst = parse(tokens).unwrap();
+    let rch_cst: rch_cst::Expr = cst.into();
+    let mut converter = RchCstToAstConverter::default();
     converter.convert(rch_cst)
 }
 

@@ -1,4 +1,4 @@
-use crate::{ast::*, eval::*};
+use crate::{eval::*, syntax_tree::ast::*};
 
 #[derive(Debug, Clone)]
 pub struct ConcreteSubstitution {

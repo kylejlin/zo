@@ -1,11 +1,13 @@
 use crate::{
-    ast::{self, Deb, RcSemHashed, UniverseLevel},
     eval::{Evaluator, NormalForm, Normalized},
     hash::sha256::*,
-    rch_cst::{self as cst, RcHashed},
-    rch_cst_to_ast::RchCstToAstConverter,
-    replace_debs::*,
-    token::*,
+    syntax_tree::{
+        ast::{self, Deb, RcSemHashed, UniverseLevel},
+        rch_cst::{self as cst, RcHashed},
+        rch_cst_to_ast::RchCstToAstConverter,
+        replace_debs::*,
+        token::*,
+    },
 };
 
 use std::{ops::BitOrAssign, rc::Rc};

@@ -1,0 +1,19 @@
+---
+source: src/syntax_tree/parser/tests/ind.rs
+expression: "&err"
+---
+Some(
+    Number(
+        NumberLiteral {
+            value: 2,
+            span: (
+                ByteIndex(
+                    15,
+                ),
+                ByteIndex(
+                    16,
+                ),
+            ),
+        },
+    ),
+)

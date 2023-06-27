@@ -1,0 +1,75 @@
+---
+source: src/syntax_tree/parser/tests/fun.rs
+expression: "&cst"
+---
+Fun(
+    Fun {
+        lparen: ByteIndex(
+            1,
+        ),
+        decreasing_index: Number(
+            NumberLiteral {
+                value: 0,
+                span: (
+                    ByteIndex(
+                        46,
+                    ),
+                    ByteIndex(
+                        47,
+                    ),
+                ),
+            },
+        ),
+        param_types_lparen: ByteIndex(
+            72,
+        ),
+        param_types: Cons(
+            Nil,
+            Deb(
+                NumberLiteral {
+                    value: 4,
+                    span: (
+                        ByteIndex(
+                            73,
+                        ),
+                        ByteIndex(
+                            74,
+                        ),
+                    ),
+                },
+            ),
+        ),
+        param_types_rparen: ByteIndex(
+            74,
+        ),
+        return_type: Deb(
+            NumberLiteral {
+                value: 8,
+                span: (
+                    ByteIndex(
+                        100,
+                    ),
+                    ByteIndex(
+                        101,
+                    ),
+                ),
+            },
+        ),
+        return_val: Deb(
+            NumberLiteral {
+                value: 1,
+                span: (
+                    ByteIndex(
+                        107,
+                    ),
+                    ByteIndex(
+                        108,
+                    ),
+                ),
+            },
+        ),
+        rparen: ByteIndex(
+            109,
+        ),
+    },
+)

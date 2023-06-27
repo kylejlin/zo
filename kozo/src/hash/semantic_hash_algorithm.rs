@@ -1,6 +1,6 @@
 use super::*;
 
-use crate::ast::*;
+use crate::syntax_tree::ast::*;
 
 use std::hash::Hasher;
 
