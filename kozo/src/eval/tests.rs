@@ -41,18 +41,8 @@ fn add_2_3() {
         "(<SUCC> (<SUCC> (<SUCC> (<SUCC> (<SUCC> <ZERO>)))))",
     );
 
-    let actual = {
-        let tokens = crate::lexer::lex(&add_two_three_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).into_raw()
-    };
-
-    let expected = {
-        let tokens = crate::lexer::lex(&five_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        Expr::from(cst)
-    };
+    let actual = eval_or_panic(&add_two_three_src).into_raw();
+    let expected = parse_or_panic(&five_src);
 
     assert_eq!(expected.digest(), actual.digest());
 }
@@ -80,18 +70,8 @@ fn nullary_match_case() {
     );
     let expected_src = r#"12"#;
 
-    let actual = {
-        let tokens = crate::lexer::lex(&match_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).into_raw()
-    };
-
-    let expected = {
-        let tokens = crate::lexer::lex(&expected_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        Expr::from(cst)
-    };
+    let actual = eval_or_panic(&match_src).into_raw();
+    let expected = parse_or_panic(&expected_src);
 
     assert_eq!(expected.digest(), actual.digest());
 }
@@ -119,18 +99,8 @@ fn match_case_param_substitution() {
     );
     let expected_src = r#"(14 10 11)"#;
 
-    let actual = {
-        let tokens = crate::lexer::lex(&match_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).into_raw()
-    };
-
-    let expected = {
-        let tokens = crate::lexer::lex(&expected_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        Expr::from(cst)
-    };
+    let actual = eval_or_panic(&match_src).into_raw();
+    let expected = parse_or_panic(&expected_src);
 
     assert_eq!(expected.digest(), actual.digest());
 }
@@ -321,18 +291,8 @@ fn rev_1_2_3() {
     let three_two_one_src =
             substitute_with_compounding(src_defs, "(<NORMALIZED_NAT_CONS> <3> (<NORMALIZED_NAT_CONS> <2> (<NORMALIZED_NAT_CONS> <1> <NORMALIZED_NAT_NIL>)))");
 
-    let actual = {
-        let tokens = crate::lexer::lex(&rev_one_two_three_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).into_raw()
-    };
-
-    let expected = {
-        let tokens = crate::lexer::lex(&three_two_one_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        Expr::from(cst)
-    };
+    let actual = eval_or_panic(&rev_one_two_three_src).into_raw();
+    let expected = parse_or_panic(&three_two_one_src);
 
     assert_eq!(expected.digest(), actual.digest());
 }
@@ -526,18 +486,8 @@ fn polymorphic_rev_1_2_3() {
     let three_two_one_src =
             substitute_with_compounding(src_defs, "(<NORMALIZED_NAT_CONS> <3> (<NORMALIZED_NAT_CONS> <2> (<NORMALIZED_NAT_CONS> <1> <NORMALIZED_NAT_NIL>)))");
 
-    let actual = {
-        let tokens = crate::lexer::lex(&rev_one_two_three_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).into_raw()
-    };
-
-    let expected = {
-        let tokens = crate::lexer::lex(&three_two_one_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        Expr::from(cst)
-    };
+    let actual = eval_or_panic(&rev_one_two_three_src).into_raw();
+    let expected = parse_or_panic(&three_two_one_src);
 
     assert_eq!(expected.digest(), actual.digest());
 }
@@ -579,18 +529,8 @@ fn recursive_fun_app_stops_unfolding_when_decreasing_arg_not_vconlike() {
     let succ_ident_deb_123_src =
         substitute_with_compounding(defs, "(<SUCC> (<RECURSIVE_IDENTITY> 123))");
 
-    let actual = {
-        let tokens = crate::lexer::lex(&ident_succ_deb_123_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).into_raw()
-    };
-
-    let expected = {
-        let tokens = crate::lexer::lex(&succ_ident_deb_123_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        Expr::from(cst)
-    };
+    let actual = eval_or_panic(&ident_succ_deb_123_src).into_raw();
+    let expected = parse_or_panic(&succ_ident_deb_123_src);
 
     assert_eq!(expected.digest(), actual.digest());
 }
@@ -638,18 +578,8 @@ fn substitution_upshifts_new_expr_debs() {
     );
     let deb_5_src = "5";
 
-    let actual = {
-        let tokens = crate::lexer::lex(&match_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        let ast: Expr = cst.into();
-        Evaluator::default().eval(ast).into_raw()
-    };
-
-    let expected = {
-        let tokens = crate::lexer::lex(&deb_5_src).unwrap();
-        let cst = crate::parser::parse(tokens).unwrap();
-        Expr::from(cst)
-    };
+    let actual = eval_or_panic(&match_src).into_raw();
+    let expected = parse_or_panic(&deb_5_src);
 
     assert_eq!(expected.digest(), actual.digest());
 }
@@ -672,4 +602,17 @@ fn substitute_without_compounding(replacements: &[(&str, String)], original: &st
         result = result.replace(from, to);
     }
     result
+}
+
+fn parse_or_panic(src: &str) -> Expr {
+    let tokens = crate::lexer::lex(src).unwrap();
+    let cst = crate::parser::parse(tokens).unwrap();
+    let rch_cst: crate::rch_cst::Expr = cst.into();
+    let mut converter = crate::rch_cst_to_ast::RchCstToAstConverter::default();
+    converter.convert(rch_cst)
+}
+
+fn eval_or_panic(src: &str) -> NormalForm {
+    let ast = parse_or_panic(src);
+    Evaluator::default().eval(ast)
 }

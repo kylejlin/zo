@@ -1,6 +1,5 @@
 pub mod ast;
 pub mod cst;
-pub mod cst_to_ast;
 pub mod cst_to_rch_cst;
 pub mod eval;
 pub mod hashed;
