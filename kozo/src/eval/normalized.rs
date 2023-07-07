@@ -227,7 +227,6 @@ impl Normalized<RcSemHashed<Box<[Expr]>>> {
     pub fn replace_deb0_with_ind_with_increasing_cutoff(
         self,
         ind: Normalized<RcSemHashed<Ind>>,
-        cutoff: usize,
     ) -> Self {
         let ind_singleton: [Expr; 1] = [ind.raw().clone().into()];
         let ind_singleton_deb_substituter = DebDownshiftSubstituter {
@@ -235,7 +234,7 @@ impl Normalized<RcSemHashed<Box<[Expr]>>> {
         };
         Normalized(
             ind_singleton_deb_substituter
-                .replace_debs_in_expressions_with_increasing_cutoff(self.0, cutoff),
+                .replace_debs_in_expressions_with_increasing_cutoff(self.0, 0),
         )
     }
 }
