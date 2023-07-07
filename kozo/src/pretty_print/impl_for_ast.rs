@@ -106,7 +106,49 @@ fn fmt_vcon(vcon: RcSemHashed<Vcon>, f: &mut Formatter<'_>, indent: Indentation)
 }
 
 fn fmt_match(m: RcSemHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
-    todo!()
+    let i1 = indent.incremented();
+    write!(f, "{indent}(\n{i1}match\n")?;
+
+    fmt_expr(m.value.matchee.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_expr(m.value.return_type.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_parenthesized_match_cases(m.value.cases.clone(), f, i1)?;
+    write!(f, "\n{indent})")?;
+    Ok(())
+}
+
+fn fmt_parenthesized_match_cases(
+    cases: RcSemHashed<Box<[MatchCase]>>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
+    if cases.value.is_empty() {
+        return write!(f, "{indent}()");
+    }
+
+    write!(f, "{indent}(")?;
+    let i1 = indent.incremented();
+
+    for case in cases.value.as_ref() {
+        write!(f, "\n")?;
+        fmt_match_case(case, f, i1)?;
+    }
+
+    write!(f, "\n{indent})")?;
+    Ok(())
+}
+
+fn fmt_match_case(case: &MatchCase, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+    let i1 = indent.incremented();
+    let case_arity = case.arity;
+    write!(f, "{indent}(\n{i1}{case_arity}\n")?;
+
+    fmt_expr(case.return_val.clone(), f, i1)?;
+    write!(f, "\n{indent})")?;
+    Ok(())
 }
 
 fn fmt_fun(fun: RcSemHashed<Fun>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
