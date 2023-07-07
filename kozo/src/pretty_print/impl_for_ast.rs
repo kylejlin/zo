@@ -152,7 +152,32 @@ fn fmt_match_case(case: &MatchCase, f: &mut Formatter<'_>, indent: Indentation) 
 }
 
 fn fmt_fun(fun: RcSemHashed<Fun>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
-    todo!()
+    let i1 = indent.incremented();
+    write!(f, "{indent}(\n{i1}fun\n")?;
+
+    fmt_decreasing_index(fun.value.decreasing_index, f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_parenthesized_expressions(fun.value.param_types.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_expr(fun.value.return_type.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_expr(fun.value.return_val.clone(), f, i1)?;
+    write!(f, "\n{indent})")?;
+    Ok(())
+}
+
+fn fmt_decreasing_index(
+    index: Option<usize>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
+    match index {
+        Some(index) => write!(f, "{indent}{index}"),
+        None => write!(f, "{indent}nonrec"),
+    }
 }
 
 fn fmt_app(app: RcSemHashed<App>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
