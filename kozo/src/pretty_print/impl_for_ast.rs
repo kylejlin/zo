@@ -216,7 +216,7 @@ fn fmt_for(for_: RcSemHashed<For>, f: &mut Formatter<'_>, indent: Indentation) -
 
 fn fmt_deb(deb: RcSemHashed<DebNode>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let index = deb.value.deb.0;
-    write!(f, "{indent}Type{index}")
+    write!(f, "{indent}{index}")
 }
 
 fn fmt_universe(

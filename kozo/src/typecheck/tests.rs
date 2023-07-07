@@ -60,10 +60,11 @@ fn add_2_3() {
             ..
         } => {
             panic!(
-                "******EXPR*******\n{}\n\n******EXPECTED TYPE*******\n{}\n\n******ACTUAL TYPE*******\n{}\n\n",
-                PrettyPrinted(&RchCstToAstConverter::default().convert(expr)),
+                "******EXPR*******\n{}\n\n******EXPECTED TYPE*******\n{}\n\n******ACTUAL TYPE*******\n{}\n\n******SRC*******\n{add_two_three_src}\n\n******EXPR.SPAN*******\n{:?}\n\n",
+                PrettyPrinted(&RchCstToAstConverter::default().convert(expr.clone())),
                 PrettyPrinted(expected_type.raw()),
                 PrettyPrinted(actual_type.raw()),
+                expr.span(),
             );
         }
 
