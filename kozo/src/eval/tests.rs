@@ -22,7 +22,7 @@ fn add_2_3() {
             succ_def,
             (
                 "<ADD>",
-                "(fun 0 (<NAT> <NAT>) Type0
+                "(fun 0 (<NAT> <NAT>) <NAT>
 (
     match 2 <NAT>
 
