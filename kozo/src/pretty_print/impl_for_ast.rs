@@ -61,11 +61,37 @@ fn fmt_str_literal(
 }
 
 fn fmt_parenthesized_vcon_defs(
-    parenthesized_vcon_defs: RcSemHashed<Box<[VconDef]>>,
+    defs: RcSemHashed<Box<[VconDef]>>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
-    todo!()
+    if defs.value.is_empty() {
+        return write!(f, "{indent}()");
+    }
+
+    write!(f, "{indent}(")?;
+    let i1 = indent.incremented();
+
+    for def in defs.value.as_ref() {
+        write!(f, "\n")?;
+        fmt_vcon_def(def, f, i1)?;
+    }
+
+    write!(f, "\n{indent})")?;
+    Ok(())
+}
+
+fn fmt_vcon_def(def: &VconDef, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+    write!(f, "{indent}(\n")?;
+
+    let i1 = indent.incremented();
+    fmt_parenthesized_expressions(def.param_types.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_parenthesized_expressions(def.index_args.clone(), f, i1)?;
+
+    write!(f, "\n{indent})")?;
+    Ok(())
 }
 
 fn fmt_vcon(vcon: RcSemHashed<Vcon>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
