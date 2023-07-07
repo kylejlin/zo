@@ -181,7 +181,25 @@ fn fmt_decreasing_index(
 }
 
 fn fmt_app(app: RcSemHashed<App>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
-    todo!()
+    if app.value.args.value.is_empty() {
+        write!(f, "{indent}(")?;
+        fmt_expr(app.value.callee.clone(), f, indent)?;
+        write!(f, ")")?;
+        return Ok(());
+    }
+
+    write!(f, "{indent}(\n")?;
+
+    let i1 = indent.incremented();
+    fmt_expr(app.value.callee.clone(), f, i1)?;
+
+    for arg in app.value.args.value.as_ref() {
+        write!(f, "\n")?;
+        fmt_expr(arg.clone(), f, i1)?;
+    }
+
+    write!(f, "\n{indent})")?;
+    Ok(())
 }
 
 fn fmt_for(for_: RcSemHashed<For>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
