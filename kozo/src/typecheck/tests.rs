@@ -2,13 +2,6 @@ use crate::{pretty_print::PrettyPrinted, test_utils::*};
 
 #[test]
 fn add_2_3() {
-    use crate::{
-        syntax_tree::rch_cst_to_ast::RchCstToAstConverter,
-        typecheck::{
-            error::TypeError, LazySubstitutionContext, LazyTypeContext, Normalized, TypeChecker,
-        },
-    };
-
     let nat_def = (
         "<NAT>",
         r#"(ind Type0 "Nat" () (
@@ -42,32 +35,7 @@ fn add_2_3() {
         r#"(<ADD> <2> <3>)"#,
     );
 
-    // TODO: Fix this test
-    let cst = parse_rch_cst_or_panic(&add_two_three_src);
-    let err = TypeChecker::default()
-        .get_type(
-            cst,
-            LazyTypeContext::Base(Normalized::empty_static()),
-            LazySubstitutionContext::Base(&[]),
-        )
-        .unwrap_err();
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&add_two_three_src);
 
-    match err {
-        TypeError::TypeMismatch {
-            expr,
-            expected_type,
-            actual_type,
-            ..
-        } => {
-            panic!(
-                "******EXPR*******\n{}\n\n******EXPECTED TYPE*******\n{}\n\n******ACTUAL TYPE*******\n{}\n\n******SRC*******\n{add_two_three_src}\n\n******EXPR.SPAN*******\n{:?}\n\n",
-                PrettyPrinted(&RchCstToAstConverter::default().convert(expr.clone())),
-                PrettyPrinted(expected_type.raw()),
-                PrettyPrinted(actual_type.raw()),
-                expr.span(),
-            );
-        }
-
-        err => panic!("Unexpected err: {err:?}"),
-    }
+    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
 }
