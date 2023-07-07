@@ -52,7 +52,7 @@ fn fmt_str_literal(
         if c.is_ascii_alphanumeric() || " _`~!@#$%^&*()-_=+[]|;:',<.>/?".contains(c) {
             write!(f, "{c}")?;
         } else {
-            write!(f, "{{0x{:x}}}", u32::from(c))?;
+            write!(f, "{{0x{:X}}}", u32::from(c))?;
         }
     }
 
