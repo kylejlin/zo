@@ -46,7 +46,18 @@ fn fmt_str_literal(
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
-    todo!()
+    write!(f, "{indent}\"")?;
+
+    for c in str_literal.0.chars() {
+        if c.is_ascii_alphanumeric() || " _`~!@#$%^&*()-_=+[]|;:',<.>/?".contains(c) {
+            write!(f, "{c}")?;
+        } else {
+            write!(f, "{{0x{:x}}}", u32::from(c))?;
+        }
+    }
+
+    write!(f, "\"")?;
+    Ok(())
 }
 
 fn fmt_parenthesized_vcon_defs(
