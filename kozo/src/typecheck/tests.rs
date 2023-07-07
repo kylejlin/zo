@@ -1,4 +1,4 @@
-use crate::test_utils::*;
+use crate::{pretty_print::PrettyPrinted, test_utils::*};
 
 #[test]
 fn add_2_3() {
@@ -35,7 +35,7 @@ fn add_2_3() {
         r#"(<ADD> <2> <3>)"#,
     );
 
-    let actual = eval_or_panic(&add_two_three_src).into_raw();
+    let actual = get_type_under_empty_tcon_and_scon_or_panic(&add_two_three_src).into_raw();
 
-    insta::assert_debug_snapshot!(actual);
+    insta::assert_display_snapshot!(PrettyPrinted(&actual));
 }
