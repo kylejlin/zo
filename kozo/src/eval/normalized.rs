@@ -50,6 +50,12 @@ impl<T> Normalized<RcSemHashed<T>> {
     }
 }
 
+impl<T> Normalized<&'static [T]> {
+    pub fn empty_static() -> Self {
+        Self(&[])
+    }
+}
+
 impl<T, S> Normalized<S>
 where
     S: Deref<Target = [T]>,

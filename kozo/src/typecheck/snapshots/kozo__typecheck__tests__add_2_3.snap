@@ -1,0 +1,482 @@
+---
+source: src/typecheck/tests.rs
+expression: actual
+---
+App(
+    Hashed {
+        value: App {
+            callee: Vcon(
+                Hashed {
+                    value: Vcon {
+                        ind: Hashed {
+                            value: Ind {
+                                name: StringValue(
+                                    "Nat",
+                                ),
+                                universe_level: UniverseLevel(
+                                    0,
+                                ),
+                                index_types: Hashed {
+                                    value: [],
+                                    digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                    _marker: PhantomData,
+                                },
+                                vcon_defs: Hashed {
+                                    value: [
+                                        VconDef {
+                                            param_types: Hashed {
+                                                value: [],
+                                                digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                _marker: PhantomData,
+                                            },
+                                            index_args: Hashed {
+                                                value: [],
+                                                digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                _marker: PhantomData,
+                                            },
+                                        },
+                                        VconDef {
+                                            param_types: Hashed {
+                                                value: [
+                                                    Deb(
+                                                        Hashed {
+                                                            value: DebNode {
+                                                                deb: Deb(
+                                                                    0,
+                                                                ),
+                                                            },
+                                                            digest: 0x0a0d8e6d983f6f6270bca7cca2cda8e931639f8113e55f18e56cdc6323a91e7d,
+                                                            _marker: PhantomData,
+                                                        },
+                                                    ),
+                                                ],
+                                                digest: 0x5301377c05425f8f2a4c94917aef6d1212dcfe9103a30fdefbfc0ddfd45a5609,
+                                                _marker: PhantomData,
+                                            },
+                                            index_args: Hashed {
+                                                value: [],
+                                                digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                _marker: PhantomData,
+                                            },
+                                        },
+                                    ],
+                                    digest: 0x9fba5f5bf6bf3431912cbb7f18a90cb4a3c49a8e7e38e0c46824501e46c9e2db,
+                                    _marker: PhantomData,
+                                },
+                            },
+                            digest: 0x8be29e8d71468490ba86771a91135b972a21079849295b44dceb54f7aeb77e9e,
+                            _marker: PhantomData,
+                        },
+                        vcon_index: 1,
+                    },
+                    digest: 0xa9b36b2c9a60b0ffd58034c35fe3565cc7ebea2024f8c570708a0e6b31f79f13,
+                    _marker: PhantomData,
+                },
+            ),
+            args: Hashed {
+                value: [
+                    App(
+                        Hashed {
+                            value: App {
+                                callee: Vcon(
+                                    Hashed {
+                                        value: Vcon {
+                                            ind: Hashed {
+                                                value: Ind {
+                                                    name: StringValue(
+                                                        "Nat",
+                                                    ),
+                                                    universe_level: UniverseLevel(
+                                                        0,
+                                                    ),
+                                                    index_types: Hashed {
+                                                        value: [],
+                                                        digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                        _marker: PhantomData,
+                                                    },
+                                                    vcon_defs: Hashed {
+                                                        value: [
+                                                            VconDef {
+                                                                param_types: Hashed {
+                                                                    value: [],
+                                                                    digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                    _marker: PhantomData,
+                                                                },
+                                                                index_args: Hashed {
+                                                                    value: [],
+                                                                    digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                    _marker: PhantomData,
+                                                                },
+                                                            },
+                                                            VconDef {
+                                                                param_types: Hashed {
+                                                                    value: [
+                                                                        Deb(
+                                                                            Hashed {
+                                                                                value: DebNode {
+                                                                                    deb: Deb(
+                                                                                        0,
+                                                                                    ),
+                                                                                },
+                                                                                digest: 0x0a0d8e6d983f6f6270bca7cca2cda8e931639f8113e55f18e56cdc6323a91e7d,
+                                                                                _marker: PhantomData,
+                                                                            },
+                                                                        ),
+                                                                    ],
+                                                                    digest: 0x5301377c05425f8f2a4c94917aef6d1212dcfe9103a30fdefbfc0ddfd45a5609,
+                                                                    _marker: PhantomData,
+                                                                },
+                                                                index_args: Hashed {
+                                                                    value: [],
+                                                                    digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                    _marker: PhantomData,
+                                                                },
+                                                            },
+                                                        ],
+                                                        digest: 0x9fba5f5bf6bf3431912cbb7f18a90cb4a3c49a8e7e38e0c46824501e46c9e2db,
+                                                        _marker: PhantomData,
+                                                    },
+                                                },
+                                                digest: 0x8be29e8d71468490ba86771a91135b972a21079849295b44dceb54f7aeb77e9e,
+                                                _marker: PhantomData,
+                                            },
+                                            vcon_index: 1,
+                                        },
+                                        digest: 0xa9b36b2c9a60b0ffd58034c35fe3565cc7ebea2024f8c570708a0e6b31f79f13,
+                                        _marker: PhantomData,
+                                    },
+                                ),
+                                args: Hashed {
+                                    value: [
+                                        App(
+                                            Hashed {
+                                                value: App {
+                                                    callee: Vcon(
+                                                        Hashed {
+                                                            value: Vcon {
+                                                                ind: Hashed {
+                                                                    value: Ind {
+                                                                        name: StringValue(
+                                                                            "Nat",
+                                                                        ),
+                                                                        universe_level: UniverseLevel(
+                                                                            0,
+                                                                        ),
+                                                                        index_types: Hashed {
+                                                                            value: [],
+                                                                            digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                            _marker: PhantomData,
+                                                                        },
+                                                                        vcon_defs: Hashed {
+                                                                            value: [
+                                                                                VconDef {
+                                                                                    param_types: Hashed {
+                                                                                        value: [],
+                                                                                        digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                        _marker: PhantomData,
+                                                                                    },
+                                                                                    index_args: Hashed {
+                                                                                        value: [],
+                                                                                        digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                        _marker: PhantomData,
+                                                                                    },
+                                                                                },
+                                                                                VconDef {
+                                                                                    param_types: Hashed {
+                                                                                        value: [
+                                                                                            Deb(
+                                                                                                Hashed {
+                                                                                                    value: DebNode {
+                                                                                                        deb: Deb(
+                                                                                                            0,
+                                                                                                        ),
+                                                                                                    },
+                                                                                                    digest: 0x0a0d8e6d983f6f6270bca7cca2cda8e931639f8113e55f18e56cdc6323a91e7d,
+                                                                                                    _marker: PhantomData,
+                                                                                                },
+                                                                                            ),
+                                                                                        ],
+                                                                                        digest: 0x5301377c05425f8f2a4c94917aef6d1212dcfe9103a30fdefbfc0ddfd45a5609,
+                                                                                        _marker: PhantomData,
+                                                                                    },
+                                                                                    index_args: Hashed {
+                                                                                        value: [],
+                                                                                        digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                        _marker: PhantomData,
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                            digest: 0x9fba5f5bf6bf3431912cbb7f18a90cb4a3c49a8e7e38e0c46824501e46c9e2db,
+                                                                            _marker: PhantomData,
+                                                                        },
+                                                                    },
+                                                                    digest: 0x8be29e8d71468490ba86771a91135b972a21079849295b44dceb54f7aeb77e9e,
+                                                                    _marker: PhantomData,
+                                                                },
+                                                                vcon_index: 1,
+                                                            },
+                                                            digest: 0xa9b36b2c9a60b0ffd58034c35fe3565cc7ebea2024f8c570708a0e6b31f79f13,
+                                                            _marker: PhantomData,
+                                                        },
+                                                    ),
+                                                    args: Hashed {
+                                                        value: [
+                                                            App(
+                                                                Hashed {
+                                                                    value: App {
+                                                                        callee: Vcon(
+                                                                            Hashed {
+                                                                                value: Vcon {
+                                                                                    ind: Hashed {
+                                                                                        value: Ind {
+                                                                                            name: StringValue(
+                                                                                                "Nat",
+                                                                                            ),
+                                                                                            universe_level: UniverseLevel(
+                                                                                                0,
+                                                                                            ),
+                                                                                            index_types: Hashed {
+                                                                                                value: [],
+                                                                                                digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                _marker: PhantomData,
+                                                                                            },
+                                                                                            vcon_defs: Hashed {
+                                                                                                value: [
+                                                                                                    VconDef {
+                                                                                                        param_types: Hashed {
+                                                                                                            value: [],
+                                                                                                            digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                            _marker: PhantomData,
+                                                                                                        },
+                                                                                                        index_args: Hashed {
+                                                                                                            value: [],
+                                                                                                            digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                            _marker: PhantomData,
+                                                                                                        },
+                                                                                                    },
+                                                                                                    VconDef {
+                                                                                                        param_types: Hashed {
+                                                                                                            value: [
+                                                                                                                Deb(
+                                                                                                                    Hashed {
+                                                                                                                        value: DebNode {
+                                                                                                                            deb: Deb(
+                                                                                                                                0,
+                                                                                                                            ),
+                                                                                                                        },
+                                                                                                                        digest: 0x0a0d8e6d983f6f6270bca7cca2cda8e931639f8113e55f18e56cdc6323a91e7d,
+                                                                                                                        _marker: PhantomData,
+                                                                                                                    },
+                                                                                                                ),
+                                                                                                            ],
+                                                                                                            digest: 0x5301377c05425f8f2a4c94917aef6d1212dcfe9103a30fdefbfc0ddfd45a5609,
+                                                                                                            _marker: PhantomData,
+                                                                                                        },
+                                                                                                        index_args: Hashed {
+                                                                                                            value: [],
+                                                                                                            digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                            _marker: PhantomData,
+                                                                                                        },
+                                                                                                    },
+                                                                                                ],
+                                                                                                digest: 0x9fba5f5bf6bf3431912cbb7f18a90cb4a3c49a8e7e38e0c46824501e46c9e2db,
+                                                                                                _marker: PhantomData,
+                                                                                            },
+                                                                                        },
+                                                                                        digest: 0x8be29e8d71468490ba86771a91135b972a21079849295b44dceb54f7aeb77e9e,
+                                                                                        _marker: PhantomData,
+                                                                                    },
+                                                                                    vcon_index: 1,
+                                                                                },
+                                                                                digest: 0xa9b36b2c9a60b0ffd58034c35fe3565cc7ebea2024f8c570708a0e6b31f79f13,
+                                                                                _marker: PhantomData,
+                                                                            },
+                                                                        ),
+                                                                        args: Hashed {
+                                                                            value: [
+                                                                                App(
+                                                                                    Hashed {
+                                                                                        value: App {
+                                                                                            callee: Vcon(
+                                                                                                Hashed {
+                                                                                                    value: Vcon {
+                                                                                                        ind: Hashed {
+                                                                                                            value: Ind {
+                                                                                                                name: StringValue(
+                                                                                                                    "Nat",
+                                                                                                                ),
+                                                                                                                universe_level: UniverseLevel(
+                                                                                                                    0,
+                                                                                                                ),
+                                                                                                                index_types: Hashed {
+                                                                                                                    value: [],
+                                                                                                                    digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                                    _marker: PhantomData,
+                                                                                                                },
+                                                                                                                vcon_defs: Hashed {
+                                                                                                                    value: [
+                                                                                                                        VconDef {
+                                                                                                                            param_types: Hashed {
+                                                                                                                                value: [],
+                                                                                                                                digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                                                _marker: PhantomData,
+                                                                                                                            },
+                                                                                                                            index_args: Hashed {
+                                                                                                                                value: [],
+                                                                                                                                digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                                                _marker: PhantomData,
+                                                                                                                            },
+                                                                                                                        },
+                                                                                                                        VconDef {
+                                                                                                                            param_types: Hashed {
+                                                                                                                                value: [
+                                                                                                                                    Deb(
+                                                                                                                                        Hashed {
+                                                                                                                                            value: DebNode {
+                                                                                                                                                deb: Deb(
+                                                                                                                                                    0,
+                                                                                                                                                ),
+                                                                                                                                            },
+                                                                                                                                            digest: 0x0a0d8e6d983f6f6270bca7cca2cda8e931639f8113e55f18e56cdc6323a91e7d,
+                                                                                                                                            _marker: PhantomData,
+                                                                                                                                        },
+                                                                                                                                    ),
+                                                                                                                                ],
+                                                                                                                                digest: 0x5301377c05425f8f2a4c94917aef6d1212dcfe9103a30fdefbfc0ddfd45a5609,
+                                                                                                                                _marker: PhantomData,
+                                                                                                                            },
+                                                                                                                            index_args: Hashed {
+                                                                                                                                value: [],
+                                                                                                                                digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                                                _marker: PhantomData,
+                                                                                                                            },
+                                                                                                                        },
+                                                                                                                    ],
+                                                                                                                    digest: 0x9fba5f5bf6bf3431912cbb7f18a90cb4a3c49a8e7e38e0c46824501e46c9e2db,
+                                                                                                                    _marker: PhantomData,
+                                                                                                                },
+                                                                                                            },
+                                                                                                            digest: 0x8be29e8d71468490ba86771a91135b972a21079849295b44dceb54f7aeb77e9e,
+                                                                                                            _marker: PhantomData,
+                                                                                                        },
+                                                                                                        vcon_index: 1,
+                                                                                                    },
+                                                                                                    digest: 0xa9b36b2c9a60b0ffd58034c35fe3565cc7ebea2024f8c570708a0e6b31f79f13,
+                                                                                                    _marker: PhantomData,
+                                                                                                },
+                                                                                            ),
+                                                                                            args: Hashed {
+                                                                                                value: [
+                                                                                                    Vcon(
+                                                                                                        Hashed {
+                                                                                                            value: Vcon {
+                                                                                                                ind: Hashed {
+                                                                                                                    value: Ind {
+                                                                                                                        name: StringValue(
+                                                                                                                            "Nat",
+                                                                                                                        ),
+                                                                                                                        universe_level: UniverseLevel(
+                                                                                                                            0,
+                                                                                                                        ),
+                                                                                                                        index_types: Hashed {
+                                                                                                                            value: [],
+                                                                                                                            digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                                            _marker: PhantomData,
+                                                                                                                        },
+                                                                                                                        vcon_defs: Hashed {
+                                                                                                                            value: [
+                                                                                                                                VconDef {
+                                                                                                                                    param_types: Hashed {
+                                                                                                                                        value: [],
+                                                                                                                                        digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                                                        _marker: PhantomData,
+                                                                                                                                    },
+                                                                                                                                    index_args: Hashed {
+                                                                                                                                        value: [],
+                                                                                                                                        digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                                                        _marker: PhantomData,
+                                                                                                                                    },
+                                                                                                                                },
+                                                                                                                                VconDef {
+                                                                                                                                    param_types: Hashed {
+                                                                                                                                        value: [
+                                                                                                                                            Deb(
+                                                                                                                                                Hashed {
+                                                                                                                                                    value: DebNode {
+                                                                                                                                                        deb: Deb(
+                                                                                                                                                            0,
+                                                                                                                                                        ),
+                                                                                                                                                    },
+                                                                                                                                                    digest: 0x0a0d8e6d983f6f6270bca7cca2cda8e931639f8113e55f18e56cdc6323a91e7d,
+                                                                                                                                                    _marker: PhantomData,
+                                                                                                                                                },
+                                                                                                                                            ),
+                                                                                                                                        ],
+                                                                                                                                        digest: 0x5301377c05425f8f2a4c94917aef6d1212dcfe9103a30fdefbfc0ddfd45a5609,
+                                                                                                                                        _marker: PhantomData,
+                                                                                                                                    },
+                                                                                                                                    index_args: Hashed {
+                                                                                                                                        value: [],
+                                                                                                                                        digest: 0x1a5ead5227b449f9b23e4e270d413721dc548e28e2cabd190da44f5b625fe7c1,
+                                                                                                                                        _marker: PhantomData,
+                                                                                                                                    },
+                                                                                                                                },
+                                                                                                                            ],
+                                                                                                                            digest: 0x9fba5f5bf6bf3431912cbb7f18a90cb4a3c49a8e7e38e0c46824501e46c9e2db,
+                                                                                                                            _marker: PhantomData,
+                                                                                                                        },
+                                                                                                                    },
+                                                                                                                    digest: 0x8be29e8d71468490ba86771a91135b972a21079849295b44dceb54f7aeb77e9e,
+                                                                                                                    _marker: PhantomData,
+                                                                                                                },
+                                                                                                                vcon_index: 0,
+                                                                                                            },
+                                                                                                            digest: 0xa5cf8c18af736139e44032ee1983227c19569a341d8d32f4defa5ce6c7975f1d,
+                                                                                                            _marker: PhantomData,
+                                                                                                        },
+                                                                                                    ),
+                                                                                                ],
+                                                                                                digest: 0xc6a550ee8079b48c7b22c074b0e0dc7dd202be64fb02468e95b09ea092a1e0c4,
+                                                                                                _marker: PhantomData,
+                                                                                            },
+                                                                                        },
+                                                                                        digest: 0x2ebca96f1ca59e767710dc0eeb0dedb12b8bffa0009d2c6f425f5b32dca1ec59,
+                                                                                        _marker: PhantomData,
+                                                                                    },
+                                                                                ),
+                                                                            ],
+                                                                            digest: 0x327f5b21656d47e8177e0d088b932a5095bc95a963a5c16242dd11183fb47b5a,
+                                                                            _marker: PhantomData,
+                                                                        },
+                                                                    },
+                                                                    digest: 0xeaa49df3ca87c5fdc8bab75ca76ccc9df3b9b056c7dba851823a71469cef9c99,
+                                                                    _marker: PhantomData,
+                                                                },
+                                                            ),
+                                                        ],
+                                                        digest: 0xefc05dc8fc44db0c4c2203003ab0daef7323163993b0c04429f0a269d1a11bc3,
+                                                        _marker: PhantomData,
+                                                    },
+                                                },
+                                                digest: 0x67cf7da0c23c5bcabf1a875540187f6a087e5ad673c22a0629ddc201d2cc54e8,
+                                                _marker: PhantomData,
+                                            },
+                                        ),
+                                    ],
+                                    digest: 0x4a1b8f83f3ef8eb166c402bf58be98a771ebbd1007b8c30e998a49a525be4486,
+                                    _marker: PhantomData,
+                                },
+                            },
+                            digest: 0xb3559f1d99d1badc09cad69037f037c221ce6d7bee20241625c0530635506eb8,
+                            _marker: PhantomData,
+                        },
+                    ),
+                ],
+                digest: 0x6b6573b8b90da0bd0de8dfc2e1bf791d1b1f09917c18e5439a27820753c44568,
+                _marker: PhantomData,
+            },
+        },
+        digest: 0xc2fa5736497f584a22dba984b7d3bd08fbc5543428e2117399cbe73f14f6f1cb,
+        _marker: PhantomData,
+    },
+)

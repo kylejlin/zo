@@ -24,10 +24,13 @@ mod error;
 use error::*;
 
 mod scon;
-use scon::*;
+pub use scon::*;
 
 mod tcon;
-use tcon::*;
+pub use tcon::*;
+
+#[cfg(test)]
+mod tests;
 
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
