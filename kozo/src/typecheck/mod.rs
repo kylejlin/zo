@@ -239,22 +239,31 @@ impl TypeChecker {
         def: &cst::VconDef,
         ind: RcHashed<cst::Ind>,
     ) -> Result<NormalForm, TypeError> {
-        let param_types_ast = self
+        let unsubstituted_param_types_ast = self
             .cst_converter
             .convert_expressions(def.param_types.clone());
-        let index_args_ast = self
+        let unsubstituted_index_args_ast = self
             .cst_converter
             .convert_expressions(def.index_args.clone());
         let ind_ast = self.cst_converter.convert_ind(ind);
-
-        // TODO: Sub [0 => ind] in param_types[0],
-        //           [1 => ind] in param_types[1],
-        //           ...
-        let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
         let normalized_ind = self.evaluator.eval_ind(ind_ast);
-        // TODO: Sub [n => ind] in index_args,
-        // where n is the number of parameters.
-        let normalized_index_args = self.evaluator.eval_expressions(index_args_ast);
+
+        let ind_singleton: [ast::Expr; 1] = [normalized_ind.raw().clone().into()];
+        let ind_singleton_deb_substituter = DebDownshiftSubstituter {
+            new_exprs: &ind_singleton,
+        };
+
+        let substituted_param_types_ast = ind_singleton_deb_substituter
+            .replace_debs_in_expressions_with_increasing_cutoff(unsubstituted_param_types_ast, 0);
+        let normalized_param_types = self.evaluator.eval_expressions(substituted_param_types_ast);
+
+        let param_count = def.param_types.len();
+        let substituted_index_args_ast = ind_singleton_deb_substituter
+            .replace_debs_in_expressions_with_constant_cutoff(
+                unsubstituted_index_args_ast,
+                param_count,
+            );
+        let normalized_index_args = self.evaluator.eval_expressions(substituted_index_args_ast);
         let return_type = Normalized::app_with_ind_callee(normalized_ind, normalized_index_args)
             .collapse_if_nullary();
         Ok(Normalized::for_(normalized_param_types, return_type).collapse_if_nullary())
