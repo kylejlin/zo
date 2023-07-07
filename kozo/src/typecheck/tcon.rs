@@ -27,12 +27,12 @@ impl LazyTypeContext<'_> {
     fn get_unshifted(&self, deb: Deb) -> Option<NormalForm> {
         match self {
             LazyTypeContext::Base(types) => {
-                let index = (types.raw().len() - 1).checked_sub(deb.0)?;
+                let index = (types.raw().len()).checked_sub(1 + deb.0)?;
                 Some(types.get(index)?.cloned())
             }
 
             LazyTypeContext::Snoc(subcontext, types) => {
-                if let Some(index) = (types.raw().len() - 1).checked_sub(deb.0) {
+                if let Some(index) = (types.raw().len()).checked_sub(1 + deb.0) {
                     Some(types.get(index)?.cloned())
                 } else {
                     subcontext.get(Deb(deb.0 - types.raw().len()))
