@@ -4,11 +4,11 @@ use crate::syntax_tree::ast::*;
 
 impl Display for PrettyPrinted<'_, Expr> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_expr(self.0, f, SoftTabCount(0))
+        fmt_expr(self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-fn fmt_expr(expr: &Expr, f: &mut Formatter<'_>, indent: SoftTabCount) -> FmtResult {
+fn fmt_expr(expr: &Expr, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     match expr {
         Expr::Ind(e) => fmt_ind(e, f, indent),
         Expr::Vcon(e) => fmt_vcon(e, f, indent),
@@ -21,42 +21,40 @@ fn fmt_expr(expr: &Expr, f: &mut Formatter<'_>, indent: SoftTabCount) -> FmtResu
     }
 }
 
-fn fmt_ind(ind: &RcSemHashed<Ind>, f: &mut Formatter<'_>, indent: SoftTabCount) -> FmtResult {
+fn fmt_ind(ind: &RcSemHashed<Ind>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     todo!()
 }
 
-fn fmt_vcon(vcon: &RcSemHashed<Vcon>, f: &mut Formatter<'_>, indent: SoftTabCount) -> FmtResult {
+fn fmt_vcon(vcon: &RcSemHashed<Vcon>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     todo!()
 }
 
-fn fmt_match(m: &RcSemHashed<Match>, f: &mut Formatter<'_>, indent: SoftTabCount) -> FmtResult {
+fn fmt_match(m: &RcSemHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     todo!()
 }
 
-fn fmt_fun(fun: &RcSemHashed<Fun>, f: &mut Formatter<'_>, indent: SoftTabCount) -> FmtResult {
+fn fmt_fun(fun: &RcSemHashed<Fun>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     todo!()
 }
 
-fn fmt_app(app: &RcSemHashed<App>, f: &mut Formatter<'_>, indent: SoftTabCount) -> FmtResult {
+fn fmt_app(app: &RcSemHashed<App>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     todo!()
 }
 
-fn fmt_for(for_: &RcSemHashed<For>, f: &mut Formatter<'_>, indent: SoftTabCount) -> FmtResult {
+fn fmt_for(for_: &RcSemHashed<For>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     todo!()
 }
 
-fn fmt_deb(deb: &RcSemHashed<DebNode>, f: &mut Formatter<'_>, indent: SoftTabCount) -> FmtResult {
-    let indent_str = get_indent_str(indent);
+fn fmt_deb(deb: &RcSemHashed<DebNode>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let index = deb.value.deb.0;
-    write!(f, "{indent_str}Type{index}")
+    write!(f, "{indent}Type{index}")
 }
 
 fn fmt_universe(
     universe: &RcSemHashed<UniverseNode>,
     f: &mut Formatter<'_>,
-    indent: SoftTabCount,
+    indent: Indentation,
 ) -> FmtResult {
-    let indent_str = get_indent_str(indent);
     let level = universe.value.level.0;
-    write!(f, "{indent_str}Type{level}")
+    write!(f, "{indent}Type{level}")
 }
