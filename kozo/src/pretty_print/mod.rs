@@ -1,4 +1,7 @@
-use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::{
+    fmt::{Display, Formatter, Result as FmtResult},
+    rc::Rc,
+};
 
 pub const SOFT_TAB: &str = "    ";
 
@@ -11,7 +14,7 @@ struct Indentation {
 }
 
 impl Indentation {
-    pub fn increment(self) -> Self {
+    pub fn incremented(self) -> Self {
         Self {
             soft_tab_count: self.soft_tab_count + 1,
         }

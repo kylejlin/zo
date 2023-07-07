@@ -26,6 +26,34 @@ fn fmt_expr(expr: &Expr, f: &mut Formatter<'_>, indent: Indentation) -> FmtResul
 }
 
 fn fmt_ind(ind: &RcSemHashed<Ind>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+    let i1 = indent.incremented();
+    let universe_level = ind.value.universe_level.0;
+    write!(f, "{indent}(\n{i1}ind\n{i1}Type{universe_level}\n")?;
+    fmt_str_literal(ind.value.name.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_parenthesized_expressions(ind.value.index_types.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_parenthesized_vcon_defs(ind.value.vcon_defs.clone(), f, i1)?;
+    write!(f, "\n{indent})")?;
+
+    Ok(())
+}
+
+fn fmt_str_literal(
+    str_literal: Rc<StringValue>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
+    todo!()
+}
+
+fn fmt_parenthesized_vcon_defs(
+    parenthesized_vcon_defs: RcSemHashed<Box<[VconDef]>>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     todo!()
 }
 
@@ -61,4 +89,12 @@ fn fmt_universe(
 ) -> FmtResult {
     let level = universe.value.level.0;
     write!(f, "{indent}Type{level}")
+}
+
+fn fmt_parenthesized_expressions(
+    parenthesized_expressions: RcSemHashed<Box<[Expr]>>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
+    todo!()
 }
