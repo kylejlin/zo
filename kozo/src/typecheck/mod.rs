@@ -247,8 +247,13 @@ impl TypeChecker {
             .convert_expressions(def.index_args.clone());
         let ind_ast = self.cst_converter.convert_ind(ind);
 
+        // TODO: Sub [0 => ind] in param_types[0],
+        //           [1 => ind] in param_types[1],
+        //           ...
         let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
         let normalized_ind = self.evaluator.eval_ind(ind_ast);
+        // TODO: Sub [n => ind] in index_args,
+        // where n is the number of parameters.
         let normalized_index_args = self.evaluator.eval_expressions(index_args_ast);
         let return_type = Normalized::app_with_ind_callee(normalized_ind, normalized_index_args)
             .collapse_if_nullary();
