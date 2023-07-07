@@ -46,7 +46,9 @@ fn fmt_for(for_: &RcSemHashed<For>, f: &mut Formatter<'_>, indent: SoftTabCount)
 }
 
 fn fmt_deb(deb: &RcSemHashed<DebNode>, f: &mut Formatter<'_>, indent: SoftTabCount) -> FmtResult {
-    todo!()
+    let indent_str = get_indent_str(indent);
+    let index = deb.value.deb.0;
+    write!(f, "{indent_str}Type{index}")
 }
 
 fn fmt_universe(
