@@ -233,5 +233,18 @@ fn fmt_parenthesized_expressions(
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
-    todo!()
+    if parenthesized_expressions.value.is_empty() {
+        return write!(f, "{indent}()");
+    }
+
+    write!(f, "{indent}(")?;
+    let i1 = indent.incremented();
+
+    for expr in parenthesized_expressions.value.as_ref() {
+        write!(f, "\n")?;
+        fmt_expr(expr.clone(), f, i1)?;
+    }
+
+    write!(f, "\n{indent})")?;
+    Ok(())
 }
