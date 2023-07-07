@@ -8,6 +8,10 @@ impl Display for PrettyPrinted<'_, Expr> {
     }
 }
 
+// Every `fmt_{node}` function writes an indent
+// at the beginning.
+// It does _not_ write a newline at the end.
+
 fn fmt_expr(expr: &Expr, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     match expr {
         Expr::Ind(e) => fmt_ind(e, f, indent),

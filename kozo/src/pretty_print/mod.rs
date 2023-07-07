@@ -10,6 +10,14 @@ struct Indentation {
     pub soft_tab_count: usize,
 }
 
+impl Indentation {
+    pub fn increment(self) -> Self {
+        Self {
+            soft_tab_count: self.soft_tab_count + 1,
+        }
+    }
+}
+
 impl Display for Indentation {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         for _ in 0..self.soft_tab_count {
