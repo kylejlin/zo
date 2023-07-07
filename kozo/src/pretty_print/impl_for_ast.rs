@@ -95,7 +95,14 @@ fn fmt_vcon_def(def: &VconDef, f: &mut Formatter<'_>, indent: Indentation) -> Fm
 }
 
 fn fmt_vcon(vcon: RcSemHashed<Vcon>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
-    todo!()
+    let i1 = indent.incremented();
+    write!(f, "{indent}(\n{i1}vcon\n")?;
+
+    fmt_ind(vcon.value.ind.clone(), f, i1)?;
+
+    let vcon_index = vcon.value.vcon_index;
+    write!(f, "\n{i1}{vcon_index}\n{indent})")?;
+    Ok(())
 }
 
 fn fmt_match(m: RcSemHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
