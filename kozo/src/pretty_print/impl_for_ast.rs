@@ -203,7 +203,15 @@ fn fmt_app(app: RcSemHashed<App>, f: &mut Formatter<'_>, indent: Indentation) ->
 }
 
 fn fmt_for(for_: RcSemHashed<For>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
-    todo!()
+    let i1 = indent.incremented();
+    write!(f, "{indent}(\n{i1}for\n")?;
+
+    fmt_parenthesized_expressions(for_.value.param_types.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_expr(for_.value.return_type.clone(), f, i1)?;
+    write!(f, "\n{indent})")?;
+    Ok(())
 }
 
 fn fmt_deb(deb: RcSemHashed<DebNode>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
