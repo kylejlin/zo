@@ -692,11 +692,17 @@ impl TypeChecker {
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
         let mut out: Normalized<Vec<ast::Expr>> =
             Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
+        let mut normalized_visited_params: Normalized<Vec<ast::Expr>> =
+            Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
 
         for expr in exprs.iter() {
-            let current_tcon = LazyTypeContext::Snoc(&tcon, out.to_derefed());
+            let current_tcon = LazyTypeContext::Snoc(&tcon, normalized_visited_params.to_derefed());
             let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
             out.push(type_);
+
+            let expr_ast = self.cst_converter.convert(expr.clone());
+            let normalized = self.evaluator.eval(expr_ast);
+            normalized_visited_params.push(normalized);
         }
 
         Ok(out)
