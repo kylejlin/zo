@@ -636,7 +636,13 @@ impl TypeChecker {
             }
         })?;
 
-        let tcon_extended_with_params = LazyTypeContext::Snoc(&tcon, param_type_types.to_derefed());
+        let param_types_ast = self
+            .cst_converter
+            .convert_expressions(for_.value.param_types.clone());
+        let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
+        let normalized_param_types_without_digest = normalized_param_types.without_digest();
+        let tcon_extended_with_params =
+            LazyTypeContext::Snoc(&tcon, normalized_param_types_without_digest.derefed());
         let return_type_type = self.get_type(
             for_.value.return_type.clone(),
             tcon_extended_with_params,
