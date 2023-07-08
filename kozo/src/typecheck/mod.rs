@@ -138,19 +138,27 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         let recursive_ind_entry: Normalized<Vec<ast::Expr>> =
             std::iter::once(predicted_ind_type).collect();
-        let tcon_with_recursive_ind_entry =
-            LazyTypeContext::Snoc(&tcon, recursive_ind_entry.to_derefed());
+        let tcon_with_ind_type = LazyTypeContext::Snoc(&tcon, recursive_ind_entry.to_derefed());
         let param_type_types = self.get_types_of_dependent_expressions(
             def.param_types.clone(),
-            tcon_with_recursive_ind_entry,
+            tcon_with_ind_type,
             scon,
         )?;
 
-        let tcon_with_params = LazyTypeContext::Snoc(
-            &tcon_with_recursive_ind_entry,
-            param_type_types.to_derefed(),
+        let param_types_ast = self
+            .cst_converter
+            .convert_expressions(def.param_types.clone());
+        let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
+        let normalized_param_types_without_digest = normalized_param_types.without_digest();
+        let tcon_with_ind_and_param_types = LazyTypeContext::Snoc(
+            &tcon_with_ind_type,
+            normalized_param_types_without_digest.derefed(),
         );
-        self.get_types_of_independent_expressions(def.index_args.clone(), tcon_with_params, scon)?;
+        self.get_types_of_independent_expressions(
+            def.index_args.clone(),
+            tcon_with_ind_and_param_types,
+            scon,
+        )?;
 
         if ind.value.index_types.len() != def.index_args.len() {
             return Err(TypeError::WrongNumberOfIndexArguments {
@@ -388,7 +396,8 @@ impl TypeChecker {
             );
         let match_case_param_types = self.evaluator.eval_expressions(match_case_param_types);
         let match_case_param_types = match_case_param_types.without_digest();
-        let extended_tcon = LazyTypeContext::Snoc(&tcon, match_case_param_types.derefed());
+        let tcon_with_match_case_param_types =
+            LazyTypeContext::Snoc(&tcon, match_case_param_types.derefed());
 
         let match_case_param_count = match_case_param_types.raw().len();
         let substituted_vcon_index_args = well_typed_vcon_def
@@ -397,7 +406,7 @@ impl TypeChecker {
         let upshifted_matchee_type_args = well_typed_matchee_type_args
             .clone()
             .upshift_expressions_with_constant_cutoff(match_case_param_count);
-        let extended_tcon_len = extended_tcon.len();
+        let extended_tcon_len = tcon_with_match_case_param_types.len();
         let matchee_ast = self.cst_converter.convert(match_.value.matchee.clone());
         let upshifted_matchee = DebUpshifter(match_case_param_count).replace_debs(matchee_ast, 0);
         let upshifted_normalized_matchee = self.evaluator.eval(upshifted_matchee);
@@ -433,8 +442,11 @@ impl TypeChecker {
                 .collect();
         let extended_scon = LazySubstitutionContext::Snoc(&scon, &new_substitutions);
 
-        let match_case_return_type =
-            self.get_type(match_case.return_val.clone(), extended_tcon, extended_scon)?;
+        let match_case_return_type = self.get_type(
+            match_case.return_val.clone(),
+            tcon_with_match_case_param_types,
+            extended_scon,
+        )?;
 
         self.assert_expected_type_equality_holds_after_applying_scon(
             ExpectedTypeEquality {
@@ -469,13 +481,10 @@ impl TypeChecker {
         let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
 
         let normalized_param_types_without_digest = normalized_param_types.without_digest();
-        let tcon_extended_with_param_types =
+        let tcon_with_param_types =
             LazyTypeContext::Snoc(&tcon, normalized_param_types_without_digest.derefed());
-        let return_type_type = self.get_type(
-            fun.value.return_type.clone(),
-            tcon_extended_with_param_types,
-            scon,
-        )?;
+        let return_type_type =
+            self.get_type(fun.value.return_type.clone(), tcon_with_param_types, scon)?;
         if !return_type_type.raw().is_universe() {
             return Err(TypeError::UnexpectedNonTypeExpression {
                 expr: fun.value.return_type.clone(),
@@ -500,12 +509,12 @@ impl TypeChecker {
                 .into_iter()
                 .chain(std::iter::once(only_possible_fun_type.clone()))
                 .collect();
-        let tcon_extended_with_params_and_recursive_fun_param_types =
+        let tcon_with_param_and_recursive_fun_param_types =
             LazyTypeContext::Snoc(&tcon, param_types_and_recursive_fun_param_type.to_derefed());
 
         let return_val_type = self.get_type(
             fun.value.return_val.clone(),
-            tcon_extended_with_params_and_recursive_fun_param_types,
+            tcon_with_param_and_recursive_fun_param_types,
             scon,
         )?;
 
@@ -641,13 +650,10 @@ impl TypeChecker {
             .convert_expressions(for_.value.param_types.clone());
         let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
         let normalized_param_types_without_digest = normalized_param_types.without_digest();
-        let tcon_extended_with_params =
+        let tcon_with_param_types =
             LazyTypeContext::Snoc(&tcon, normalized_param_types_without_digest.derefed());
-        let return_type_type = self.get_type(
-            for_.value.return_type.clone(),
-            tcon_extended_with_params,
-            scon,
-        )?;
+        let return_type_type =
+            self.get_type(for_.value.return_type.clone(), tcon_with_param_types, scon)?;
         let return_type_type_universe_level = match return_type_type.raw() {
             ast::Expr::Universe(universe_node) => universe_node.value.level,
 
@@ -698,17 +704,17 @@ impl TypeChecker {
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
         let mut out: Normalized<Vec<ast::Expr>> =
             Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
-        let mut normalized_visited_params: Normalized<Vec<ast::Expr>> =
+        let mut normalized_visited_exprs: Normalized<Vec<ast::Expr>> =
             Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
 
         for expr in exprs.iter() {
-            let current_tcon = LazyTypeContext::Snoc(&tcon, normalized_visited_params.to_derefed());
+            let current_tcon = LazyTypeContext::Snoc(&tcon, normalized_visited_exprs.to_derefed());
             let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
             out.push(type_);
 
             let expr_ast = self.cst_converter.convert(expr.clone());
             let normalized = self.evaluator.eval(expr_ast);
-            normalized_visited_params.push(normalized);
+            normalized_visited_exprs.push(normalized);
         }
 
         Ok(out)
