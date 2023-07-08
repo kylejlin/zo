@@ -558,7 +558,8 @@ impl TypeChecker {
             callee_type.without_digest().param_types(),
             normalized_args.clone(),
         );
-        self.assert_expected_type_equalities_holds_after_applying_scon(
+        // TODO: Restore this to a normal `(...)?` expression.
+        let todo_ = self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
                 exprs: app.value.args.to_vec_of_cloned(),
                 expected_types: substituted_param_types,
@@ -566,7 +567,25 @@ impl TypeChecker {
                 tcon_len: tcon.len(),
             },
             scon,
-        )?;
+        );
+        if let Err(e) = todo_ {
+            use crate::pretty_print::PrettyPrinted;
+            println!(
+                "get_type_of_app TypeMismatch!\n\n****APP:****\n{}\n\n",
+                PrettyPrinted(
+                    &RchCstToAstConverter::default().convert(cst::Expr::App(app.clone()))
+                )
+            );
+            let tcon_len = tcon.len();
+            for raw_deb in 0..tcon_len {
+                let deb_type = tcon.get(Deb(raw_deb)).unwrap();
+                println!(
+                    "****tcon[{raw_deb}]:****\n{}\n\n",
+                    PrettyPrinted(deb_type.raw())
+                );
+            }
+            return Err(e);
+        }
 
         let arg_substituter = DebDownshiftSubstituter {
             new_exprs: &normalized_args.raw().value,
