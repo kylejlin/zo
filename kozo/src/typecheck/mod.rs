@@ -468,7 +468,14 @@ impl TypeChecker {
             .convert_expressions(fun.value.param_types.clone());
         let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
 
-        let return_type_type = self.get_type(fun.value.return_type.clone(), tcon, scon)?;
+        let normalized_param_types_without_digest = normalized_param_types.without_digest();
+        let tcon_extended_with_param_types =
+            LazyTypeContext::Snoc(&tcon, normalized_param_types_without_digest.derefed());
+        let return_type_type = self.get_type(
+            fun.value.return_type.clone(),
+            tcon_extended_with_param_types,
+            scon,
+        )?;
         if !return_type_type.raw().is_universe() {
             return Err(TypeError::UnexpectedNonTypeExpression {
                 expr: fun.value.return_type.clone(),
@@ -484,6 +491,7 @@ impl TypeChecker {
         )
         .into();
 
+        // TODO: Reuse `tcon_extended_with_param_types`.
         let param_types_and_recursive_fun_param_type: Normalized<Vec<ast::Expr>> =
             normalized_param_types
                 .without_digest()
@@ -492,12 +500,12 @@ impl TypeChecker {
                 .into_iter()
                 .chain(std::iter::once(only_possible_fun_type.clone()))
                 .collect();
-        let tcon_extended_with_params_and_recursive_fun_param =
+        let tcon_extended_with_params_and_recursive_fun_param_types =
             LazyTypeContext::Snoc(&tcon, param_types_and_recursive_fun_param_type.to_derefed());
 
         let return_val_type = self.get_type(
             fun.value.return_val.clone(),
-            tcon_extended_with_params_and_recursive_fun_param,
+            tcon_extended_with_params_and_recursive_fun_param_types,
             scon,
         )?;
 
