@@ -112,7 +112,7 @@ fn rev_1_2_3() {
 
     (Type0)
 
-    Type0
+    (<POLYMORPHIC_LIST> 0)
 
     (vcon <LIST_0> 0)
 )"#,
@@ -126,7 +126,7 @@ fn rev_1_2_3() {
 
     (Type0)
 
-    Type0
+    (for (0 (<POLYMORPHIC_LIST> 1)) (<POLYMORPHIC_LIST> 2))
 
     (vcon <LIST_0> 1)
 )"#,
