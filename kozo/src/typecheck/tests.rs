@@ -133,39 +133,6 @@ fn rev_1_2_3() {
     );
     let nat_nil_def = ("<NAT_NIL>", "(<POLYMORPHIC_NIL> <NAT>)");
     let cons_def = ("<NAT_CONS>", "(<POLYMORPHIC_CONS> <NAT>)");
-    let normalized_nat_list_def = (
-        "<NORMALIZED_NAT_LIST>",
-        r#"(
-            ind
-    
-            Type0
-    
-            "List"
-    
-            ()
-    
-            (
-                // DB index stack is
-                // 0 =>  List(Nat)
-                // 1 => List 
-    
-                // nil
-                (() ())
-    
-                // cons
-                ((
-                    <NAT>
-    
-                    // DB index stack is
-                    // 0 => car
-                    // 1 => List(Nat)
-                    1
-                ) ())
-            )
-        )"#,
-    );
-    let normalized_nat_nil_def = ("<NORMALIZED_NAT_NIL>", "(vcon <NORMALIZED_NAT_LIST> 0)");
-    let normalized_nat_cons_def = ("<NORMALIZED_NAT_CONS>", "(vcon <NORMALIZED_NAT_LIST> 1)");
     let one_two_three_src = (
         "<123>",
         "(<NAT_CONS> <1> (<NAT_CONS> <2> (<NAT_CONS> <3> <NAT_NIL>)))",
@@ -217,9 +184,6 @@ fn rev_1_2_3() {
         polymorphic_cons_def,
         nat_nil_def,
         cons_def,
-        normalized_nat_list_def,
-        normalized_nat_nil_def,
-        normalized_nat_cons_def,
         one_two_three_src,
         rev_src,
     ];
