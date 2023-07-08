@@ -493,11 +493,11 @@ impl TypeChecker {
             });
         }
         let return_type_ast = self.cst_converter.convert(fun.value.return_type.clone());
-        let normalized_return_type = self.evaluator.eval(return_type_ast);
+        let unshifted_normalized_return_type = self.evaluator.eval(return_type_ast);
 
         let only_possible_fun_type: NormalForm = Normalized::for_(
             normalized_param_types.clone(),
-            normalized_return_type.clone(),
+            unshifted_normalized_return_type.clone(),
         )
         .into();
 
@@ -519,10 +519,11 @@ impl TypeChecker {
             scon,
         )?;
 
+        let shifted_normalized_return_type = unshifted_normalized_return_type.upshift(1);
         self.assert_expected_type_equality_holds_after_applying_scon(
             ExpectedTypeEquality {
                 expr: fun.value.return_val.clone(),
-                expected_type: normalized_return_type.clone(),
+                expected_type: shifted_normalized_return_type.clone(),
                 actual_type: return_val_type,
                 tcon_len: tcon.len(),
             },
