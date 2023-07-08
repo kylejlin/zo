@@ -14,11 +14,6 @@ impl ZeroOrMoreExprs {
 }
 
 impl ZeroOrMoreExprs {
-    pub fn iter(&self) -> impl Iterator<Item = &Expr> {
-        let v = self.to_vec();
-        v.into_iter().rev()
-    }
-
     pub fn to_vec(&self) -> Vec<&Expr> {
         match self {
             Self::Nil => vec![],
@@ -72,11 +67,6 @@ impl ZeroOrMoreExprs {
 }
 
 impl ZeroOrMoreVconDefs {
-    pub fn iter(&self) -> impl Iterator<Item = &VconDef> {
-        let v = self.to_vec();
-        v.into_iter().rev()
-    }
-
     pub fn to_vec(&self) -> Vec<&VconDef> {
         match self {
             Self::Nil => vec![],

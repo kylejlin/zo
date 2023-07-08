@@ -132,7 +132,7 @@ fn rev_1_2_3() {
 )"#,
     );
     let nat_nil_def = ("<NAT_NIL>", "(<POLYMORPHIC_NIL> <NAT>)");
-    let cons_def = ("<NAT_CONS>", "(<POLYMORPHIC_CONS> <NAT>)");
+    let nat_cons_def = ("<NAT_CONS>", "(<POLYMORPHIC_CONS> <NAT>)");
     let one_two_three_src = (
         "<123>",
         "(<NAT_CONS> <1> (<NAT_CONS> <2> (<NAT_CONS> <3> <NAT_NIL>)))",
@@ -183,7 +183,7 @@ fn rev_1_2_3() {
         polymorphic_nil_def,
         polymorphic_cons_def,
         nat_nil_def,
-        cons_def,
+        nat_cons_def,
         one_two_three_src,
         rev_src,
     ];

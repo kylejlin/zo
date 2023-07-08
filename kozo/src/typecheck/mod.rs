@@ -1,6 +1,7 @@
 use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::sha256::*,
+    pretty_print::PrettyPrinted,
     syntax_tree::{
         ast::{self, Deb, RcSemHashed, UniverseLevel},
         rch_cst::{self as cst, RcHashed},
@@ -116,7 +117,7 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        for def in ind.value.vcon_defs.iter() {
+        for def in ind.value.vcon_defs.to_vec() {
             self.assert_ind_vcon_def_is_well_typed(
                 ind.clone(),
                 predicted_ind_type.clone(),
@@ -636,6 +637,22 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
+        // TODO: Delete
+        use crate::pretty_print::*;
+        println!(
+            "****`for`({}) EXPR:****\n{}\n\n",
+            for_.value.param_types.len(),
+            PrettyPrinted(&self.cst_converter.convert(cst::Expr::For(for_.clone())))
+        );
+        let tcon_len = tcon.len();
+        for raw_deb in 0..tcon_len {
+            let deb_type = tcon.get(Deb(raw_deb)).unwrap();
+            println!(
+                "****for.tcon[{raw_deb}]:****\n{}\n\n",
+                PrettyPrinted(deb_type.raw())
+            );
+        }
+
         let param_type_types =
             self.get_types_of_dependent_expressions(for_.value.param_types.clone(), tcon, scon)?;
         assert_every_expr_is_universe(param_type_types.raw()).map_err(|offender_index| {
@@ -707,7 +724,17 @@ impl TypeChecker {
         let mut normalized_visited_exprs: Normalized<Vec<ast::Expr>> =
             Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
 
-        for expr in exprs.iter() {
+        // TODO: Delete
+        println!("dependent_expressions start");
+        let mut todo_i = 0;
+
+        for expr in exprs.to_vec() {
+            println!(
+                "dep_expr[{todo_i}]:\n{}\n\n",
+                PrettyPrinted(&self.cst_converter.convert(expr.clone()))
+            );
+            todo_i += 1;
+
             let current_tcon = LazyTypeContext::Snoc(&tcon, normalized_visited_exprs.to_derefed());
             let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
             out.push(type_);
@@ -729,7 +756,7 @@ impl TypeChecker {
         let mut out: Normalized<Vec<ast::Expr>> =
             Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
 
-        for expr in exprs.iter() {
+        for expr in exprs.to_vec() {
             let type_ = self.get_type(expr.clone(), tcon, scon)?;
             out.push(type_);
         }
