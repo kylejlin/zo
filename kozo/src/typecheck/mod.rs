@@ -433,6 +433,9 @@ impl TypeChecker {
         let new_substitutions: Vec<LazySubstitution> =
             (0..substituted_vcon_index_args.raw().value.len())
                 .map(|i| {
+                    // TODO: Upshift `substituted_vcon_index_args`
+                    // by `match_case_param_count` WITH A CUTOFF OF
+                    // `match_case_param_count`.
                     let vcon_index_arg = substituted_vcon_index_args
                         .without_digest()
                         .derefed()
@@ -475,6 +478,21 @@ impl TypeChecker {
             extended_scon,
         );
         if let Err(err) = res {
+            println!(
+                "****match_case_param_types.len:****\n{}\n\n",
+                match_case_param_types.raw().len()
+            );
+            for raw_deb in 0..tcon.len() {
+                println!(
+                    "****tcon[{raw_deb}]:****\n{}\n\n",
+                    PrettyPrinted(tcon.get(Deb(raw_deb)).unwrap().raw())
+                );
+                println!(
+                    "****tcon.UNSHIFTED[{raw_deb}]:****\n{}\n\n",
+                    PrettyPrinted(tcon.get_unshifted(Deb(raw_deb)).unwrap().raw())
+                );
+            }
+
             for raw_deb in 0..tcon_with_match_case_param_types.len() {
                 println!(
                     "****tcon_with_match_case_param_types[{raw_deb}]:****\n{}\n\n",
