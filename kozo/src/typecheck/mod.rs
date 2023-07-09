@@ -581,6 +581,7 @@ impl TypeChecker {
         );
 
         // TODO: Delete
+        // TODO: Print `normalized_param_types_without_digest`.
         println!("****START get_type_of_fun.tcon_dump****\n\n");
         for raw_deb in 0..tcon.len() {
             println!(
