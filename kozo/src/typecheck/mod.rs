@@ -488,6 +488,7 @@ impl TypeChecker {
             extended_scon,
         );
         if let Err(err) = res {
+            println!("****START_ERR****\n\n");
             println!(
                 "****match_case_param_types.len:****\n{}\n\n",
                 match_case_param_types.raw().len()
@@ -578,6 +579,20 @@ impl TypeChecker {
             &tcon_with_param_types,
             recursive_fun_param_type_singleton_ref.convert(),
         );
+
+        // TODO: Delete
+        println!("****START get_type_of_fun.tcon_dump****\n\n");
+        for raw_deb in 0..tcon.len() {
+            println!(
+                "****tcon[{raw_deb}]:****\n{}\n\n",
+                PrettyPrinted(tcon.get(Deb(raw_deb)).unwrap().raw())
+            );
+            println!(
+                "****tcon.UNSHIFTED[{raw_deb}]:****\n{}\n\n",
+                PrettyPrinted(tcon.get_unshifted(Deb(raw_deb)).unwrap().raw())
+            );
+        }
+        println!("****END get_type_of_fun.tcon_dump****\n\n");
 
         let return_val_type = self.get_type(
             fun.value.return_val.clone(),
