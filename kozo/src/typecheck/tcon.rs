@@ -24,7 +24,8 @@ impl LazyTypeContext<'_> {
         Some(unshifted.upshift(deb.0 + 1))
     }
 
-    fn get_unshifted(&self, deb: Deb) -> Option<NormalForm> {
+    // TODO: Make private again.
+    pub fn get_unshifted(&self, deb: Deb) -> Option<NormalForm> {
         match self {
             LazyTypeContext::Base(types) => {
                 let index = (types.raw().len()).checked_sub(1 + deb.0)?;

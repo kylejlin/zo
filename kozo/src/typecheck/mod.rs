@@ -476,11 +476,23 @@ impl TypeChecker {
         );
         if let Err(err) = res {
             for raw_deb in 0..tcon_with_match_case_param_types.len() {
-                let tcon_entry = tcon_with_match_case_param_types.get(Deb(raw_deb)).unwrap();
                 println!(
-                    "****tcon_with_match_case_param_types[{}]:****\n{}\n\n",
-                    raw_deb,
-                    PrettyPrinted(tcon_entry.raw())
+                    "****tcon_with_match_case_param_types[{raw_deb}]:****\n{}\n\n",
+                    PrettyPrinted(
+                        tcon_with_match_case_param_types
+                            .get(Deb(raw_deb))
+                            .unwrap()
+                            .raw()
+                    )
+                );
+                println!(
+                    "****tcon_with_match_case_param_types.UNSHIFTED[{raw_deb}]:****\n{}\n\n",
+                    PrettyPrinted(
+                        tcon_with_match_case_param_types
+                            .get_unshifted(Deb(raw_deb))
+                            .unwrap()
+                            .raw()
+                    )
                 );
             }
             return Err(err);
