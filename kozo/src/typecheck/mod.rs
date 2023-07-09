@@ -453,6 +453,8 @@ impl TypeChecker {
         self.assert_expected_type_equality_holds_after_applying_scon(
             ExpectedTypeEquality {
                 expr: match_case.return_val.clone(),
+                // TODO: Upshift `match_return_type` by the number
+                // of match case params.
                 expected_type: match_return_type,
                 actual_type: match_case_return_type.clone(),
                 tcon_len: extended_tcon_len,
