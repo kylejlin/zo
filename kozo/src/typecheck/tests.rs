@@ -40,7 +40,6 @@ fn add_2_3() {
     insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
 }
 
-#[ignore]
 #[test]
 fn rev_1_2_3() {
     let nat_def = (
@@ -189,34 +188,7 @@ fn rev_1_2_3() {
     ];
     let rev_one_two_three_src = substitute_with_compounding(src_defs, r#"(<REV> <123> <NAT_NIL>)"#);
 
-    use crate::{syntax_tree::rch_cst_to_ast::*, typecheck::*};
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&rev_one_two_three_src);
 
-    let cst = parse_rch_cst_or_panic(&rev_one_two_three_src);
-    let err = TypeChecker::default()
-        .get_type(
-            cst,
-            LazyTypeContext::Base(Normalized::empty_static()),
-            LazySubstitutionContext::Base(&[]),
-        )
-        .unwrap_err();
-
-    match err {
-        TypeError::TypeMismatch {
-            expr,
-            expected_type,
-            actual_type,
-            ..
-        } => {
-            panic!(
-                "\n*****EXPR:*****\n{}\n\n*****EXPECTED TYPE:*****\n{}\n\n*****ACTUAL TYPE:*****\n{}\n\n****EXPR_SPAN:****\n{:?}\n\n****SRC:****:\n{}\n\n",
-                PrettyPrinted(&RchCstToAstConverter::default().convert(expr.clone())),
-                PrettyPrinted(expected_type.raw()),
-                PrettyPrinted(actual_type.raw()),
-                expr.span(),
-                &rev_one_two_three_src,
-            );
-        }
-
-        _ => panic!("expected TypeMismatch error, got {:?}", err),
-    }
+    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
 }
