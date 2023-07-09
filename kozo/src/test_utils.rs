@@ -47,10 +47,11 @@ pub fn eval_or_panic(src: &str) -> NormalForm {
 
 pub fn get_type_under_empty_tcon_and_scon_or_panic(src: &str) -> NormalForm {
     let cst = parse_rch_cst_or_panic(src);
+    let empty = Normalized::<[_; 0]>::new();
     TypeChecker::default()
         .get_type(
             cst,
-            LazyTypeContext::Base(Normalized::empty_static()),
+            LazyTypeContext::Base(empty.as_ref().convert()),
             LazySubstitutionContext::Base(&[]),
         )
         .unwrap()

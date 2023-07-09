@@ -57,13 +57,11 @@ impl<T> Normalized<RcSemHashed<T>> {
     }
 }
 
-// TODO: Delete if possible.
-impl<T> Normalized<&'static [T]> {
-    pub fn empty_static() -> Self {
-        Self(&[])
+impl<T> Normalized<[T; 0]> {
+    pub fn new() -> Self {
+        Self([])
     }
 }
-
 impl<T> Normalized<[T; 1]> {
     pub fn new(a: Normalized<T>) -> Self {
         Self([a.0])
