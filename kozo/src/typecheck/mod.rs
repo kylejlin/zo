@@ -329,10 +329,10 @@ impl TypeChecker {
         }
 
         let return_type_ast = self.cst_converter.convert(match_.value.return_type.clone());
-        let normalized_match_return_type = self.evaluator.eval(return_type_ast);
+        let unshifted_normalized_match_return_type = self.evaluator.eval(return_type_ast);
         self.perform_match_cases_precheck(
             match_,
-            normalized_match_return_type,
+            unshifted_normalized_match_return_type,
             well_typed_matchee_type_ind,
             well_typed_matchee_type_args,
             tcon,
@@ -345,7 +345,7 @@ impl TypeChecker {
     fn perform_match_cases_precheck(
         &mut self,
         match_: RcHashed<cst::Match>,
-        match_return_type: NormalForm,
+        unshifted_match_return_type: NormalForm,
         well_typed_matchee_type_ind: Normalized<RcSemHashed<ast::Ind>>,
         well_typed_matchee_type_args: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
         tcon: LazyTypeContext,
@@ -363,7 +363,7 @@ impl TypeChecker {
                 match_case_index,
                 well_typed_vcon_def,
                 match_.clone(),
-                match_return_type.clone(),
+                unshifted_match_return_type.clone(),
                 well_typed_matchee_type_ind.clone(),
                 well_typed_matchee_type_args.clone(),
                 tcon,
@@ -380,7 +380,7 @@ impl TypeChecker {
         match_case_index: usize,
         well_typed_vcon_def: Normalized<&ast::VconDef>,
         match_: RcHashed<cst::Match>,
-        match_return_type: NormalForm,
+        unshifted_match_return_type: NormalForm,
         well_typed_matchee_type_ind: Normalized<RcSemHashed<ast::Ind>>,
         well_typed_matchee_type_args: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
         tcon: LazyTypeContext,
@@ -391,11 +391,13 @@ impl TypeChecker {
             new_exprs: &ind_singleton,
         };
 
-        if match_case.arity.value != well_typed_vcon_def.raw().param_types.value.len() {
+        let actual_arity = match_case.arity.value;
+        let expected_arity = well_typed_vcon_def.raw().param_types.value.len();
+        if actual_arity != expected_arity {
             return Err(TypeError::WrongMatchCaseArity {
                 actual_node: match_case.arity.clone(),
-                actual: match_case.arity.value,
-                expected: well_typed_vcon_def.raw().param_types.value.len(),
+                actual: actual_arity,
+                expected: expected_arity,
                 match_: match_.value.clone(),
                 match_case_index,
             });
@@ -460,12 +462,11 @@ impl TypeChecker {
             extended_scon,
         )?;
 
+        let shifted_match_return_type = unshifted_match_return_type.upshift(expected_arity);
         self.assert_expected_type_equality_holds_after_applying_scon(
             ExpectedTypeEquality {
                 expr: match_case.return_val.clone(),
-                // TODO: Upshift `match_return_type` by the number
-                // of match case params.
-                expected_type: match_return_type,
+                expected_type: shifted_match_return_type,
                 actual_type: match_case_return_type.clone(),
                 tcon_len: extended_tcon_len,
             },
