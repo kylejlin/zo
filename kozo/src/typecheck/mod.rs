@@ -503,17 +503,13 @@ impl TypeChecker {
         )
         .into();
 
-        // TODO: Reuse `tcon_extended_with_param_types`.
-        let param_types_and_recursive_fun_param_type: Normalized<Vec<ast::Expr>> =
-            normalized_param_types
-                .without_digest()
-                .derefed()
-                .to_vec_normalized()
-                .into_iter()
-                .chain(std::iter::once(only_possible_fun_type.clone()))
-                .collect();
-        let tcon_with_param_and_recursive_fun_param_types =
-            LazyTypeContext::Snoc(&tcon, param_types_and_recursive_fun_param_type.to_derefed());
+        let recursive_fun_param_type_singleton: Normalized<[ast::Expr; 1]> =
+            Normalized::new(only_possible_fun_type.clone());
+        let recursive_fun_param_type_singleton_ref = recursive_fun_param_type_singleton.as_ref();
+        let tcon_with_param_and_recursive_fun_param_types = LazyTypeContext::Snoc(
+            &tcon_with_param_types,
+            recursive_fun_param_type_singleton_ref.convert(),
+        );
 
         let return_val_type = self.get_type(
             fun.value.return_val.clone(),

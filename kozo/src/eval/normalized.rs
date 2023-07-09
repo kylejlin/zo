@@ -42,6 +42,13 @@ impl<T> Normalized<&T> {
     {
         Normalized(self.0.deref())
     }
+
+    pub fn convert<U: ?Sized>(&self) -> Normalized<&U>
+    where
+        T: AsRef<U>,
+    {
+        Normalized(self.0.as_ref())
+    }
 }
 
 impl<T> Normalized<RcSemHashed<T>> {
@@ -50,9 +57,16 @@ impl<T> Normalized<RcSemHashed<T>> {
     }
 }
 
+// TODO: Delete if possible.
 impl<T> Normalized<&'static [T]> {
     pub fn empty_static() -> Self {
         Self(&[])
+    }
+}
+
+impl<T> Normalized<[T; 1]> {
+    pub fn new(a: Normalized<T>) -> Self {
+        Self([a.0])
     }
 }
 
