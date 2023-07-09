@@ -515,12 +515,14 @@ impl TypeChecker {
         )
         .into();
 
+        let shifted_fun_type = only_possible_fun_type
+            .clone()
+            .upshift(normalized_param_types.raw().value.len() + 1);
         let recursive_fun_param_type_singleton =
-            Normalized::<[ast::Expr; 1]>::new(only_possible_fun_type.clone());
+            Normalized::<[ast::Expr; 1]>::new(shifted_fun_type.clone());
         let recursive_fun_param_type_singleton_ref = recursive_fun_param_type_singleton.as_ref();
         let tcon_with_param_and_recursive_fun_param_types = LazyTypeContext::Snoc(
             &tcon_with_param_types,
-            // TODO: Upshift by `param_types.len() + 1`.
             recursive_fun_param_type_singleton_ref.convert(),
         );
 
