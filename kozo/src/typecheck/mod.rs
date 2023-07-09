@@ -426,6 +426,8 @@ impl TypeChecker {
         let upshifted_matchee = DebUpshifter(match_case_param_count).replace_debs(matchee_ast, 0);
         let upshifted_normalized_matchee = self.evaluator.eval(upshifted_matchee);
         let parameterized_vcon_capp = Normalized::vcon_capp(
+            // TODO: Upshift `well_typed_matchee_type_ind`
+            // by `match_case_param_count` WITH A CUTOFF OF ZERO.
             well_typed_matchee_type_ind,
             match_case_index,
             match_case_param_count,
@@ -441,6 +443,10 @@ impl TypeChecker {
                         .derefed()
                         .index(i)
                         .cloned();
+                    // NO ACTION NEEDED:
+                    // We already upshifted the matchee type args.
+                    // TODO: Delete above comment after we finish
+                    // checking the shifting logic.
                     let matchee_index_arg = upshifted_matchee_type_args
                         .without_digest()
                         .derefed()
@@ -454,6 +460,10 @@ impl TypeChecker {
                 })
                 .chain(std::iter::once(LazySubstitution {
                     tcon_len: extended_tcon_len,
+                    // NO ACTION NEEDED:
+                    // We already upshifted the normalized matchee.
+                    // TODO: Delete above comment after we finish
+                    // checking the shifting logic.
                     from: upshifted_normalized_matchee,
                     to: parameterized_vcon_capp,
                 }))
