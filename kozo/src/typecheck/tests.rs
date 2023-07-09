@@ -345,7 +345,37 @@ fn polymorphic_rev_1_2_3() {
     let rev_one_two_three_src =
         substitute_with_compounding(src_defs, r#"(<POLYMORPHIC_REV> <NAT> <123> <NAT_NIL>)"#);
 
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&rev_one_two_three_src);
+    use crate::typecheck::*;
 
-    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+    let cst = parse_rch_cst_or_panic(&rev_one_two_three_src);
+    let empty = Normalized::<[_; 0]>::new();
+    let err = TypeChecker::default()
+        .get_type(
+            cst,
+            LazyTypeContext::Base(empty.as_ref().convert()),
+            LazySubstitutionContext::Base(&[]),
+        )
+        .unwrap_err();
+
+    match err {
+        TypeError::TypeMismatch {
+            expr,
+            expected_type,
+            actual_type,
+            ..
+        } => {
+            panic!(
+                "\n****EXPR:****\n{}\n\n****EXPECTED TYPE:****\n{}\n\n****ACTUAL TYPE:****\n{}\n\n****EXPR SPAN:****\n{:?}\n\n****SRC:****\n{}\n\n",
+                PrettyPrinted(&RchCstToAstConverter::default().convert(expr.clone())),
+                PrettyPrinted(expected_type.raw()),
+                PrettyPrinted(actual_type.raw()),
+                expr.span(),
+                rev_one_two_three_src,
+            );
+        }
+
+        _ => {
+            panic!("Expected TypeError::TypeMismatch");
+        }
+    }
 }
