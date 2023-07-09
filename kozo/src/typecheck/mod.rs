@@ -391,6 +391,7 @@ impl TypeChecker {
             new_exprs: &ind_singleton,
         };
 
+        // TODO: Check that `match_case.arity == match_case_param_types.len()`.
         let match_case_param_types = ind_singleton_deb_substituter
             .replace_debs_in_expressions_with_increasing_cutoff(
                 well_typed_vcon_def.raw().param_types.clone(),
