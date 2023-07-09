@@ -219,6 +219,12 @@ impl NormalForm {
     }
 }
 
+impl Normalized<RcSemHashed<Ind>> {
+    pub fn upshift(self, amount: usize) -> Self {
+        Normalized(DebUpshifter(amount).replace_debs_in_ind(self.0, 0))
+    }
+}
+
 impl Normalized<RcSemHashed<Box<[Expr]>>> {
     pub fn upshift_expressions_with_constant_cutoff(self, amount: usize) -> Self {
         Normalized(DebUpshifter(amount).replace_debs_in_expressions_with_constant_cutoff(self.0, 0))

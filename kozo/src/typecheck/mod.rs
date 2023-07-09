@@ -273,8 +273,10 @@ impl TypeChecker {
                 param_count,
             );
         let normalized_index_args = self.evaluator.eval_expressions(substituted_index_args_ast);
-        let return_type = Normalized::app_with_ind_callee(normalized_ind, normalized_index_args)
-            .collapse_if_nullary();
+        let shifted_normalized_ind = normalized_ind.upshift(param_count);
+        let return_type =
+            Normalized::app_with_ind_callee(shifted_normalized_ind, normalized_index_args)
+                .collapse_if_nullary();
         Ok(Normalized::for_(normalized_param_types, return_type).collapse_if_nullary())
     }
 
