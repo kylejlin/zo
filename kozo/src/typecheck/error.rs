@@ -29,6 +29,13 @@ pub enum TypeError {
         match_: cst::Match,
         matchee_type_ind: Normalized<ast::Ind>,
     },
+    WrongMatchCaseArity {
+        actual_node: cst::NumberLiteral,
+        actual: usize,
+        expected: usize,
+        match_: cst::Match,
+        match_case_index: usize,
+    },
     TypeMismatch {
         expr: cst::Expr,
         expected_type: NormalForm,

@@ -391,7 +391,16 @@ impl TypeChecker {
             new_exprs: &ind_singleton,
         };
 
-        // TODO: Check that `match_case.arity == match_case_param_types.len()`.
+        if match_case.arity.value != well_typed_vcon_def.raw().param_types.value.len() {
+            return Err(TypeError::WrongMatchCaseArity {
+                actual_node: match_case.arity.clone(),
+                actual: match_case.arity.value,
+                expected: well_typed_vcon_def.raw().param_types.value.len(),
+                match_: match_.value.clone(),
+                match_case_index,
+            });
+        }
+
         let match_case_param_types = ind_singleton_deb_substituter
             .replace_debs_in_expressions_with_increasing_cutoff(
                 well_typed_vcon_def.raw().param_types.clone(),
