@@ -1,6 +1,7 @@
 use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::sha256::*,
+    pretty_print::PrettyPrinted,
     syntax_tree::{
         ast::{self, Deb, RcSemHashed, UniverseLevel},
         rch_cst::{self as cst, RcHashed},
@@ -463,7 +464,8 @@ impl TypeChecker {
         )?;
 
         let shifted_match_return_type = unshifted_match_return_type.upshift(expected_arity);
-        self.assert_expected_type_equality_holds_after_applying_scon(
+        // TODO: Replace with normal `?` syntax.
+        let res = self.assert_expected_type_equality_holds_after_applying_scon(
             ExpectedTypeEquality {
                 expr: match_case.return_val.clone(),
                 expected_type: shifted_match_return_type,
@@ -471,7 +473,18 @@ impl TypeChecker {
                 tcon_len: extended_tcon_len,
             },
             extended_scon,
-        )?;
+        );
+        if let Err(err) = res {
+            for raw_deb in 0..tcon_with_match_case_param_types.len() {
+                let tcon_entry = tcon_with_match_case_param_types.get(Deb(raw_deb)).unwrap();
+                println!(
+                    "****tcon_with_match_case_param_types[{}]:****\n{}\n\n",
+                    raw_deb,
+                    PrettyPrinted(tcon_entry.raw())
+                );
+            }
+            return Err(err);
+        }
 
         Ok(())
     }
