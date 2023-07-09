@@ -1,7 +1,6 @@
 use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::sha256::*,
-    pretty_print::PrettyPrinted,
     syntax_tree::{
         ast::{self, Deb, RcSemHashed, UniverseLevel},
         rch_cst::{self as cst, RcHashed},
@@ -567,8 +566,7 @@ impl TypeChecker {
             callee_type.without_digest().param_types(),
             normalized_args.clone(),
         );
-        // TODO: Restore this to a normal `(...)?` expression.
-        let todo_ = self.assert_expected_type_equalities_holds_after_applying_scon(
+        self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
                 exprs: app.value.args.to_vec_of_cloned(),
                 expected_types: substituted_param_types,
@@ -576,25 +574,7 @@ impl TypeChecker {
                 tcon_len: tcon.len(),
             },
             scon,
-        );
-        if let Err(e) = todo_ {
-            use crate::pretty_print::PrettyPrinted;
-            println!(
-                "get_type_of_app TypeMismatch!\n\n****APP:****\n{}\n\n",
-                PrettyPrinted(
-                    &RchCstToAstConverter::default().convert(cst::Expr::App(app.clone()))
-                )
-            );
-            let tcon_len = tcon.len();
-            for raw_deb in 0..tcon_len {
-                let deb_type = tcon.get(Deb(raw_deb)).unwrap();
-                println!(
-                    "****tcon[{raw_deb}]:****\n{}\n\n",
-                    PrettyPrinted(deb_type.raw())
-                );
-            }
-            return Err(e);
-        }
+        )?;
 
         let arg_substituter = DebDownshiftSubstituter {
             new_exprs: &normalized_args.raw().value,
@@ -636,22 +616,6 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        // TODO: Delete
-        use crate::pretty_print::*;
-        println!(
-            "****`for`({}) EXPR:****\n{}\n\n",
-            for_.value.param_types.len(),
-            PrettyPrinted(&self.cst_converter.convert(cst::Expr::For(for_.clone())))
-        );
-        let tcon_len = tcon.len();
-        for raw_deb in 0..tcon_len {
-            let deb_type = tcon.get(Deb(raw_deb)).unwrap();
-            println!(
-                "****for.tcon[{raw_deb}]:****\n{}\n\n",
-                PrettyPrinted(deb_type.raw())
-            );
-        }
-
         let param_type_types =
             self.get_types_of_dependent_expressions(for_.value.param_types.clone(), tcon, scon)?;
         assert_every_expr_is_universe(param_type_types.raw()).map_err(|offender_index| {
@@ -723,17 +687,7 @@ impl TypeChecker {
         let mut normalized_visited_exprs: Normalized<Vec<ast::Expr>> =
             Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
 
-        // TODO: Delete
-        println!("dependent_expressions start");
-        let mut todo_i = 0;
-
         for expr in exprs.to_vec() {
-            println!(
-                "dep_expr[{todo_i}]:\n{}\n\n",
-                PrettyPrinted(&self.cst_converter.convert(expr.clone()))
-            );
-            todo_i += 1;
-
             let current_tcon = LazyTypeContext::Snoc(&tcon, normalized_visited_exprs.to_derefed());
             let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
             out.push(type_);
