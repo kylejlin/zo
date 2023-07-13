@@ -74,8 +74,7 @@ impl TypeChecker {
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         let vcon_defs = well_typed_matchee_type_ind.without_digest().vcon_defs();
-        let vcon_defs = vcon_defs.without_digest();
-        let vcon_defs = vcon_defs.derefed();
+        let vcon_defs = vcon_defs.without_digest().derefed();
 
         for match_case_index in 0..match_.value.cases.len() {
             let well_typed_vcon_def = vcon_defs.index(match_case_index);
