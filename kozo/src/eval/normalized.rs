@@ -36,8 +36,9 @@ impl<T> Normalized<&T> {
         Normalized(self.0.clone())
     }
 
-    pub fn derefed(&self) -> Normalized<&T::Target>
+    pub fn derefed<'a>(self) -> Normalized<&'a T::Target>
     where
+        Self: 'a,
         T: Deref,
     {
         Normalized(self.0.deref())
