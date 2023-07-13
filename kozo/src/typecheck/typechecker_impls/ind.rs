@@ -24,9 +24,8 @@ impl TypeChecker {
             .collapse_if_nullary();
 
         let ind_type_singleton = Normalized::<[_; 1]>::new(ind_type.clone());
-        let ind_type_singleton = ind_type_singleton.as_ref();
         let tcon_with_ind_type_g1 =
-            LazyTypeContext::Snoc(&tcon_g0, ind_type_singleton.convert_ref());
+            LazyTypeContext::Snoc(&tcon_g0, ind_type_singleton.as_ref().convert_ref());
 
         self.typecheck_ind_vcon_defs(
             ind.clone(),

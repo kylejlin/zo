@@ -44,10 +44,9 @@ impl TypeChecker {
             .upshift(normalized_param_types.raw().value.len() + 1);
         let recursive_fun_param_type_singleton =
             Normalized::<[ast::Expr; 1]>::new(shifted_fun_type.clone());
-        let recursive_fun_param_type_singleton_ref = recursive_fun_param_type_singleton.as_ref();
         let tcon_with_param_and_recursive_fun_param_types = LazyTypeContext::Snoc(
             &tcon_with_param_types,
-            recursive_fun_param_type_singleton_ref.convert_ref(),
+            recursive_fun_param_type_singleton.as_ref().convert_ref(),
         );
 
         // TODO: Delete

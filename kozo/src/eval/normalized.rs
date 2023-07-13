@@ -44,8 +44,9 @@ impl<T> Normalized<&T> {
         Normalized(self.0.deref())
     }
 
-    pub fn convert_ref<U: ?Sized>(&self) -> Normalized<&U>
+    pub fn convert_ref<'a, U: ?Sized>(self) -> Normalized<&'a U>
     where
+        Self: 'a,
         T: AsRef<U>,
     {
         Normalized(self.0.as_ref())
