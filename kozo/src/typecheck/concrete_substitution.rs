@@ -76,7 +76,7 @@ struct DependentExprs<'a>(&'a [Expr]);
 struct IndependentExprs<'a>(&'a [Expr]);
 
 impl Substitute for DependentExprs<'_> {
-    type Output = RcSemHashed<Box<[Expr]>>;
+    type Output = RcSemHashed<Vec<Expr>>;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         let subbed = self
@@ -86,12 +86,12 @@ impl Substitute for DependentExprs<'_> {
             .enumerate()
             .map(|(i, e)| e.substitute(&sub.upshift(i)))
             .collect::<Vec<_>>();
-        rc_sem_hashed(subbed.into_boxed_slice())
+        rc_sem_hashed(subbed)
     }
 }
 
 impl Substitute for IndependentExprs<'_> {
-    type Output = RcSemHashed<Box<[Expr]>>;
+    type Output = RcSemHashed<Vec<Expr>>;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         let subbed = self
@@ -100,11 +100,11 @@ impl Substitute for IndependentExprs<'_> {
             .cloned()
             .map(|e| e.substitute(sub))
             .collect::<Vec<_>>();
-        rc_sem_hashed(subbed.into_boxed_slice())
+        rc_sem_hashed(subbed)
     }
 }
 
-impl Substitute for RcSemHashed<Box<[VconDef]>> {
+impl Substitute for RcSemHashed<Vec<VconDef>> {
     type Output = Self;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -114,7 +114,7 @@ impl Substitute for RcSemHashed<Box<[VconDef]>> {
             .cloned()
             .map(|def| def.substitute_in_children(sub))
             .collect::<Vec<_>>();
-        rc_sem_hashed(subbed.into_boxed_slice())
+        rc_sem_hashed(subbed)
     }
 }
 
@@ -155,7 +155,7 @@ impl Substitute for RcSemHashed<Match> {
     }
 }
 
-impl Substitute for RcSemHashed<Box<[MatchCase]>> {
+impl Substitute for RcSemHashed<Vec<MatchCase>> {
     type Output = Self;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -165,7 +165,7 @@ impl Substitute for RcSemHashed<Box<[MatchCase]>> {
             .cloned()
             .map(|case| case.substitute_in_children(sub))
             .collect::<Vec<_>>();
-        rc_sem_hashed(subbed.into_boxed_slice())
+        rc_sem_hashed(subbed)
     }
 }
 

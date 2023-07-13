@@ -115,11 +115,11 @@ impl<T> Normalized<Vec<T>> {
         self.0.into_iter().map(Normalized).collect()
     }
 
-    pub fn from_boxed_slice(boxed: Normalized<Box<[T]>>) -> Self {
+    pub fn from_boxed_slice(boxed: Normalized<Vec<T>>) -> Self {
         Normalized(boxed.0.into())
     }
 
-    pub fn into_boxed_slice(self) -> Normalized<Box<[T]>> {
+    pub fn into_boxed_slice(self) -> Normalized<Vec<T>> {
         Normalized(self.0.into())
     }
 }
@@ -141,13 +141,10 @@ impl NormalForm {
         self,
     ) -> Option<(
         Normalized<RcSemHashed<Ind>>,
-        Normalized<RcSemHashed<Box<[Expr]>>>,
+        Normalized<RcSemHashed<Vec<Expr>>>,
     )> {
         match self.0 {
-            Expr::Ind(ind) => Some((
-                Normalized(ind),
-                Normalized(Rc::new(Hashed::new(Box::new([])))),
-            )),
+            Expr::Ind(ind) => Some((Normalized(ind), Normalized(Rc::new(Hashed::new(vec![]))))),
 
             Expr::App(app) => match &app.value.callee {
                 Expr::Ind(ind) => {
@@ -162,13 +159,13 @@ impl NormalForm {
 }
 
 impl Normalized<&Ind> {
-    pub fn vcon_defs(self) -> Normalized<RcSemHashed<Box<[VconDef]>>> {
+    pub fn vcon_defs(self) -> Normalized<RcSemHashed<Vec<VconDef>>> {
         Normalized(self.0.vcon_defs.clone())
     }
 }
 
 impl Normalized<&VconDef> {
-    pub fn index_args(self) -> Normalized<RcSemHashed<Box<[Expr]>>> {
+    pub fn index_args(self) -> Normalized<RcSemHashed<Vec<Expr>>> {
         Normalized(self.0.index_args.clone())
     }
 }
@@ -176,7 +173,7 @@ impl Normalized<&VconDef> {
 impl Normalized<App> {
     pub fn app_with_ind_callee(
         callee: Normalized<RcSemHashed<Ind>>,
-        args: Normalized<RcSemHashed<Box<[Expr]>>>,
+        args: Normalized<RcSemHashed<Vec<Expr>>>,
     ) -> Self {
         Normalized(App {
             callee: Expr::Ind(callee.into_raw()),
@@ -190,16 +187,13 @@ impl Normalized<App> {
 }
 
 impl Normalized<&For> {
-    pub fn param_types(self) -> Normalized<RcSemHashed<Box<[Expr]>>> {
+    pub fn param_types(self) -> Normalized<RcSemHashed<Vec<Expr>>> {
         Normalized(self.0.param_types.clone())
     }
 }
 
 impl Normalized<For> {
-    pub fn for_(
-        param_types: Normalized<RcSemHashed<Box<[Expr]>>>,
-        return_type: NormalForm,
-    ) -> Self {
+    pub fn for_(param_types: Normalized<RcSemHashed<Vec<Expr>>>, return_type: NormalForm) -> Self {
         Normalized(For {
             param_types: param_types.into_raw(),
             return_type: return_type.into_raw(),
@@ -237,7 +231,7 @@ impl NormalForm {
             .collect();
         let capp = App {
             callee: vcon.into(),
-            args: rc_sem_hashed(args.into_boxed_slice()),
+            args: rc_sem_hashed(args),
         }
         .collapse_if_nullary();
         Normalized(capp)
@@ -256,7 +250,7 @@ impl Normalized<RcSemHashed<Ind>> {
     }
 }
 
-impl Normalized<RcSemHashed<Box<[Expr]>>> {
+impl Normalized<RcSemHashed<Vec<Expr>>> {
     pub fn upshift_expressions_with_constant_cutoff(self, amount: usize) -> Self {
         Normalized(DebUpshifter(amount).replace_debs_in_expressions_with_constant_cutoff(self.0, 0))
     }

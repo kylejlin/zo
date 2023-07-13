@@ -19,9 +19,9 @@ impl Evaluator {
     }
 }
 
-type RcExprs = RcSemHashed<Box<[Expr]>>;
-type RcVconDefs = RcSemHashed<Box<[VconDef]>>;
-type RcMatchCases = RcSemHashed<Box<[MatchCase]>>;
+type RcExprs = RcSemHashed<Vec<Expr>>;
+type RcVconDefs = RcSemHashed<Vec<VconDef>>;
+type RcMatchCases = RcSemHashed<Vec<MatchCase>>;
 
 impl Evaluator {
     pub fn eval(&mut self, expr: Expr) -> NormalForm {
@@ -75,7 +75,6 @@ impl Evaluator {
             .iter()
             .map(|expr| self.eval(expr.clone()).into_raw())
             .collect::<Vec<_>>()
-            .into_boxed_slice()
             .rc_hash_and_wrap_in_normalized();
 
         self.eval_exprs_cache
@@ -98,7 +97,6 @@ impl Evaluator {
             .iter()
             .map(|def| self.eval_vcon_def(def.clone()).into_raw())
             .collect::<Vec<_>>()
-            .into_boxed_slice()
             .rc_hash_and_wrap_in_normalized();
 
         self.eval_vcon_defs_cache
@@ -218,7 +216,6 @@ impl Evaluator {
                 return_val: self.eval(original.return_val.clone()).into_raw(),
             })
             .collect::<Vec<_>>()
-            .into_boxed_slice()
             .rc_hash_and_wrap_in_normalized()
     }
 

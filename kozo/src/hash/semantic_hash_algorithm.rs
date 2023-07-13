@@ -126,7 +126,7 @@ impl SemanticHash for UniverseNode {
     }
 }
 
-impl SemanticHash for Box<[Expr]> {
+impl SemanticHash for Vec<Expr> {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::EXPR_SLICE);
 
@@ -138,7 +138,7 @@ impl SemanticHash for Box<[Expr]> {
     }
 }
 
-impl SemanticHash for Box<[VconDef]> {
+impl SemanticHash for Vec<VconDef> {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::VARIANT_CONSTRUCTOR_DEF_SLICE);
 
@@ -155,7 +155,7 @@ impl SemanticHash for Box<[VconDef]> {
     }
 }
 
-impl SemanticHash for Box<[MatchCase]> {
+impl SemanticHash for Vec<MatchCase> {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write_u8(discriminator::MATCH_CASE_SLICE);
 

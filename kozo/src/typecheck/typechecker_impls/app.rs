@@ -57,8 +57,8 @@ impl TypeChecker {
 
     fn substitute_param_types(
         &mut self,
-        unsubstituted_param_types: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
-        normalized_args: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
+        unsubstituted_param_types: Normalized<RcSemHashed<Vec<ast::Expr>>>,
+        normalized_args: Normalized<RcSemHashed<Vec<ast::Expr>>>,
     ) -> Normalized<Vec<ast::Expr>> {
         let len = normalized_args.raw().value.len();
 

@@ -69,7 +69,7 @@ impl TypeChecker {
         match_: RcHashed<cst::Match>,
         unshifted_match_return_type: NormalForm,
         well_typed_matchee_type_ind: Normalized<RcSemHashed<ast::Ind>>,
-        well_typed_matchee_type_args: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
+        well_typed_matchee_type_args: Normalized<RcSemHashed<Vec<ast::Expr>>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -103,7 +103,7 @@ impl TypeChecker {
         match_: RcHashed<cst::Match>,
         unshifted_match_return_type: NormalForm,
         well_typed_matchee_type_ind: Normalized<RcSemHashed<ast::Ind>>,
-        well_typed_matchee_type_args: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
+        well_typed_matchee_type_args: Normalized<RcSemHashed<Vec<ast::Expr>>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {

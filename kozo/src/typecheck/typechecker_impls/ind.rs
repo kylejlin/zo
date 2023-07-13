@@ -40,7 +40,7 @@ impl TypeChecker {
     fn typecheck_ind_vcon_defs(
         &mut self,
         ind: RcHashed<cst::Ind>,
-        normalized_index_types_g0: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
+        normalized_index_types_g0: Normalized<RcSemHashed<Vec<ast::Expr>>>,
         tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -60,7 +60,7 @@ impl TypeChecker {
         &mut self,
         def: &cst::VconDef,
         ind: RcHashed<cst::Ind>,
-        normalized_index_types_g0: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
+        normalized_index_types_g0: Normalized<RcSemHashed<Vec<ast::Expr>>>,
         tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {

@@ -61,7 +61,7 @@ fn fmt_str_literal(
 }
 
 fn fmt_parenthesized_vcon_defs(
-    defs: RcSemHashed<Box<[VconDef]>>,
+    defs: RcSemHashed<Vec<VconDef>>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -72,7 +72,7 @@ fn fmt_parenthesized_vcon_defs(
     write!(f, "{indent}(")?;
     let i1 = indent.incremented();
 
-    for def in defs.value.as_ref() {
+    for def in defs.value.iter() {
         write!(f, "\n")?;
         fmt_vcon_def(def, f, i1)?;
     }
@@ -121,7 +121,7 @@ fn fmt_match(m: RcSemHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) 
 }
 
 fn fmt_parenthesized_match_cases(
-    cases: RcSemHashed<Box<[MatchCase]>>,
+    cases: RcSemHashed<Vec<MatchCase>>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -132,7 +132,7 @@ fn fmt_parenthesized_match_cases(
     write!(f, "{indent}(")?;
     let i1 = indent.incremented();
 
-    for case in cases.value.as_ref() {
+    for case in cases.value.iter() {
         write!(f, "\n")?;
         fmt_match_case(case, f, i1)?;
     }
@@ -193,7 +193,7 @@ fn fmt_app(app: RcSemHashed<App>, f: &mut Formatter<'_>, indent: Indentation) ->
     let i1 = indent.incremented();
     fmt_expr(app.value.callee.clone(), f, i1)?;
 
-    for arg in app.value.args.value.as_ref() {
+    for arg in app.value.args.value.iter() {
         write!(f, "\n")?;
         fmt_expr(arg.clone(), f, i1)?;
     }
@@ -229,7 +229,7 @@ fn fmt_universe(
 }
 
 fn fmt_parenthesized_expressions(
-    parenthesized_expressions: RcSemHashed<Box<[Expr]>>,
+    parenthesized_expressions: RcSemHashed<Vec<Expr>>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -240,7 +240,7 @@ fn fmt_parenthesized_expressions(
     write!(f, "{indent}(")?;
     let i1 = indent.incremented();
 
-    for expr in parenthesized_expressions.value.as_ref() {
+    for expr in parenthesized_expressions.value.iter() {
         write!(f, "\n")?;
         fmt_expr(expr.clone(), f, i1)?;
     }

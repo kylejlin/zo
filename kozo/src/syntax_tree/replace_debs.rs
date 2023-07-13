@@ -2,9 +2,9 @@ use crate::syntax_tree::ast::*;
 
 use std::rc::Rc;
 
-type RcExprs = RcSemHashed<Box<[Expr]>>;
-type RcVconDefs = RcSemHashed<Box<[VconDef]>>;
-type RcMatchCases = RcSemHashed<Box<[MatchCase]>>;
+type RcExprs = RcSemHashed<Vec<Expr>>;
+type RcVconDefs = RcSemHashed<Vec<VconDef>>;
+type RcMatchCases = RcSemHashed<Vec<MatchCase>>;
 
 /// Replaces `0` with the last element of in `new_exprs`,
 /// `1` with the second to last element,
@@ -87,7 +87,7 @@ pub trait ReplaceDebs {
             .enumerate()
             .map(|(expr_index, expr)| self.replace_debs(expr.clone(), starting_cutoff + expr_index))
             .collect();
-        Rc::new(Hashed::new(shifted.into_boxed_slice()))
+        Rc::new(Hashed::new(shifted))
     }
 
     fn replace_debs_in_vcon_defs(&self, original: RcVconDefs, cutoff: usize) -> RcVconDefs {
@@ -96,7 +96,7 @@ pub trait ReplaceDebs {
             .iter()
             .map(|def| self.replace_debs_in_vcon_def(def.clone(), cutoff))
             .collect();
-        Rc::new(Hashed::new(shifted.into_boxed_slice()))
+        Rc::new(Hashed::new(shifted))
     }
 
     fn replace_debs_in_vcon_def(&self, original: VconDef, cutoff: usize) -> VconDef {
@@ -143,7 +143,7 @@ pub trait ReplaceDebs {
             .iter()
             .map(|case| self.replace_debs_in_match_case(case.clone(), cutoff))
             .collect();
-        Rc::new(Hashed::new(shifted.into_boxed_slice()))
+        Rc::new(Hashed::new(shifted))
     }
 
     fn replace_debs_in_match_case(&self, original: MatchCase, cutoff: usize) -> MatchCase {
@@ -191,7 +191,7 @@ pub trait ReplaceDebs {
             .iter()
             .map(|expr| self.replace_debs(expr.clone(), cutoff))
             .collect();
-        Rc::new(Hashed::new(shifted.into_boxed_slice()))
+        Rc::new(Hashed::new(shifted))
     }
 
     fn replace_debs_in_for(&self, original: RcSemHashed<For>, cutoff: usize) -> RcSemHashed<For> {

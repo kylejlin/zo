@@ -71,9 +71,9 @@ impl RchCstToAstConverter {
     pub fn convert_vcon_defs(
         &mut self,
         cst: cst::ZeroOrMoreVconDefs,
-    ) -> RcSemHashed<Box<[ast::VconDef]>> {
+    ) -> RcSemHashed<Vec<ast::VconDef>> {
         let v = self.convert_vcon_defs_to_vec(cst);
-        rc_sem_hashed(v.into_boxed_slice())
+        rc_sem_hashed(v)
     }
 
     fn convert_vcon_defs_to_vec(&mut self, cst: cst::ZeroOrMoreVconDefs) -> Vec<ast::VconDef> {
@@ -149,9 +149,9 @@ impl RchCstToAstConverter {
     fn convert_match_cases(
         &mut self,
         cst: cst::ZeroOrMoreMatchCases,
-    ) -> RcSemHashed<Box<[ast::MatchCase]>> {
+    ) -> RcSemHashed<Vec<ast::MatchCase>> {
         let v = self.convert_match_cases_to_vec(cst);
-        rc_sem_hashed(v.into_boxed_slice())
+        rc_sem_hashed(v)
     }
 
     fn convert_match_cases_to_vec(
@@ -250,9 +250,9 @@ impl RchCstToAstConverter {
     pub fn convert_expressions(
         &mut self,
         cst: cst::ZeroOrMoreExprs,
-    ) -> RcSemHashed<Box<[ast::Expr]>> {
+    ) -> RcSemHashed<Vec<ast::Expr>> {
         let v = self.convert_expressions_to_vec(cst);
-        rc_sem_hashed(v.into_boxed_slice())
+        rc_sem_hashed(v)
     }
 
     fn convert_expressions_to_vec(&mut self, cst: cst::ZeroOrMoreExprs) -> Vec<ast::Expr> {
