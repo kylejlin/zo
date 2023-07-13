@@ -217,14 +217,8 @@ impl NormalForm {
     }
 }
 
-impl NormalForm {
-    pub fn upshift(self, amount: usize) -> Self {
-        Normalized(self.0.replace_debs(&DebUpshifter(amount), 0))
-    }
-}
-
-impl Normalized<RcSemHashed<Ind>> {
-    pub fn upshift(self, amount: usize) -> Self {
+impl<T: ReplaceDebs> Normalized<T> {
+    pub fn upshift(self, amount: usize) -> Normalized<T::Output> {
         Normalized(self.0.replace_debs(&DebUpshifter(amount), 0))
     }
 }
