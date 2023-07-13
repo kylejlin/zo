@@ -124,11 +124,11 @@ impl TypeChecker {
             });
         }
 
-        let match_case_param_types = ind_singleton_deb_substituter
-            .replace_debs_in_expressions_with_increasing_cutoff(
-                well_typed_vcon_def.raw().param_types.clone(),
-                0,
-            );
+        let match_case_param_types = well_typed_vcon_def
+            .raw()
+            .param_types
+            .clone()
+            .replace_debs_with_increasing_cutoff(&ind_singleton_deb_substituter, 0);
         let match_case_param_types = self.evaluator.eval_expressions(match_case_param_types);
         let match_case_param_types = match_case_param_types.without_digest();
         let tcon_with_match_case_param_types =
@@ -143,7 +143,7 @@ impl TypeChecker {
             .upshift_expressions_with_constant_cutoff(match_case_param_count);
         let extended_tcon_len = tcon_with_match_case_param_types.len();
         let matchee_ast = self.cst_converter.convert(match_.value.matchee.clone());
-        let upshifted_matchee = DebUpshifter(match_case_param_count).replace_debs(matchee_ast, 0);
+        let upshifted_matchee = matchee_ast.replace_debs(&DebUpshifter(match_case_param_count), 0);
         let upshifted_normalized_matchee = self.evaluator.eval(upshifted_matchee);
         let parameterized_vcon_capp = Normalized::vcon_capp(
             // TODO: Upshift `well_typed_matchee_type_ind`

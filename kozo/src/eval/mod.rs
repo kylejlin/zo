@@ -291,7 +291,7 @@ impl Evaluator {
     }
 
     fn substitute_and_downshift_debs(&mut self, expr: Expr, new_exprs: &[Expr]) -> Expr {
-        DebDownshiftSubstituter { new_exprs }.replace_debs(expr, 0)
+        expr.replace_debs(&DebDownshiftSubstituter { new_exprs }, 0)
     }
 }
 

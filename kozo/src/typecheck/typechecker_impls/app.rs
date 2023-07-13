@@ -49,8 +49,12 @@ impl TypeChecker {
         let arg_substituter = DebDownshiftSubstituter {
             new_exprs: &normalized_args.raw().value,
         };
-        let unnormalized_substituted_return_type =
-            arg_substituter.replace_debs(callee_type.raw().value.return_type.clone(), 0);
+        let unnormalized_substituted_return_type = callee_type
+            .raw()
+            .value
+            .return_type
+            .clone()
+            .replace_debs(&arg_substituter, 0);
         let substituted_return_type = self.evaluator.eval(unnormalized_substituted_return_type);
         Ok(substituted_return_type)
     }
@@ -72,7 +76,9 @@ impl TypeChecker {
                 let substituter = DebDownshiftSubstituter {
                     new_exprs: &normalized_args.raw().value[0..param_index],
                 };
-                let substituted = substituter.replace_debs(unsubstituted_param_type.into_raw(), 0);
+                let substituted = unsubstituted_param_type
+                    .into_raw()
+                    .replace_debs(&substituter, 0);
                 self.evaluator.eval(substituted)
             })
             .collect()
