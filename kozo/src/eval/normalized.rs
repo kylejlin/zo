@@ -91,13 +91,6 @@ where
     pub fn index(&self, index: usize) -> Normalized<&T> {
         Normalized(&self.0[index])
     }
-
-    pub fn to_vec_normalized(&self) -> Vec<Normalized<T>>
-    where
-        T: Clone,
-    {
-        self.0.into_iter().cloned().map(Normalized).collect()
-    }
 }
 
 impl<T> FromIterator<Normalized<T>> for Normalized<Vec<T>> {
