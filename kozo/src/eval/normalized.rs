@@ -223,8 +223,8 @@ impl<T: ReplaceDebs> Normalized<T> {
     }
 }
 
-impl Normalized<RcSemHashedVec<Expr>> {
-    pub fn upshift_expressions_with_constant_cutoff(self, amount: usize) -> Self {
+impl<T: ReplaceDebsInEachItem> Normalized<T> {
+    pub fn upshift_with_constant_cutoff(self, amount: usize) -> Self {
         Normalized(
             self.0
                 .replace_debs_with_constant_cutoff(&DebUpshifter(amount), 0),
@@ -236,13 +236,10 @@ impl Normalized<RcSemHashedVec<Expr>> {
         ind: Normalized<RcSemHashed<Ind>>,
     ) -> Self {
         let ind_singleton: [Expr; 1] = [ind.raw().clone().into()];
-        let ind_singleton_deb_substituter = DebDownshiftSubstituter {
+        let substituter = DebDownshiftSubstituter {
             new_exprs: &ind_singleton,
         };
-        Normalized(
-            self.0
-                .replace_debs_with_increasing_cutoff(&ind_singleton_deb_substituter, 0),
-        )
+        Normalized(self.0.replace_debs_with_increasing_cutoff(&substituter, 0))
     }
 }
 

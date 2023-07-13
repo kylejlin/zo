@@ -140,7 +140,7 @@ impl TypeChecker {
             .replace_deb0_with_ind_with_increasing_cutoff(well_typed_matchee_type_ind.clone());
         let upshifted_matchee_type_args = well_typed_matchee_type_args
             .clone()
-            .upshift_expressions_with_constant_cutoff(match_case_param_count);
+            .upshift_with_constant_cutoff(match_case_param_count);
         let extended_tcon_len = tcon_with_match_case_param_types.len();
         let matchee_ast = self.cst_converter.convert(match_.value.matchee.clone());
         let upshifted_matchee = matchee_ast.replace_debs(&DebUpshifter(match_case_param_count), 0);

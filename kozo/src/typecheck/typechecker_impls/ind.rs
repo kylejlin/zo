@@ -82,7 +82,7 @@ impl TypeChecker {
         )?;
 
         let normalized_index_types_g2 = normalized_index_types_g0
-            .upshift_expressions_with_constant_cutoff(1 + normalized_param_types.raw().len());
+            .upshift_with_constant_cutoff(1 + normalized_param_types.raw().len());
 
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
