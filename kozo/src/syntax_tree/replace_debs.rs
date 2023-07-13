@@ -2,10 +2,6 @@ use crate::syntax_tree::ast::*;
 
 use std::rc::Rc;
 
-type RcExprs = RcSemHashedVec<Expr>;
-type RcVconDefs = RcSemHashedVec<VconDef>;
-type RcMatchCases = RcSemHashedVec<MatchCase>;
-
 /// Replaces `0` with the last element of in `new_exprs`,
 /// `1` with the second to last element,
 /// and so on.
@@ -78,9 +74,9 @@ pub trait ReplaceDebs {
 
     fn replace_debs_in_expressions_with_increasing_cutoff(
         &self,
-        original: RcExprs,
+        original: RcSemHashedVec<Expr>,
         starting_cutoff: usize,
-    ) -> RcExprs {
+    ) -> RcSemHashedVec<Expr> {
         let shifted: Vec<Expr> = original
             .value
             .iter()
@@ -90,7 +86,11 @@ pub trait ReplaceDebs {
         Rc::new(Hashed::new(shifted))
     }
 
-    fn replace_debs_in_vcon_defs(&self, original: RcVconDefs, cutoff: usize) -> RcVconDefs {
+    fn replace_debs_in_vcon_defs(
+        &self,
+        original: RcSemHashedVec<VconDef>,
+        cutoff: usize,
+    ) -> RcSemHashedVec<VconDef> {
         let shifted: Vec<VconDef> = original
             .value
             .iter()
@@ -137,7 +137,11 @@ pub trait ReplaceDebs {
         }))
     }
 
-    fn replace_debs_in_match_cases(&self, original: RcMatchCases, cutoff: usize) -> RcMatchCases {
+    fn replace_debs_in_match_cases(
+        &self,
+        original: RcSemHashedVec<MatchCase>,
+        cutoff: usize,
+    ) -> RcSemHashedVec<MatchCase> {
         let shifted: Vec<MatchCase> = original
             .value
             .iter()
@@ -183,9 +187,9 @@ pub trait ReplaceDebs {
 
     fn replace_debs_in_expressions_with_constant_cutoff(
         &self,
-        original: RcExprs,
+        original: RcSemHashedVec<Expr>,
         cutoff: usize,
-    ) -> RcExprs {
+    ) -> RcSemHashedVec<Expr> {
         let shifted: Vec<Expr> = original
             .value
             .iter()
