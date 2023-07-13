@@ -102,8 +102,6 @@ impl TypeChecker {
 
         let exprs_ast = self.cst_converter.convert_expressions(exprs.clone());
         let normalized = self.evaluator.eval_expressions(exprs_ast);
-        Ok(Normalized::<Vec<_>>::from_boxed_slice(
-            normalized.without_digest().cloned(),
-        ))
+        Ok(normalized.without_digest().cloned())
     }
 }

@@ -93,12 +93,6 @@ where
     }
 }
 
-impl<T> FromIterator<Normalized<T>> for Normalized<Vec<T>> {
-    fn from_iter<I: IntoIterator<Item = Normalized<T>>>(iter: I) -> Self {
-        Normalized(iter.into_iter().map(Normalized::into_raw).collect())
-    }
-}
-
 impl<T> Normalized<Vec<T>> {
     pub fn from_vec_normalized(v: Vec<Normalized<T>>) -> Self {
         Normalized(v.into_iter().map(Normalized::into_raw).collect())
@@ -106,14 +100,6 @@ impl<T> Normalized<Vec<T>> {
 
     pub fn into_vec_normalized(self) -> Vec<Normalized<T>> {
         self.0.into_iter().map(Normalized).collect()
-    }
-
-    pub fn from_boxed_slice(boxed: Normalized<Vec<T>>) -> Self {
-        Normalized(boxed.0.into())
-    }
-
-    pub fn into_boxed_slice(self) -> Normalized<Vec<T>> {
-        Normalized(self.0.into())
     }
 }
 

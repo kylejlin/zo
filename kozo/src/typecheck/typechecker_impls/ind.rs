@@ -14,7 +14,6 @@ impl TypeChecker {
                 tcon_g0,
                 scon,
             )?
-            .into_boxed_slice()
             .into_rc_sem_hashed();
 
         let universe_node = NormalForm::universe(ast::UniverseNode {
@@ -88,9 +87,7 @@ impl TypeChecker {
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
                 exprs: def.index_args.to_vec_of_cloned(),
-                expected_types: Normalized::<Vec<_>>::from_boxed_slice(
-                    normalized_index_types_g2.without_digest().cloned(),
-                ),
+                expected_types: normalized_index_types_g2.without_digest().cloned(),
                 actual_types: index_arg_types_g2,
                 tcon_len: tcon_with_param_types_g2.len(),
             },
