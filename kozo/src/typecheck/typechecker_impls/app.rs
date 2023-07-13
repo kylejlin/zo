@@ -62,7 +62,7 @@ impl TypeChecker {
     ) -> Normalized<Vec<ast::Expr>> {
         let len = normalized_args.raw().value.len();
 
-        let out: Vec<NormalForm> = (0..len)
+        (0..len)
             .map(|param_index| {
                 let unsubstituted_param_type = unsubstituted_param_types
                     .without_digest()
@@ -75,8 +75,6 @@ impl TypeChecker {
                 let substituted = substituter.replace_debs(unsubstituted_param_type.into_raw(), 0);
                 self.evaluator.eval(substituted)
             })
-            .collect();
-
-        Normalized::from_vec_normalized(out)
+            .collect()
     }
 }

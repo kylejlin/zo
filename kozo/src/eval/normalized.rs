@@ -94,18 +94,18 @@ where
 }
 
 impl<T> Normalized<Vec<T>> {
-    pub fn from_vec_normalized(v: Vec<Normalized<T>>) -> Self {
-        Normalized(v.into_iter().map(Normalized::into_raw).collect())
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self(Vec::with_capacity(capacity))
     }
 
-    pub fn into_vec_normalized(self) -> Vec<Normalized<T>> {
-        self.0.into_iter().map(Normalized).collect()
+    pub fn push(&mut self, item: Normalized<T>) {
+        self.0.push(item.into_raw())
     }
 }
 
-impl<T> Normalized<Vec<T>> {
-    pub fn push(&mut self, item: Normalized<T>) {
-        self.0.push(item.into_raw())
+impl<T> FromIterator<Normalized<T>> for Normalized<Vec<T>> {
+    fn from_iter<I: IntoIterator<Item = Normalized<T>>>(iter: I) -> Self {
+        Self(iter.into_iter().map(Normalized::into_raw).collect())
     }
 }
 

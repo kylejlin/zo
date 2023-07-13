@@ -34,10 +34,9 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
-        let mut out: Normalized<Vec<ast::Expr>> =
-            Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
+        let mut out: Normalized<Vec<ast::Expr>> = Normalized::with_capacity(exprs.len());
         let mut normalized_visited_exprs: Normalized<Vec<ast::Expr>> =
-            Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
+            Normalized::with_capacity(exprs.len());
 
         for expr in exprs.to_vec() {
             let current_tcon = LazyTypeContext::Snoc(&tcon, normalized_visited_exprs.to_derefed());
@@ -58,8 +57,7 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
-        let mut out: Normalized<Vec<ast::Expr>> =
-            Normalized::from_vec_normalized(Vec::with_capacity(exprs.len()));
+        let mut out: Normalized<Vec<ast::Expr>> = Normalized::with_capacity(exprs.len());
 
         for expr in exprs.to_vec() {
             let type_ = self.get_type(expr.clone(), tcon, scon)?;
