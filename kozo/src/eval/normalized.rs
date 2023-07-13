@@ -141,7 +141,7 @@ impl NormalForm {
         self,
     ) -> Option<(
         Normalized<RcSemHashed<Ind>>,
-        Normalized<RcSemHashed<Vec<Expr>>>,
+        Normalized<RcSemHashedVec<Expr>>,
     )> {
         match self.0 {
             Expr::Ind(ind) => Some((Normalized(ind), Normalized(Rc::new(Hashed::new(vec![]))))),
@@ -159,13 +159,13 @@ impl NormalForm {
 }
 
 impl Normalized<&Ind> {
-    pub fn vcon_defs(self) -> Normalized<RcSemHashed<Vec<VconDef>>> {
+    pub fn vcon_defs(self) -> Normalized<RcSemHashedVec<VconDef>> {
         Normalized(self.0.vcon_defs.clone())
     }
 }
 
 impl Normalized<&VconDef> {
-    pub fn index_args(self) -> Normalized<RcSemHashed<Vec<Expr>>> {
+    pub fn index_args(self) -> Normalized<RcSemHashedVec<Expr>> {
         Normalized(self.0.index_args.clone())
     }
 }
@@ -173,7 +173,7 @@ impl Normalized<&VconDef> {
 impl Normalized<App> {
     pub fn app_with_ind_callee(
         callee: Normalized<RcSemHashed<Ind>>,
-        args: Normalized<RcSemHashed<Vec<Expr>>>,
+        args: Normalized<RcSemHashedVec<Expr>>,
     ) -> Self {
         Normalized(App {
             callee: Expr::Ind(callee.into_raw()),
@@ -187,13 +187,13 @@ impl Normalized<App> {
 }
 
 impl Normalized<&For> {
-    pub fn param_types(self) -> Normalized<RcSemHashed<Vec<Expr>>> {
+    pub fn param_types(self) -> Normalized<RcSemHashedVec<Expr>> {
         Normalized(self.0.param_types.clone())
     }
 }
 
 impl Normalized<For> {
-    pub fn for_(param_types: Normalized<RcSemHashed<Vec<Expr>>>, return_type: NormalForm) -> Self {
+    pub fn for_(param_types: Normalized<RcSemHashedVec<Expr>>, return_type: NormalForm) -> Self {
         Normalized(For {
             param_types: param_types.into_raw(),
             return_type: return_type.into_raw(),
@@ -250,7 +250,7 @@ impl Normalized<RcSemHashed<Ind>> {
     }
 }
 
-impl Normalized<RcSemHashed<Vec<Expr>>> {
+impl Normalized<RcSemHashedVec<Expr>> {
     pub fn upshift_expressions_with_constant_cutoff(self, amount: usize) -> Self {
         Normalized(DebUpshifter(amount).replace_debs_in_expressions_with_constant_cutoff(self.0, 0))
     }

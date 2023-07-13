@@ -61,7 +61,7 @@ fn fmt_str_literal(
 }
 
 fn fmt_parenthesized_vcon_defs(
-    defs: RcSemHashed<Vec<VconDef>>,
+    defs: RcSemHashedVec<VconDef>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -121,7 +121,7 @@ fn fmt_match(m: RcSemHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) 
 }
 
 fn fmt_parenthesized_match_cases(
-    cases: RcSemHashed<Vec<MatchCase>>,
+    cases: RcSemHashedVec<MatchCase>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -229,7 +229,7 @@ fn fmt_universe(
 }
 
 fn fmt_parenthesized_expressions(
-    parenthesized_expressions: RcSemHashed<Vec<Expr>>,
+    parenthesized_expressions: RcSemHashedVec<Expr>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {

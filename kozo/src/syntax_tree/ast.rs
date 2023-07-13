@@ -5,6 +5,9 @@ pub use crate::hash::{sha256::*, *};
 /// Reference-counted semantically hashed.
 pub type RcSemHashed<T> = Rc<SemanticallyHashed<T>>;
 
+/// Reference-counted semantically hashed vector.
+pub type RcSemHashedVec<T> = Rc<SemanticallyHashed<Vec<T>>>;
+
 pub fn rc_sem_hashed<T: HashWithAlgorithm<SemanticHashAlgorithm>>(t: T) -> RcSemHashed<T> {
     Rc::new(Hashed::new(t))
 }
@@ -220,8 +223,8 @@ impl Expr {
 pub struct Ind {
     pub name: Rc<StringValue>,
     pub universe_level: UniverseLevel,
-    pub index_types: RcSemHashed<Vec<Expr>>,
-    pub vcon_defs: RcSemHashed<Vec<VconDef>>,
+    pub index_types: RcSemHashedVec<Expr>,
+    pub vcon_defs: RcSemHashedVec<VconDef>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
@@ -229,8 +232,8 @@ pub struct StringValue(pub String);
 
 #[derive(Debug, Clone)]
 pub struct VconDef {
-    pub param_types: RcSemHashed<Vec<Expr>>,
-    pub index_args: RcSemHashed<Vec<Expr>>,
+    pub param_types: RcSemHashedVec<Expr>,
+    pub index_args: RcSemHashedVec<Expr>,
 }
 
 #[derive(Debug, Clone)]
@@ -243,7 +246,7 @@ pub struct Vcon {
 pub struct Match {
     pub matchee: Expr,
     pub return_type: Expr,
-    pub cases: RcSemHashed<Vec<MatchCase>>,
+    pub cases: RcSemHashedVec<MatchCase>,
 }
 
 #[derive(Debug, Clone)]
@@ -255,7 +258,7 @@ pub struct MatchCase {
 #[derive(Debug, Clone)]
 pub struct Fun {
     pub decreasing_index: Option<usize>,
-    pub param_types: RcSemHashed<Vec<Expr>>,
+    pub param_types: RcSemHashedVec<Expr>,
     pub return_type: Expr,
     pub return_val: Expr,
 }
@@ -263,12 +266,12 @@ pub struct Fun {
 #[derive(Debug, Clone)]
 pub struct App {
     pub callee: Expr,
-    pub args: RcSemHashed<Vec<Expr>>,
+    pub args: RcSemHashedVec<Expr>,
 }
 
 #[derive(Debug, Clone)]
 pub struct For {
-    pub param_types: RcSemHashed<Vec<Expr>>,
+    pub param_types: RcSemHashedVec<Expr>,
     pub return_type: Expr,
 }
 

@@ -2,9 +2,9 @@ use crate::syntax_tree::ast::*;
 
 use std::rc::Rc;
 
-type RcExprs = RcSemHashed<Vec<Expr>>;
-type RcVconDefs = RcSemHashed<Vec<VconDef>>;
-type RcMatchCases = RcSemHashed<Vec<MatchCase>>;
+type RcExprs = RcSemHashedVec<Expr>;
+type RcVconDefs = RcSemHashedVec<VconDef>;
+type RcMatchCases = RcSemHashedVec<MatchCase>;
 
 /// Replaces `0` with the last element of in `new_exprs`,
 /// `1` with the second to last element,

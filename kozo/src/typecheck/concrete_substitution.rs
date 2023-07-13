@@ -76,7 +76,7 @@ struct DependentExprs<'a>(&'a [Expr]);
 struct IndependentExprs<'a>(&'a [Expr]);
 
 impl Substitute for DependentExprs<'_> {
-    type Output = RcSemHashed<Vec<Expr>>;
+    type Output = RcSemHashedVec<Expr>;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         let subbed = self
@@ -91,7 +91,7 @@ impl Substitute for DependentExprs<'_> {
 }
 
 impl Substitute for IndependentExprs<'_> {
-    type Output = RcSemHashed<Vec<Expr>>;
+    type Output = RcSemHashedVec<Expr>;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         let subbed = self
@@ -104,7 +104,7 @@ impl Substitute for IndependentExprs<'_> {
     }
 }
 
-impl Substitute for RcSemHashed<Vec<VconDef>> {
+impl Substitute for RcSemHashedVec<VconDef> {
     type Output = Self;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -155,7 +155,7 @@ impl Substitute for RcSemHashed<Match> {
     }
 }
 
-impl Substitute for RcSemHashed<Vec<MatchCase>> {
+impl Substitute for RcSemHashedVec<MatchCase> {
     type Output = Self;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {

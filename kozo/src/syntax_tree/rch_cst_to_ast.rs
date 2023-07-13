@@ -1,7 +1,7 @@
 use crate::{
     hash::{sha256::*, *},
     syntax_tree::{
-        ast::{self, rc_sem_hashed, Deb, RcSemHashed, UniverseLevel},
+        ast::{self, rc_sem_hashed, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
         rch_cst::{self as cst, RcHashed},
     },
 };
@@ -71,7 +71,7 @@ impl RchCstToAstConverter {
     pub fn convert_vcon_defs(
         &mut self,
         cst: cst::ZeroOrMoreVconDefs,
-    ) -> RcSemHashed<Vec<ast::VconDef>> {
+    ) -> RcSemHashedVec<ast::VconDef> {
         let v = self.convert_vcon_defs_to_vec(cst);
         rc_sem_hashed(v)
     }
@@ -149,7 +149,7 @@ impl RchCstToAstConverter {
     fn convert_match_cases(
         &mut self,
         cst: cst::ZeroOrMoreMatchCases,
-    ) -> RcSemHashed<Vec<ast::MatchCase>> {
+    ) -> RcSemHashedVec<ast::MatchCase> {
         let v = self.convert_match_cases_to_vec(cst);
         rc_sem_hashed(v)
     }
@@ -247,10 +247,7 @@ impl RchCstToAstConverter {
         })
     }
 
-    pub fn convert_expressions(
-        &mut self,
-        cst: cst::ZeroOrMoreExprs,
-    ) -> RcSemHashed<Vec<ast::Expr>> {
+    pub fn convert_expressions(&mut self, cst: cst::ZeroOrMoreExprs) -> RcSemHashedVec<ast::Expr> {
         let v = self.convert_expressions_to_vec(cst);
         rc_sem_hashed(v)
     }

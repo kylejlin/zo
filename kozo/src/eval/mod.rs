@@ -19,9 +19,9 @@ impl Evaluator {
     }
 }
 
-type RcExprs = RcSemHashed<Vec<Expr>>;
-type RcVconDefs = RcSemHashed<Vec<VconDef>>;
-type RcMatchCases = RcSemHashed<Vec<MatchCase>>;
+type RcExprs = RcSemHashedVec<Expr>;
+type RcVconDefs = RcSemHashedVec<VconDef>;
+type RcMatchCases = RcSemHashedVec<MatchCase>;
 
 impl Evaluator {
     pub fn eval(&mut self, expr: Expr) -> NormalForm {
