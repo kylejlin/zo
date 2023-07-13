@@ -352,7 +352,7 @@ fn polymorphic_rev_1_2_3() {
     let err = TypeChecker::default()
         .get_type(
             cst,
-            LazyTypeContext::Base(empty.as_ref().convert()),
+            LazyTypeContext::Base(empty.as_ref().convert_ref()),
             LazySubstitutionContext::Base(&[]),
         )
         .unwrap_err();

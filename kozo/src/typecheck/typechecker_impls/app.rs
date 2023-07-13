@@ -26,8 +26,7 @@ impl TypeChecker {
             });
         }
 
-        let arg_types =
-            self.get_types_of_independent_expressions(app.value.args.clone(), tcon, scon)?;
+        let arg_types = self.get_types_of_independent_expressions(&app.value.args, tcon, scon)?;
         let args_ast = self
             .cst_converter
             .convert_expressions(app.value.args.clone());

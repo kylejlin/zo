@@ -8,7 +8,7 @@ impl TypeChecker {
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         let param_type_types =
-            self.get_types_of_dependent_expressions(fun.value.param_types.clone(), tcon, scon)?;
+            self.get_types_of_dependent_expressions(&fun.value.param_types, tcon, scon)?;
         assert_every_expr_is_universe(param_type_types.raw()).map_err(|offender_index| {
             TypeError::UnexpectedNonTypeExpression {
                 expr: fun.value.param_types[offender_index].clone(),
@@ -48,7 +48,7 @@ impl TypeChecker {
         let recursive_fun_param_type_singleton_ref = recursive_fun_param_type_singleton.as_ref();
         let tcon_with_param_and_recursive_fun_param_types = LazyTypeContext::Snoc(
             &tcon_with_param_types,
-            recursive_fun_param_type_singleton_ref.convert(),
+            recursive_fun_param_type_singleton_ref.convert_ref(),
         );
 
         // TODO: Delete

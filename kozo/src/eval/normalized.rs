@@ -43,7 +43,7 @@ impl<T> Normalized<&T> {
         Normalized(self.0.deref())
     }
 
-    pub fn convert<U: ?Sized>(&self) -> Normalized<&U>
+    pub fn convert_ref<U: ?Sized>(&self) -> Normalized<&U>
     where
         T: AsRef<U>,
     {
@@ -54,6 +54,15 @@ impl<T> Normalized<&T> {
 impl<T> Normalized<RcSemHashed<T>> {
     pub fn without_digest(&self) -> Normalized<&T> {
         Normalized(&self.0.value)
+    }
+}
+
+impl<T> Normalized<T>
+where
+    T: HashWithAlgorithm<SemanticHashAlgorithm>,
+{
+    pub fn into_rc_sem_hashed(self) -> Normalized<RcSemHashed<T>> {
+        Normalized(rc_sem_hashed(self.0))
     }
 }
 
@@ -102,6 +111,14 @@ impl<T> Normalized<Vec<T>> {
 
     pub fn into_vec_normalized(self) -> Vec<Normalized<T>> {
         self.0.into_iter().map(Normalized).collect()
+    }
+
+    pub fn from_boxed_slice(boxed: Normalized<Box<[T]>>) -> Self {
+        Normalized(boxed.0.into())
+    }
+
+    pub fn into_boxed_slice(self) -> Normalized<Box<[T]>> {
+        Normalized(self.0.into())
     }
 }
 

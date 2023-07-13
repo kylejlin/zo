@@ -4,153 +4,117 @@ impl TypeChecker {
     pub fn get_type_of_ind(
         &mut self,
         ind: RcHashed<cst::Ind>,
-        tcon: LazyTypeContext,
+        tcon_g0: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        self.perform_ind_precheck(ind.clone(), tcon, scon)?;
-        Ok(self.get_ind_type_assuming_ind_is_well_typed(ind))
+        let normalized_index_types_g0 = self
+            .typecheck_and_normalize_param_types_with_limit(
+                &ind.value.index_types,
+                ind.clone(),
+                tcon_g0,
+                scon,
+            )?
+            .into_boxed_slice()
+            .into_rc_sem_hashed();
+
+        let universe_node = NormalForm::universe(ast::UniverseNode {
+            level: UniverseLevel(ind.value.type_.level),
+        });
+        let ind_type = Normalized::for_(normalized_index_types_g0.clone(), universe_node)
+            .collapse_if_nullary();
+
+        let ind_type_singleton = Normalized::<[_; 1]>::new(ind_type.clone());
+        let ind_type_singleton = ind_type_singleton.as_ref();
+        let tcon_with_ind_type_g1 =
+            LazyTypeContext::Snoc(&tcon_g0, ind_type_singleton.convert_ref());
+
+        self.typecheck_ind_vcon_defs(
+            ind.clone(),
+            normalized_index_types_g0,
+            tcon_with_ind_type_g1,
+            scon,
+        )?;
+
+        Ok(ind_type)
     }
 
-    fn perform_ind_precheck(
+    fn typecheck_ind_vcon_defs(
         &mut self,
         ind: RcHashed<cst::Ind>,
-        tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
-    ) -> Result<(), TypeError> {
-        let index_type_types =
-            self.get_types_of_dependent_expressions(ind.value.index_types.clone(), tcon, scon)?;
-        assert_every_expr_is_universe(&index_type_types.raw()).map_err(|offender_index| {
-            TypeError::UnexpectedNonTypeExpression {
-                expr: ind.value.index_types[offender_index].clone(),
-                type_: index_type_types.index(offender_index).cloned(),
-            }
-        })?;
-
-        // Once we verify that the index types are all well-typed,
-        // it is safe to construct a predicted type for the ind type.
-        let predicted_ind_type = self.get_ind_type_assuming_ind_is_well_typed(ind.clone());
-
-        assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
-            &index_type_types.raw(),
-            UniverseLevel(ind.value.type_.level),
-        )
-        .map_err(|(offender_index, offender_level)| {
-            TypeError::UniverseInconsistencyInIndDef {
-                index_or_param_type: ind.value.index_types[offender_index].clone(),
-                level: offender_level,
-                ind: ind.value.clone(),
-            }
-        })?;
-
-        self.assert_ind_vcon_defs_are_well_typed(ind, predicted_ind_type, tcon, scon)?;
-
-        Ok(())
-    }
-
-    fn assert_ind_vcon_defs_are_well_typed(
-        &mut self,
-        ind: RcHashed<cst::Ind>,
-        predicted_ind_type: NormalForm,
-        tcon: LazyTypeContext,
+        normalized_index_types_g0: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
+        tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         for def in ind.value.vcon_defs.to_vec() {
-            self.assert_ind_vcon_def_is_well_typed(
-                ind.clone(),
-                predicted_ind_type.clone(),
+            self.typecheck_ind_vcon_def(
                 def,
-                tcon,
+                ind.clone(),
+                normalized_index_types_g0.clone(),
+                tcon_g1,
                 scon,
             )?;
         }
         Ok(())
     }
 
-    fn assert_ind_vcon_def_is_well_typed(
+    fn typecheck_ind_vcon_def(
         &mut self,
-        ind: RcHashed<cst::Ind>,
-        predicted_ind_type: NormalForm,
         def: &cst::VconDef,
-        tcon: LazyTypeContext,
+        ind: RcHashed<cst::Ind>,
+        normalized_index_types_g0: Normalized<RcSemHashed<Box<[ast::Expr]>>>,
+        tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        let recursive_ind_entry: Normalized<Vec<ast::Expr>> =
-            std::iter::once(predicted_ind_type).collect();
-        let tcon_with_ind_type = LazyTypeContext::Snoc(&tcon, recursive_ind_entry.to_derefed());
-        let param_type_types = self.get_types_of_dependent_expressions(
-            def.param_types.clone(),
-            tcon_with_ind_type,
+        self.assert_index_arg_count_is_correct(def, normalized_index_types_g0.raw().value.len())?;
+
+        let normalized_param_types = self.typecheck_and_normalize_param_types_with_limit(
+            &def.param_types,
+            ind,
+            tcon_g1,
             scon,
         )?;
 
-        let param_types_ast = self
-            .cst_converter
-            .convert_expressions(def.param_types.clone());
-        let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
-        let normalized_param_types_without_digest = normalized_param_types.without_digest();
-        let tcon_with_ind_and_param_types = LazyTypeContext::Snoc(
-            &tcon_with_ind_type,
-            normalized_param_types_without_digest.derefed(),
-        );
-        self.get_types_of_independent_expressions(
-            def.index_args.clone(),
-            tcon_with_ind_and_param_types,
+        let tcon_with_param_types_g2 =
+            LazyTypeContext::Snoc(&tcon_g1, normalized_param_types.to_derefed());
+
+        let index_arg_types_g2 = self.get_types_of_independent_expressions(
+            &def.index_args,
+            tcon_with_param_types_g2,
             scon,
         )?;
 
-        if ind.value.index_types.len() != def.index_args.len() {
+        let normalized_index_types_g2 = normalized_index_types_g0
+            .upshift_expressions_with_constant_cutoff(1 + normalized_param_types.raw().len());
+
+        self.assert_expected_type_equalities_holds_after_applying_scon(
+            ExpectedTypeEqualities {
+                exprs: def.index_args.to_vec_of_cloned(),
+                expected_types: Normalized::<Vec<_>>::from_boxed_slice(
+                    normalized_index_types_g2.without_digest().cloned(),
+                ),
+                actual_types: index_arg_types_g2,
+                tcon_len: tcon_with_param_types_g2.len(),
+            },
+            scon,
+        )?;
+
+        Ok(())
+    }
+
+    fn assert_index_arg_count_is_correct(
+        &mut self,
+        def: &cst::VconDef,
+        expected_index_arg_count: usize,
+    ) -> Result<(), TypeError> {
+        let actual_index_arg_count = def.index_args.len();
+        if expected_index_arg_count != actual_index_arg_count {
             return Err(TypeError::WrongNumberOfIndexArguments {
                 def: def.clone(),
-                expected: ind.value.index_types.len(),
-                actual: def.index_args.len(),
+                expected: expected_index_arg_count,
+                actual: actual_index_arg_count,
             });
         }
 
-        assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
-            &param_type_types.raw(),
-            UniverseLevel(ind.value.type_.level),
-        )
-        .map_err(|(offender_index, offender_level)| {
-            TypeError::UniverseInconsistencyInIndDef {
-                index_or_param_type: def.param_types[offender_index].clone(),
-                level: offender_level,
-                ind: ind.value.clone(),
-            }
-        })?;
-
-        self.assert_vcon_def_is_strictly_positive(ind, def, tcon, scon)?;
-
         Ok(())
-    }
-
-    fn assert_vcon_def_is_strictly_positive(
-        &mut self,
-        _ind: RcHashed<cst::Ind>,
-        _def: &cst::VconDef,
-        _tcon: LazyTypeContext,
-        _scon: LazySubstitutionContext,
-    ) -> Result<(), TypeError> {
-        // TODO: Actually check positivity.
-        Ok(())
-    }
-
-    /// This function assumes that the index types are well-typed.
-    /// If they are not, this will cause (probably undetectable) bugs.
-    ///
-    /// However, you may safely call this function even if the vcon defs
-    /// are ill-typed.
-    fn get_ind_type_assuming_ind_is_well_typed(&mut self, ind: RcHashed<cst::Ind>) -> NormalForm {
-        let index_types_ast = self
-            .cst_converter
-            .convert_expressions(ind.value.index_types.clone());
-        let normalized_index_types = self.evaluator.eval_expressions(index_types_ast);
-        let return_type = self.get_ind_return_type(ind);
-        Normalized::for_(normalized_index_types, return_type).collapse_if_nullary()
-    }
-
-    fn get_ind_return_type(&mut self, ind: RcHashed<cst::Ind>) -> NormalForm {
-        Normalized::universe(ast::UniverseNode {
-            level: UniverseLevel(ind.value.type_.level),
-        })
     }
 }

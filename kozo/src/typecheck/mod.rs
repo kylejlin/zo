@@ -66,24 +66,6 @@ impl ast::Expr {
     }
 }
 
-fn assert_every_lhs_universe_is_less_than_or_equal_to_rhs(
-    lhs: &[ast::Expr],
-    rhs: UniverseLevel,
-) -> Result<(), (usize, UniverseLevel)> {
-    for (i, expr) in lhs.iter().enumerate() {
-        let lhs_level = match expr {
-            ast::Expr::Universe(universe) => universe.value.level,
-            _ => continue,
-        };
-
-        if lhs_level > rhs {
-            return Err((i, lhs_level));
-        }
-    }
-
-    Ok(())
-}
-
 fn get_max_universe_level<'a>(
     exprs: impl IntoIterator<Item = &'a ast::Expr>,
 ) -> Option<UniverseLevel> {

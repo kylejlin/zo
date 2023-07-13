@@ -51,7 +51,7 @@ pub fn get_type_under_empty_tcon_and_scon_or_panic(src: &str) -> NormalForm {
     TypeChecker::default()
         .get_type(
             cst,
-            LazyTypeContext::Base(empty.as_ref().convert()),
+            LazyTypeContext::Base(empty.as_ref().convert_ref()),
             LazySubstitutionContext::Base(&[]),
         )
         .unwrap()
