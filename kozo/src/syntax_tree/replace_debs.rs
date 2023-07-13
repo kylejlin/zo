@@ -53,6 +53,15 @@ pub trait ReplaceDebs {
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output;
 }
 
+/// Some collections represent independent items,
+/// whereas others represent a dependent items.
+/// This requires shifting each item with a constant cutoff
+/// and increasing cutoff, respectively.
+///
+/// We could represent this semantic difference at the type level
+/// (e.g. `RcSemHashedIndependentVec` vs `RcSemHashedDependentVec`),
+/// but this requires a lot of boilerplate.
+/// So instead, we leave it up to the user to call the correct method.
 pub trait ReplaceDebsInEachItem {
     fn replace_debs_with_constant_cutoff<R: DebReplacer>(self, replacer: &R, cutoff: usize)
         -> Self;
