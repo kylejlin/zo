@@ -156,9 +156,9 @@ impl NormalForm {
     }
 }
 
-impl Normalized<&Ind> {
-    pub fn vcon_defs(self) -> Normalized<RcSemHashedVec<VconDef>> {
-        Normalized(self.0.vcon_defs.clone())
+impl<'a> Normalized<&'a Ind> {
+    pub fn vcon_defs(self) -> Normalized<&'a RcSemHashedVec<VconDef>> {
+        Normalized(&self.0.vcon_defs)
     }
 }
 

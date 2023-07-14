@@ -77,8 +77,11 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        let vcon_defs = well_typed_matchee_type_ind.to_hashee().vcon_defs();
-        let vcon_defs = vcon_defs.to_hashee().derefed();
+        let vcon_defs: Normalized<&[ast::VconDef]> = well_typed_matchee_type_ind
+            .to_hashee()
+            .vcon_defs()
+            .hashee()
+            .derefed();
 
         for match_case_index in 0..match_.hashee.cases.len() {
             let well_typed_vcon_def = vcon_defs.index_ref(match_case_index);
