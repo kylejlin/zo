@@ -188,9 +188,9 @@ impl Normalized<App> {
     }
 }
 
-impl Normalized<&For> {
-    pub fn param_types(self) -> Normalized<RcSemHashedVec<Expr>> {
-        Normalized(self.0.param_types.clone())
+impl<'a> Normalized<&'a For> {
+    pub fn param_types(self) -> Normalized<&'a RcSemHashedVec<Expr>> {
+        Normalized(&self.0.param_types)
     }
 }
 

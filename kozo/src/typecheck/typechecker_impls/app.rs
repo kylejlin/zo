@@ -33,7 +33,7 @@ impl TypeChecker {
         let normalized_args = self.evaluator.eval_expressions(args_ast);
 
         let substituted_param_types = self.substitute_param_types(
-            callee_type.to_hashee().param_types(),
+            callee_type.to_hashee().param_types().cloned(),
             normalized_args.clone(),
         );
         self.assert_expected_type_equalities_holds_after_applying_scon(
