@@ -53,7 +53,13 @@ impl<'a, T> Normalized<&'a T> {
 }
 
 impl<T> Normalized<RcSemHashed<T>> {
+    /// Shorthand for `self.as_ref().hashee()`.
     pub fn to_hashee(&self) -> Normalized<&T> {
+        self.as_ref().hashee()
+    }
+}
+impl<'a, T> Normalized<&'a RcSemHashed<T>> {
+    pub fn hashee(self) -> Normalized<&'a T> {
         Normalized(&self.0.hashee)
     }
 }
