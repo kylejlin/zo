@@ -29,7 +29,7 @@ impl<T> Normalized<T> {
     }
 }
 
-impl<T> Normalized<&T> {
+impl<'a, T> Normalized<&'a T> {
     pub fn cloned(self) -> Normalized<T>
     where
         T: Clone,
@@ -37,17 +37,15 @@ impl<T> Normalized<&T> {
         Normalized(self.0.clone())
     }
 
-    pub fn derefed<'a>(self) -> Normalized<&'a T::Target>
+    pub fn derefed(self) -> Normalized<&'a T::Target>
     where
-        Self: 'a,
         T: Deref,
     {
         Normalized(self.0.deref())
     }
 
-    pub fn convert_ref<'a, U: ?Sized>(self) -> Normalized<&'a U>
+    pub fn convert_ref<U: ?Sized>(self) -> Normalized<&'a U>
     where
-        Self: 'a,
         T: AsRef<U>,
     {
         Normalized(self.0.as_ref())
