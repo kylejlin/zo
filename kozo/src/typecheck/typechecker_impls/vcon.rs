@@ -7,57 +7,64 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        self.perform_vcon_precheck(vcon.clone(), tcon, scon)?;
+        self.assert_vcon_index_is_valid(vcon.clone())?;
 
-        let vcon_index = vcon.value.vcon_index;
-        let defs: &cst::ZeroOrMoreVconDefs = &vcon.value.ind.value.vcon_defs;
-        let Some(def) = defs.get(vcon_index.value) else {
-            return Err(TypeError::InvalidVconIndex(vcon.value.clone()));
-        };
-        self.get_type_of_trusted_vcon_def(def, vcon.value.ind.clone())
+        let normalized_ind =
+            self.typecheck_and_normalize_ind(vcon.value.ind.clone(), tcon, scon)?;
+
+        let vcon_index = vcon.value.vcon_index.value;
+        Ok(
+            self.get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
+                normalized_ind.clone(),
+                vcon_index,
+            ),
+        )
     }
 
-    fn perform_vcon_precheck(
-        &mut self,
-        vcon: RcHashed<cst::Vcon>,
-        tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
-    ) -> Result<(), TypeError> {
-        self.get_type_of_ind(vcon.value.ind.clone(), tcon, scon)?;
+    fn assert_vcon_index_is_valid(&mut self, vcon: RcHashed<cst::Vcon>) -> Result<(), TypeError> {
+        let vcon_index = vcon.value.vcon_index.value;
+        let defs: &cst::ZeroOrMoreVconDefs = &vcon.value.ind.value.vcon_defs;
+        if vcon_index >= defs.len() {
+            return Err(TypeError::InvalidVconIndex(vcon.value.clone()));
+        }
         Ok(())
     }
 
-    fn get_type_of_trusted_vcon_def(
+    fn typecheck_and_normalize_ind(
         &mut self,
-        def: &cst::VconDef,
         ind: RcHashed<cst::Ind>,
-    ) -> Result<NormalForm, TypeError> {
-        let unsubstituted_param_types_ast = self
-            .cst_converter
-            .convert_expressions(def.param_types.clone());
-        let unsubstituted_index_args_ast = self
-            .cst_converter
-            .convert_expressions(def.index_args.clone());
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<Normalized<RcSemHashed<ast::Ind>>, TypeError> {
+        self.get_type_of_ind(ind.clone(), tcon, scon)?;
+
         let ind_ast = self.cst_converter.convert_ind(ind);
-        let normalized_ind = self.evaluator.eval_ind(ind_ast);
+        let normalized = self.evaluator.eval_ind(ind_ast);
+        Ok(normalized)
+    }
 
-        let ind_singleton: [ast::Expr; 1] = [normalized_ind.raw().clone().into()];
-        let ind_singleton_deb_substituter = DebDownshiftSubstituter {
-            new_exprs: &ind_singleton,
-        };
+    fn get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
+        &mut self,
+        ind: Normalized<RcSemHashed<ast::Ind>>,
+        vcon_index: usize,
+    ) -> NormalForm {
+        let defs = ind.without_digest().vcon_defs();
+        let defs = defs.without_digest().derefed();
+        let def: Normalized<&ast::VconDef> = defs.index(vcon_index);
 
-        let substituted_param_types_ast = unsubstituted_param_types_ast
-            .replace_debs_with_increasing_cutoff(&ind_singleton_deb_substituter, 0);
-        let normalized_param_types = self.evaluator.eval_expressions(substituted_param_types_ast);
+        let substituted_downshifted_param_types = def
+            .param_types()
+            .replace_deb0_with_ind_with_increasing_cutoff(ind.clone(), 0);
 
-        let param_count = def.param_types.len();
-        let substituted_index_args_ast = unsubstituted_index_args_ast
-            .replace_debs_with_constant_cutoff(&ind_singleton_deb_substituter, param_count);
-        let normalized_index_args = self.evaluator.eval_expressions(substituted_index_args_ast);
-        let shifted_normalized_ind = normalized_ind.upshift(param_count);
-        let return_type =
-            Normalized::app_with_ind_callee(shifted_normalized_ind, normalized_index_args)
+        let param_count = def.raw().param_types.value.len();
+        let substituted_downshifted_index_args = def
+            .index_args()
+            .replace_deb0_with_ind_with_constant_cutoff(ind.clone(), param_count);
+
+        let upshifted_ind = ind.upshift(param_count);
+        let capp =
+            Normalized::app_with_ind_callee(upshifted_ind, substituted_downshifted_index_args)
                 .collapse_if_nullary();
-        Ok(Normalized::for_(normalized_param_types, return_type).collapse_if_nullary())
+        Normalized::for_(substituted_downshifted_param_types, capp).collapse_if_nullary()
     }
 }
