@@ -144,6 +144,7 @@ impl TypeChecker {
         let match_case_param_count = match_case_param_types.raw().len();
         let substituted_vcon_index_args = well_typed_vcon_def
             .index_args()
+            .cloned()
             .replace_deb0_with_ind_with_increasing_cutoff(well_typed_matchee_type_ind.clone(), 0);
         let upshifted_matchee_type_args = well_typed_matchee_type_args
             .clone()

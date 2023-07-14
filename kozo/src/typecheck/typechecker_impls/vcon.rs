@@ -53,11 +53,13 @@ impl TypeChecker {
 
         let substituted_downshifted_param_types = def
             .param_types()
+            .cloned()
             .replace_deb0_with_ind_with_increasing_cutoff(ind.clone(), 0);
 
         let param_count = def.raw().param_types.hashee.len();
         let substituted_downshifted_index_args = def
             .index_args()
+            .cloned()
             .replace_deb0_with_ind_with_constant_cutoff(ind.clone(), param_count);
 
         let upshifted_ind = ind.upshift(param_count);

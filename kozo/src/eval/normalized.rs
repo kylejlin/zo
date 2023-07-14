@@ -162,13 +162,13 @@ impl<'a> Normalized<&'a Ind> {
     }
 }
 
-impl Normalized<&VconDef> {
-    pub fn param_types(self) -> Normalized<RcSemHashedVec<Expr>> {
-        Normalized(self.0.param_types.clone())
+impl<'a> Normalized<&'a VconDef> {
+    pub fn param_types(self) -> Normalized<&'a RcSemHashedVec<Expr>> {
+        Normalized(&self.0.param_types)
     }
 
-    pub fn index_args(self) -> Normalized<RcSemHashedVec<Expr>> {
-        Normalized(self.0.index_args.clone())
+    pub fn index_args(self) -> Normalized<&'a RcSemHashedVec<Expr>> {
+        Normalized(&self.0.index_args)
     }
 }
 
