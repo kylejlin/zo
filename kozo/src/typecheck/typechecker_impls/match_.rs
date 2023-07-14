@@ -81,7 +81,7 @@ impl TypeChecker {
         let vcon_defs = vcon_defs.to_hashee().derefed();
 
         for match_case_index in 0..match_.hashee.cases.len() {
-            let well_typed_vcon_def = vcon_defs.index(match_case_index);
+            let well_typed_vcon_def = vcon_defs.index_ref(match_case_index);
             let match_case = &match_.hashee.cases[match_case_index];
             self.perform_match_case_precheck(
                 match_case,
@@ -165,7 +165,7 @@ impl TypeChecker {
                     let vcon_index_arg = substituted_vcon_index_args
                         .to_hashee()
                         .derefed()
-                        .index(i)
+                        .index_ref(i)
                         .cloned();
                     // NO ACTION NEEDED:
                     // We already upshifted the matchee type args.
@@ -174,7 +174,7 @@ impl TypeChecker {
                     let matchee_index_arg = upshifted_matchee_type_args
                         .to_hashee()
                         .derefed()
-                        .index(i)
+                        .index_ref(i)
                         .cloned();
                     LazySubstitution {
                         tcon_len: extended_tcon_len,

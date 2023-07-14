@@ -88,12 +88,26 @@ impl<T, S> Normalized<S>
 where
     S: Deref<Target = [T]>,
 {
-    pub fn get(&self, index: usize) -> Option<Normalized<&T>> {
+    /// Shorthand for `self.as_ref().get(index)`.
+    pub fn get_ref(&self, index: usize) -> Option<Normalized<&T>> {
+        self.as_ref().get(index)
+    }
+
+    /// Shorthand for `self.as_ref().index(index)`.
+    pub fn index_ref(&self, index: usize) -> Normalized<&T> {
+        self.as_ref().index(index)
+    }
+}
+impl<'a, T, S> Normalized<&'a S>
+where
+    S: Deref<Target = [T]>,
+{
+    pub fn get(self, index: usize) -> Option<Normalized<&'a T>> {
         self.0.deref().get(index).map(Normalized)
     }
 
     /// A panicking version of `get`.
-    pub fn index(&self, index: usize) -> Normalized<&T> {
+    pub fn index(self, index: usize) -> Normalized<&'a T> {
         Normalized(&self.0[index])
     }
 }

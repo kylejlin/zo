@@ -71,7 +71,7 @@ impl TypeChecker {
                 let unsubstituted_param_type = unsubstituted_param_types
                     .to_hashee()
                     .derefed()
-                    .index(param_index)
+                    .index_ref(param_index)
                     .cloned();
                 let substituter = DebDownshiftSubstituter {
                     new_exprs: &normalized_args.raw().hashee[0..param_index],

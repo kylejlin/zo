@@ -12,7 +12,7 @@ impl TypeChecker {
         assert_every_expr_is_universe(param_type_types.raw()).map_err(|offender_index| {
             TypeError::UnexpectedNonTypeExpression {
                 expr: for_.hashee.param_types[offender_index].clone(),
-                type_: param_type_types.index(offender_index).cloned(),
+                type_: param_type_types.index_ref(offender_index).cloned(),
             }
         })?;
 

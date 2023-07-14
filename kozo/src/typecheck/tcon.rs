@@ -29,12 +29,12 @@ impl LazyTypeContext<'_> {
         match self {
             LazyTypeContext::Base(types) => {
                 let index = (types.raw().len()).checked_sub(1 + deb.0)?;
-                Some(types.get(index)?.cloned())
+                Some(types.get_ref(index)?.cloned())
             }
 
             LazyTypeContext::Snoc(subcontext, types) => {
                 if let Some(index) = (types.raw().len()).checked_sub(1 + deb.0) {
-                    Some(types.get(index)?.cloned())
+                    Some(types.get_ref(index)?.cloned())
                 } else {
                     subcontext.get(Deb(deb.0 - types.raw().len()))
                 }

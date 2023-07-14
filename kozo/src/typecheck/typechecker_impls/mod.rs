@@ -78,7 +78,7 @@ impl TypeChecker {
         let param_type_types = self.get_types_of_dependent_expressions(exprs, tcon, scon)?;
 
         for i in 0..param_type_types.raw().len() {
-            let param_type_type: Normalized<&ast::Expr> = param_type_types.index(i);
+            let param_type_type: Normalized<&ast::Expr> = param_type_types.index_ref(i);
             let param_type_type_ul = match param_type_type.into_raw() {
                 ast::Expr::Universe(universe) => universe.hashee.level,
                 _ => {

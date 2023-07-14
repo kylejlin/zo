@@ -22,8 +22,8 @@ impl ExpectedTypeEqualities {
         let tcon_len = self.tcon_len;
         (0..self.len()).into_iter().map(move |i| {
             let expr = self.exprs[i].clone();
-            let expected_type = self.expected_types.index(i).cloned();
-            let actual_type = self.actual_types.index(i).cloned();
+            let expected_type = self.expected_types.index_ref(i).cloned();
+            let actual_type = self.actual_types.index_ref(i).cloned();
             ExpectedTypeEquality {
                 expr,
                 expected_type,

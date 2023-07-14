@@ -50,7 +50,7 @@ impl TypeChecker {
     ) -> NormalForm {
         let defs = ind.to_hashee().vcon_defs();
         let defs = defs.to_hashee().derefed();
-        let def: Normalized<&ast::VconDef> = defs.index(vcon_index);
+        let def: Normalized<&ast::VconDef> = defs.index_ref(vcon_index);
 
         let substituted_downshifted_param_types = def
             .param_types()
