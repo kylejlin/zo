@@ -18,10 +18,15 @@ impl TypeChecker {
 
         let param_types_ast = self
             .cst_converter
-            .convert_expressions(for_.value.param_types.clone());
-        let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
-        let tcon_with_param_types =
-            LazyTypeContext::Snoc(&tcon, normalized_param_types.without_digest().derefed());
+            .convert_dependent_expressions(for_.value.param_types.clone());
+        let normalized_param_types = self.evaluator.eval_dependent_expressions(param_types_ast);
+        let tcon_with_param_types = LazyTypeContext::Snoc(
+            &tcon,
+            normalized_param_types
+                .to_derefed()
+                .without_digest()
+                .derefed(),
+        );
         let return_type_type =
             self.get_type(for_.value.return_type.clone(), tcon_with_param_types, scon)?;
         let return_type_type_universe_level = match return_type_type.raw() {

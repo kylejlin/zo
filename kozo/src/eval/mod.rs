@@ -10,7 +10,7 @@ pub use normalized::*;
 pub struct Evaluator {
     pub eval_expr_cache: NoHashHashMap<Digest, NormalForm>,
     pub eval_exprs_cache: NoHashHashMap<Digest, Normalized<RcSemHashedVec<Expr>>>,
-    pub eval_vcon_defs_cache: NoHashHashMap<Digest, Normalized<RcSemHashedVec<VconDef>>>,
+    pub eval_vcon_defs_cache: NoHashHashMap<Digest, Normalized<IndepRcSemHashedVec<VconDef>>>,
 }
 
 impl Evaluator {
@@ -47,13 +47,37 @@ impl Evaluator {
         let normalized = Ind {
             name: ind.name.clone(),
             universe_level: ind.universe_level,
-            index_types: self.eval_expressions(ind.index_types.clone()).into_raw(),
+            index_types: self
+                .eval_dependent_expressions(ind.index_types.clone())
+                .into_raw(),
             vcon_defs: self.eval_vcon_defs(ind.vcon_defs.clone()).into_raw(),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
         self.eval_expr_cache.insert(ind_digest, normalized.clone());
         normalized
+    }
+
+    /// This is just a wrapper for `Self::eval_expressions`.
+    /// Independent expressions and dependent expressions
+    /// have the same evaluation semantics
+    /// (although they have different typing semantics).
+    pub fn eval_independent_expressions(
+        &mut self,
+        exprs: IndepRcSemHashedVec<Expr>,
+    ) -> Normalized<IndepRcSemHashedVec<Expr>> {
+        Normalized(Independent(self.eval_expressions(exprs.0).0))
+    }
+
+    /// This is just a wrapper for `Self::eval_expressions`.
+    /// Independent expressions and dependent expressions
+    /// have the same evaluation semantics
+    /// (although they have different typing semantics).
+    pub fn eval_dependent_expressions(
+        &mut self,
+        exprs: DepRcSemHashedVec<Expr>,
+    ) -> Normalized<DepRcSemHashedVec<Expr>> {
+        Normalized(Dependent(self.eval_expressions(exprs.0).0))
     }
 
     pub fn eval_expressions(
@@ -86,8 +110,8 @@ impl Evaluator {
 
     fn eval_vcon_defs(
         &mut self,
-        defs: RcSemHashedVec<VconDef>,
-    ) -> Normalized<RcSemHashedVec<VconDef>> {
+        defs: IndepRcSemHashedVec<VconDef>,
+    ) -> Normalized<IndepRcSemHashedVec<VconDef>> {
         if let Some(result) = self.eval_vcon_defs_cache.get(&defs.digest) {
             result.clone()
         } else {
@@ -97,15 +121,15 @@ impl Evaluator {
 
     fn eval_unseen_vcon_defs(
         &mut self,
-        defs: RcSemHashedVec<VconDef>,
-    ) -> Normalized<RcSemHashedVec<VconDef>> {
+        defs: IndepRcSemHashedVec<VconDef>,
+    ) -> Normalized<IndepRcSemHashedVec<VconDef>> {
         let defs_digest = defs.digest.clone();
         let defs = &defs.value;
         let normalized = defs
             .iter()
             .map(|def| self.eval_vcon_def(def.clone()).into_raw())
             .collect::<Vec<_>>()
-            .rc_hash_and_wrap_in_normalized();
+            .rc_hash_and_wrap_in_normalized_independent();
 
         self.eval_vcon_defs_cache
             .insert(defs_digest, normalized.clone());
@@ -122,8 +146,12 @@ impl Evaluator {
 
     fn eval_unseen_vcon_def(&mut self, def: VconDef) -> Normalized<VconDef> {
         Normalized(VconDef {
-            param_types: self.eval_expressions(def.param_types.clone()).into_raw(),
-            index_args: self.eval_expressions(def.index_args.clone()).into_raw(),
+            param_types: self
+                .eval_dependent_expressions(def.param_types.clone())
+                .into_raw(),
+            index_args: self
+                .eval_independent_expressions(def.index_args.clone())
+                .into_raw(),
         })
     }
 
@@ -209,8 +237,8 @@ impl Evaluator {
 
     fn eval_match_cases(
         &mut self,
-        cases: RcSemHashedVec<MatchCase>,
-    ) -> Normalized<RcSemHashedVec<MatchCase>> {
+        cases: IndepRcSemHashedVec<MatchCase>,
+    ) -> Normalized<IndepRcSemHashedVec<MatchCase>> {
         // It's not worth caching match cases,
         // so we'll just re-evaluate them every time.
         // This isn't actually that expensive,
@@ -220,8 +248,8 @@ impl Evaluator {
 
     fn eval_unseen_match_cases(
         &mut self,
-        cases: RcSemHashedVec<MatchCase>,
-    ) -> Normalized<RcSemHashedVec<MatchCase>> {
+        cases: IndepRcSemHashedVec<MatchCase>,
+    ) -> Normalized<IndepRcSemHashedVec<MatchCase>> {
         let cases = &cases.value;
         cases
             .iter()
@@ -230,7 +258,7 @@ impl Evaluator {
                 return_val: self.eval(original.return_val.clone()).into_raw(),
             })
             .collect::<Vec<_>>()
-            .rc_hash_and_wrap_in_normalized()
+            .rc_hash_and_wrap_in_normalized_independent()
     }
 
     fn eval_unseen_fun(&mut self, fun: RcSemHashed<Fun>) -> NormalForm {
@@ -238,7 +266,9 @@ impl Evaluator {
         let fun = &fun.value;
         let normalized = Fun {
             decreasing_index: fun.decreasing_index,
-            param_types: self.eval_expressions(fun.param_types.clone()).into_raw(),
+            param_types: self
+                .eval_dependent_expressions(fun.param_types.clone())
+                .into_raw(),
             return_type: self.eval(fun.return_type.clone()).into_raw(),
             return_val: self.eval(fun.return_val.clone()).into_raw(),
         }
@@ -250,7 +280,9 @@ impl Evaluator {
 
     fn eval_unseen_app(&mut self, app: RcSemHashed<App>) -> NormalForm {
         let normalized_callee = self.eval(app.value.callee.clone()).into_raw();
-        let normalized_args = self.eval_expressions(app.value.args.clone()).into_raw();
+        let normalized_args = self
+            .eval_independent_expressions(app.value.args.clone())
+            .into_raw();
 
         if let Expr::Fun(callee) = &normalized_callee {
             if can_unfold_app(callee.clone(), normalized_args.clone()) {
@@ -269,7 +301,7 @@ impl Evaluator {
         let app_digest = app.digest.clone();
         let normalized = App {
             callee: normalized_callee,
-            args: normalized_args,
+            args: normalized_args.into(),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
@@ -281,7 +313,9 @@ impl Evaluator {
         let for_digest = for_.digest.clone();
         let for_ = &for_.value;
         let normalized = For {
-            param_types: self.eval_expressions(for_.param_types.clone()).into_raw(),
+            param_types: self
+                .eval_dependent_expressions(for_.param_types.clone())
+                .into_raw(),
             return_type: self.eval(for_.return_type.clone()).into_raw(),
         }
         .convert_to_expr_and_wrap_in_normalized();
@@ -295,7 +329,7 @@ impl Evaluator {
     }
 }
 
-fn can_unfold_app(callee: RcSemHashed<Fun>, args: RcSemHashedVec<Expr>) -> bool {
+fn can_unfold_app(callee: RcSemHashed<Fun>, args: IndepRcSemHashedVec<Expr>) -> bool {
     let Some(decreasing_index) = callee.value.decreasing_index else {
         // If there is no decreasing param index,
         // the function is non-recursive.

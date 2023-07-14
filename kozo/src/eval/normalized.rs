@@ -58,6 +58,14 @@ impl<T> Normalized<RcSemHashed<T>> {
         Normalized(&self.0.value)
     }
 }
+impl<T> Normalized<&RcSemHashed<T>> {
+    pub fn without_digest<'a>(self) -> Normalized<&'a T>
+    where
+        Self: 'a,
+    {
+        Normalized(&self.0.value)
+    }
+}
 
 impl<T> Normalized<T>
 where
@@ -65,6 +73,16 @@ where
 {
     pub fn into_rc_sem_hashed(self) -> Normalized<RcSemHashed<T>> {
         Normalized(rc_sem_hashed(self.0))
+    }
+}
+
+impl<T> Normalized<T> {
+    pub fn into_independent(self) -> Normalized<Independent<T>> {
+        Normalized(Independent(self.0))
+    }
+
+    pub fn into_dependent(self) -> Normalized<Dependent<T>> {
+        Normalized(Dependent(self.0))
     }
 }
 
@@ -120,10 +138,10 @@ impl NormalForm {
         self,
     ) -> Option<(
         Normalized<RcSemHashed<Ind>>,
-        Normalized<RcSemHashedVec<Expr>>,
+        Normalized<IndepRcSemHashedVec<Expr>>,
     )> {
         match self.0 {
-            Expr::Ind(ind) => Some((Normalized(ind), Normalized(Rc::new(Hashed::new(vec![]))))),
+            Expr::Ind(ind) => Some((Normalized(ind), Normalized(indep_rc_sem_hashed(vec![])))),
 
             Expr::App(app) => match &app.value.callee {
                 Expr::Ind(ind) => {
@@ -138,13 +156,13 @@ impl NormalForm {
 }
 
 impl Normalized<&Ind> {
-    pub fn vcon_defs(self) -> Normalized<RcSemHashedVec<VconDef>> {
+    pub fn vcon_defs(self) -> Normalized<IndepRcSemHashedVec<VconDef>> {
         Normalized(self.0.vcon_defs.clone())
     }
 }
 
 impl Normalized<&VconDef> {
-    pub fn index_args(self) -> Normalized<RcSemHashedVec<Expr>> {
+    pub fn index_args(self) -> Normalized<IndepRcSemHashedVec<Expr>> {
         Normalized(self.0.index_args.clone())
     }
 }
@@ -152,7 +170,7 @@ impl Normalized<&VconDef> {
 impl Normalized<App> {
     pub fn app_with_ind_callee(
         callee: Normalized<RcSemHashed<Ind>>,
-        args: Normalized<RcSemHashedVec<Expr>>,
+        args: Normalized<IndepRcSemHashedVec<Expr>>,
     ) -> Self {
         Normalized(App {
             callee: Expr::Ind(callee.into_raw()),
@@ -166,13 +184,13 @@ impl Normalized<App> {
 }
 
 impl Normalized<&For> {
-    pub fn param_types(self) -> Normalized<RcSemHashedVec<Expr>> {
+    pub fn param_types(self) -> Normalized<DepRcSemHashedVec<Expr>> {
         Normalized(self.0.param_types.clone())
     }
 }
 
 impl Normalized<For> {
-    pub fn for_(param_types: Normalized<RcSemHashedVec<Expr>>, return_type: NormalForm) -> Self {
+    pub fn for_(param_types: Normalized<DepRcSemHashedVec<Expr>>, return_type: NormalForm) -> Self {
         Normalized(For {
             param_types: param_types.into_raw(),
             return_type: return_type.into_raw(),
@@ -210,7 +228,7 @@ impl NormalForm {
             .collect();
         let capp = App {
             callee: vcon.into(),
-            args: rc_sem_hashed(args),
+            args: indep_rc_sem_hashed(args),
         }
         .collapse_if_nullary();
         Normalized(capp)
@@ -221,25 +239,13 @@ impl<T: ReplaceDebs> Normalized<T> {
     pub fn upshift(self, amount: usize) -> Normalized<T::Output> {
         Normalized(self.0.replace_debs(&DebUpshifter(amount), 0))
     }
-}
 
-impl<T: ReplaceDebsInEachItem> Normalized<T> {
-    pub fn upshift_with_constant_cutoff(self, amount: usize) -> Self {
-        Normalized(
-            self.0
-                .replace_debs_with_constant_cutoff(&DebUpshifter(amount), 0),
-        )
-    }
-
-    pub fn replace_deb0_with_ind_with_increasing_cutoff(
-        self,
-        ind: Normalized<RcSemHashed<Ind>>,
-    ) -> Self {
+    pub fn replace_deb0_with_ind(self, ind: Normalized<RcSemHashed<Ind>>) -> Normalized<T::Output> {
         let ind_singleton: [Expr; 1] = [ind.raw().clone().into()];
         let substituter = DebDownshiftSubstituter {
             new_exprs: &ind_singleton,
         };
-        Normalized(self.0.replace_debs_with_increasing_cutoff(&substituter, 0))
+        Normalized(self.0.replace_debs(&substituter, 0))
     }
 }
 
@@ -371,6 +377,14 @@ mod unchecked {
 
     pub trait RcSemHashAndWrapInNormalized: Sized {
         fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcSemHashed<Self>>;
+
+        fn rc_hash_and_wrap_in_normalized_independent(
+            self,
+        ) -> Normalized<Independent<RcSemHashed<Self>>>;
+
+        fn rc_hash_and_wrap_in_normalized_dependent(
+            self,
+        ) -> Normalized<Dependent<RcSemHashed<Self>>>;
     }
 
     impl<T> RcSemHashAndWrapInNormalized for T
@@ -379,6 +393,18 @@ mod unchecked {
     {
         fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcSemHashed<Self>> {
             Normalized(rc_sem_hashed(self))
+        }
+
+        fn rc_hash_and_wrap_in_normalized_independent(
+            self,
+        ) -> Normalized<Independent<RcSemHashed<Self>>> {
+            Normalized(Independent(rc_sem_hashed(self)))
+        }
+
+        fn rc_hash_and_wrap_in_normalized_dependent(
+            self,
+        ) -> Normalized<Dependent<RcSemHashed<Self>>> {
+            Normalized(Dependent(rc_sem_hashed(self)))
         }
     }
 }

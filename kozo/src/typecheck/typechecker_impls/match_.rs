@@ -69,12 +69,12 @@ impl TypeChecker {
         match_: RcHashed<cst::Match>,
         unshifted_match_return_type: NormalForm,
         well_typed_matchee_type_ind: Normalized<RcSemHashed<ast::Ind>>,
-        well_typed_matchee_type_args: Normalized<RcSemHashedVec<ast::Expr>>,
+        well_typed_matchee_type_args: Normalized<IndepRcSemHashedVec<ast::Expr>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         let vcon_defs = well_typed_matchee_type_ind.without_digest().vcon_defs();
-        let vcon_defs = vcon_defs.without_digest().derefed();
+        let vcon_defs = vcon_defs.to_derefed().without_digest().derefed();
 
         for match_case_index in 0..match_.value.cases.len() {
             let well_typed_vcon_def = vcon_defs.index(match_case_index);
@@ -103,7 +103,7 @@ impl TypeChecker {
         match_: RcHashed<cst::Match>,
         unshifted_match_return_type: NormalForm,
         well_typed_matchee_type_ind: Normalized<RcSemHashed<ast::Ind>>,
-        well_typed_matchee_type_args: Normalized<RcSemHashedVec<ast::Expr>>,
+        well_typed_matchee_type_args: Normalized<IndepRcSemHashedVec<ast::Expr>>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -128,8 +128,8 @@ impl TypeChecker {
             .raw()
             .param_types
             .clone()
-            .replace_debs_with_increasing_cutoff(&ind_singleton_deb_substituter, 0);
-        let match_case_param_types = self.evaluator.eval_expressions(match_case_param_types);
+            .replace_debs(&ind_singleton_deb_substituter, 0);
+        let match_case_param_types = self.evaluator.eval_expressions(match_case_param_types.0);
         let match_case_param_types = match_case_param_types.without_digest();
         let tcon_with_match_case_param_types =
             LazyTypeContext::Snoc(&tcon, match_case_param_types.derefed());
@@ -137,10 +137,10 @@ impl TypeChecker {
         let match_case_param_count = match_case_param_types.raw().len();
         let substituted_vcon_index_args = well_typed_vcon_def
             .index_args()
-            .replace_deb0_with_ind_with_increasing_cutoff(well_typed_matchee_type_ind.clone());
+            .replace_deb0_with_ind(well_typed_matchee_type_ind.clone());
         let upshifted_matchee_type_args = well_typed_matchee_type_args
             .clone()
-            .upshift_with_constant_cutoff(match_case_param_count);
+            .upshift(match_case_param_count);
         let extended_tcon_len = tcon_with_match_case_param_types.len();
         let matchee_ast = self.cst_converter.convert(match_.value.matchee.clone());
         let upshifted_matchee = matchee_ast.replace_debs(&DebUpshifter(match_case_param_count), 0);
@@ -159,6 +159,8 @@ impl TypeChecker {
                     // by `match_case_param_count` WITH A CUTOFF OF
                     // `match_case_param_count`.
                     let vcon_index_arg = substituted_vcon_index_args
+                        .to_derefed()
+                        .cloned()
                         .without_digest()
                         .derefed()
                         .index(i)
@@ -168,6 +170,8 @@ impl TypeChecker {
                     // TODO: Delete above comment after we finish
                     // checking the shifting logic.
                     let matchee_index_arg = upshifted_matchee_type_args
+                        .to_derefed()
+                        .cloned()
                         .without_digest()
                         .derefed()
                         .index(i)

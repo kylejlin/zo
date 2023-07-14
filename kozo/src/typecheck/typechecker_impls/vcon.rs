@@ -34,10 +34,10 @@ impl TypeChecker {
     ) -> Result<NormalForm, TypeError> {
         let unsubstituted_param_types_ast = self
             .cst_converter
-            .convert_expressions(def.param_types.clone());
+            .convert_dependent_expressions(def.param_types.clone());
         let unsubstituted_index_args_ast = self
             .cst_converter
-            .convert_expressions(def.index_args.clone());
+            .convert_independent_expressions(def.index_args.clone());
         let ind_ast = self.cst_converter.convert_ind(ind);
         let normalized_ind = self.evaluator.eval_ind(ind_ast);
 
@@ -46,14 +46,20 @@ impl TypeChecker {
             new_exprs: &ind_singleton,
         };
 
-        let substituted_param_types_ast = unsubstituted_param_types_ast
-            .replace_debs_with_increasing_cutoff(&ind_singleton_deb_substituter, 0);
-        let normalized_param_types = self.evaluator.eval_expressions(substituted_param_types_ast);
+        let substituted_param_types_ast =
+            unsubstituted_param_types_ast.replace_debs(&ind_singleton_deb_substituter, 0);
+        let normalized_param_types = self
+            .evaluator
+            .eval_expressions(substituted_param_types_ast.0)
+            .into_dependent();
 
         let param_count = def.param_types.len();
-        let substituted_index_args_ast = unsubstituted_index_args_ast
-            .replace_debs_with_constant_cutoff(&ind_singleton_deb_substituter, param_count);
-        let normalized_index_args = self.evaluator.eval_expressions(substituted_index_args_ast);
+        let substituted_index_args_ast =
+            unsubstituted_index_args_ast.replace_debs(&ind_singleton_deb_substituter, param_count);
+        let normalized_index_args = self
+            .evaluator
+            .eval_expressions(substituted_index_args_ast.0)
+            .into_independent();
         let shifted_normalized_ind = normalized_ind.upshift(param_count);
         let return_type =
             Normalized::app_with_ind_callee(shifted_normalized_ind, normalized_index_args)

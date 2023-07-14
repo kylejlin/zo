@@ -1,15 +1,65 @@
-use std::rc::Rc;
+use std::{
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
 
 pub use crate::hash::{sha256::*, *};
 
 /// Reference-counted semantically hashed.
 pub type RcSemHashed<T> = Rc<SemanticallyHashed<T>>;
 
-/// Reference-counted semantically hashed vector.
+/// Reference-counted semantically vector.
 pub type RcSemHashedVec<T> = Rc<SemanticallyHashed<Vec<T>>>;
+
+/// Reference-counted semantically hashed independent vector.
+pub type IndepRcSemHashedVec<T> = Independent<RcSemHashedVec<T>>;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+pub struct Independent<T>(pub T);
+impl<T> Deref for Independent<T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl<T> DerefMut for Independent<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+/// Reference-counted semantically hashed independent vector.
+pub type DepRcSemHashedVec<T> = Dependent<RcSemHashedVec<T>>;
+
+impl<T> Deref for Dependent<T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl<T> DerefMut for Dependent<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+pub struct Dependent<T>(pub T);
 
 pub fn rc_sem_hashed<T: HashWithAlgorithm<SemanticHashAlgorithm>>(t: T) -> RcSemHashed<T> {
     Rc::new(Hashed::new(t))
+}
+
+pub fn indep_rc_sem_hashed<T: HashWithAlgorithm<SemanticHashAlgorithm>>(
+    t: T,
+) -> Independent<RcSemHashed<T>> {
+    Independent(rc_sem_hashed(t))
+}
+
+pub fn dep_rc_sem_hashed<T: HashWithAlgorithm<SemanticHashAlgorithm>>(
+    t: T,
+) -> Dependent<RcSemHashed<T>> {
+    Dependent(rc_sem_hashed(t))
 }
 
 #[derive(Clone, Debug)]
@@ -22,6 +72,98 @@ pub enum Expr {
     For(RcSemHashed<For>),
     Deb(RcSemHashed<DebNode>),
     Universe(RcSemHashed<UniverseNode>),
+}
+
+#[derive(Clone, Debug)]
+pub struct Ind {
+    pub name: Rc<StringValue>,
+    pub universe_level: UniverseLevel,
+    pub index_types: DepRcSemHashedVec<Expr>,
+    pub vcon_defs: IndepRcSemHashedVec<VconDef>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
+pub struct StringValue(pub String);
+
+#[derive(Debug, Clone)]
+pub struct VconDef {
+    pub param_types: DepRcSemHashedVec<Expr>,
+    pub index_args: IndepRcSemHashedVec<Expr>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Vcon {
+    pub ind: RcSemHashed<Ind>,
+    pub vcon_index: usize,
+}
+
+#[derive(Debug, Clone)]
+pub struct Match {
+    pub matchee: Expr,
+    pub return_type: Expr,
+    pub cases: IndepRcSemHashedVec<MatchCase>,
+}
+
+#[derive(Debug, Clone)]
+pub struct MatchCase {
+    pub arity: usize,
+    pub return_val: Expr,
+}
+
+#[derive(Debug, Clone)]
+pub struct Fun {
+    pub decreasing_index: Option<usize>,
+    pub param_types: DepRcSemHashedVec<Expr>,
+    pub return_type: Expr,
+    pub return_val: Expr,
+}
+
+#[derive(Debug, Clone)]
+pub struct App {
+    pub callee: Expr,
+    pub args: IndepRcSemHashedVec<Expr>,
+}
+
+#[derive(Debug, Clone)]
+pub struct For {
+    pub param_types: DepRcSemHashedVec<Expr>,
+    pub return_type: Expr,
+}
+
+#[derive(Debug, Clone)]
+pub struct DebNode {
+    pub deb: Deb,
+}
+
+#[derive(Debug, Clone)]
+pub struct UniverseNode {
+    pub level: UniverseLevel,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+pub struct Deb(pub usize);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+pub struct UniverseLevel(pub usize);
+
+impl App {
+    pub fn collapse_if_nullary(self) -> Expr {
+        if self.args.value.is_empty() {
+            self.callee
+        } else {
+            Expr::App(Rc::new(Hashed::new(self)))
+        }
+    }
+}
+
+impl For {
+    pub fn collapse_if_nullary(self) -> Expr {
+        if self.param_types.value.is_empty() {
+            self.return_type
+        } else {
+            Expr::For(Rc::new(Hashed::new(self)))
+        }
+    }
 }
 
 impl GetDigest for Expr {
@@ -215,98 +357,6 @@ impl Expr {
         match self {
             Expr::Universe(e) => Ok(e),
             _ => Err(self),
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct Ind {
-    pub name: Rc<StringValue>,
-    pub universe_level: UniverseLevel,
-    pub index_types: RcSemHashedVec<Expr>,
-    pub vcon_defs: RcSemHashedVec<VconDef>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
-pub struct StringValue(pub String);
-
-#[derive(Debug, Clone)]
-pub struct VconDef {
-    pub param_types: RcSemHashedVec<Expr>,
-    pub index_args: RcSemHashedVec<Expr>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Vcon {
-    pub ind: RcSemHashed<Ind>,
-    pub vcon_index: usize,
-}
-
-#[derive(Debug, Clone)]
-pub struct Match {
-    pub matchee: Expr,
-    pub return_type: Expr,
-    pub cases: RcSemHashedVec<MatchCase>,
-}
-
-#[derive(Debug, Clone)]
-pub struct MatchCase {
-    pub arity: usize,
-    pub return_val: Expr,
-}
-
-#[derive(Debug, Clone)]
-pub struct Fun {
-    pub decreasing_index: Option<usize>,
-    pub param_types: RcSemHashedVec<Expr>,
-    pub return_type: Expr,
-    pub return_val: Expr,
-}
-
-#[derive(Debug, Clone)]
-pub struct App {
-    pub callee: Expr,
-    pub args: RcSemHashedVec<Expr>,
-}
-
-#[derive(Debug, Clone)]
-pub struct For {
-    pub param_types: RcSemHashedVec<Expr>,
-    pub return_type: Expr,
-}
-
-#[derive(Debug, Clone)]
-pub struct DebNode {
-    pub deb: Deb,
-}
-
-#[derive(Debug, Clone)]
-pub struct UniverseNode {
-    pub level: UniverseLevel,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
-pub struct Deb(pub usize);
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
-pub struct UniverseLevel(pub usize);
-
-impl App {
-    pub fn collapse_if_nullary(self) -> Expr {
-        if self.args.value.is_empty() {
-            self.callee
-        } else {
-            Expr::App(Rc::new(Hashed::new(self)))
-        }
-    }
-}
-
-impl For {
-    pub fn collapse_if_nullary(self) -> Expr {
-        if self.param_types.value.is_empty() {
-            self.return_type
-        } else {
-            Expr::For(Rc::new(Hashed::new(self)))
         }
     }
 }

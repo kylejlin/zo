@@ -1,12 +1,17 @@
 use crate::{
     hash::{sha256::*, *},
     syntax_tree::{
-        ast::{self, rc_sem_hashed, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
+        ast::{
+            self, dep_rc_sem_hashed, rc_sem_hashed, Deb, DepRcSemHashedVec, IndepRcSemHashedVec,
+            RcSemHashed, UniverseLevel,
+        },
         rch_cst::{self as cst, RcHashed},
     },
 };
 
 use std::rc::Rc;
+
+use super::ast::indep_rc_sem_hashed;
 
 #[derive(Debug, Clone, Default)]
 pub struct RchCstToAstConverter {
@@ -63,7 +68,7 @@ impl RchCstToAstConverter {
         rc_sem_hashed(ast::Ind {
             name: Rc::new(ast::StringValue(cst.value.name.value.to_owned())),
             universe_level: UniverseLevel(cst.value.type_.level),
-            index_types: self.convert_expressions(cst.value.index_types.clone()),
+            index_types: self.convert_dependent_expressions(cst.value.index_types.clone()),
             vcon_defs: self.convert_vcon_defs(cst.value.vcon_defs.clone()),
         })
     }
@@ -71,9 +76,9 @@ impl RchCstToAstConverter {
     pub fn convert_vcon_defs(
         &mut self,
         cst: cst::ZeroOrMoreVconDefs,
-    ) -> RcSemHashedVec<ast::VconDef> {
+    ) -> IndepRcSemHashedVec<ast::VconDef> {
         let v = self.convert_vcon_defs_to_vec(cst);
-        rc_sem_hashed(v)
+        indep_rc_sem_hashed(v)
     }
 
     fn convert_vcon_defs_to_vec(&mut self, cst: cst::ZeroOrMoreVconDefs) -> Vec<ast::VconDef> {
@@ -90,8 +95,8 @@ impl RchCstToAstConverter {
 
     fn convert_vcon_def(&mut self, cst: cst::VconDef) -> ast::VconDef {
         ast::VconDef {
-            param_types: self.convert_expressions(cst.param_types),
-            index_args: self.convert_expressions(cst.index_args),
+            param_types: self.convert_dependent_expressions(cst.param_types).into(),
+            index_args: self.convert_independent_expressions(cst.index_args).into(),
         }
     }
 
@@ -149,9 +154,9 @@ impl RchCstToAstConverter {
     fn convert_match_cases(
         &mut self,
         cst: cst::ZeroOrMoreMatchCases,
-    ) -> RcSemHashedVec<ast::MatchCase> {
+    ) -> IndepRcSemHashedVec<ast::MatchCase> {
         let v = self.convert_match_cases_to_vec(cst);
-        rc_sem_hashed(v)
+        indep_rc_sem_hashed(v)
     }
 
     fn convert_match_cases_to_vec(
@@ -197,7 +202,7 @@ impl RchCstToAstConverter {
                 cst::NumberOrNonrecKw::NonrecKw(_) => None,
                 cst::NumberOrNonrecKw::Number(n) => Some(n.value),
             },
-            param_types: self.convert_expressions(cst.value.param_types.clone()),
+            param_types: self.convert_dependent_expressions(cst.value.param_types.clone()),
             return_type: self.convert(cst.value.return_type.clone()),
             return_val: self.convert(cst.value.return_val.clone()),
         })
@@ -221,7 +226,7 @@ impl RchCstToAstConverter {
     fn convert_unseen_app(&mut self, cst: RcHashed<cst::App>) -> RcSemHashed<ast::App> {
         rc_sem_hashed(ast::App {
             callee: self.convert(cst.value.callee.clone()),
-            args: self.convert_expressions(cst.value.args.clone()),
+            args: self.convert_independent_expressions(cst.value.args.clone()),
         })
     }
 
@@ -242,14 +247,31 @@ impl RchCstToAstConverter {
 
     fn convert_unseen_for(&mut self, cst: RcHashed<cst::For>) -> RcSemHashed<ast::For> {
         rc_sem_hashed(ast::For {
-            param_types: self.convert_expressions(cst.value.param_types.clone()),
+            param_types: self.convert_dependent_expressions(cst.value.param_types.clone()),
             return_type: self.convert(cst.value.return_type.clone()),
         })
     }
 
-    pub fn convert_expressions(&mut self, cst: cst::ZeroOrMoreExprs) -> RcSemHashedVec<ast::Expr> {
+    /// This is just a wrapper around `Self::convert_expressions_to_vec`.
+    /// Independent expressions and dependent expressions have the same
+    /// syntax tree conversion semantics.
+    pub fn convert_independent_expressions(
+        &mut self,
+        cst: cst::ZeroOrMoreExprs,
+    ) -> IndepRcSemHashedVec<ast::Expr> {
         let v = self.convert_expressions_to_vec(cst);
-        rc_sem_hashed(v)
+        indep_rc_sem_hashed(v)
+    }
+
+    /// This is just a wrapper around `Self::convert_expressions_to_vec`.
+    /// Independent expressions and dependent expressions have the same
+    /// syntax tree conversion semantics.
+    pub fn convert_dependent_expressions(
+        &mut self,
+        cst: cst::ZeroOrMoreExprs,
+    ) -> DepRcSemHashedVec<ast::Expr> {
+        let v = self.convert_expressions_to_vec(cst);
+        dep_rc_sem_hashed(v)
     }
 
     fn convert_expressions_to_vec(&mut self, cst: cst::ZeroOrMoreExprs) -> Vec<ast::Expr> {

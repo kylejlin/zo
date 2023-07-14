@@ -3,7 +3,7 @@ use crate::{
     hash::sha256::*,
     pretty_print::PrettyPrinted,
     syntax_tree::{
-        ast::{self, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
+        ast::{self, Deb, DepRcSemHashedVec, IndepRcSemHashedVec, RcSemHashed, UniverseLevel},
         rch_cst::{self as cst, RcHashed},
         rch_cst_to_ast::RchCstToAstConverter,
         replace_debs::*,

@@ -14,7 +14,8 @@ impl TypeChecker {
                 tcon_g0,
                 scon,
             )?
-            .into_rc_sem_hashed();
+            .into_rc_sem_hashed()
+            .into_dependent();
 
         let universe_node = NormalForm::universe(ast::UniverseNode {
             level: UniverseLevel(ind.value.type_.level),
@@ -39,7 +40,7 @@ impl TypeChecker {
     fn typecheck_ind_vcon_defs(
         &mut self,
         ind: RcHashed<cst::Ind>,
-        normalized_index_types_g0: Normalized<RcSemHashedVec<ast::Expr>>,
+        normalized_index_types_g0: Normalized<DepRcSemHashedVec<ast::Expr>>,
         tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -59,7 +60,7 @@ impl TypeChecker {
         &mut self,
         def: &cst::VconDef,
         ind: RcHashed<cst::Ind>,
-        normalized_index_types_g0: Normalized<RcSemHashedVec<ast::Expr>>,
+        normalized_index_types_g0: Normalized<DepRcSemHashedVec<ast::Expr>>,
         tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -81,13 +82,17 @@ impl TypeChecker {
             scon,
         )?;
 
-        let normalized_index_types_g2 = normalized_index_types_g0
-            .upshift_with_constant_cutoff(1 + normalized_param_types.raw().len());
+        let normalized_index_types_g2 =
+            normalized_index_types_g0.upshift(1 + normalized_param_types.raw().len());
 
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
                 exprs: def.index_args.to_vec_of_cloned(),
-                expected_types: normalized_index_types_g2.without_digest().cloned(),
+                expected_types: normalized_index_types_g2
+                    .to_derefed()
+                    .cloned()
+                    .without_digest()
+                    .cloned(),
                 actual_types: index_arg_types_g2,
                 tcon_len: tcon_with_param_types_g2.len(),
             },

@@ -32,10 +32,10 @@ fn fmt_ind(ind: RcSemHashed<Ind>, f: &mut Formatter<'_>, indent: Indentation) ->
     fmt_str_literal(ind.value.name.clone(), f, i1)?;
     write!(f, "\n")?;
 
-    fmt_parenthesized_expressions(ind.value.index_types.clone(), f, i1)?;
+    fmt_parenthesized_expressions(ind.value.index_types.0.clone(), f, i1)?;
     write!(f, "\n")?;
 
-    fmt_parenthesized_vcon_defs(ind.value.vcon_defs.clone(), f, i1)?;
+    fmt_parenthesized_vcon_defs(ind.value.vcon_defs.0.clone(), f, i1)?;
     write!(f, "\n{indent})")?;
 
     Ok(())
@@ -85,10 +85,10 @@ fn fmt_vcon_def(def: &VconDef, f: &mut Formatter<'_>, indent: Indentation) -> Fm
     write!(f, "{indent}(\n")?;
 
     let i1 = indent.incremented();
-    fmt_parenthesized_expressions(def.param_types.clone(), f, i1)?;
+    fmt_parenthesized_expressions(def.param_types.0.clone(), f, i1)?;
     write!(f, "\n")?;
 
-    fmt_parenthesized_expressions(def.index_args.clone(), f, i1)?;
+    fmt_parenthesized_expressions(def.index_args.0.clone(), f, i1)?;
 
     write!(f, "\n{indent})")?;
     Ok(())
@@ -115,7 +115,7 @@ fn fmt_match(m: RcSemHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) 
     fmt_expr(m.value.return_type.clone(), f, i1)?;
     write!(f, "\n")?;
 
-    fmt_parenthesized_match_cases(m.value.cases.clone(), f, i1)?;
+    fmt_parenthesized_match_cases(m.value.cases.0.clone(), f, i1)?;
     write!(f, "\n{indent})")?;
     Ok(())
 }
@@ -158,7 +158,7 @@ fn fmt_fun(fun: RcSemHashed<Fun>, f: &mut Formatter<'_>, indent: Indentation) ->
     fmt_decreasing_index(fun.value.decreasing_index, f, i1)?;
     write!(f, "\n")?;
 
-    fmt_parenthesized_expressions(fun.value.param_types.clone(), f, i1)?;
+    fmt_parenthesized_expressions(fun.value.param_types.0.clone(), f, i1)?;
     write!(f, "\n")?;
 
     fmt_expr(fun.value.return_type.clone(), f, i1)?;
@@ -206,7 +206,7 @@ fn fmt_for(for_: RcSemHashed<For>, f: &mut Formatter<'_>, indent: Indentation) -
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}for\n")?;
 
-    fmt_parenthesized_expressions(for_.value.param_types.clone(), f, i1)?;
+    fmt_parenthesized_expressions(for_.value.param_types.0.clone(), f, i1)?;
     write!(f, "\n")?;
 
     fmt_expr(for_.value.return_type.clone(), f, i1)?;

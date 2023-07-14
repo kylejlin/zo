@@ -29,8 +29,8 @@ impl TypeChecker {
         let arg_types = self.get_types_of_independent_expressions(&app.value.args, tcon, scon)?;
         let args_ast = self
             .cst_converter
-            .convert_expressions(app.value.args.clone());
-        let normalized_args = self.evaluator.eval_expressions(args_ast);
+            .convert_independent_expressions(app.value.args.clone());
+        let normalized_args = self.evaluator.eval_independent_expressions(args_ast);
 
         let substituted_param_types = self.substitute_param_types(
             callee_type.without_digest().param_types(),
@@ -61,14 +61,16 @@ impl TypeChecker {
 
     fn substitute_param_types(
         &mut self,
-        unsubstituted_param_types: Normalized<RcSemHashedVec<ast::Expr>>,
-        normalized_args: Normalized<RcSemHashedVec<ast::Expr>>,
+        unsubstituted_param_types: Normalized<DepRcSemHashedVec<ast::Expr>>,
+        normalized_args: Normalized<IndepRcSemHashedVec<ast::Expr>>,
     ) -> Normalized<Vec<ast::Expr>> {
         let len = normalized_args.raw().value.len();
 
         (0..len)
             .map(|param_index| {
                 let unsubstituted_param_type = unsubstituted_param_types
+                    .to_derefed()
+                    .cloned()
                     .without_digest()
                     .derefed()
                     .index(param_index)

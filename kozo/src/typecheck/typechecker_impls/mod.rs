@@ -69,13 +69,13 @@ impl TypeChecker {
 
     fn typecheck_and_normalize_param_types_with_limit(
         &mut self,
-        exprs: &cst::ZeroOrMoreExprs,
+        param_types: &cst::ZeroOrMoreExprs,
         limiting_ind: RcHashed<cst::Ind>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
         let inclusive_max = UniverseLevel(limiting_ind.value.type_.level);
-        let param_type_types = self.get_types_of_dependent_expressions(exprs, tcon, scon)?;
+        let param_type_types = self.get_types_of_dependent_expressions(param_types, tcon, scon)?;
 
         for i in 0..param_type_types.raw().len() {
             let param_type_type: Normalized<&ast::Expr> = param_type_types.index(i);
@@ -83,7 +83,7 @@ impl TypeChecker {
                 ast::Expr::Universe(universe) => universe.value.level,
                 _ => {
                     return Err(TypeError::UnexpectedNonTypeExpression {
-                        expr: exprs[i].clone(),
+                        expr: param_types[i].clone(),
                         type_: param_type_type.cloned(),
                     })
                 }
@@ -91,15 +91,17 @@ impl TypeChecker {
 
             if param_type_type_ul > inclusive_max {
                 return Err(TypeError::UniverseInconsistencyInIndDef {
-                    index_or_param_type: exprs[i].clone(),
+                    index_or_param_type: param_types[i].clone(),
                     level: param_type_type_ul,
                     ind: limiting_ind.value.clone(),
                 });
             }
         }
 
-        let exprs_ast = self.cst_converter.convert_expressions(exprs.clone());
-        let normalized = self.evaluator.eval_expressions(exprs_ast);
-        Ok(normalized.without_digest().cloned())
+        let exprs_ast = self
+            .cst_converter
+            .convert_dependent_expressions(param_types.clone());
+        let normalized = self.evaluator.eval_dependent_expressions(exprs_ast);
+        Ok(normalized.to_derefed().cloned().without_digest().cloned())
     }
 }
