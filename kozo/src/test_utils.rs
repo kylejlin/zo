@@ -60,16 +60,16 @@ pub fn get_type_under_empty_tcon_and_scon_or_panic(src: &str) -> NormalForm {
 impl rch_cst::Expr {
     pub fn span(&self) -> Span {
         match self {
-            Self::Ind(e) => (e.value.lparen, e.value.rparen),
-            Self::Vcon(e) => (e.value.lparen, e.value.rparen),
-            Self::Match(e) => (e.value.lparen, e.value.rparen),
-            Self::Fun(e) => (e.value.lparen, e.value.rparen),
-            Self::App(e) => (e.value.lparen, e.value.rparen),
-            Self::For(e) => (e.value.lparen, e.value.rparen),
-            Self::Deb(e) => e.value.span,
+            Self::Ind(e) => (e.hashee.lparen, e.hashee.rparen),
+            Self::Vcon(e) => (e.hashee.lparen, e.hashee.rparen),
+            Self::Match(e) => (e.hashee.lparen, e.hashee.rparen),
+            Self::Fun(e) => (e.hashee.lparen, e.hashee.rparen),
+            Self::App(e) => (e.hashee.lparen, e.hashee.rparen),
+            Self::For(e) => (e.hashee.lparen, e.hashee.rparen),
+            Self::Deb(e) => e.hashee.span,
             Self::Universe(e) => (
-                e.value.start,
-                ByteIndex(e.value.start.0 + "Type".len() + get_digit_count(e.value.level)),
+                e.hashee.start,
+                ByteIndex(e.hashee.start.0 + "Type".len() + get_digit_count(e.hashee.level)),
             ),
         }
     }

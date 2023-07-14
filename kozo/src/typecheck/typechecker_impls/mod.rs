@@ -74,13 +74,13 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
-        let inclusive_max = UniverseLevel(limiting_ind.value.type_.level);
+        let inclusive_max = UniverseLevel(limiting_ind.hashee.type_.level);
         let param_type_types = self.get_types_of_dependent_expressions(exprs, tcon, scon)?;
 
         for i in 0..param_type_types.raw().len() {
             let param_type_type: Normalized<&ast::Expr> = param_type_types.index(i);
             let param_type_type_ul = match param_type_type.into_raw() {
-                ast::Expr::Universe(universe) => universe.value.level,
+                ast::Expr::Universe(universe) => universe.hashee.level,
                 _ => {
                     return Err(TypeError::UnexpectedNonTypeExpression {
                         expr: exprs[i].clone(),
@@ -93,13 +93,13 @@ impl TypeChecker {
                 return Err(TypeError::UniverseInconsistencyInIndDef {
                     index_or_param_type: exprs[i].clone(),
                     level: param_type_type_ul,
-                    ind: limiting_ind.value.clone(),
+                    ind: limiting_ind.hashee.clone(),
                 });
             }
         }
 
         let exprs_ast = self.cst_converter.convert_expressions(exprs.clone());
         let normalized = self.evaluator.eval_expressions(exprs_ast);
-        Ok(normalized.without_digest().cloned())
+        Ok(normalized.to_hashee().cloned())
     }
 }

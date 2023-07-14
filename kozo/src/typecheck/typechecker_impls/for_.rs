@@ -8,28 +8,28 @@ impl TypeChecker {
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         let param_type_types =
-            self.get_types_of_dependent_expressions(&for_.value.param_types, tcon, scon)?;
+            self.get_types_of_dependent_expressions(&for_.hashee.param_types, tcon, scon)?;
         assert_every_expr_is_universe(param_type_types.raw()).map_err(|offender_index| {
             TypeError::UnexpectedNonTypeExpression {
-                expr: for_.value.param_types[offender_index].clone(),
+                expr: for_.hashee.param_types[offender_index].clone(),
                 type_: param_type_types.index(offender_index).cloned(),
             }
         })?;
 
         let param_types_ast = self
             .cst_converter
-            .convert_expressions(for_.value.param_types.clone());
+            .convert_expressions(for_.hashee.param_types.clone());
         let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
         let tcon_with_param_types =
-            LazyTypeContext::Snoc(&tcon, normalized_param_types.without_digest().derefed());
+            LazyTypeContext::Snoc(&tcon, normalized_param_types.to_hashee().derefed());
         let return_type_type =
-            self.get_type(for_.value.return_type.clone(), tcon_with_param_types, scon)?;
+            self.get_type(for_.hashee.return_type.clone(), tcon_with_param_types, scon)?;
         let return_type_type_universe_level = match return_type_type.raw() {
-            ast::Expr::Universe(universe_node) => universe_node.value.level,
+            ast::Expr::Universe(universe_node) => universe_node.hashee.level,
 
             _ => {
                 return Err(TypeError::UnexpectedNonTypeExpression {
-                    expr: for_.value.return_type.clone(),
+                    expr: for_.hashee.return_type.clone(),
                     type_: return_type_type,
                 })
             }

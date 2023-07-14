@@ -6,12 +6,12 @@ impl TypeChecker {
         deb: RcHashed<NumberLiteral>,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
-        if let Some(expr) = tcon.get(Deb(deb.value.value)) {
+        if let Some(expr) = tcon.get(Deb(deb.hashee.value)) {
             return Ok(expr);
         }
 
         return Err(TypeError::InvalidDeb {
-            deb: deb.value.clone(),
+            deb: deb.hashee.clone(),
             tcon_len: tcon.len(),
         });
     }

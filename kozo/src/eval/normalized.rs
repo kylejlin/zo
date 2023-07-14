@@ -55,8 +55,8 @@ impl<T> Normalized<&T> {
 }
 
 impl<T> Normalized<RcSemHashed<T>> {
-    pub fn without_digest(&self) -> Normalized<&T> {
-        Normalized(&self.0.value)
+    pub fn to_hashee(&self) -> Normalized<&T> {
+        Normalized(&self.0.hashee)
     }
 }
 
@@ -126,9 +126,9 @@ impl NormalForm {
         match self.0 {
             Expr::Ind(ind) => Some((Normalized(ind), Normalized(Rc::new(Hashed::new(vec![]))))),
 
-            Expr::App(app) => match &app.value.callee {
+            Expr::App(app) => match &app.hashee.callee {
                 Expr::Ind(ind) => {
-                    Some((Normalized(ind.clone()), Normalized(app.value.args.clone())))
+                    Some((Normalized(ind.clone()), Normalized(app.hashee.args.clone())))
                 }
                 _other_callee => None,
             },

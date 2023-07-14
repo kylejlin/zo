@@ -293,7 +293,7 @@ pub struct UniverseLevel(pub usize);
 
 impl App {
     pub fn collapse_if_nullary(self) -> Expr {
-        if self.args.value.is_empty() {
+        if self.args.hashee.is_empty() {
             self.callee
         } else {
             Expr::App(Rc::new(Hashed::new(self)))
@@ -303,7 +303,7 @@ impl App {
 
 impl For {
     pub fn collapse_if_nullary(self) -> Expr {
-        if self.param_types.value.is_empty() {
+        if self.param_types.hashee.is_empty() {
             self.return_type
         } else {
             Expr::For(Rc::new(Hashed::new(self)))

@@ -34,11 +34,11 @@ impl RchCstToAstConverter {
             cst::Expr::App(e) => self.convert_app(e).into(),
             cst::Expr::For(e) => self.convert_for(e).into(),
             cst::Expr::Deb(e) => ast::DebNode {
-                deb: Deb(e.value.value),
+                deb: Deb(e.hashee.value),
             }
             .into(),
             cst::Expr::Universe(e) => ast::UniverseNode {
-                level: UniverseLevel(e.value.level),
+                level: UniverseLevel(e.hashee.level),
             }
             .into(),
         }
@@ -61,10 +61,10 @@ impl RchCstToAstConverter {
 
     fn convert_unseen_ind(&mut self, cst: RcHashed<cst::Ind>) -> RcSemHashed<ast::Ind> {
         rc_sem_hashed(ast::Ind {
-            name: Rc::new(ast::StringValue(cst.value.name.value.to_owned())),
-            universe_level: UniverseLevel(cst.value.type_.level),
-            index_types: self.convert_expressions(cst.value.index_types.clone()),
-            vcon_defs: self.convert_vcon_defs(cst.value.vcon_defs.clone()),
+            name: Rc::new(ast::StringValue(cst.hashee.name.value.to_owned())),
+            universe_level: UniverseLevel(cst.hashee.type_.level),
+            index_types: self.convert_expressions(cst.hashee.index_types.clone()),
+            vcon_defs: self.convert_vcon_defs(cst.hashee.vcon_defs.clone()),
         })
     }
 
@@ -115,8 +115,8 @@ impl RchCstToAstConverter {
 
     fn convert_unseen_vcon(&mut self, cst: RcHashed<cst::Vcon>) -> RcSemHashed<ast::Vcon> {
         rc_sem_hashed(ast::Vcon {
-            ind: self.convert_ind(cst.value.ind.clone()),
-            vcon_index: cst.value.vcon_index.value,
+            ind: self.convert_ind(cst.hashee.ind.clone()),
+            vcon_index: cst.hashee.vcon_index.value,
         })
     }
 
@@ -140,9 +140,9 @@ impl RchCstToAstConverter {
 
     fn convert_unseen_match(&mut self, cst: RcHashed<cst::Match>) -> RcSemHashed<ast::Match> {
         rc_sem_hashed(ast::Match {
-            matchee: self.convert(cst.value.matchee.clone()),
-            return_type: self.convert(cst.value.return_type.clone()),
-            cases: self.convert_match_cases(cst.value.cases.clone()),
+            matchee: self.convert(cst.hashee.matchee.clone()),
+            return_type: self.convert(cst.hashee.return_type.clone()),
+            cases: self.convert_match_cases(cst.hashee.cases.clone()),
         })
     }
 
@@ -193,13 +193,13 @@ impl RchCstToAstConverter {
 
     fn convert_unseen_fun(&mut self, cst: RcHashed<cst::Fun>) -> RcSemHashed<ast::Fun> {
         rc_sem_hashed(ast::Fun {
-            decreasing_index: match cst.value.decreasing_index {
+            decreasing_index: match cst.hashee.decreasing_index {
                 cst::NumberOrNonrecKw::NonrecKw(_) => None,
                 cst::NumberOrNonrecKw::Number(n) => Some(n.value),
             },
-            param_types: self.convert_expressions(cst.value.param_types.clone()),
-            return_type: self.convert(cst.value.return_type.clone()),
-            return_val: self.convert(cst.value.return_val.clone()),
+            param_types: self.convert_expressions(cst.hashee.param_types.clone()),
+            return_type: self.convert(cst.hashee.return_type.clone()),
+            return_val: self.convert(cst.hashee.return_val.clone()),
         })
     }
 
@@ -220,8 +220,8 @@ impl RchCstToAstConverter {
 
     fn convert_unseen_app(&mut self, cst: RcHashed<cst::App>) -> RcSemHashed<ast::App> {
         rc_sem_hashed(ast::App {
-            callee: self.convert(cst.value.callee.clone()),
-            args: self.convert_expressions(cst.value.args.clone()),
+            callee: self.convert(cst.hashee.callee.clone()),
+            args: self.convert_expressions(cst.hashee.args.clone()),
         })
     }
 
@@ -242,8 +242,8 @@ impl RchCstToAstConverter {
 
     fn convert_unseen_for(&mut self, cst: RcHashed<cst::For>) -> RcSemHashed<ast::For> {
         rc_sem_hashed(ast::For {
-            param_types: self.convert_expressions(cst.value.param_types.clone()),
-            return_type: self.convert(cst.value.return_type.clone()),
+            param_types: self.convert_expressions(cst.hashee.param_types.clone()),
+            return_type: self.convert(cst.hashee.return_type.clone()),
         })
     }
 

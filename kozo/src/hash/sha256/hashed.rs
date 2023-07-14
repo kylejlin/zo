@@ -2,7 +2,7 @@ use super::*;
 
 #[derive(Clone, Debug)]
 pub struct Hashed<T, A> {
-    pub value: T,
+    pub hashee: T,
     pub digest: Digest,
     _marker: std::marker::PhantomData<A>,
 }
@@ -19,7 +19,7 @@ where
         let digest = hasher.digest();
 
         Self {
-            value,
+            hashee: value,
             digest,
             _marker: std::marker::PhantomData,
         }

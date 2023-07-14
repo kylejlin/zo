@@ -72,7 +72,7 @@ fn get_max_universe_level<'a>(
     exprs
         .into_iter()
         .filter_map(|expr| match expr {
-            ast::Expr::Universe(universe) => Some(universe.value.level),
+            ast::Expr::Universe(universe) => Some(universe.hashee.level),
             _ => None,
         })
         .max()

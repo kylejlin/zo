@@ -9,7 +9,9 @@ impl TypeChecker {
     ) -> Result<NormalForm, TypeError> {
         self.perform_match_precheck(match_.clone(), tcon, scon)?;
 
-        let return_type_ast = self.cst_converter.convert(match_.value.return_type.clone());
+        let return_type_ast = self
+            .cst_converter
+            .convert(match_.hashee.return_type.clone());
         let normalized_return_type = self.evaluator.eval(return_type_ast);
         Ok(normalized_return_type)
     }
@@ -20,37 +22,39 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        let matchee_type = self.get_type(match_.value.matchee.clone(), tcon, scon)?;
+        let matchee_type = self.get_type(match_.hashee.matchee.clone(), tcon, scon)?;
         let Some((well_typed_matchee_type_ind, well_typed_matchee_type_args)) = matchee_type.clone().ind_or_ind_app() else {
             return Err(TypeError::NonInductiveMatcheeType {
-                expr: match_.value.matchee.clone(),
+                expr: match_.hashee.matchee.clone(),
                 type_: matchee_type,
             });
         };
 
-        let return_type_type = self.get_type(match_.value.return_type.clone(), tcon, scon)?;
+        let return_type_type = self.get_type(match_.hashee.return_type.clone(), tcon, scon)?;
         if !return_type_type.raw().is_universe() {
             return Err(TypeError::UnexpectedNonTypeExpression {
-                expr: match_.value.return_type.clone(),
+                expr: match_.hashee.return_type.clone(),
                 type_: return_type_type,
             });
         }
 
         let vcon_count = well_typed_matchee_type_ind
             .raw()
-            .value
+            .hashee
             .vcon_defs
-            .value
+            .hashee
             .len();
-        let match_case_count = match_.value.cases.len();
+        let match_case_count = match_.hashee.cases.len();
         if vcon_count != match_case_count {
             return Err(TypeError::WrongNumberOfMatchCases {
-                match_: match_.value.clone(),
-                matchee_type_ind: well_typed_matchee_type_ind.without_digest().cloned(),
+                match_: match_.hashee.clone(),
+                matchee_type_ind: well_typed_matchee_type_ind.to_hashee().cloned(),
             });
         }
 
-        let return_type_ast = self.cst_converter.convert(match_.value.return_type.clone());
+        let return_type_ast = self
+            .cst_converter
+            .convert(match_.hashee.return_type.clone());
         let unshifted_normalized_match_return_type = self.evaluator.eval(return_type_ast);
         self.perform_match_cases_precheck(
             match_,
@@ -73,12 +77,12 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        let vcon_defs = well_typed_matchee_type_ind.without_digest().vcon_defs();
-        let vcon_defs = vcon_defs.without_digest().derefed();
+        let vcon_defs = well_typed_matchee_type_ind.to_hashee().vcon_defs();
+        let vcon_defs = vcon_defs.to_hashee().derefed();
 
-        for match_case_index in 0..match_.value.cases.len() {
+        for match_case_index in 0..match_.hashee.cases.len() {
             let well_typed_vcon_def = vcon_defs.index(match_case_index);
-            let match_case = &match_.value.cases[match_case_index];
+            let match_case = &match_.hashee.cases[match_case_index];
             self.perform_match_case_precheck(
                 match_case,
                 match_case_index,
@@ -113,13 +117,13 @@ impl TypeChecker {
         };
 
         let actual_arity = match_case.arity.value;
-        let expected_arity = well_typed_vcon_def.raw().param_types.value.len();
+        let expected_arity = well_typed_vcon_def.raw().param_types.hashee.len();
         if actual_arity != expected_arity {
             return Err(TypeError::WrongMatchCaseArity {
                 actual_node: match_case.arity.clone(),
                 actual: actual_arity,
                 expected: expected_arity,
-                match_: match_.value.clone(),
+                match_: match_.hashee.clone(),
                 match_case_index,
             });
         }
@@ -130,7 +134,7 @@ impl TypeChecker {
             .clone()
             .replace_debs_with_increasing_cutoff(&ind_singleton_deb_substituter, 0);
         let match_case_param_types = self.evaluator.eval_expressions(match_case_param_types);
-        let match_case_param_types = match_case_param_types.without_digest();
+        let match_case_param_types = match_case_param_types.to_hashee();
         let tcon_with_match_case_param_types =
             LazyTypeContext::Snoc(&tcon, match_case_param_types.derefed());
 
@@ -142,7 +146,7 @@ impl TypeChecker {
             .clone()
             .upshift_with_constant_cutoff(match_case_param_count);
         let extended_tcon_len = tcon_with_match_case_param_types.len();
-        let matchee_ast = self.cst_converter.convert(match_.value.matchee.clone());
+        let matchee_ast = self.cst_converter.convert(match_.hashee.matchee.clone());
         let upshifted_matchee = matchee_ast.replace_debs(&DebUpshifter(match_case_param_count), 0);
         let upshifted_normalized_matchee = self.evaluator.eval(upshifted_matchee);
         let parameterized_vcon_capp = Normalized::vcon_capp(
@@ -153,13 +157,13 @@ impl TypeChecker {
             match_case_param_count,
         );
         let new_substitutions: Vec<LazySubstitution> =
-            (0..substituted_vcon_index_args.raw().value.len())
+            (0..substituted_vcon_index_args.raw().hashee.len())
                 .map(|i| {
                     // TODO: Upshift `substituted_vcon_index_args`
                     // by `match_case_param_count` WITH A CUTOFF OF
                     // `match_case_param_count`.
                     let vcon_index_arg = substituted_vcon_index_args
-                        .without_digest()
+                        .to_hashee()
                         .derefed()
                         .index(i)
                         .cloned();
@@ -168,7 +172,7 @@ impl TypeChecker {
                     // TODO: Delete above comment after we finish
                     // checking the shifting logic.
                     let matchee_index_arg = upshifted_matchee_type_args
-                        .without_digest()
+                        .to_hashee()
                         .derefed()
                         .index(i)
                         .cloned();

@@ -9,7 +9,7 @@ impl TypeChecker {
     ) -> Result<NormalForm, TypeError> {
         let normalized_index_types_g0 = self
             .typecheck_and_normalize_param_types_with_limit(
-                &ind.value.index_types,
+                &ind.hashee.index_types,
                 ind.clone(),
                 tcon_g0,
                 scon,
@@ -17,7 +17,7 @@ impl TypeChecker {
             .into_rc_sem_hashed();
 
         let universe_node = NormalForm::universe(ast::UniverseNode {
-            level: UniverseLevel(ind.value.type_.level),
+            level: UniverseLevel(ind.hashee.type_.level),
         });
         let ind_type = Normalized::for_(normalized_index_types_g0.clone(), universe_node)
             .collapse_if_nullary();
@@ -43,7 +43,7 @@ impl TypeChecker {
         tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        for def in ind.value.vcon_defs.to_vec() {
+        for def in ind.hashee.vcon_defs.to_vec() {
             self.typecheck_ind_vcon_def(
                 def,
                 ind.clone(),
@@ -63,7 +63,7 @@ impl TypeChecker {
         tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        self.assert_index_arg_count_is_correct(def, normalized_index_types_g0.raw().value.len())?;
+        self.assert_index_arg_count_is_correct(def, normalized_index_types_g0.raw().hashee.len())?;
 
         let normalized_param_types = self.typecheck_and_normalize_param_types_with_limit(
             &def.param_types,
@@ -87,7 +87,7 @@ impl TypeChecker {
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
                 exprs: def.index_args.to_vec_of_cloned(),
-                expected_types: normalized_index_types_g2.without_digest().cloned(),
+                expected_types: normalized_index_types_g2.to_hashee().cloned(),
                 actual_types: index_arg_types_g2,
                 tcon_len: tcon_with_param_types_g2.len(),
             },

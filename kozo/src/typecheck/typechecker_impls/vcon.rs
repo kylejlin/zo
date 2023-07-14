@@ -10,9 +10,9 @@ impl TypeChecker {
         self.assert_vcon_index_is_valid(vcon.clone())?;
 
         let normalized_ind =
-            self.typecheck_and_normalize_ind(vcon.value.ind.clone(), tcon, scon)?;
+            self.typecheck_and_normalize_ind(vcon.hashee.ind.clone(), tcon, scon)?;
 
-        let vcon_index = vcon.value.vcon_index.value;
+        let vcon_index = vcon.hashee.vcon_index.value;
         Ok(
             self.get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
                 normalized_ind.clone(),
@@ -22,10 +22,10 @@ impl TypeChecker {
     }
 
     fn assert_vcon_index_is_valid(&mut self, vcon: RcHashed<cst::Vcon>) -> Result<(), TypeError> {
-        let vcon_index = vcon.value.vcon_index.value;
-        let defs: &cst::ZeroOrMoreVconDefs = &vcon.value.ind.value.vcon_defs;
+        let vcon_index = vcon.hashee.vcon_index.value;
+        let defs: &cst::ZeroOrMoreVconDefs = &vcon.hashee.ind.hashee.vcon_defs;
         if vcon_index >= defs.len() {
-            return Err(TypeError::InvalidVconIndex(vcon.value.clone()));
+            return Err(TypeError::InvalidVconIndex(vcon.hashee.clone()));
         }
         Ok(())
     }
@@ -48,15 +48,15 @@ impl TypeChecker {
         ind: Normalized<RcSemHashed<ast::Ind>>,
         vcon_index: usize,
     ) -> NormalForm {
-        let defs = ind.without_digest().vcon_defs();
-        let defs = defs.without_digest().derefed();
+        let defs = ind.to_hashee().vcon_defs();
+        let defs = defs.to_hashee().derefed();
         let def: Normalized<&ast::VconDef> = defs.index(vcon_index);
 
         let substituted_downshifted_param_types = def
             .param_types()
             .replace_deb0_with_ind_with_increasing_cutoff(ind.clone(), 0);
 
-        let param_count = def.raw().param_types.value.len();
+        let param_count = def.raw().param_types.hashee.len();
         let substituted_downshifted_index_args = def
             .index_args()
             .replace_deb0_with_ind_with_constant_cutoff(ind.clone(), param_count);

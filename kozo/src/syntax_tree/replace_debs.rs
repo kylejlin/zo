@@ -17,18 +17,18 @@ pub struct DebDownshiftSubstituter<'a> {
 
 impl DebReplacer for DebDownshiftSubstituter<'_> {
     fn replace_deb(&self, original: RcSemHashed<DebNode>, cutoff: usize) -> Expr {
-        if original.value.deb.0 < cutoff {
+        if original.hashee.deb.0 < cutoff {
             return Expr::Deb(original);
         }
 
-        let adjusted = original.value.deb.0 - cutoff;
+        let adjusted = original.hashee.deb.0 - cutoff;
         let new_exprs_len = self.new_exprs.len();
         if adjusted < new_exprs_len {
             let unshifted_new_expr = self.new_exprs[new_exprs_len - 1 - adjusted].clone();
             return unshifted_new_expr.replace_debs(&DebUpshifter(cutoff), 0);
         }
 
-        let shifted = Deb(original.value.deb.0 - new_exprs_len);
+        let shifted = Deb(original.hashee.deb.0 - new_exprs_len);
         Expr::Deb(Rc::new(Hashed::new(DebNode { deb: shifted })))
     }
 }
@@ -37,12 +37,12 @@ pub struct DebUpshifter(pub usize);
 
 impl DebReplacer for DebUpshifter {
     fn replace_deb(&self, original: RcSemHashed<DebNode>, cutoff: usize) -> Expr {
-        if original.value.deb.0 < cutoff {
+        if original.hashee.deb.0 < cutoff {
             return Expr::Deb(original);
         }
 
         Expr::Deb(Rc::new(Hashed::new(DebNode {
-            deb: Deb(original.value.deb.0 + self.0),
+            deb: Deb(original.hashee.deb.0 + self.0),
         })))
     }
 }
@@ -84,7 +84,7 @@ where
         cutoff: usize,
     ) -> Self {
         let shifted: Vec<T> = self
-            .value
+            .hashee
             .iter()
             .map(|item| item.clone().replace_debs(replacer, cutoff))
             .collect();
@@ -97,7 +97,7 @@ where
         cutoff: usize,
     ) -> Self {
         let shifted: Vec<T> = self
-            .value
+            .hashee
             .iter()
             .enumerate()
             .map(|(index, item)| item.clone().replace_debs(replacer, cutoff + index))
@@ -153,7 +153,7 @@ impl ReplaceDebs for RcSemHashed<Ind> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
-        let original = &self.value;
+        let original = &self.hashee;
         Rc::new(Hashed::new(Ind {
             name: original.name.clone(),
             universe_level: original.universe_level,
@@ -178,10 +178,10 @@ impl ReplaceDebs for VconDef {
                 .param_types
                 .clone()
                 .replace_debs_with_increasing_cutoff(replacer, cutoff),
-            index_args: self
-                .index_args
-                .clone()
-                .replace_debs_with_constant_cutoff(replacer, cutoff + self.param_types.value.len()),
+            index_args: self.index_args.clone().replace_debs_with_constant_cutoff(
+                replacer,
+                cutoff + self.param_types.hashee.len(),
+            ),
         }
     }
 }
@@ -190,7 +190,7 @@ impl ReplaceDebs for RcSemHashed<Vcon> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
-        let original = &self.value;
+        let original = &self.hashee;
         Rc::new(Hashed::new(Vcon {
             ind: original.ind.clone().replace_debs(replacer, cutoff),
             vcon_index: original.vcon_index,
@@ -202,7 +202,7 @@ impl ReplaceDebs for RcSemHashed<Match> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
-        let original = &self.value;
+        let original = &self.hashee;
         Rc::new(Hashed::new(Match {
             matchee: original.matchee.clone().replace_debs(replacer, cutoff),
             return_type: original.return_type.clone().replace_debs(replacer, cutoff),
@@ -229,7 +229,7 @@ impl ReplaceDebs for RcSemHashed<Fun> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
-        let original = &self.value;
+        let original = &self.hashee;
         Rc::new(Hashed::new(Fun {
             decreasing_index: original.decreasing_index,
             param_types: original
@@ -239,11 +239,11 @@ impl ReplaceDebs for RcSemHashed<Fun> {
             return_type: original
                 .return_type
                 .clone()
-                .replace_debs(replacer, cutoff + original.param_types.value.len()),
+                .replace_debs(replacer, cutoff + original.param_types.hashee.len()),
             return_val: original
                 .return_val
                 .clone()
-                .replace_debs(replacer, cutoff + original.param_types.value.len() + 1),
+                .replace_debs(replacer, cutoff + original.param_types.hashee.len() + 1),
         }))
     }
 }
@@ -252,7 +252,7 @@ impl ReplaceDebs for RcSemHashed<App> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
-        let original = &self.value;
+        let original = &self.hashee;
         Rc::new(Hashed::new(App {
             callee: original.callee.clone().replace_debs(replacer, cutoff),
             args: original
@@ -267,7 +267,7 @@ impl ReplaceDebs for RcSemHashed<For> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
-        let original = &self.value;
+        let original = &self.hashee;
         Rc::new(Hashed::new(For {
             param_types: original
                 .param_types
@@ -276,7 +276,7 @@ impl ReplaceDebs for RcSemHashed<For> {
             return_type: original
                 .return_type
                 .clone()
-                .replace_debs(replacer, cutoff + original.param_types.value.len()),
+                .replace_debs(replacer, cutoff + original.param_types.hashee.len()),
         }))
     }
 }

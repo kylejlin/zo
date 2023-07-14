@@ -43,7 +43,7 @@ impl Evaluator {
 
     fn eval_unseen_ind(&mut self, ind: RcSemHashed<Ind>) -> NormalForm {
         let ind_digest = ind.digest.clone();
-        let ind = &ind.value;
+        let ind = &ind.hashee;
         let normalized = Ind {
             name: ind.name.clone(),
             universe_level: ind.universe_level,
@@ -72,7 +72,7 @@ impl Evaluator {
         exprs: RcSemHashedVec<Expr>,
     ) -> Normalized<RcSemHashedVec<Expr>> {
         let exprs_digest = exprs.digest.clone();
-        let exprs = &exprs.value;
+        let exprs = &exprs.hashee;
         let normalized = exprs
             .iter()
             .map(|expr| self.eval(expr.clone()).into_raw())
@@ -100,7 +100,7 @@ impl Evaluator {
         defs: RcSemHashedVec<VconDef>,
     ) -> Normalized<RcSemHashedVec<VconDef>> {
         let defs_digest = defs.digest.clone();
-        let defs = &defs.value;
+        let defs = &defs.hashee;
         let normalized = defs
             .iter()
             .map(|def| self.eval_vcon_def(def.clone()).into_raw())
@@ -129,7 +129,7 @@ impl Evaluator {
 
     fn eval_unseen_vcon(&mut self, vcon: RcSemHashed<Vcon>) -> NormalForm {
         let vcon_digest = vcon.digest.clone();
-        let vcon = &vcon.value;
+        let vcon = &vcon.hashee;
         let normalized = Vcon {
             ind: self.eval_ind(vcon.ind.clone()).into_raw(),
             vcon_index: vcon.vcon_index,
@@ -161,34 +161,34 @@ impl Evaluator {
     }
 
     fn eval_unseen_match(&mut self, m: RcSemHashed<Match>) -> NormalForm {
-        let match_ = &m.value;
+        let match_ = &m.hashee;
         let normalized_matchee = self.eval(match_.matchee.clone()).into_raw();
 
         if let Expr::Vcon(vcon) = &normalized_matchee {
-            let vcon_index = vcon.value.vcon_index;
-            if vcon_index >= match_.cases.value.len() {
+            let vcon_index = vcon.hashee.vcon_index;
+            if vcon_index >= match_.cases.hashee.len() {
                 // This is a "stuck" term.
                 // Since we don't emit errors, we just return it as-is.
                 return m.convert_to_expr_and_wrap_in_normalized();
             }
 
-            let match_return_value = match_.cases.value[vcon_index].return_val.clone();
+            let match_return_value = match_.cases.hashee[vcon_index].return_val.clone();
             return self.eval(match_return_value);
         }
 
         if let Expr::App(normalized_matchee) = &normalized_matchee {
-            if let Expr::Vcon(vcon) = &normalized_matchee.value.callee {
-                let vcon_index = vcon.value.vcon_index;
-                if vcon_index >= match_.cases.value.len() {
+            if let Expr::Vcon(vcon) = &normalized_matchee.hashee.callee {
+                let vcon_index = vcon.hashee.vcon_index;
+                if vcon_index >= match_.cases.hashee.len() {
                     // This is a "stuck" term.
                     // Since we don't emit errors, we just return it as-is.
                     return m.convert_to_expr_and_wrap_in_normalized();
                 }
 
-                let unsubstituted = match_.cases.value[vcon_index].return_val.clone();
+                let unsubstituted = match_.cases.hashee[vcon_index].return_val.clone();
                 let substituted = self.substitute_and_downshift_debs(
                     unsubstituted,
-                    &normalized_matchee.value.args.value,
+                    &normalized_matchee.hashee.args.hashee,
                 );
                 return self.eval(substituted);
             }
@@ -222,7 +222,7 @@ impl Evaluator {
         &mut self,
         cases: RcSemHashedVec<MatchCase>,
     ) -> Normalized<RcSemHashedVec<MatchCase>> {
-        let cases = &cases.value;
+        let cases = &cases.hashee;
         cases
             .iter()
             .map(|original| MatchCase {
@@ -235,7 +235,7 @@ impl Evaluator {
 
     fn eval_unseen_fun(&mut self, fun: RcSemHashed<Fun>) -> NormalForm {
         let fun_digest = fun.digest.clone();
-        let fun = &fun.value;
+        let fun = &fun.hashee;
         let normalized = Fun {
             decreasing_index: fun.decreasing_index,
             param_types: self.eval_expressions(fun.param_types.clone()).into_raw(),
@@ -249,14 +249,14 @@ impl Evaluator {
     }
 
     fn eval_unseen_app(&mut self, app: RcSemHashed<App>) -> NormalForm {
-        let normalized_callee = self.eval(app.value.callee.clone()).into_raw();
-        let normalized_args = self.eval_expressions(app.value.args.clone()).into_raw();
+        let normalized_callee = self.eval(app.hashee.callee.clone()).into_raw();
+        let normalized_args = self.eval_expressions(app.hashee.args.clone()).into_raw();
 
         if let Expr::Fun(callee) = &normalized_callee {
             if can_unfold_app(callee.clone(), normalized_args.clone()) {
-                let unsubstituted = callee.value.return_val.clone();
+                let unsubstituted = callee.hashee.return_val.clone();
                 let new_exprs: Vec<Expr> = normalized_args
-                    .value
+                    .hashee
                     .iter()
                     .cloned()
                     .chain(std::iter::once(normalized_callee))
@@ -279,7 +279,7 @@ impl Evaluator {
 
     fn eval_unseen_for(&mut self, for_: RcSemHashed<For>) -> NormalForm {
         let for_digest = for_.digest.clone();
-        let for_ = &for_.value;
+        let for_ = &for_.hashee;
         let normalized = For {
             param_types: self.eval_expressions(for_.param_types.clone()).into_raw(),
             return_type: self.eval(for_.return_type.clone()).into_raw(),
@@ -296,14 +296,14 @@ impl Evaluator {
 }
 
 fn can_unfold_app(callee: RcSemHashed<Fun>, args: RcSemHashedVec<Expr>) -> bool {
-    let Some(decreasing_index) = callee.value.decreasing_index else {
+    let Some(decreasing_index) = callee.hashee.decreasing_index else {
         // If there is no decreasing param index,
         // the function is non-recursive.
         // We can always unfold non-recursive functions.
         return true;
     };
 
-    let Some(decreasing_arg) = args.value.get(decreasing_index) else {
+    let Some(decreasing_arg) = args.hashee.get(decreasing_index) else {
         // If there is no argument at the decreasing index,
         // the application is ill-typed.
         // So, we do not unfold, in order to minimize
@@ -317,7 +317,7 @@ fn can_unfold_app(callee: RcSemHashed<Fun>, args: RcSemHashedVec<Expr>) -> bool 
 fn is_vconlike(expr: Expr) -> bool {
     match expr {
         Expr::Vcon(_) => true,
-        Expr::App(app) => match &app.value.callee {
+        Expr::App(app) => match &app.hashee.callee {
             Expr::Vcon(_) => true,
             _other_callee => false,
         },
