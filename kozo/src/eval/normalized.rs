@@ -20,11 +20,12 @@ impl<T> Normalized<T> {
         Normalized(&self.0)
     }
 
+    /// Shorthand for `self.as_ref().derefed()`.
     pub fn to_derefed(&self) -> Normalized<&T::Target>
     where
         T: Deref,
     {
-        Normalized(self.0.deref())
+        self.as_ref().derefed()
     }
 }
 
