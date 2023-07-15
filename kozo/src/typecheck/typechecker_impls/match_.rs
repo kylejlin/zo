@@ -15,6 +15,7 @@ impl TypeChecker {
         let (matchee_type_ind, matchee_type_args) = self.assert_matchee_type_is_inductive(
             match_.hashee.matchee.clone(),
             matchee_type.clone(),
+            scon,
         )?;
 
         self.assert_number_of_match_cases_is_correct(match_.clone(), matchee_type_ind.clone())?;
@@ -42,6 +43,7 @@ impl TypeChecker {
         &mut self,
         matchee: cst::Expr,
         matchee_type: NormalForm,
+        scon: LazySubstitutionContext,
     ) -> Result<
         (
             Normalized<RcSemHashed<ast::Ind>>,
@@ -52,6 +54,8 @@ impl TypeChecker {
         if let Some(ind_and_args) = matchee_type.clone().ind_or_ind_app() {
             return Ok(ind_and_args);
         }
+
+        // TODO: Use scon.
 
         Err(TypeError::NonInductiveMatcheeType {
             expr: matchee,
