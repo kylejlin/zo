@@ -32,9 +32,6 @@ impl TypeChecker {
             normalized_args.clone(),
         );
 
-        let substituted_callee_type_return_type =
-            self.substitute_callee_type_return_type(callee_type_return_type_g0f, normalized_args);
-
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
                 exprs: app.hashee.args.to_vec_of_cloned(),
@@ -45,6 +42,8 @@ impl TypeChecker {
             scon,
         )?;
 
+        let substituted_callee_type_return_type =
+            self.substitute_callee_type_return_type(callee_type_return_type_g0f, normalized_args);
         Ok(substituted_callee_type_return_type)
     }
 
