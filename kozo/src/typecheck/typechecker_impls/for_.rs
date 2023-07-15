@@ -3,38 +3,44 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_for(
         &mut self,
-        for_: RcHashed<cst::For>,
-        tcon: LazyTypeContext,
+        for_g0: RcHashed<cst::For>,
+        tcon_g0: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        let param_type_types =
-            self.get_types_of_dependent_expressions(&for_.hashee.param_types, tcon, scon)?;
+        let param_type_types_g0 =
+            self.get_types_of_dependent_expressions(&for_g0.hashee.param_types, tcon_g0, scon)?;
+
         self.assert_every_type_is_universe(
-            param_type_types.to_derefed(),
-            &for_.hashee.param_types,
+            param_type_types_g0.to_derefed(),
+            &for_g0.hashee.param_types,
         )?;
 
-        let param_types_ast = self
+        let param_types_g0_ast = self
             .cst_converter
-            .convert_expressions(for_.hashee.param_types.clone());
-        let normalized_param_types = self.evaluator.eval_expressions(param_types_ast);
-        let tcon_with_param_types =
-            LazyTypeContext::Snoc(&tcon, normalized_param_types.to_hashee().derefed());
-        let return_type_type =
-            self.get_type(for_.hashee.return_type.clone(), tcon_with_param_types, scon)?;
-        let return_type_type_universe_level = match return_type_type.raw() {
+            .convert_expressions(for_g0.hashee.param_types.clone());
+        let normalized_param_types_g0 = self.evaluator.eval_expressions(param_types_g0_ast);
+
+        let tcon_with_param_types_g1 =
+            LazyTypeContext::Snoc(&tcon_g0, normalized_param_types_g0.to_hashee().derefed());
+
+        let return_type_type_g1 = self.get_type(
+            for_g0.hashee.return_type.clone(),
+            tcon_with_param_types_g1,
+            scon,
+        )?;
+        let return_type_type_g1_universe_level = match return_type_type_g1.raw() {
             ast::Expr::Universe(universe_node) => universe_node.hashee.level,
 
             _ => {
                 return Err(TypeError::UnexpectedNonTypeExpression {
-                    expr: for_.hashee.return_type.clone(),
-                    type_: return_type_type,
+                    expr: for_g0.hashee.return_type.clone(),
+                    type_: return_type_type_g1,
                 })
             }
         };
 
-        let max_level = return_type_type_universe_level
-            .max_or_self(get_max_universe_level(param_type_types.raw()));
+        let max_level = return_type_type_g1_universe_level
+            .max_or_self(get_max_universe_level(param_type_types_g0.raw()));
         Ok(Normalized::universe(ast::UniverseNode { level: max_level }))
     }
 

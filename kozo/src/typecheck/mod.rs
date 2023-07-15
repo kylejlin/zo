@@ -57,6 +57,8 @@ impl ast::Expr {
     }
 }
 
+/// Non-universe expressions are ignored.
+/// If there are no universe expressions, `None` is returned.
 fn get_max_universe_level<'a>(
     exprs: impl IntoIterator<Item = &'a ast::Expr>,
 ) -> Option<UniverseLevel> {
@@ -70,6 +72,8 @@ fn get_max_universe_level<'a>(
 }
 
 trait MaxOrSelf: Sized {
+    /// If `other` is `None`, `self` is returned.
+    /// Otherwise, `self.max(o)` is returned, where `other` equals `Some(o)`.
     fn max_or_self(self, other: Option<Self>) -> Self;
 }
 
