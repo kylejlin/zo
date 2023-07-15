@@ -15,6 +15,8 @@ use std::{ops::BitOrAssign, rc::Rc};
 mod concrete_substitution;
 use concrete_substitution::*;
 
+mod concrete_substitution_vec;
+
 mod cst_impls;
 
 mod equality_judgment;
