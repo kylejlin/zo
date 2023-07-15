@@ -133,16 +133,15 @@ impl TypeChecker {
             LazyTypeContext::Snoc(&tcon_g0, param_types_g0.to_hashee().derefed());
 
         let vcon_type_g1 = vcon_type_g0.upshift(param_count);
-        let extended_scon_lender = Self::extend_scon(
+        let new_substitutions = Self::get_new_substitutions(
             case_index,
             normalized_matchee_g0.upshift(param_count),
             matchee_type_ind_g0.upshift(param_count),
             matchee_type_args_g0.upshift_with_constant_cutoff(param_count),
             vcon_type_g1,
             extended_tcon_g1.len(),
-            scon,
         );
-        let extended_scon = extended_scon_lender.get_extended_scon();
+        let extended_scon = LazySubstitutionContext::Snoc(&scon, &new_substitutions);
 
         let case_return_val_type_g1 =
             self.get_type(case.return_val.clone(), extended_tcon_g1, extended_scon)?;
@@ -181,15 +180,14 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn extend_scon<'a>(
+    fn get_new_substitutions(
         case_index: usize,
         normalized_matchee_g1: NormalForm,
         matchee_type_ind_g1: Normalized<RcSemHashed<ast::Ind>>,
         matchee_type_args_g1: Normalized<RcSemHashedVec<ast::Expr>>,
         vcon_type_g1: NormalForm,
         tcon_g1_len: usize,
-        scon: LazySubstitutionContext<'a>,
-    ) -> LazySubstitutionContextLender<'a> {
+    ) -> Vec<LazySubstitution> {
         let vcon_param_count = vcon_type_g1
             .clone()
             .for_param_types_or_empty_vec()
@@ -224,27 +222,6 @@ impl TypeChecker {
             .chain(std::iter::once(matchee_substitution))
             .collect();
 
-        LazySubstitutionContextLender {
-            sub_scon: scon,
-            substitutions,
-        }
-    }
-}
-
-/// `TypeChecker::extend_scon` cannot directly return
-/// the extended scon, since that scon references a vec
-/// that is created within the `TypeChecker::extend_scon` method
-/// (and is therefore dropped upon exiting the method).
-/// To get around this, we return a "lender", which takes
-/// ownership of the vec.
-/// The lender can then be used to get the extended scon.
-struct LazySubstitutionContextLender<'a> {
-    sub_scon: LazySubstitutionContext<'a>,
-    substitutions: Vec<LazySubstitution>,
-}
-
-impl<'a> LazySubstitutionContextLender<'a> {
-    fn get_extended_scon(&'a self) -> LazySubstitutionContext<'a> {
-        LazySubstitutionContext::Snoc(&self.sub_scon, &self.substitutions)
+        substitutions
     }
 }
