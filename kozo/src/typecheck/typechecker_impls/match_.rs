@@ -16,6 +16,7 @@ impl TypeChecker {
             match_.hashee.matchee.clone(),
             matchee_type.clone(),
             scon,
+            tcon.len(),
         )?;
 
         self.assert_number_of_match_cases_is_correct(match_.clone(), matchee_type_ind.clone())?;
@@ -44,6 +45,7 @@ impl TypeChecker {
         matchee: cst::Expr,
         matchee_type: NormalForm,
         scon: LazySubstitutionContext,
+        tcon_len: usize,
     ) -> Result<
         (
             Normalized<RcSemHashed<ast::Ind>>,
@@ -55,11 +57,17 @@ impl TypeChecker {
             return Ok(ind_and_args);
         }
 
-        // TODO: Use scon.
+        let subs = scon.into_concrete_noncompounded_substitutions(tcon_len);
+        let substituted_matchee_type =
+            self.apply_concrete_substitutions(subs, [matchee_type.clone()])[0].clone();
+        if let Some(ind_and_args) = substituted_matchee_type.clone().ind_or_ind_app() {
+            return Ok(ind_and_args);
+        }
 
         Err(TypeError::NonInductiveMatcheeType {
             expr: matchee,
             type_: matchee_type,
+            type_after_applying_scon: substituted_matchee_type,
         })
     }
 

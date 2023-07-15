@@ -24,6 +24,7 @@ pub enum TypeError {
     NonInductiveMatcheeType {
         expr: cst::Expr,
         type_: NormalForm,
+        type_after_applying_scon: NormalForm,
     },
     WrongNumberOfMatchCases {
         match_: cst::Match,
