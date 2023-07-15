@@ -48,16 +48,6 @@ impl TypeChecker {
     }
 }
 
-fn assert_every_expr_is_universe(exprs: &[ast::Expr]) -> Result<(), usize> {
-    for (i, expr) in exprs.iter().enumerate() {
-        if !expr.is_universe() {
-            return Err(i);
-        }
-    }
-
-    Ok(())
-}
-
 impl ast::Expr {
     fn is_universe(&self) -> bool {
         match self {

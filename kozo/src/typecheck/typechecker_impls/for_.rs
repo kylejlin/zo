@@ -9,12 +9,10 @@ impl TypeChecker {
     ) -> Result<NormalForm, TypeError> {
         let param_type_types =
             self.get_types_of_dependent_expressions(&for_.hashee.param_types, tcon, scon)?;
-        assert_every_expr_is_universe(param_type_types.raw()).map_err(|offender_index| {
-            TypeError::UnexpectedNonTypeExpression {
-                expr: for_.hashee.param_types[offender_index].clone(),
-                type_: param_type_types.index_ref(offender_index).cloned(),
-            }
-        })?;
+        self.assert_every_type_is_universe(
+            param_type_types.to_derefed(),
+            &for_.hashee.param_types,
+        )?;
 
         let param_types_ast = self
             .cst_converter
@@ -38,5 +36,22 @@ impl TypeChecker {
         let max_level = return_type_type_universe_level
             .max_or_self(get_max_universe_level(param_type_types.raw()));
         Ok(Normalized::universe(ast::UniverseNode { level: max_level }))
+    }
+
+    fn assert_every_type_is_universe(
+        &mut self,
+        types: Normalized<&[ast::Expr]>,
+        exprs: &cst::ZeroOrMoreExprs,
+    ) -> Result<(), TypeError> {
+        for i in 0..types.raw().len() {
+            if !types.raw()[i].is_universe() {
+                return Err(TypeError::UnexpectedNonTypeExpression {
+                    expr: exprs[i].clone(),
+                    type_: types.index_ref(i).cloned(),
+                });
+            }
+        }
+
+        Ok(())
     }
 }
