@@ -15,48 +15,81 @@ impl TypeChecker {
             tcon.len(),
         )?;
 
-        let arg_count = app.hashee.args.len();
-        let param_count = callee_type.raw().hashee.param_types.hashee.len();
-        if arg_count != param_count {
-            return Err(TypeError::WrongNumberOfAppArguments {
-                app: app.hashee.clone(),
-                callee_type: callee_type.to_hashee().cloned(),
-                expected: param_count,
-                actual: arg_count,
-            });
-        }
+        let callee_type_param_types = callee_type.to_hashee().param_types().cloned();
+        let callee_type_return_type_g0f = callee_type.to_hashee().return_type().cloned();
+
+        self.assert_arg_count_is_correct(app.clone(), callee_type.clone())?;
 
         let arg_types = self.get_types_of_independent_expressions(&app.hashee.args, tcon, scon)?;
+
         let args_ast = self
             .cst_converter
             .convert_expressions(app.hashee.args.clone());
         let normalized_args = self.evaluator.eval_expressions(args_ast);
 
-        let substituted_param_types = self.substitute_param_types(
-            callee_type.to_hashee().param_types().cloned(),
+        let substituted_callee_type_param_types = self.substitute_callee_type_param_types(
+            callee_type_param_types.clone(),
             normalized_args.clone(),
         );
+
+        let substituted_callee_type_return_type =
+            self.substitute_callee_type_return_type(callee_type_return_type_g0f, normalized_args);
+
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
                 exprs: app.hashee.args.to_vec_of_cloned(),
-                expected_types: substituted_param_types,
+                expected_types: substituted_callee_type_param_types.to_hashee().cloned(),
                 actual_types: arg_types,
                 tcon_len: tcon.len(),
             },
             scon,
         )?;
 
-        let arg_substituter = DebDownshiftSubstituter {
-            new_exprs: &normalized_args.raw().hashee,
-        };
-        let unnormalized_substituted_return_type = callee_type
-            .raw()
-            .hashee
-            .return_type
-            .clone()
-            .replace_debs(&arg_substituter, 0);
-        let substituted_return_type = self.evaluator.eval(unnormalized_substituted_return_type);
-        Ok(substituted_return_type)
+        Ok(substituted_callee_type_return_type)
+
+        // TODO: Delete
+        // let arg_count = app.hashee.args.len();
+        // let param_count = callee_type.raw().hashee.param_types.hashee.len();
+        // if arg_count != param_count {
+        //     return Err(TypeError::WrongNumberOfAppArguments {
+        //         app: app.hashee.clone(),
+        //         callee_type: callee_type.to_hashee().cloned(),
+        //         expected: param_count,
+        //         actual: arg_count,
+        //     });
+        // }
+
+        // let arg_types = self.get_types_of_independent_expressions(&app.hashee.args, tcon, scon)?;
+        // let args_ast = self
+        //     .cst_converter
+        //     .convert_expressions(app.hashee.args.clone());
+        // let normalized_args = self.evaluator.eval_expressions(args_ast);
+
+        // let substituted_param_types = self.substitute_param_types(
+        //     callee_type.to_hashee().param_types().cloned(),
+        //     normalized_args.clone(),
+        // );
+        // self.assert_expected_type_equalities_holds_after_applying_scon(
+        //     ExpectedTypeEqualities {
+        //         exprs: app.hashee.args.to_vec_of_cloned(),
+        //         expected_types: substituted_param_types,
+        //         actual_types: arg_types,
+        //         tcon_len: tcon.len(),
+        //     },
+        //     scon,
+        // )?;
+
+        // let arg_substituter = DebDownshiftSubstituter {
+        //     new_exprs: &normalized_args.raw().hashee,
+        // };
+        // let unnormalized_substituted_return_type = callee_type
+        //     .raw()
+        //     .hashee
+        //     .return_type
+        //     .clone()
+        //     .replace_debs(&arg_substituter, 0);
+        // let substituted_return_type = self.evaluator.eval(unnormalized_substituted_return_type);
+        // Ok(substituted_return_type)
     }
 
     fn assert_callee_type_is_a_for_expression(
@@ -84,28 +117,86 @@ impl TypeChecker {
         })
     }
 
-    fn substitute_param_types(
+    fn assert_arg_count_is_correct(
         &mut self,
-        unsubstituted_param_types: Normalized<RcSemHashedVec<ast::Expr>>,
-        normalized_args: Normalized<RcSemHashedVec<ast::Expr>>,
-    ) -> Normalized<Vec<ast::Expr>> {
-        let len = normalized_args.raw().hashee.len();
+        app: RcHashed<cst::App>,
+        callee_type: Normalized<RcSemHashed<ast::For>>,
+    ) -> Result<(), TypeError> {
+        let arg_count = app.hashee.args.len();
+        let param_count = callee_type.raw().hashee.param_types.hashee.len();
+        if arg_count != param_count {
+            return Err(TypeError::WrongNumberOfAppArguments {
+                app: app.hashee.clone(),
+                callee_type: callee_type.to_hashee().cloned(),
+                expected: param_count,
+                actual: arg_count,
+            });
+        }
+
+        Ok(())
+    }
+
+    fn substitute_callee_type_param_types(
+        &mut self,
+        param_types: Normalized<RcSemHashedVec<ast::Expr>>,
+        args: Normalized<RcSemHashedVec<ast::Expr>>,
+    ) -> Normalized<RcSemHashedVec<ast::Expr>> {
+        let len = args.raw().hashee.len();
 
         (0..len)
             .map(|param_index| {
-                let unsubstituted_param_type = unsubstituted_param_types
+                let unsubstituted_param_type = param_types
                     .to_hashee()
                     .derefed()
                     .index_ref(param_index)
                     .cloned();
                 let substituter = DebDownshiftSubstituter {
-                    new_exprs: &normalized_args.raw().hashee[0..param_index],
+                    new_exprs: &args.raw().hashee[0..param_index],
                 };
                 let substituted = unsubstituted_param_type
                     .into_raw()
                     .replace_debs(&substituter, 0);
                 self.evaluator.eval(substituted)
             })
-            .collect()
+            .collect::<Normalized<Vec<_>>>()
+            .into_rc_sem_hashed()
     }
+
+    fn substitute_callee_type_return_type(
+        &mut self,
+        return_type_g0f: NormalForm,
+        args: Normalized<RcSemHashedVec<ast::Expr>>,
+    ) -> NormalForm {
+        let substituter = DebDownshiftSubstituter {
+            new_exprs: &args.raw().hashee,
+        };
+        let substituted = return_type_g0f.into_raw().replace_debs(&substituter, 0);
+        self.evaluator.eval(substituted)
+    }
+
+    // TODO: Delete
+    // fn substitute_param_types(
+    //     &mut self,
+    //     unsubstituted_param_types: Normalized<RcSemHashedVec<ast::Expr>>,
+    //     normalized_args: Normalized<RcSemHashedVec<ast::Expr>>,
+    // ) -> Normalized<Vec<ast::Expr>> {
+    //     let len = normalized_args.raw().hashee.len();
+
+    //     (0..len)
+    //         .map(|param_index| {
+    //             let unsubstituted_param_type = unsubstituted_param_types
+    //                 .to_hashee()
+    //                 .derefed()
+    //                 .index_ref(param_index)
+    //                 .cloned();
+    //             let substituter = DebDownshiftSubstituter {
+    //                 new_exprs: &normalized_args.raw().hashee[0..param_index],
+    //             };
+    //             let substituted = unsubstituted_param_type
+    //                 .into_raw()
+    //                 .replace_debs(&substituter, 0);
+    //             self.evaluator.eval(substituted)
+    //         })
+    //         .collect()
+    // }
 }

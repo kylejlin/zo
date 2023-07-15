@@ -251,6 +251,10 @@ impl<'a> Normalized<&'a For> {
     pub fn param_types(self) -> Normalized<&'a RcSemHashedVec<Expr>> {
         Normalized(&self.0.param_types)
     }
+
+    pub fn return_type(self) -> Normalized<&'a Expr> {
+        Normalized(&self.0.return_type)
+    }
 }
 
 impl Normalized<For> {
