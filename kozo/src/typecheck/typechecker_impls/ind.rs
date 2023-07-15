@@ -10,7 +10,7 @@ impl TypeChecker {
         let normalized_index_types_g0 = self
             .typecheck_and_normalize_param_types_with_limit(
                 &ind.hashee.index_types,
-                ind.clone(),
+                LimitToIndUniverse(ind.clone()),
                 tcon_g0,
                 scon,
             )?
@@ -67,7 +67,7 @@ impl TypeChecker {
 
         let normalized_param_types_g1 = self.typecheck_and_normalize_param_types_with_limit(
             &def.param_types,
-            ind,
+            LimitToIndUniverse(ind),
             tcon_g1,
             scon,
         )?;

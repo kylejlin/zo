@@ -70,11 +70,10 @@ impl TypeChecker {
     fn typecheck_and_normalize_param_types_with_limit(
         &mut self,
         exprs: &cst::ZeroOrMoreExprs,
-        limiting_ind: RcHashed<cst::Ind>,
+        limiter: impl UniverseLimit,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
-        let inclusive_max = UniverseLevel(limiting_ind.hashee.type_.level);
         let param_type_types = self.get_types_of_dependent_expressions(exprs, tcon, scon)?;
 
         for i in 0..param_type_types.raw().len() {
@@ -89,13 +88,7 @@ impl TypeChecker {
                 }
             };
 
-            if param_type_type_ul > inclusive_max {
-                return Err(TypeError::UniverseInconsistencyInIndDef {
-                    index_or_param_type: exprs[i].clone(),
-                    level: param_type_type_ul,
-                    ind: limiting_ind.hashee.clone(),
-                });
-            }
+            limiter.assert_ul_is_within_limit(param_type_type_ul, exprs[i].clone())?;
         }
 
         let exprs_ast = self.cst_converter.convert_expressions(exprs.clone());
@@ -118,5 +111,42 @@ impl TypeChecker {
         let expr_ast = self.cst_converter.convert(expr.clone());
         let normalized = self.evaluator.eval(expr_ast);
         Ok(normalized)
+    }
+}
+
+trait UniverseLimit {
+    fn assert_ul_is_within_limit(
+        &self,
+        param_type_type_ul: UniverseLevel,
+        expr: cst::Expr,
+    ) -> Result<(), TypeError>;
+}
+
+struct LimitToIndUniverse(RcHashed<cst::Ind>);
+
+impl UniverseLimit for LimitToIndUniverse {
+    fn assert_ul_is_within_limit(
+        &self,
+        param_type_type_ul: UniverseLevel,
+        expr: cst::Expr,
+    ) -> Result<(), TypeError> {
+        let inclusive_max = UniverseLevel(self.0.hashee.type_.level);
+        if param_type_type_ul > inclusive_max {
+            return Err(TypeError::UniverseInconsistencyInIndDef {
+                index_or_param_type: expr.clone(),
+                level: param_type_type_ul,
+                ind: self.0.hashee.clone(),
+            });
+        }
+
+        Ok(())
+    }
+}
+
+struct NoLimit;
+
+impl UniverseLimit for NoLimit {
+    fn assert_ul_is_within_limit(&self, _: UniverseLevel, _: cst::Expr) -> Result<(), TypeError> {
+        Ok(())
     }
 }

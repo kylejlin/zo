@@ -1,7 +1,6 @@
 use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::sha256::*,
-    pretty_print::PrettyPrinted,
     syntax_tree::{
         ast::{self, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
         rch_cst::{self as cst, RcHashed},
