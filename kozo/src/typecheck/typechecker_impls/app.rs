@@ -9,6 +9,7 @@ impl TypeChecker {
     ) -> Result<NormalForm, TypeError> {
         let callee_type = self
             .get_type(app.hashee.callee.clone(), tcon, scon)?
+            // TODO: Check the scon case.
             .try_into_for()
             .map_err(|original| TypeError::CalleeTypeIsNotAForExpression {
                 app: app.hashee.clone(),

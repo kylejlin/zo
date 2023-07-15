@@ -73,6 +73,11 @@ where
     }
 }
 
+impl<T> Normalized<Vec<T>> {
+    pub fn new() -> Self {
+        Self(vec![])
+    }
+}
 impl<T> Normalized<[T; 0]> {
     pub fn new() -> Self {
         Self([])
@@ -135,6 +140,7 @@ impl NormalForm {
 }
 
 impl NormalForm {
+    // TODO: Delete this to force us to check the scon case.
     pub fn ind_or_ind_app(
         self,
     ) -> Option<(
@@ -153,6 +159,59 @@ impl NormalForm {
 
             _ => None,
         }
+    }
+
+    /// If `self` is a `for` expression,
+    /// this function returns the parameter types of said `for` expression.
+    /// Otherwise, it returns `None`.
+    pub fn for_param_types(self) -> Option<Normalized<RcSemHashedVec<Expr>>> {
+        match self.0 {
+            Expr::For(for_) => Some(Normalized(for_.hashee.param_types.clone())),
+            _ => None,
+        }
+    }
+
+    /// If `self` is a `for` expression,
+    /// this function returns the parameter types of said `for` expression.
+    /// Otherwise, it returns an empty (RC sem-hashed) vector.
+    pub fn for_param_types_or_empty_vec(self) -> Normalized<RcSemHashedVec<Expr>> {
+        self.for_param_types()
+            .unwrap_or_else(|| Normalized::<Vec<_>>::new().into_rc_sem_hashed())
+    }
+
+    /// If `self` is a `for` expression,
+    /// this function returns the return type of said `for` expression.
+    /// Otherwise, it returns `None`.
+    pub fn for_return_type(self) -> Option<NormalForm> {
+        match self.0 {
+            Expr::For(for_) => Some(Normalized(for_.hashee.return_type.clone())),
+            _ => None,
+        }
+    }
+
+    /// If `self` is a `for` expression,
+    /// this function returns the return type of said `for` expression.
+    /// Otherwise, it returns `self`.
+    pub fn for_return_type_or_self(self) -> NormalForm {
+        self.clone().for_return_type().unwrap_or(self)
+    }
+
+    /// If `self` is a `app` expression,
+    /// this function returns the arguments of said `app` expression.
+    /// Otherwise, it returns `None`.
+    pub fn app_args(self) -> Option<Normalized<RcSemHashedVec<Expr>>> {
+        match self.0 {
+            Expr::App(app) => Some(Normalized(app.hashee.args.clone())),
+            _ => None,
+        }
+    }
+
+    /// If `self` is a `app` expression,
+    /// this function returns the arguments of said `app` expression.
+    /// Otherwise, it returns an empty (RC sem-hashed) vector.
+    pub fn app_args_or_empty_vec(self) -> Normalized<RcSemHashedVec<Expr>> {
+        self.app_args()
+            .unwrap_or_else(|| Normalized::<Vec<_>>::new().into_rc_sem_hashed())
     }
 }
 
@@ -217,11 +276,14 @@ impl NormalForm {
     ///     0
     /// ))
     /// ```
-    pub fn vcon_capp(
-        ind: Normalized<RcSemHashed<Ind>>,
-        vcon_index: usize,
-        arg_count: usize,
-    ) -> NormalForm {
+    /// where `arg_count` is the number of params
+    /// that the `vcon_index`th vcon def has.
+    pub fn vcon_capp(ind: Normalized<RcSemHashed<Ind>>, vcon_index: usize) -> NormalForm {
+        let arg_count = ind.raw().hashee.vcon_defs.hashee[vcon_index]
+            .param_types
+            .hashee
+            .len();
+
         let vcon = Vcon {
             ind: ind.into_raw(),
             vcon_index,
@@ -251,6 +313,20 @@ impl<T: ReplaceDebsInEachItem> Normalized<T> {
         Normalized(
             self.0
                 .replace_debs_with_constant_cutoff(&DebUpshifter(amount), 0),
+        )
+    }
+
+    pub fn downshift_n_with_constant_cutoff_n(self, amount: usize) -> Self {
+        let decreasing_debs: Vec<Expr> = (0..amount)
+            .rev()
+            .map(|i| DebNode { deb: Deb(i) }.into())
+            .collect();
+        let substituter = DebDownshiftSubstituter {
+            new_exprs: &decreasing_debs,
+        };
+        Normalized(
+            self.0
+                .replace_debs_with_constant_cutoff(&substituter, amount),
         )
     }
 

@@ -102,4 +102,21 @@ impl TypeChecker {
         let normalized = self.evaluator.eval_expressions(exprs_ast);
         Ok(normalized.to_hashee().cloned())
     }
+
+    fn assert_expr_type_is_universe_and_then_eval(
+        &mut self,
+        expr: cst::Expr,
+        tcon: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<NormalForm, TypeError> {
+        let type_ = self.get_type(expr.clone(), tcon, scon)?;
+
+        if !type_.raw().is_universe() {
+            return Err(TypeError::UnexpectedNonTypeExpression { expr, type_ });
+        }
+
+        let expr_ast = self.cst_converter.convert(expr.clone());
+        let normalized = self.evaluator.eval(expr_ast);
+        Ok(normalized)
+    }
 }

@@ -19,10 +19,10 @@ impl TypeChecker {
         let universe_node = NormalForm::universe(ast::UniverseNode {
             level: UniverseLevel(ind.hashee.type_.level),
         });
-        let ind_type = Normalized::for_(normalized_index_types_g0.clone(), universe_node)
+        let ind_type_g0 = Normalized::for_(normalized_index_types_g0.clone(), universe_node)
             .collapse_if_nullary();
 
-        let ind_type_singleton = Normalized::<[_; 1]>::new(ind_type.clone());
+        let ind_type_singleton = Normalized::<[_; 1]>::new(ind_type_g0.clone());
         let tcon_with_ind_type_g1 =
             LazyTypeContext::Snoc(&tcon_g0, ind_type_singleton.as_ref().convert_ref());
 
@@ -33,7 +33,7 @@ impl TypeChecker {
             scon,
         )?;
 
-        Ok(ind_type)
+        Ok(ind_type_g0)
     }
 
     fn typecheck_ind_vcon_defs(
@@ -65,7 +65,7 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         self.assert_index_arg_count_is_correct(def, normalized_index_types_g0.raw().hashee.len())?;
 
-        let normalized_param_types = self.typecheck_and_normalize_param_types_with_limit(
+        let normalized_param_types_g1 = self.typecheck_and_normalize_param_types_with_limit(
             &def.param_types,
             ind,
             tcon_g1,
@@ -73,7 +73,7 @@ impl TypeChecker {
         )?;
 
         let tcon_with_param_types_g2 =
-            LazyTypeContext::Snoc(&tcon_g1, normalized_param_types.to_derefed());
+            LazyTypeContext::Snoc(&tcon_g1, normalized_param_types_g1.to_derefed());
 
         let index_arg_types_g2 = self.get_types_of_independent_expressions(
             &def.index_args,
@@ -82,7 +82,7 @@ impl TypeChecker {
         )?;
 
         let normalized_index_types_g2 = normalized_index_types_g0
-            .upshift_with_constant_cutoff(1 + normalized_param_types.raw().len());
+            .upshift_with_constant_cutoff(1 + normalized_param_types_g1.raw().len());
 
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {

@@ -31,7 +31,6 @@ pub enum TypeError {
     },
     WrongMatchCaseArity {
         actual_node: cst::NumberLiteral,
-        actual: usize,
         expected: usize,
         match_: cst::Match,
         match_case_index: usize,
