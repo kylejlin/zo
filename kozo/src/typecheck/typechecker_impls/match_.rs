@@ -231,6 +231,13 @@ impl TypeChecker {
     }
 }
 
+/// `TypeChecker::extend_scon` cannot directly return
+/// the extended scon, since that scon references a vec
+/// that is created within the `TypeChecker::extend_scon` method
+/// (and is therefore dropped upon exiting the method).
+/// To get around this, we return a "lender", which takes
+/// ownership of the vec.
+/// The lender can then be used to get the extended scon.
 struct LazySubstitutionContextLender<'a> {
     sub_scon: LazySubstitutionContext<'a>,
     substitutions: Vec<LazySubstitution>,
