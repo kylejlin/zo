@@ -21,7 +21,7 @@ impl LazyTypeContext<'_> {
 
     pub fn get(&self, deb: Deb) -> Option<NormalForm> {
         let unshifted = self.get_unshifted(deb)?;
-        Some(unshifted.upshift(deb.0 + 1))
+        Some(unshifted.upshift(deb.0 + 1, 0))
     }
 
     // TODO: Make private again.

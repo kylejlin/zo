@@ -303,8 +303,8 @@ impl NormalForm {
 }
 
 impl<T: ReplaceDebs> Normalized<T> {
-    pub fn upshift(self, amount: usize) -> Normalized<T::Output> {
-        Normalized(self.0.replace_debs(&DebUpshifter(amount), 0))
+    pub fn upshift(self, amount: usize, cutoff: usize) -> Normalized<T::Output> {
+        Normalized(self.0.replace_debs(&DebUpshifter(amount), cutoff))
     }
 }
 
@@ -313,6 +313,13 @@ impl<T: ReplaceDebsInEachItem> Normalized<T> {
         Normalized(
             self.0
                 .replace_debs_with_constant_cutoff(&DebUpshifter(amount), 0),
+        )
+    }
+
+    pub fn upshift_with_increasing_cutoff(self, amount: usize) -> Self {
+        Normalized(
+            self.0
+                .replace_debs_with_increasing_cutoff(&DebUpshifter(amount), 0),
         )
     }
 

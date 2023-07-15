@@ -9,8 +9,8 @@ pub struct ConcreteSubstitution {
 impl ConcreteSubstitution {
     pub fn upshift(&self, amount: usize) -> Self {
         Self {
-            from: self.from.clone().upshift(amount),
-            to: self.to.clone().upshift(amount),
+            from: self.from.clone().upshift(amount, 0),
+            to: self.to.clone().upshift(amount, 0),
         }
     }
 }

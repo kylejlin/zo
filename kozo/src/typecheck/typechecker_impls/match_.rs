@@ -132,11 +132,11 @@ impl TypeChecker {
         let extended_tcon_g1 =
             LazyTypeContext::Snoc(&tcon_g0, param_types_g0.to_hashee().derefed());
 
-        let vcon_type_g1 = vcon_type_g0.upshift(param_count);
+        let vcon_type_g1 = vcon_type_g0.upshift(param_count, 0);
         let new_substitutions = Self::get_new_substitutions(
             case_index,
-            normalized_matchee_g0.upshift(param_count),
-            matchee_type_ind_g0.upshift(param_count),
+            normalized_matchee_g0.upshift(param_count, 0),
+            matchee_type_ind_g0.upshift(param_count, 0),
             matchee_type_args_g0.upshift_with_constant_cutoff(param_count),
             vcon_type_g1,
             extended_tcon_g1.len(),
@@ -146,7 +146,8 @@ impl TypeChecker {
         let case_return_val_type_g1 =
             self.get_type(case.return_val.clone(), extended_tcon_g1, extended_scon)?;
 
-        let normalized_match_return_type_g1 = normalized_match_return_type_g0.upshift(param_count);
+        let normalized_match_return_type_g1 =
+            normalized_match_return_type_g0.upshift(param_count, 0);
 
         self.assert_expected_type_equality_holds_after_applying_scon(
             ExpectedTypeEquality {

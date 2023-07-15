@@ -62,7 +62,7 @@ impl TypeChecker {
             .cloned()
             .replace_deb0_with_ind_with_constant_cutoff(ind.clone(), param_count);
 
-        let upshifted_ind = ind.upshift(param_count);
+        let upshifted_ind = ind.upshift(param_count, 0);
         let capp =
             Normalized::app_with_ind_callee(upshifted_ind, substituted_downshifted_index_args)
                 .collapse_if_nullary();

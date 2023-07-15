@@ -3,63 +3,69 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_fun(
         &mut self,
-        fun: RcHashed<cst::Fun>,
-        tcon: LazyTypeContext,
+        fun_g0: RcHashed<cst::Fun>,
+        tcon_g0: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        let normalized_param_types = self.typecheck_and_normalize_param_types_with_limit(
-            &fun.hashee.param_types,
+        let normalized_param_types_g0 = self.typecheck_and_normalize_param_types_with_limit(
+            &fun_g0.hashee.param_types,
             NoLimit,
-            tcon,
+            tcon_g0,
+            scon,
+        )?;
+        let param_count = normalized_param_types_g0.raw().len();
+
+        let tcon_with_param_types_g1 =
+            LazyTypeContext::Snoc(&tcon_g0, normalized_param_types_g0.to_derefed());
+
+        let normalized_return_type_g1 = self.assert_expr_type_is_universe_and_then_eval(
+            fun_g0.hashee.return_type.clone(),
+            tcon_with_param_types_g1,
             scon,
         )?;
 
-        let tcon_with_param_types =
-            LazyTypeContext::Snoc(&tcon, normalized_param_types.to_derefed());
-        let return_type_type =
-            self.get_type(fun.hashee.return_type.clone(), tcon_with_param_types, scon)?;
-        if !return_type_type.raw().is_universe() {
-            return Err(TypeError::UnexpectedNonTypeExpression {
-                expr: fun.hashee.return_type.clone(),
-                type_: return_type_type,
-            });
-        }
-        let return_type_ast = self.cst_converter.convert(fun.hashee.return_type.clone());
-        let unshifted_normalized_return_type = self.evaluator.eval(return_type_ast);
+        let normalized_param_types_g1 = normalized_param_types_g0
+            .clone()
+            .upshift_with_increasing_cutoff(param_count);
 
-        let only_possible_fun_type: NormalForm = Normalized::for_(
-            normalized_param_types.clone().into_rc_sem_hashed(),
-            unshifted_normalized_return_type.clone(),
+        let normalized_return_type_g1f = normalized_return_type_g1
+            .clone()
+            .upshift(param_count, param_count);
+
+        let fun_type_g1: NormalForm = Normalized::for_(
+            normalized_param_types_g1.clone().into_rc_sem_hashed(),
+            normalized_return_type_g1f.clone(),
         )
         .into();
 
-        let shifted_fun_type = only_possible_fun_type
-            .clone()
-            .upshift(normalized_param_types.raw().len() + 1);
-        let recursive_fun_param_type_singleton =
-            Normalized::<[ast::Expr; 1]>::new(shifted_fun_type.clone());
-        let tcon_with_param_and_recursive_fun_param_types = LazyTypeContext::Snoc(
-            &tcon_with_param_types,
-            recursive_fun_param_type_singleton.as_ref().convert_ref(),
+        let fun_type_g1_singleton = Normalized::<[_; 1]>::new(fun_type_g1.clone());
+        let tcon_with_param_types_and_fun_types_g2 = LazyTypeContext::Snoc(
+            &tcon_with_param_types_g1,
+            fun_type_g1_singleton.as_ref().convert_ref(),
         );
 
-        let return_val_type = self.get_type(
-            fun.hashee.return_val.clone(),
-            tcon_with_param_and_recursive_fun_param_types,
+        let normalized_return_type_g2 = normalized_return_type_g1.clone().upshift(1, 0);
+
+        let return_val_type_g2 = self.get_type(
+            fun_g0.hashee.return_val.clone(),
+            tcon_with_param_types_and_fun_types_g2,
             scon,
         )?;
 
-        let shifted_normalized_return_type = unshifted_normalized_return_type.upshift(1);
         self.assert_expected_type_equality_holds_after_applying_scon(
             ExpectedTypeEquality {
-                expr: fun.hashee.return_val.clone(),
-                expected_type: shifted_normalized_return_type.clone(),
-                actual_type: return_val_type,
-                tcon_len: tcon.len(),
+                expr: fun_g0.hashee.return_val.clone(),
+                expected_type: normalized_return_type_g2,
+                actual_type: return_val_type_g2,
+                tcon_len: tcon_with_param_types_and_fun_types_g2.len(),
             },
             scon,
         )?;
 
-        Ok(only_possible_fun_type)
+        Ok(Normalized::for_(
+            normalized_param_types_g0.into_rc_sem_hashed(),
+            normalized_return_type_g1,
+        )
+        .into())
     }
 }

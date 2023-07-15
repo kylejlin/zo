@@ -59,8 +59,8 @@ fn lazy_substitution_slice_to_concrete_noncompounded_substitutions(
 ) -> impl Iterator<Item = ConcreteSubstitution> + '_ {
     subs.iter().map(move |sub| {
         let upshift_amount = current_tcon_len - sub.tcon_len;
-        let from = sub.from.clone().upshift(upshift_amount);
-        let to = sub.to.clone().upshift(upshift_amount);
+        let from = sub.from.clone().upshift(upshift_amount, 0);
+        let to = sub.to.clone().upshift(upshift_amount, 0);
         ConcreteSubstitution { from, to }
     })
 }
