@@ -7,14 +7,13 @@ impl TypeChecker {
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        let callee_type = self
-            .get_type(app.hashee.callee.clone(), tcon, scon)?
-            // TODO: Check the scon case.
-            .try_into_for()
-            .map_err(|original| TypeError::CalleeTypeIsNotAForExpression {
-                app: app.hashee.clone(),
-                callee_type: original,
-            })?;
+        let callee_type = self.get_type(app.hashee.callee.clone(), tcon, scon)?;
+        let callee_type = self.assert_callee_type_is_a_for_expression(
+            callee_type,
+            app.clone(),
+            scon,
+            tcon.len(),
+        )?;
 
         let arg_count = app.hashee.args.len();
         let param_count = callee_type.raw().hashee.param_types.hashee.len();
@@ -58,6 +57,31 @@ impl TypeChecker {
             .replace_debs(&arg_substituter, 0);
         let substituted_return_type = self.evaluator.eval(unnormalized_substituted_return_type);
         Ok(substituted_return_type)
+    }
+
+    fn assert_callee_type_is_a_for_expression(
+        &mut self,
+        callee_type: NormalForm,
+        app: RcHashed<cst::App>,
+        scon: LazySubstitutionContext,
+        tcon_len: usize,
+    ) -> Result<Normalized<RcSemHashed<ast::For>>, TypeError> {
+        if let Ok(for_) = callee_type.clone().try_into_for() {
+            return Ok(for_);
+        }
+
+        let subs = scon.into_concrete_noncompounded_substitutions(tcon_len);
+        let callee_type_after_applying_scon =
+            self.apply_concrete_substitutions(subs, [callee_type.clone()])[0].clone();
+        if let Ok(for_) = callee_type_after_applying_scon.clone().try_into_for() {
+            return Ok(for_);
+        }
+
+        Err(TypeError::CalleeTypeIsNotAForExpression {
+            app: app.hashee.clone(),
+            callee_type,
+            callee_type_after_applying_scon,
+        })
     }
 
     fn substitute_param_types(

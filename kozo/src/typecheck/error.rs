@@ -46,6 +46,7 @@ pub enum TypeError {
     CalleeTypeIsNotAForExpression {
         app: cst::App,
         callee_type: NormalForm,
+        callee_type_after_applying_scon: NormalForm,
     },
     WrongNumberOfAppArguments {
         app: cst::App,
