@@ -46,44 +46,11 @@ impl TypeChecker {
 
         let normalized_return_type_g2 = normalized_return_type_g1.clone().upshift(1, 0);
 
-        // TODO: Restore to `?`.
-        let res = self.get_type(
+        let return_val_type_g2 = self.get_type(
             fun_g0.hashee.return_val.clone(),
             tcon_with_param_types_and_fun_types_g2,
             scon,
-        );
-        let return_val_type_g2 = match res {
-            Ok(x) => x,
-            Err(err) => {
-                use crate::pretty_print::PrettyPrinted;
-
-                {
-                    let len = tcon_with_param_types_g1.len();
-                    for i in 0..len {
-                        let type_ = tcon_with_param_types_g1.get_unshifted(Deb(i)).unwrap();
-                        println!(
-                            "*** fun.tcon_g1[{i}].unshifted_type: ***\n{}\n\n",
-                            PrettyPrinted(type_.raw())
-                        );
-                    }
-                }
-
-                {
-                    let len = tcon_with_param_types_and_fun_types_g2.len();
-                    for i in 0..len {
-                        let type_ = tcon_with_param_types_and_fun_types_g2
-                            .get_unshifted(Deb(i))
-                            .unwrap();
-                        println!(
-                            "*** fun.tcon_g2[{i}].unshifted_type: ***\n{}\n\n",
-                            PrettyPrinted(type_.raw())
-                        );
-                    }
-                }
-
-                return Err(err);
-            }
-        };
+        )?;
 
         self.assert_expected_type_equality_holds_after_applying_scon(
             ExpectedTypeEquality {

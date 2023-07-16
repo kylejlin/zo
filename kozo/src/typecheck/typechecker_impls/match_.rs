@@ -161,8 +161,7 @@ impl TypeChecker {
         let normalized_match_return_type_g1 =
             normalized_match_return_type_g0.upshift(param_count, 0);
 
-        // TODO: Restore to `?`.
-        let res = self.assert_expected_type_equality_holds_after_applying_scon(
+        self.assert_expected_type_equality_holds_after_applying_scon(
             ExpectedTypeEquality {
                 expr: case.return_val.clone(),
                 expected_type: normalized_match_return_type_g1,
@@ -170,20 +169,7 @@ impl TypeChecker {
                 tcon_len: extended_tcon_g1.len(),
             },
             scon,
-        );
-        if let Err(err) = res {
-            use crate::pretty_print::PrettyPrinted;
-            let len = extended_tcon_g1.len();
-            for i in 0..len {
-                let type_ = extended_tcon_g1.get_unshifted(Deb(i)).unwrap();
-                println!(
-                    "*** match.tcon_g1[{i}].unshifted_type: ***\n{}\n\n",
-                    PrettyPrinted(type_.raw())
-                );
-            }
-
-            return Err(err);
-        }
+        )?;
 
         Ok(())
     }

@@ -140,7 +140,6 @@ impl NormalForm {
 }
 
 impl NormalForm {
-    // TODO: Delete this to force us to check the scon case.
     pub fn ind_or_ind_app(
         self,
     ) -> Option<(
