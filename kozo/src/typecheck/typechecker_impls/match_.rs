@@ -177,7 +177,7 @@ impl TypeChecker {
             for i in 0..len {
                 let type_ = extended_tcon_g1.get_unshifted(Deb(i)).unwrap();
                 println!(
-                    "*** tcon[{i}].unshifted_type: ***\n{}\n\n",
+                    "*** match.tcon_g1[{i}].unshifted_type: ***\n{}\n\n",
                     PrettyPrinted(type_.raw())
                 );
             }
