@@ -1,5 +1,3 @@
-use crate::syntax_tree::rch_cst::rc_hashed;
-
 use super::*;
 
 impl TypeChecker {
@@ -177,12 +175,11 @@ impl TypeChecker {
             use crate::pretty_print::PrettyPrinted;
             let len = extended_tcon_g1.len();
             for i in 0..len {
-                let deb = cst::Expr::Deb(rc_hashed(cst::NumberLiteral {
-                    value: i,
-                    span: (ByteIndex(0), ByteIndex(0)),
-                }));
-                let type_ = self.get_type(deb, extended_tcon_g1, extended_scon)?;
-                println!("*** Deb({i}).type: ***\n{}\n\n", PrettyPrinted(type_.raw()));
+                let type_ = extended_tcon_g1.get_unshifted(Deb(i)).unwrap();
+                println!(
+                    "*** tcon[{i}].unshifted_type: ***\n{}\n\n",
+                    PrettyPrinted(type_.raw())
+                );
             }
 
             return Err(err);
