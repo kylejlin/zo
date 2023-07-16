@@ -79,7 +79,7 @@ impl RchCstToAstConverter {
     fn convert_vcon_defs_to_vec(&mut self, cst: cst::ZeroOrMoreVconDefs) -> Vec<ast::VconDef> {
         match cst {
             cst::ZeroOrMoreVconDefs::Nil => vec![],
-            cst::ZeroOrMoreVconDefs::Cons(left, right) => {
+            cst::ZeroOrMoreVconDefs::Snoc(left, right) => {
                 let mut left = self.convert_vcon_defs_to_vec(*left);
                 let right = self.convert_vcon_def(right);
                 left.push(right);
@@ -160,7 +160,7 @@ impl RchCstToAstConverter {
     ) -> Vec<ast::MatchCase> {
         match cst {
             cst::ZeroOrMoreMatchCases::Nil => vec![],
-            cst::ZeroOrMoreMatchCases::Cons(left, right) => {
+            cst::ZeroOrMoreMatchCases::Snoc(left, right) => {
                 let mut left = self.convert_match_cases_to_vec(*left);
                 let right = self.convert_match_case(right);
                 left.push(right);
@@ -255,7 +255,7 @@ impl RchCstToAstConverter {
     fn convert_expressions_to_vec(&mut self, cst: cst::ZeroOrMoreExprs) -> Vec<ast::Expr> {
         match cst {
             cst::ZeroOrMoreExprs::Nil => vec![],
-            cst::ZeroOrMoreExprs::Cons(left, right) => {
+            cst::ZeroOrMoreExprs::Snoc(left, right) => {
                 let mut left = self.convert_expressions_to_vec(*left);
                 let right = self.convert(right);
                 left.push(right);

@@ -4,7 +4,7 @@ impl ZeroOrMoreExprs {
     pub fn to_vec_of_cloned(&self) -> Vec<Expr> {
         match self {
             Self::Nil => vec![],
-            Self::Cons(left, right) => {
+            Self::Snoc(left, right) => {
                 let mut left = left.to_vec_of_cloned();
                 left.push(right.clone());
                 left
@@ -17,7 +17,7 @@ impl ZeroOrMoreExprs {
     pub fn to_vec(&self) -> Vec<&Expr> {
         match self {
             Self::Nil => vec![],
-            Self::Cons(left, right) => {
+            Self::Snoc(left, right) => {
                 let mut left = left.to_vec();
                 left.push(right);
                 left
@@ -48,7 +48,7 @@ impl ZeroOrMoreExprs {
     pub fn get_from_back(&self, index: usize) -> Option<&Expr> {
         match self {
             ZeroOrMoreExprs::Nil => None,
-            ZeroOrMoreExprs::Cons(left, right) => {
+            ZeroOrMoreExprs::Snoc(left, right) => {
                 if index == 0 {
                     Some(&right)
                 } else {
@@ -61,7 +61,7 @@ impl ZeroOrMoreExprs {
     pub fn len(&self) -> usize {
         match self {
             ZeroOrMoreExprs::Nil => 0,
-            ZeroOrMoreExprs::Cons(left, _) => 1 + left.len(),
+            ZeroOrMoreExprs::Snoc(left, _) => 1 + left.len(),
         }
     }
 }
@@ -70,7 +70,7 @@ impl ZeroOrMoreVconDefs {
     pub fn to_vec(&self) -> Vec<&VconDef> {
         match self {
             Self::Nil => vec![],
-            Self::Cons(left, right) => {
+            Self::Snoc(left, right) => {
                 let mut left = left.to_vec();
                 left.push(right);
                 left
@@ -101,7 +101,7 @@ impl ZeroOrMoreVconDefs {
     pub fn get_from_back(&self, index: usize) -> Option<&VconDef> {
         match self {
             ZeroOrMoreVconDefs::Nil => None,
-            ZeroOrMoreVconDefs::Cons(left, right) => {
+            ZeroOrMoreVconDefs::Snoc(left, right) => {
                 if index == 0 {
                     Some(&right)
                 } else {
@@ -114,7 +114,7 @@ impl ZeroOrMoreVconDefs {
     pub fn len(&self) -> usize {
         match self {
             ZeroOrMoreVconDefs::Nil => 0,
-            ZeroOrMoreVconDefs::Cons(left, _) => 1 + left.len(),
+            ZeroOrMoreVconDefs::Snoc(left, _) => 1 + left.len(),
         }
     }
 }
@@ -141,7 +141,7 @@ impl ZeroOrMoreMatchCases {
     pub fn get_from_back(&self, index: usize) -> Option<&MatchCase> {
         match self {
             ZeroOrMoreMatchCases::Nil => None,
-            ZeroOrMoreMatchCases::Cons(left, right) => {
+            ZeroOrMoreMatchCases::Snoc(left, right) => {
                 if index == 0 {
                     Some(&right)
                 } else {
@@ -154,7 +154,7 @@ impl ZeroOrMoreMatchCases {
     pub fn len(&self) -> usize {
         match self {
             ZeroOrMoreMatchCases::Nil => 0,
-            ZeroOrMoreMatchCases::Cons(left, _) => 1 + left.len(),
+            ZeroOrMoreMatchCases::Snoc(left, _) => 1 + left.len(),
         }
     }
 }

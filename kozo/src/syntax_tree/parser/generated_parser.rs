@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 06f88763ae537f7e243503111348976b77f80100e06d7990d6fde3d6e78eb08c
+// @sha256 c702f59aed98a396ea69ccfc777fec8249afcde85fc636ba517da04d6c8b0fb8
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -73,7 +73,7 @@ pub struct Ind {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ZeroOrMoreExprs {
     Nil,
-    Cons(
+    Snoc(
         Box<ZeroOrMoreExprs>,
         Box<Expr>,
     ),
@@ -82,7 +82,7 @@ pub enum ZeroOrMoreExprs {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ZeroOrMoreVconDefs {
     Nil,
-    Cons(
+    Snoc(
         Box<ZeroOrMoreVconDefs>,
         Box<VconDef>,
     ),
@@ -122,7 +122,7 @@ pub struct Match {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ZeroOrMoreMatchCases {
     Nil,
-    Cons(
+    Snoc(
         Box<ZeroOrMoreMatchCases>,
         Box<MatchCase>,
     ),
@@ -530,7 +530,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 2);
             
             (
-                Node::ZeroOrMoreExprs(ZeroOrMoreExprs::Cons(
+                Node::ZeroOrMoreExprs(ZeroOrMoreExprs::Snoc(
                     t0,
                     t1,
                 )),
@@ -550,7 +550,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 2);
             
             (
-                Node::ZeroOrMoreVconDefs(ZeroOrMoreVconDefs::Cons(
+                Node::ZeroOrMoreVconDefs(ZeroOrMoreVconDefs::Snoc(
                     t0,
                     t1,
                 )),
@@ -640,7 +640,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 2);
             
             (
-                Node::ZeroOrMoreMatchCases(ZeroOrMoreMatchCases::Cons(
+                Node::ZeroOrMoreMatchCases(ZeroOrMoreMatchCases::Snoc(
                     t0,
                     t1,
                 )),

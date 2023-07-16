@@ -10,9 +10,9 @@ For(
         param_types_lparen: ByteIndex(
             35,
         ),
-        param_types: Cons(
-            Cons(
-                Cons(
+        param_types: Snoc(
+            Snoc(
+                Snoc(
                     Nil,
                     Universe(
                         UniverseLiteral {

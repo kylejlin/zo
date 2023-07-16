@@ -36,8 +36,8 @@ Match(
         cases_lparen: ByteIndex(
             45,
         ),
-        cases: Cons(
-            Cons(
+        cases: Snoc(
+            Snoc(
                 Nil,
                 MatchCase {
                     lparen: ByteIndex(

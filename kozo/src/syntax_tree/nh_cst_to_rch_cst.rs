@@ -46,8 +46,8 @@ impl From<nh_cst::ZeroOrMoreExprs> for rch::ZeroOrMoreExprs {
     fn from(cst: nh_cst::ZeroOrMoreExprs) -> Self {
         match cst {
             nh_cst::ZeroOrMoreExprs::Nil => rch::ZeroOrMoreExprs::Nil,
-            nh_cst::ZeroOrMoreExprs::Cons(exprs, expr) => {
-                rch::ZeroOrMoreExprs::Cons(Box::new((*exprs).into()), (*expr).into())
+            nh_cst::ZeroOrMoreExprs::Snoc(exprs, expr) => {
+                rch::ZeroOrMoreExprs::Snoc(Box::new((*exprs).into()), (*expr).into())
             }
         }
     }
@@ -57,8 +57,8 @@ impl From<nh_cst::ZeroOrMoreVconDefs> for rch::ZeroOrMoreVconDefs {
     fn from(cst: nh_cst::ZeroOrMoreVconDefs) -> Self {
         match cst {
             nh_cst::ZeroOrMoreVconDefs::Nil => rch::ZeroOrMoreVconDefs::Nil,
-            nh_cst::ZeroOrMoreVconDefs::Cons(vcon_defs, vcon_def) => {
-                rch::ZeroOrMoreVconDefs::Cons(Box::new((*vcon_defs).into()), (*vcon_def).into())
+            nh_cst::ZeroOrMoreVconDefs::Snoc(vcon_defs, vcon_def) => {
+                rch::ZeroOrMoreVconDefs::Snoc(Box::new((*vcon_defs).into()), (*vcon_def).into())
             }
         }
     }
@@ -108,8 +108,8 @@ impl From<nh_cst::ZeroOrMoreMatchCases> for rch::ZeroOrMoreMatchCases {
     fn from(cst: nh_cst::ZeroOrMoreMatchCases) -> Self {
         match cst {
             nh_cst::ZeroOrMoreMatchCases::Nil => rch::ZeroOrMoreMatchCases::Nil,
-            nh_cst::ZeroOrMoreMatchCases::Cons(match_cases, match_case) => {
-                rch::ZeroOrMoreMatchCases::Cons(
+            nh_cst::ZeroOrMoreMatchCases::Snoc(match_cases, match_case) => {
+                rch::ZeroOrMoreMatchCases::Snoc(
                     Box::new((*match_cases).into()),
                     (*match_case).into(),
                 )

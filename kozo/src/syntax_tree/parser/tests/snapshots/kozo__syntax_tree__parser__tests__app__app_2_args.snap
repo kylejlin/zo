@@ -20,8 +20,8 @@ App(
                 ),
             },
         ),
-        args: Cons(
-            Cons(
+        args: Snoc(
+            Snoc(
                 Nil,
                 Deb(
                     NumberLiteral {

@@ -23,7 +23,7 @@ Fun(
         param_types_lparen: ByteIndex(
             72,
         ),
-        param_types: Cons(
+        param_types: Snoc(
             Nil,
             Deb(
                 NumberLiteral {

@@ -41,13 +41,13 @@ pub struct Ind {
 #[derive(Debug, Clone, Hash)]
 pub enum ZeroOrMoreExprs {
     Nil,
-    Cons(Box<ZeroOrMoreExprs>, Expr),
+    Snoc(Box<ZeroOrMoreExprs>, Expr),
 }
 
 #[derive(Debug, Clone, Hash)]
 pub enum ZeroOrMoreVconDefs {
     Nil,
-    Cons(Box<ZeroOrMoreVconDefs>, VconDef),
+    Snoc(Box<ZeroOrMoreVconDefs>, VconDef),
 }
 
 #[derive(Debug, Clone, Hash)]
@@ -84,7 +84,7 @@ pub struct Match {
 #[derive(Debug, Clone, Hash)]
 pub enum ZeroOrMoreMatchCases {
     Nil,
-    Cons(Box<ZeroOrMoreMatchCases>, MatchCase),
+    Snoc(Box<ZeroOrMoreMatchCases>, MatchCase),
 }
 
 #[derive(Debug, Clone, Hash)]

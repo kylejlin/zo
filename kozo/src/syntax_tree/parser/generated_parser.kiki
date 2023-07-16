@@ -34,13 +34,13 @@ struct Ind {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ZeroOrMoreExprs {
     Nil
-    Cons(ZeroOrMoreExprs Expr)
+    Snoc(ZeroOrMoreExprs Expr)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ZeroOrMoreVconDefs {
     Nil
-    Cons(ZeroOrMoreVconDefs VconDef)
+    Snoc(ZeroOrMoreVconDefs VconDef)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -87,7 +87,7 @@ struct Match {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ZeroOrMoreMatchCases {
     Nil
-    Cons(ZeroOrMoreMatchCases MatchCase)
+    Snoc(ZeroOrMoreMatchCases MatchCase)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

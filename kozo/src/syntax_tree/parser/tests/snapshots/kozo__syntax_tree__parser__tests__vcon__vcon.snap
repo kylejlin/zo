@@ -38,8 +38,8 @@ Vcon(
             vcon_defs_lparen: ByteIndex(
                 73,
             ),
-            vcon_defs: Cons(
-                Cons(
+            vcon_defs: Snoc(
+                Snoc(
                     Nil,
                     VconDef {
                         lparen: ByteIndex(
@@ -71,7 +71,7 @@ Vcon(
                     param_types_lparen: ByteIndex(
                         100,
                     ),
-                    param_types: Cons(
+                    param_types: Snoc(
                         Nil,
                         Deb(
                             NumberLiteral {
