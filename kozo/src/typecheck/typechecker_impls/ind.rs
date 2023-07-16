@@ -86,9 +86,9 @@ impl TypeChecker {
 
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
-                exprs: def.index_args.clone(),
-                expected_types: normalized_index_types_g2.to_hashee().cloned(),
-                actual_types: index_arg_types_g2,
+                exprs: &def.index_args,
+                expected_types: normalized_index_types_g2.to_hashee().derefed(),
+                actual_types: index_arg_types_g2.to_derefed(),
                 tcon_len: tcon_with_param_types_g2.len(),
             },
             scon,

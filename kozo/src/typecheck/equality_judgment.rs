@@ -10,16 +10,15 @@ pub struct ExpectedTypeEquality {
 
 /// `exprs`, `expected_types`, and `actual_types` **must** all have the same length.
 #[derive(Clone, Debug)]
-pub struct ExpectedTypeEqualities {
-    // TODO: Make this a reference.
-    pub exprs: Vec<cst::Expr>,
-    pub expected_types: Normalized<Vec<ast::Expr>>,
-    pub actual_types: Normalized<Vec<ast::Expr>>,
+pub struct ExpectedTypeEqualities<'a> {
+    pub exprs: &'a [cst::Expr],
+    pub expected_types: Normalized<&'a [ast::Expr]>,
+    pub actual_types: Normalized<&'a [ast::Expr]>,
     pub tcon_len: usize,
 }
 
-impl ExpectedTypeEqualities {
-    pub fn zip(self) -> impl Iterator<Item = ExpectedTypeEquality> {
+impl<'a> ExpectedTypeEqualities<'a> {
+    pub fn zip(self) -> impl Iterator<Item = ExpectedTypeEquality> + 'a {
         let tcon_len = self.tcon_len;
         (0..self.len()).into_iter().map(move |i| {
             let expr = self.exprs[i].clone();

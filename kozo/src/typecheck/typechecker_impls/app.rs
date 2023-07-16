@@ -32,9 +32,9 @@ impl TypeChecker {
 
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
-                exprs: app.hashee.args.clone(),
-                expected_types: substituted_callee_type_param_types.to_hashee().cloned(),
-                actual_types: arg_types,
+                exprs: &app.hashee.args,
+                expected_types: substituted_callee_type_param_types.to_hashee().derefed(),
+                actual_types: arg_types.to_derefed(),
                 tcon_len: tcon.len(),
             },
             scon,
