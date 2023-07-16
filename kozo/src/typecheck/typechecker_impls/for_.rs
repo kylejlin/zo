@@ -17,7 +17,7 @@ impl TypeChecker {
 
         let param_types_g0_ast = self
             .cst_converter
-            .convert_expressions(for_g0.hashee.param_types.clone());
+            .convert_expressions(&for_g0.hashee.param_types);
         let normalized_param_types_g0 = self.evaluator.eval_expressions(param_types_g0_ast);
 
         let tcon_with_param_types_g1 =
@@ -47,7 +47,7 @@ impl TypeChecker {
     fn assert_every_type_is_universe(
         &mut self,
         types: Normalized<&[ast::Expr]>,
-        exprs: &cst::ZeroOrMoreExprs,
+        exprs: &[cst::Expr],
     ) -> Result<(), TypeError> {
         for i in 0..types.raw().len() {
             if !types.raw()[i].is_universe() {

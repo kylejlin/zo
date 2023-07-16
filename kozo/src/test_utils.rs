@@ -3,7 +3,7 @@ use ipist::ByteIndex;
 use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     syntax_tree::{
-        ast, ipist, ipist_to_ast::RchCstToAstConverter, lexer::lex, ost::Span, parser::parse,
+        ast, ipist, ipist_to_ast::IpistToAstConverter, lexer::lex, ost::Span, parser::parse,
     },
     typecheck::{LazySubstitutionContext, LazyTypeContext, TypeChecker},
 };
@@ -36,7 +36,7 @@ pub fn parse_rch_cst_or_panic(src: &str) -> ipist::Expr {
 
 pub fn parse_ast_or_panic(src: &str) -> ast::Expr {
     let rch_cst: ipist::Expr = parse_rch_cst_or_panic(src);
-    let mut converter = RchCstToAstConverter::default();
+    let mut converter = IpistToAstConverter::default();
     converter.convert(rch_cst)
 }
 

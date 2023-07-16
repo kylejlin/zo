@@ -4,7 +4,7 @@ use crate::{
     syntax_tree::{
         ast::{self, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
         ipist::{self as cst, RcHashed},
-        ipist_to_ast::RchCstToAstConverter,
+        ipist_to_ast::IpistToAstConverter,
         replace_debs::*,
         token::*,
     },
@@ -16,8 +16,6 @@ mod apply_concrete_substitutions_impl;
 
 mod concrete_substitution;
 use concrete_substitution::*;
-
-mod cst_impls;
 
 mod equality_judgment;
 use equality_judgment::*;
@@ -39,7 +37,7 @@ mod tests;
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
-    pub cst_converter: RchCstToAstConverter,
+    pub cst_converter: IpistToAstConverter,
 }
 
 impl TypeChecker {

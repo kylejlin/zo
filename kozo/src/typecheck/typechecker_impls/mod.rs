@@ -30,7 +30,7 @@ impl TypeChecker {
 
     fn get_types_of_dependent_expressions(
         &mut self,
-        exprs: &cst::ZeroOrMoreExprs,
+        exprs: &[cst::Expr],
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
@@ -38,7 +38,7 @@ impl TypeChecker {
         let mut normalized_visited_exprs: Normalized<Vec<ast::Expr>> =
             Normalized::with_capacity(exprs.len());
 
-        for expr in exprs.to_vec() {
+        for expr in exprs {
             let current_tcon = LazyTypeContext::Snoc(&tcon, normalized_visited_exprs.to_derefed());
             let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
             out.push(type_);
@@ -53,13 +53,13 @@ impl TypeChecker {
 
     fn get_types_of_independent_expressions(
         &mut self,
-        exprs: &cst::ZeroOrMoreExprs,
+        exprs: &[cst::Expr],
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
         let mut out: Normalized<Vec<ast::Expr>> = Normalized::with_capacity(exprs.len());
 
-        for expr in exprs.to_vec() {
+        for expr in exprs {
             let type_ = self.get_type(expr.clone(), tcon, scon)?;
             out.push(type_);
         }
@@ -69,7 +69,7 @@ impl TypeChecker {
 
     fn typecheck_and_normalize_param_types_with_limit(
         &mut self,
-        exprs: &cst::ZeroOrMoreExprs,
+        exprs: &[cst::Expr],
         limiter: impl UniverseLimit,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,

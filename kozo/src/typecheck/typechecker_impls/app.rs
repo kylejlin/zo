@@ -22,9 +22,7 @@ impl TypeChecker {
 
         let arg_types = self.get_types_of_independent_expressions(&app.hashee.args, tcon, scon)?;
 
-        let args_ast = self
-            .cst_converter
-            .convert_expressions(app.hashee.args.clone());
+        let args_ast = self.cst_converter.convert_expressions(&app.hashee.args);
         let normalized_args = self.evaluator.eval_expressions(args_ast);
 
         let substituted_callee_type_param_types = self.substitute_callee_type_param_types(
@@ -34,7 +32,7 @@ impl TypeChecker {
 
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
-                exprs: app.hashee.args.to_vec_of_cloned(),
+                exprs: app.hashee.args.clone(),
                 expected_types: substituted_callee_type_param_types.to_hashee().cloned(),
                 actual_types: arg_types,
                 tcon_len: tcon.len(),

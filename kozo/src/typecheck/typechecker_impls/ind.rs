@@ -43,7 +43,7 @@ impl TypeChecker {
         tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
-        for def in ind.hashee.vcon_defs.to_vec() {
+        for def in &ind.hashee.vcon_defs {
             self.typecheck_ind_vcon_def(
                 def,
                 ind.clone(),
@@ -86,7 +86,7 @@ impl TypeChecker {
 
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {
-                exprs: def.index_args.to_vec_of_cloned(),
+                exprs: def.index_args.clone(),
                 expected_types: normalized_index_types_g2.to_hashee().cloned(),
                 actual_types: index_arg_types_g2,
                 tcon_len: tcon_with_param_types_g2.len(),

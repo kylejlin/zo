@@ -30,34 +30,22 @@ pub struct Ind {
     pub type_: UniverseLiteral,
     pub name: StringLiteral,
     pub index_types_lparen: ByteIndex,
-    pub index_types: ZeroOrMoreExprs,
+    pub index_types: Vec<Expr>,
     pub index_types_rparen: ByteIndex,
     pub vcon_defs_lparen: ByteIndex,
-    pub vcon_defs: ZeroOrMoreVconDefs,
+    pub vcon_defs: Vec<VconDef>,
     pub vcon_defs_rparen: ByteIndex,
     pub rparen: ByteIndex,
-}
-
-#[derive(Debug, Clone, Hash)]
-pub enum ZeroOrMoreExprs {
-    Nil,
-    Snoc(Box<ZeroOrMoreExprs>, Expr),
-}
-
-#[derive(Debug, Clone, Hash)]
-pub enum ZeroOrMoreVconDefs {
-    Nil,
-    Snoc(Box<ZeroOrMoreVconDefs>, VconDef),
 }
 
 #[derive(Debug, Clone, Hash)]
 pub struct VconDef {
     pub lparen: ByteIndex,
     pub param_types_lparen: ByteIndex,
-    pub param_types: ZeroOrMoreExprs,
+    pub param_types: Vec<Expr>,
     pub param_types_rparen: ByteIndex,
     pub index_args_lparen: ByteIndex,
-    pub index_args: ZeroOrMoreExprs,
+    pub index_args: Vec<Expr>,
     pub index_args_rparen: ByteIndex,
     pub rparen: ByteIndex,
 }
@@ -76,15 +64,9 @@ pub struct Match {
     pub matchee: Expr,
     pub return_type: Expr,
     pub cases_lparen: ByteIndex,
-    pub cases: ZeroOrMoreMatchCases,
+    pub cases: Vec<MatchCase>,
     pub cases_rparen: ByteIndex,
     pub rparen: ByteIndex,
-}
-
-#[derive(Debug, Clone, Hash)]
-pub enum ZeroOrMoreMatchCases {
-    Nil,
-    Snoc(Box<ZeroOrMoreMatchCases>, MatchCase),
 }
 
 #[derive(Debug, Clone, Hash)]
@@ -100,7 +82,7 @@ pub struct Fun {
     pub lparen: ByteIndex,
     pub decreasing_index: NumberOrNonrecKw,
     pub param_types_lparen: ByteIndex,
-    pub param_types: ZeroOrMoreExprs,
+    pub param_types: Vec<Expr>,
     pub param_types_rparen: ByteIndex,
     pub return_type: Expr,
     pub return_val: Expr,
@@ -113,7 +95,7 @@ pub use crate::syntax_tree::ost::NumberOrNonrecKw;
 pub struct App {
     pub lparen: ByteIndex,
     pub callee: Expr,
-    pub args: ZeroOrMoreExprs,
+    pub args: Vec<Expr>,
     pub rparen: ByteIndex,
 }
 
@@ -121,7 +103,7 @@ pub struct App {
 pub struct For {
     pub lparen: ByteIndex,
     pub param_types_lparen: ByteIndex,
-    pub param_types: ZeroOrMoreExprs,
+    pub param_types: Vec<Expr>,
     pub param_types_rparen: ByteIndex,
     pub return_type: Expr,
     pub rparen: ByteIndex,

@@ -11,6 +11,7 @@ pub struct ExpectedTypeEquality {
 /// `exprs`, `expected_types`, and `actual_types` **must** all have the same length.
 #[derive(Clone, Debug)]
 pub struct ExpectedTypeEqualities {
+    // TODO: Make this a reference.
     pub exprs: Vec<cst::Expr>,
     pub expected_types: Normalized<Vec<ast::Expr>>,
     pub actual_types: Normalized<Vec<ast::Expr>>,

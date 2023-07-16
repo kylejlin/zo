@@ -1,33 +1,33 @@
 use crate::{
-    syntax_tree::ipist::{self as rch, rc_hashed},
+    syntax_tree::ipist::{self, rc_hashed},
     syntax_tree::ost,
 };
 
-impl From<ost::Expr> for rch::Expr {
+impl From<ost::Expr> for ipist::Expr {
     fn from(cst: ost::Expr) -> Self {
         match cst {
-            ost::Expr::Ind(cst) => rch::Ind::from(*cst).into(),
+            ost::Expr::Ind(cst) => ipist::Ind::from(*cst).into(),
 
-            ost::Expr::Vcon(cst) => rch::Vcon::from(*cst).into(),
+            ost::Expr::Vcon(cst) => ipist::Vcon::from(*cst).into(),
 
-            ost::Expr::Match(cst) => rch::Match::from(*cst).into(),
+            ost::Expr::Match(cst) => ipist::Match::from(*cst).into(),
 
-            ost::Expr::Fun(cst) => rch::Fun::from(*cst).into(),
+            ost::Expr::Fun(cst) => ipist::Fun::from(*cst).into(),
 
-            ost::Expr::App(cst) => rch::App::from(*cst).into(),
+            ost::Expr::App(cst) => ipist::App::from(*cst).into(),
 
-            ost::Expr::For(cst) => rch::For::from(*cst).into(),
+            ost::Expr::For(cst) => ipist::For::from(*cst).into(),
 
-            ost::Expr::Deb(cst) => rch::Expr::Deb(rc_hashed(cst)),
+            ost::Expr::Deb(cst) => ipist::Expr::Deb(rc_hashed(cst)),
 
-            ost::Expr::Universe(cst) => rch::Expr::Universe(rc_hashed(cst)),
+            ost::Expr::Universe(cst) => ipist::Expr::Universe(rc_hashed(cst)),
         }
     }
 }
 
-impl From<ost::Ind> for rch::Ind {
+impl From<ost::Ind> for ipist::Ind {
     fn from(cst: ost::Ind) -> Self {
-        rch::Ind {
+        ipist::Ind {
             lparen: cst.lparen,
             type_: cst.type_,
             name: cst.name,
@@ -42,31 +42,35 @@ impl From<ost::Ind> for rch::Ind {
     }
 }
 
-impl From<ost::ZeroOrMoreExprs> for rch::ZeroOrMoreExprs {
+impl From<ost::ZeroOrMoreExprs> for Vec<ipist::Expr> {
     fn from(cst: ost::ZeroOrMoreExprs) -> Self {
         match cst {
-            ost::ZeroOrMoreExprs::Nil => rch::ZeroOrMoreExprs::Nil,
-            ost::ZeroOrMoreExprs::Snoc(exprs, expr) => {
-                rch::ZeroOrMoreExprs::Snoc(Box::new((*exprs).into()), (*expr).into())
+            ost::ZeroOrMoreExprs::Nil => vec![],
+            ost::ZeroOrMoreExprs::Snoc(rdc, rac) => {
+                let mut rdc: Vec<ipist::Expr> = (*rdc).into();
+                rdc.push((*rac).into());
+                rdc
             }
         }
     }
 }
 
-impl From<ost::ZeroOrMoreVconDefs> for rch::ZeroOrMoreVconDefs {
+impl From<ost::ZeroOrMoreVconDefs> for Vec<ipist::VconDef> {
     fn from(cst: ost::ZeroOrMoreVconDefs) -> Self {
         match cst {
-            ost::ZeroOrMoreVconDefs::Nil => rch::ZeroOrMoreVconDefs::Nil,
-            ost::ZeroOrMoreVconDefs::Snoc(vcon_defs, vcon_def) => {
-                rch::ZeroOrMoreVconDefs::Snoc(Box::new((*vcon_defs).into()), (*vcon_def).into())
+            ost::ZeroOrMoreVconDefs::Nil => vec![],
+            ost::ZeroOrMoreVconDefs::Snoc(rdc, rac) => {
+                let mut rdc: Vec<ipist::VconDef> = (*rdc).into();
+                rdc.push((*rac).into());
+                rdc
             }
         }
     }
 }
 
-impl From<ost::VconDef> for rch::VconDef {
+impl From<ost::VconDef> for ipist::VconDef {
     fn from(cst: ost::VconDef) -> Self {
-        rch::VconDef {
+        ipist::VconDef {
             lparen: cst.lparen,
             param_types_lparen: cst.param_types_lparen,
             param_types: (*cst.param_types).into(),
@@ -79,9 +83,9 @@ impl From<ost::VconDef> for rch::VconDef {
     }
 }
 
-impl From<ost::Vcon> for rch::Vcon {
+impl From<ost::Vcon> for ipist::Vcon {
     fn from(cst: ost::Vcon) -> Self {
-        rch::Vcon {
+        ipist::Vcon {
             lparen: cst.lparen,
             ind: rc_hashed((*cst.ind).into()),
             vcon_index: cst.vcon_index,
@@ -90,9 +94,9 @@ impl From<ost::Vcon> for rch::Vcon {
     }
 }
 
-impl From<ost::Match> for rch::Match {
+impl From<ost::Match> for ipist::Match {
     fn from(cst: ost::Match) -> Self {
-        rch::Match {
+        ipist::Match {
             lparen: cst.lparen,
             matchee: (*cst.matchee).into(),
             return_type: (*cst.return_type).into(),
@@ -104,23 +108,22 @@ impl From<ost::Match> for rch::Match {
     }
 }
 
-impl From<ost::ZeroOrMoreMatchCases> for rch::ZeroOrMoreMatchCases {
+impl From<ost::ZeroOrMoreMatchCases> for Vec<ipist::MatchCase> {
     fn from(cst: ost::ZeroOrMoreMatchCases) -> Self {
         match cst {
-            ost::ZeroOrMoreMatchCases::Nil => rch::ZeroOrMoreMatchCases::Nil,
-            ost::ZeroOrMoreMatchCases::Snoc(match_cases, match_case) => {
-                rch::ZeroOrMoreMatchCases::Snoc(
-                    Box::new((*match_cases).into()),
-                    (*match_case).into(),
-                )
+            ost::ZeroOrMoreMatchCases::Nil => vec![],
+            ost::ZeroOrMoreMatchCases::Snoc(rdc, rac) => {
+                let mut rdc: Vec<ipist::MatchCase> = (*rdc).into();
+                rdc.push((*rac).into());
+                rdc
             }
         }
     }
 }
 
-impl From<ost::MatchCase> for rch::MatchCase {
+impl From<ost::MatchCase> for ipist::MatchCase {
     fn from(cst: ost::MatchCase) -> Self {
-        rch::MatchCase {
+        ipist::MatchCase {
             lparen: cst.lparen,
             arity: cst.arity,
             return_val: (*cst.return_val.clone()).into(),
@@ -129,9 +132,9 @@ impl From<ost::MatchCase> for rch::MatchCase {
     }
 }
 
-impl From<ost::Fun> for rch::Fun {
+impl From<ost::Fun> for ipist::Fun {
     fn from(cst: ost::Fun) -> Self {
-        rch::Fun {
+        ipist::Fun {
             lparen: cst.lparen,
             decreasing_index: *cst.decreasing_index,
             param_types_lparen: cst.param_types_lparen,
@@ -144,9 +147,9 @@ impl From<ost::Fun> for rch::Fun {
     }
 }
 
-impl From<ost::App> for rch::App {
+impl From<ost::App> for ipist::App {
     fn from(cst: ost::App) -> Self {
-        rch::App {
+        ipist::App {
             lparen: cst.lparen,
             callee: (*cst.callee).into(),
             args: (*cst.args).into(),
@@ -155,9 +158,9 @@ impl From<ost::App> for rch::App {
     }
 }
 
-impl From<ost::For> for rch::For {
+impl From<ost::For> for ipist::For {
     fn from(cst: ost::For) -> Self {
-        rch::For {
+        ipist::For {
             lparen: cst.lparen,
             param_types_lparen: cst.param_types_lparen,
             param_types: (*cst.param_types).into(),

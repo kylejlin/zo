@@ -23,7 +23,7 @@ impl TypeChecker {
 
     fn assert_vcon_index_is_valid(&mut self, vcon: RcHashed<cst::Vcon>) -> Result<(), TypeError> {
         let vcon_index = vcon.hashee.vcon_index.value;
-        let defs: &cst::ZeroOrMoreVconDefs = &vcon.hashee.ind.hashee.vcon_defs;
+        let defs = &vcon.hashee.ind.hashee.vcon_defs;
         if vcon_index >= defs.len() {
             return Err(TypeError::InvalidVconIndex(vcon.hashee.clone()));
         }
