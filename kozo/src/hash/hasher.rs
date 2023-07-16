@@ -8,6 +8,8 @@
 
 use super::*;
 
+use std::hash::Hasher;
+
 #[derive(Clone, Copy, Default)]
 pub struct Sha256Hasher(hmac_sha256::Hash);
 

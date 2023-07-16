@@ -1,12 +1,12 @@
 pub use crate::{
-    hash::{sha256::*, *},
+    hash::*,
     syntax_tree::token::{ByteIndex, NumberLiteral, StringLiteral, UniverseLiteral},
 };
 
 use std::{hash::Hash, rc::Rc};
 
 /// Reference-counted hashed.
-pub type RcHashed<T> = Rc<Hashed<T, DefaultHashAlgorithm>>;
+pub type RcHashed<T> = Rc<Hashed<T>>;
 
 pub fn rc_hashed<T: Hash>(t: T) -> RcHashed<T> {
     Rc::new(Hashed::new(t))

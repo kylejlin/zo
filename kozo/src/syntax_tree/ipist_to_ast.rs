@@ -1,5 +1,5 @@
 use crate::{
-    hash::{sha256::*, *},
+    hash::*,
     syntax_tree::{
         ast::{self, rc_sem_hashed, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
         ipist::{self, RcHashed},

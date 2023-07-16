@@ -1,17 +1,16 @@
 use super::*;
 
+use std::hash::{Hash, Hasher};
+
 #[derive(Clone, Debug)]
-pub struct Hashed<T, A> {
+pub struct Hashed<T> {
     pub hashee: T,
     pub digest: Digest,
-    _marker: std::marker::PhantomData<A>,
 }
 
-pub type SemanticallyHashed<T> = Hashed<T, SemanticHashAlgorithm>;
-
-impl<T, A> Hashed<T, A>
+impl<T> Hashed<T>
 where
-    T: HashWithAlgorithm<A>,
+    T: Hash,
 {
     pub fn new(value: T) -> Self {
         let mut hasher = Sha256Hasher::new();
@@ -21,13 +20,20 @@ where
         Self {
             hashee: value,
             digest,
-            _marker: std::marker::PhantomData,
         }
     }
 }
 
-impl<T, A> Hash for Hashed<T, A> {
+impl<T> Hash for Hashed<T> {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
         hasher.write(self.digest.as_ref());
     }
 }
+
+impl<T> PartialEq for Hashed<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.digest == other.digest
+    }
+}
+
+impl<T> Eq for Hashed<T> {}

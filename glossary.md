@@ -33,7 +33,6 @@ with the ordinary definitions.
   and then into an AST.
 - RC: reference counted
 - scon: substitution context
-- sem hash: semantic hash
 - tcon: type context
 - vcon: variant constructor
 

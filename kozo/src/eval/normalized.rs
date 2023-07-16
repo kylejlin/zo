@@ -1,6 +1,6 @@
 use crate::syntax_tree::{ast::*, replace_debs::*};
 
-use std::{ops::Deref, rc::Rc};
+use std::{hash::Hash, ops::Deref, rc::Rc};
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Normalized<T>(pub(in crate::eval) T);
@@ -66,7 +66,7 @@ impl<'a, T> Normalized<&'a RcSemHashed<T>> {
 
 impl<T> Normalized<T>
 where
-    T: HashWithAlgorithm<SemanticHashAlgorithm>,
+    T: Hash,
 {
     pub fn into_rc_sem_hashed(self) -> Normalized<RcSemHashed<T>> {
         Normalized(rc_sem_hashed(self.0))
@@ -503,7 +503,7 @@ mod unchecked {
 
     impl<T> RcSemHashAndWrapInNormalized for T
     where
-        T: HashWithAlgorithm<SemanticHashAlgorithm>,
+        T: Hash,
     {
         fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcSemHashed<Self>> {
             Normalized(rc_sem_hashed(self))

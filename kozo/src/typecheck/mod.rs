@@ -1,6 +1,6 @@
 use crate::{
     eval::{Evaluator, NormalForm, Normalized},
-    hash::sha256::*,
+    hash::*,
     syntax_tree::{
         ast::{self, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
         ipist::{self as cst, RcHashed},

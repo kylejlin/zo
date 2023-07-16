@@ -1,4 +1,7 @@
-use super::*;
+use std::{
+    fmt::{Debug, Formatter},
+    hash::{Hash, Hasher},
+};
 
 /// A SHA256 digest.
 #[derive(Clone, PartialEq, Eq, Default, PartialOrd, Ord)]

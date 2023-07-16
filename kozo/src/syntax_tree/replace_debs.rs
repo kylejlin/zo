@@ -1,6 +1,6 @@
 use crate::syntax_tree::ast::*;
 
-use std::rc::Rc;
+use std::{hash::Hash, rc::Rc};
 
 pub trait DebReplacer {
     fn replace_deb(&self, original: RcSemHashed<DebNode>, cutoff: usize) -> Expr;
@@ -76,7 +76,7 @@ pub trait ReplaceDebsInEachItem {
 impl<T> ReplaceDebsInEachItem for RcSemHashedVec<T>
 where
     T: ReplaceDebs<Output = T> + Clone,
-    Vec<T>: HashWithAlgorithm<SemanticHashAlgorithm>,
+    Vec<T>: Hash,
 {
     fn replace_debs_with_constant_cutoff<R: DebReplacer>(
         self,
