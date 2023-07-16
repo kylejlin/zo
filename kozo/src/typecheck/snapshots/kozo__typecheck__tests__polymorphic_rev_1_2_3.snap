@@ -1,0 +1,40 @@
+---
+source: src/typecheck/tests.rs
+expression: PrettyPrinted(type_.raw())
+---
+(
+    ind
+    Type0
+    "List"
+    ()
+    (
+        (
+            ()
+            ()
+        )
+        (
+            (
+                (
+                    ind
+                    Type0
+                    "Nat"
+                    ()
+                    (
+                        (
+                            ()
+                            ()
+                        )
+                        (
+                            (
+                                0
+                            )
+                            ()
+                        )
+                    )
+                )
+                1
+            )
+            ()
+        )
+    )
+)
