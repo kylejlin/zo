@@ -6,7 +6,14 @@ The definitions are not guaranteed to agree
 with the ordinary definitions.
 
 - app: (function) application
-- AST: abstract syntax tree
+- AST: abstract syntax tree.
+
+  **AST nodes only contain semantically relevant information.**
+  This implies that any two AST nodes are equal
+  under Rust's `std::cmp::Eq` iff
+  they are semantically equal under Zo's semantic rules
+  (assuming an empty substitution context).
+
 - deb: De Bruijn index
 - digest: the output of a hash algorithm.
   Unless otherwise specified, "digest" refers to
