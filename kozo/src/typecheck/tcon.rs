@@ -36,7 +36,7 @@ impl LazyTypeContext<'_> {
                 if let Some(index) = (types.raw().len()).checked_sub(1 + deb.0) {
                     Some(types.get_ref(index)?.cloned())
                 } else {
-                    subcontext.get(Deb(deb.0 - types.raw().len()))
+                    subcontext.get_unshifted(Deb(deb.0 - types.raw().len()))
                 }
             }
         }
