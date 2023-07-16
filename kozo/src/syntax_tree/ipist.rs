@@ -107,7 +107,7 @@ pub struct Fun {
     pub rparen: ByteIndex,
 }
 
-pub use crate::syntax_tree::nh_cst::NumberOrNonrecKw;
+pub use crate::syntax_tree::ost::NumberOrNonrecKw;
 
 #[derive(Debug, Clone, Hash)]
 pub struct App {

@@ -2,7 +2,7 @@ use crate::{
     hash::{sha256::*, *},
     syntax_tree::{
         ast::{self, rc_sem_hashed, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
-        rch_cst::{self as cst, RcHashed},
+        ipist::{self as cst, RcHashed},
     },
 };
 

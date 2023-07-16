@@ -1,32 +1,32 @@
 use crate::{
-    syntax_tree::nh_cst,
-    syntax_tree::rch_cst::{self as rch, rc_hashed},
+    syntax_tree::ipist::{self as rch, rc_hashed},
+    syntax_tree::ost,
 };
 
-impl From<nh_cst::Expr> for rch::Expr {
-    fn from(cst: nh_cst::Expr) -> Self {
+impl From<ost::Expr> for rch::Expr {
+    fn from(cst: ost::Expr) -> Self {
         match cst {
-            nh_cst::Expr::Ind(cst) => rch::Ind::from(*cst).into(),
+            ost::Expr::Ind(cst) => rch::Ind::from(*cst).into(),
 
-            nh_cst::Expr::Vcon(cst) => rch::Vcon::from(*cst).into(),
+            ost::Expr::Vcon(cst) => rch::Vcon::from(*cst).into(),
 
-            nh_cst::Expr::Match(cst) => rch::Match::from(*cst).into(),
+            ost::Expr::Match(cst) => rch::Match::from(*cst).into(),
 
-            nh_cst::Expr::Fun(cst) => rch::Fun::from(*cst).into(),
+            ost::Expr::Fun(cst) => rch::Fun::from(*cst).into(),
 
-            nh_cst::Expr::App(cst) => rch::App::from(*cst).into(),
+            ost::Expr::App(cst) => rch::App::from(*cst).into(),
 
-            nh_cst::Expr::For(cst) => rch::For::from(*cst).into(),
+            ost::Expr::For(cst) => rch::For::from(*cst).into(),
 
-            nh_cst::Expr::Deb(cst) => rch::Expr::Deb(rc_hashed(cst)),
+            ost::Expr::Deb(cst) => rch::Expr::Deb(rc_hashed(cst)),
 
-            nh_cst::Expr::Universe(cst) => rch::Expr::Universe(rc_hashed(cst)),
+            ost::Expr::Universe(cst) => rch::Expr::Universe(rc_hashed(cst)),
         }
     }
 }
 
-impl From<nh_cst::Ind> for rch::Ind {
-    fn from(cst: nh_cst::Ind) -> Self {
+impl From<ost::Ind> for rch::Ind {
+    fn from(cst: ost::Ind) -> Self {
         rch::Ind {
             lparen: cst.lparen,
             type_: cst.type_,
@@ -42,30 +42,30 @@ impl From<nh_cst::Ind> for rch::Ind {
     }
 }
 
-impl From<nh_cst::ZeroOrMoreExprs> for rch::ZeroOrMoreExprs {
-    fn from(cst: nh_cst::ZeroOrMoreExprs) -> Self {
+impl From<ost::ZeroOrMoreExprs> for rch::ZeroOrMoreExprs {
+    fn from(cst: ost::ZeroOrMoreExprs) -> Self {
         match cst {
-            nh_cst::ZeroOrMoreExprs::Nil => rch::ZeroOrMoreExprs::Nil,
-            nh_cst::ZeroOrMoreExprs::Snoc(exprs, expr) => {
+            ost::ZeroOrMoreExprs::Nil => rch::ZeroOrMoreExprs::Nil,
+            ost::ZeroOrMoreExprs::Snoc(exprs, expr) => {
                 rch::ZeroOrMoreExprs::Snoc(Box::new((*exprs).into()), (*expr).into())
             }
         }
     }
 }
 
-impl From<nh_cst::ZeroOrMoreVconDefs> for rch::ZeroOrMoreVconDefs {
-    fn from(cst: nh_cst::ZeroOrMoreVconDefs) -> Self {
+impl From<ost::ZeroOrMoreVconDefs> for rch::ZeroOrMoreVconDefs {
+    fn from(cst: ost::ZeroOrMoreVconDefs) -> Self {
         match cst {
-            nh_cst::ZeroOrMoreVconDefs::Nil => rch::ZeroOrMoreVconDefs::Nil,
-            nh_cst::ZeroOrMoreVconDefs::Snoc(vcon_defs, vcon_def) => {
+            ost::ZeroOrMoreVconDefs::Nil => rch::ZeroOrMoreVconDefs::Nil,
+            ost::ZeroOrMoreVconDefs::Snoc(vcon_defs, vcon_def) => {
                 rch::ZeroOrMoreVconDefs::Snoc(Box::new((*vcon_defs).into()), (*vcon_def).into())
             }
         }
     }
 }
 
-impl From<nh_cst::VconDef> for rch::VconDef {
-    fn from(cst: nh_cst::VconDef) -> Self {
+impl From<ost::VconDef> for rch::VconDef {
+    fn from(cst: ost::VconDef) -> Self {
         rch::VconDef {
             lparen: cst.lparen,
             param_types_lparen: cst.param_types_lparen,
@@ -79,8 +79,8 @@ impl From<nh_cst::VconDef> for rch::VconDef {
     }
 }
 
-impl From<nh_cst::Vcon> for rch::Vcon {
-    fn from(cst: nh_cst::Vcon) -> Self {
+impl From<ost::Vcon> for rch::Vcon {
+    fn from(cst: ost::Vcon) -> Self {
         rch::Vcon {
             lparen: cst.lparen,
             ind: rc_hashed((*cst.ind).into()),
@@ -90,8 +90,8 @@ impl From<nh_cst::Vcon> for rch::Vcon {
     }
 }
 
-impl From<nh_cst::Match> for rch::Match {
-    fn from(cst: nh_cst::Match) -> Self {
+impl From<ost::Match> for rch::Match {
+    fn from(cst: ost::Match) -> Self {
         rch::Match {
             lparen: cst.lparen,
             matchee: (*cst.matchee).into(),
@@ -104,11 +104,11 @@ impl From<nh_cst::Match> for rch::Match {
     }
 }
 
-impl From<nh_cst::ZeroOrMoreMatchCases> for rch::ZeroOrMoreMatchCases {
-    fn from(cst: nh_cst::ZeroOrMoreMatchCases) -> Self {
+impl From<ost::ZeroOrMoreMatchCases> for rch::ZeroOrMoreMatchCases {
+    fn from(cst: ost::ZeroOrMoreMatchCases) -> Self {
         match cst {
-            nh_cst::ZeroOrMoreMatchCases::Nil => rch::ZeroOrMoreMatchCases::Nil,
-            nh_cst::ZeroOrMoreMatchCases::Snoc(match_cases, match_case) => {
+            ost::ZeroOrMoreMatchCases::Nil => rch::ZeroOrMoreMatchCases::Nil,
+            ost::ZeroOrMoreMatchCases::Snoc(match_cases, match_case) => {
                 rch::ZeroOrMoreMatchCases::Snoc(
                     Box::new((*match_cases).into()),
                     (*match_case).into(),
@@ -118,8 +118,8 @@ impl From<nh_cst::ZeroOrMoreMatchCases> for rch::ZeroOrMoreMatchCases {
     }
 }
 
-impl From<nh_cst::MatchCase> for rch::MatchCase {
-    fn from(cst: nh_cst::MatchCase) -> Self {
+impl From<ost::MatchCase> for rch::MatchCase {
+    fn from(cst: ost::MatchCase) -> Self {
         rch::MatchCase {
             lparen: cst.lparen,
             arity: cst.arity,
@@ -129,8 +129,8 @@ impl From<nh_cst::MatchCase> for rch::MatchCase {
     }
 }
 
-impl From<nh_cst::Fun> for rch::Fun {
-    fn from(cst: nh_cst::Fun) -> Self {
+impl From<ost::Fun> for rch::Fun {
+    fn from(cst: ost::Fun) -> Self {
         rch::Fun {
             lparen: cst.lparen,
             decreasing_index: *cst.decreasing_index,
@@ -144,8 +144,8 @@ impl From<nh_cst::Fun> for rch::Fun {
     }
 }
 
-impl From<nh_cst::App> for rch::App {
-    fn from(cst: nh_cst::App) -> Self {
+impl From<ost::App> for rch::App {
+    fn from(cst: ost::App) -> Self {
         rch::App {
             lparen: cst.lparen,
             callee: (*cst.callee).into(),
@@ -155,8 +155,8 @@ impl From<nh_cst::App> for rch::App {
     }
 }
 
-impl From<nh_cst::For> for rch::For {
-    fn from(cst: nh_cst::For) -> Self {
+impl From<ost::For> for rch::For {
+    fn from(cst: ost::For) -> Self {
         rch::For {
             lparen: cst.lparen,
             param_types_lparen: cst.param_types_lparen,

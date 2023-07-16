@@ -3,8 +3,8 @@ use crate::{
     hash::sha256::*,
     syntax_tree::{
         ast::{self, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
-        rch_cst::{self as cst, RcHashed},
-        rch_cst_to_ast::RchCstToAstConverter,
+        ipist::{self as cst, RcHashed},
+        ipist_to_ast::RchCstToAstConverter,
         replace_debs::*,
         token::*,
     },

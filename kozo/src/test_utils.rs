@@ -1,9 +1,9 @@
-use rch_cst::ByteIndex;
+use ipist::ByteIndex;
 
 use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     syntax_tree::{
-        ast, lexer::lex, nh_cst::Span, parser::parse, rch_cst, rch_cst_to_ast::RchCstToAstConverter,
+        ast, ipist, ipist_to_ast::RchCstToAstConverter, lexer::lex, ost::Span, parser::parse,
     },
     typecheck::{LazySubstitutionContext, LazyTypeContext, TypeChecker},
 };
@@ -28,14 +28,14 @@ pub fn substitute_without_compounding(replacements: &[(&str, String)], original:
     result
 }
 
-pub fn parse_rch_cst_or_panic(src: &str) -> rch_cst::Expr {
+pub fn parse_rch_cst_or_panic(src: &str) -> ipist::Expr {
     let tokens = lex(src).unwrap();
     let nh_cst = parse(tokens).unwrap();
     nh_cst.into()
 }
 
 pub fn parse_ast_or_panic(src: &str) -> ast::Expr {
-    let rch_cst: rch_cst::Expr = parse_rch_cst_or_panic(src);
+    let rch_cst: ipist::Expr = parse_rch_cst_or_panic(src);
     let mut converter = RchCstToAstConverter::default();
     converter.convert(rch_cst)
 }
@@ -57,7 +57,7 @@ pub fn get_type_under_empty_tcon_and_scon_or_panic(src: &str) -> NormalForm {
         .unwrap()
 }
 
-impl rch_cst::Expr {
+impl ipist::Expr {
     pub fn span(&self) -> Span {
         match self {
             Self::Ind(e) => (e.hashee.lparen, e.hashee.rparen),
