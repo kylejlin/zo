@@ -7,6 +7,11 @@ impl TypeChecker {
         tcon_g0: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
+        // TODO: Check for strict positivity.
+        // We can and should check this before
+        // we perform the rest of the checks,
+        // in order to prevent the chance of infinite recursion.
+
         let normalized_index_types_g0 = self
             .typecheck_and_normalize_param_types_with_limit(
                 &ind.hashee.index_types,
