@@ -348,3 +348,39 @@ fn polymorphic_rev_1_2_3() {
 
     insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
 }
+
+#[test]
+fn eq_zero_one() {
+    let nat_def = (
+        "<NAT>",
+        r#"
+(ind Type0 "Nat" () (
+    (() ())
+    ((0) ())
+))"#,
+    );
+    let zero_def = ("<ZERO>", "(vcon <NAT> 0)");
+    let succ_def = ("<SUCC>", "(vcon <NAT> 1)");
+    let one_def = ("<1>", "(<SUCC> <ZERO>)");
+    let eq_zero_def = (
+        "<EQ_ZERO>",
+        r#"
+(ind Type0 "Eq0" (<NAT>) (
+    (() (<ZERO>))
+))"#,
+    );
+    let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
+    let eq_zero_one_implies_false_unsubstituted_src = r#"
+(fun nonrec ((<EQ_ZERO> <1>)) <FALSE>
+    (match 1 <FALSE> (
+        contra
+    ))
+)"#;
+    let src_defs = [nat_def, zero_def, succ_def, one_def, eq_zero_def, false_def];
+    let eq_zero_one_implies_false_src =
+        substitute_with_compounding(src_defs, eq_zero_one_implies_false_unsubstituted_src);
+
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&eq_zero_one_implies_false_src);
+
+    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+}
