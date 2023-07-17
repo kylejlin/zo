@@ -57,8 +57,10 @@ impl TypeChecker {
         }
 
         let subs = scon.into_concrete_noncompounded_substitutions(tcon_len);
-        let callee_type_after_applying_scon =
-            self.apply_concrete_substitutions(subs, [callee_type.clone()])[0].clone();
+        let callee_type_after_applying_scon = self
+            .apply_concrete_substitutions(subs, [callee_type.clone()])
+            .0[0]
+            .clone();
         if let Ok(for_) = callee_type_after_applying_scon.clone().try_into_for() {
             return Ok(for_);
         }

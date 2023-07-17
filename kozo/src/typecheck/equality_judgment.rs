@@ -91,7 +91,7 @@ impl TypeChecker {
     ) -> (NormalForm, NormalForm) {
         let subs = scon.into_concrete_noncompounded_substitutions(tcon_len);
         let old_exprs = [expr1, expr2];
-        let new_exprs = self.apply_concrete_substitutions(subs, old_exprs);
+        let (new_exprs, _) = self.apply_concrete_substitutions(subs, old_exprs);
         (new_exprs[0].clone(), new_exprs[1].clone())
     }
 }

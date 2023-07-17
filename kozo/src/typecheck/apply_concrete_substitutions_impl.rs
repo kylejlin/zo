@@ -1,16 +1,26 @@
 use super::*;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct HasExploded(pub bool);
+
+impl BitOrAssign for HasExploded {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
+    }
+}
+
 impl TypeChecker {
     pub(super) fn apply_concrete_substitutions<const N: usize>(
         &mut self,
         mut subs: Vec<ConcreteSubstitution>,
         mut exprs: [NormalForm; N],
-    ) -> [NormalForm; N] {
+    ) -> ([NormalForm; N], HasExploded) {
         loop {
             let HasChanged(has_changed) =
                 self.perform_substitution_iteration(&mut subs, &mut exprs);
             if !has_changed {
-                return exprs;
+                let has_exploded = does_any_substitution_contain_exploding_contradiction(&subs);
+                return (exprs, HasExploded(has_exploded));
             }
         }
     }
@@ -76,5 +86,30 @@ struct HasChanged(pub bool);
 impl BitOrAssign for HasChanged {
     fn bitor_assign(&mut self, rhs: Self) {
         self.0 |= rhs.0;
+    }
+}
+
+fn does_any_substitution_contain_exploding_contradiction(subs: &[ConcreteSubstitution]) -> bool {
+    subs.iter()
+        .any(does_substitution_contain_exploding_contradiction)
+}
+
+fn does_substitution_contain_exploding_contradiction(sub: &ConcreteSubstitution) -> bool {
+    use ast::Expr;
+
+    match (sub.from.raw(), sub.to.raw()) {
+        (Expr::Deb(_), _) => false,
+        (_, Expr::Deb(_)) => false,
+
+        (Expr::Ind(from), Expr::Ind(to)) => from.hashee.name != to.hashee.name,
+        (Expr::Vcon(from), Expr::Vcon(to)) => from.hashee.vcon_index != to.hashee.vcon_index,
+
+        (Expr::Match(_), Expr::Match(_)) => false,
+        (Expr::Fun(_), Expr::Fun(_)) => false,
+        (Expr::App(_), Expr::App(_)) => false,
+        (Expr::For(_), Expr::For(_)) => false,
+        (Expr::Universe(_), Expr::Universe(_)) => false,
+
+        _ => true,
     }
 }
