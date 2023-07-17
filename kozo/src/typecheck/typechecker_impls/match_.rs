@@ -27,7 +27,7 @@ impl TypeChecker {
             scon,
         )?;
 
-        self.check_match_cases_assuming_number_of_cases_is_correct(
+        self.typecheck_match_cases_assuming_number_of_cases_is_correct(
             match_,
             normalized_matchee,
             matchee_type_ind,
@@ -90,7 +90,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_match_cases_assuming_number_of_cases_is_correct(
+    fn typecheck_match_cases_assuming_number_of_cases_is_correct(
         &mut self,
         match_: RcHashed<cst::Match>,
         normalized_matchee: NormalForm,
@@ -101,7 +101,7 @@ impl TypeChecker {
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         for i in 0..match_.hashee.cases.len() {
-            self.check_match_case(
+            self.typecheck_match_case(
                 i,
                 match_.clone(),
                 normalized_matchee.clone(),
@@ -115,7 +115,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_match_case(
+    fn typecheck_match_case(
         &mut self,
         case_index: usize,
         match_g0: RcHashed<cst::Match>,
@@ -128,7 +128,7 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         let case = &match_g0.hashee.cases[case_index];
         match case {
-            cst::MatchCase::Nondismissed(case) => self.check_nondismissed_match_case(
+            cst::MatchCase::Nondismissed(case) => self.typecheck_nondismissed_match_case(
                 case_index,
                 case,
                 match_g0.clone(),
@@ -140,7 +140,7 @@ impl TypeChecker {
                 scon,
             ),
 
-            cst::MatchCase::Dismissed(_) => self.check_dismissed_match_case(
+            cst::MatchCase::Dismissed(_) => self.typecheck_dismissed_match_case(
                 case_index,
                 match_g0.clone(),
                 normalized_matchee_g0,
@@ -152,7 +152,7 @@ impl TypeChecker {
         }
     }
 
-    fn check_nondismissed_match_case(
+    fn typecheck_nondismissed_match_case(
         &mut self,
         case_index: usize,
         case: &cst::NondismissedMatchCase,
@@ -276,7 +276,7 @@ impl TypeChecker {
         substitutions
     }
 
-    fn check_dismissed_match_case(
+    fn typecheck_dismissed_match_case(
         &mut self,
         case_index: usize,
         match_g0: RcHashed<cst::Match>,
