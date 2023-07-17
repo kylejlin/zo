@@ -167,12 +167,24 @@ impl Evaluator {
         if let Expr::Vcon(vcon) = &normalized_matchee {
             let vcon_index = vcon.hashee.vcon_index;
             if vcon_index >= match_.cases.hashee.len() {
-                // This is a "stuck" term.
-                // Since we don't emit errors, we just return it as-is.
+                // The `match` expression does not have enough cases.
+                // Therefore, it is a "stuck" term.
+                // Since we don't emit errors, we just return the term as-is.
                 return m.convert_to_expr_and_wrap_in_normalized();
             }
 
-            let match_return_value = match_.cases.hashee[vcon_index].return_val.clone();
+            let case = match &match_.cases.hashee[vcon_index] {
+                MatchCase::Nondismissed(case) => case,
+                MatchCase::Dismissed => {
+                    // The match case corresponding to the matchee's vcon index
+                    // is dismissed.
+                    // Therefore, the `match` expression is a "stuck" term.
+                    // Since we don't emit errors, we just return the term as-is.
+                    return m.convert_to_expr_and_wrap_in_normalized();
+                }
+            };
+
+            let match_return_value = case.return_val.clone();
             return self.eval(match_return_value);
         }
 
@@ -180,12 +192,24 @@ impl Evaluator {
             if let Expr::Vcon(vcon) = &normalized_matchee.hashee.callee {
                 let vcon_index = vcon.hashee.vcon_index;
                 if vcon_index >= match_.cases.hashee.len() {
-                    // This is a "stuck" term.
-                    // Since we don't emit errors, we just return it as-is.
+                    // The `match` expression does not have enough cases.
+                    // Therefore, it is a "stuck" term.
+                    // Since we don't emit errors, we just return the term as-is.
                     return m.convert_to_expr_and_wrap_in_normalized();
                 }
 
-                let unsubstituted = match_.cases.hashee[vcon_index].return_val.clone();
+                let case = match &match_.cases.hashee[vcon_index] {
+                    MatchCase::Nondismissed(case) => case,
+                    MatchCase::Dismissed => {
+                        // The match case corresponding to the matchee's vcon index
+                        // is dismissed.
+                        // Therefore, the `match` expression is a "stuck" term.
+                        // Since we don't emit errors, we just return the term as-is.
+                        return m.convert_to_expr_and_wrap_in_normalized();
+                    }
+                };
+
+                let unsubstituted = case.return_val.clone();
                 let substituted = self.substitute_and_downshift_debs(
                     unsubstituted,
                     &normalized_matchee.hashee.args.hashee,
@@ -211,10 +235,11 @@ impl Evaluator {
         &mut self,
         cases: RcSemHashedVec<MatchCase>,
     ) -> Normalized<RcSemHashedVec<MatchCase>> {
-        // It's not worth caching match cases,
+        // It's not worth caching match case vecs,
         // so we'll just re-evaluate them every time.
         // This isn't actually that expensive,
-        // since the underlying expressions will be cached.
+        // since the underlying case return val
+        // expressions will be cached.
         self.eval_unseen_match_cases(cases)
     }
 
@@ -225,12 +250,31 @@ impl Evaluator {
         let cases = &cases.hashee;
         cases
             .iter()
-            .map(|original| MatchCase {
-                arity: original.arity,
-                return_val: self.eval(original.return_val.clone()).into_raw(),
-            })
+            .map(|original| self.eval_match_case(original).0)
             .collect::<Vec<_>>()
             .rc_hash_and_wrap_in_normalized()
+    }
+
+    fn eval_match_case(&mut self, case: &MatchCase) -> Normalized<MatchCase> {
+        // It's not worth caching match cases,
+        // so we'll just re-evaluate them every time.
+        // This isn't actually that expensive,
+        // since the underlying case return val
+        // expressions will be cached.
+        self.eval_unseen_match_case(case)
+    }
+
+    fn eval_unseen_match_case(&mut self, case: &MatchCase) -> Normalized<MatchCase> {
+        match case {
+            MatchCase::Dismissed => Normalized(MatchCase::Dismissed),
+
+            MatchCase::Nondismissed(original) => {
+                Normalized(MatchCase::Nondismissed(NondismissedMatchCase {
+                    arity: original.arity,
+                    return_val: self.eval(original.return_val.clone()).into_raw(),
+                }))
+            }
+        }
     }
 
     fn eval_unseen_fun(&mut self, fun: RcSemHashed<Fun>) -> NormalForm {

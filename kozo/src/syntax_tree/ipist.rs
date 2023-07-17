@@ -70,7 +70,13 @@ pub struct Match {
 }
 
 #[derive(Debug, Clone, Hash)]
-pub struct MatchCase {
+pub enum MatchCase {
+    Nondismissed(NondismissedMatchCase),
+    Dismissed(ByteIndex),
+}
+
+#[derive(Debug, Clone, Hash)]
+pub struct NondismissedMatchCase {
     pub lparen: ByteIndex,
     pub arity: NumberLiteral,
     pub return_val: Expr,

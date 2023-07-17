@@ -39,71 +39,75 @@ Match(
         cases: Snoc(
             Snoc(
                 Nil,
-                MatchCase {
+                Nondismissed(
+                    NondismissedMatchCase {
+                        lparen: ByteIndex(
+                            55,
+                        ),
+                        arity: NumberLiteral {
+                            value: 0,
+                            span: (
+                                ByteIndex(
+                                    56,
+                                ),
+                                ByteIndex(
+                                    57,
+                                ),
+                            ),
+                        },
+                        return_val: Deb(
+                            NumberLiteral {
+                                value: 1,
+                                span: (
+                                    ByteIndex(
+                                        58,
+                                    ),
+                                    ByteIndex(
+                                        59,
+                                    ),
+                                ),
+                            },
+                        ),
+                        rparen: ByteIndex(
+                            59,
+                        ),
+                    },
+                ),
+            ),
+            Nondismissed(
+                NondismissedMatchCase {
                     lparen: ByteIndex(
-                        55,
+                        70,
                     ),
                     arity: NumberLiteral {
-                        value: 0,
+                        value: 1,
                         span: (
                             ByteIndex(
-                                56,
+                                71,
                             ),
                             ByteIndex(
-                                57,
+                                72,
                             ),
                         ),
                     },
                     return_val: Deb(
                         NumberLiteral {
-                            value: 1,
+                            value: 2,
                             span: (
                                 ByteIndex(
-                                    58,
+                                    73,
                                 ),
                                 ByteIndex(
-                                    59,
+                                    74,
                                 ),
                             ),
                         },
                     ),
                     rparen: ByteIndex(
-                        59,
+                        74,
                     ),
                 },
             ),
-            MatchCase {
-                lparen: ByteIndex(
-                    70,
-                ),
-                arity: NumberLiteral {
-                    value: 1,
-                    span: (
-                        ByteIndex(
-                            71,
-                        ),
-                        ByteIndex(
-                            72,
-                        ),
-                    ),
-                },
-                return_val: Deb(
-                    NumberLiteral {
-                        value: 2,
-                        span: (
-                            ByteIndex(
-                                73,
-                            ),
-                            ByteIndex(
-                                74,
-                            ),
-                        ),
-                    },
-                ),
-                rparen: ByteIndex(
-                    74,
-                ),
-            },
         ),
         cases_rparen: ByteIndex(
             80,

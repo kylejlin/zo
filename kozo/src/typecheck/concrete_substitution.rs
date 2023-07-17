@@ -173,7 +173,20 @@ impl Substitute for MatchCase {
     type Output = Self;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
-        MatchCase {
+        match self {
+            MatchCase::Dismissed => self,
+            MatchCase::Nondismissed(case) => {
+                MatchCase::Nondismissed(case.substitute_in_children(sub))
+            }
+        }
+    }
+}
+
+impl Substitute for NondismissedMatchCase {
+    type Output = Self;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
+        NondismissedMatchCase {
             arity: self.arity,
             return_val: self.return_val.substitute(&sub.upshift(self.arity)),
         }

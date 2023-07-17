@@ -125,7 +125,38 @@ impl TypeChecker {
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         let case = &match_g0.hashee.cases[case_index];
+        match case {
+            cst::MatchCase::Dismissed(_) => {
+                // TODO: Properly check dismissed match cases.
+                todo!()
+            }
 
+            cst::MatchCase::Nondismissed(case) => self.check_nondismissed_match_case(
+                case_index,
+                case,
+                match_g0.clone(),
+                normalized_matchee_g0,
+                matchee_type_ind_g0,
+                matchee_type_args_g0,
+                normalized_match_return_type_g0,
+                tcon_g0,
+                scon,
+            ),
+        }
+    }
+
+    fn check_nondismissed_match_case(
+        &mut self,
+        case_index: usize,
+        case: &cst::NondismissedMatchCase,
+        match_g0: RcHashed<cst::Match>,
+        normalized_matchee_g0: NormalForm,
+        matchee_type_ind_g0: Normalized<RcSemHashed<ast::Ind>>,
+        matchee_type_args_g0: Normalized<RcSemHashedVec<ast::Expr>>,
+        normalized_match_return_type_g0: NormalForm,
+        tcon_g0: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
         let vcon_type_g0 = self.get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
             matchee_type_ind_g0.clone(),
             case_index,

@@ -142,6 +142,17 @@ fn fmt_parenthesized_match_cases(
 }
 
 fn fmt_match_case(case: &MatchCase, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+    match case {
+        MatchCase::Dismissed => write!(f, "{indent}contra"),
+        MatchCase::Nondismissed(c) => fmt_nondismissed_match_case(c, f, indent),
+    }
+}
+
+fn fmt_nondismissed_match_case(
+    case: &NondismissedMatchCase,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     let i1 = indent.incremented();
     let case_arity = case.arity;
     write!(f, "{indent}(\n{i1}{case_arity}\n")?;

@@ -218,7 +218,18 @@ impl ReplaceDebs for MatchCase {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
-        MatchCase {
+        match self {
+            MatchCase::Nondismissed(o) => MatchCase::Nondismissed(o.replace_debs(replacer, cutoff)),
+            MatchCase::Dismissed => self,
+        }
+    }
+}
+
+impl ReplaceDebs for NondismissedMatchCase {
+    type Output = Self;
+
+    fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
+        NondismissedMatchCase {
             arity: self.arity,
             return_val: self.return_val.replace_debs(replacer, cutoff + self.arity),
         }

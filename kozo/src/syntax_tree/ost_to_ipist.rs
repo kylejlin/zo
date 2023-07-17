@@ -123,7 +123,16 @@ impl From<ost::ZeroOrMoreMatchCases> for Vec<ipist::MatchCase> {
 
 impl From<ost::MatchCase> for ipist::MatchCase {
     fn from(cst: ost::MatchCase) -> Self {
-        ipist::MatchCase {
+        match cst {
+            ost::MatchCase::Dismissed(kw_index) => ipist::MatchCase::Dismissed(kw_index),
+            ost::MatchCase::Nondismissed(cst) => ipist::MatchCase::Nondismissed((*cst).into()),
+        }
+    }
+}
+
+impl From<ost::NondismissedMatchCase> for ipist::NondismissedMatchCase {
+    fn from(cst: ost::NondismissedMatchCase) -> Self {
+        ipist::NondismissedMatchCase {
             lparen: cst.lparen,
             arity: cst.arity,
             return_val: (*cst.return_val.clone()).into(),
