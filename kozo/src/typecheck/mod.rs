@@ -12,7 +12,8 @@ use crate::{
 
 use std::{ops::BitOrAssign, rc::Rc};
 
-mod apply_concrete_substitutions_impl;
+mod apply_concrete_substitutions;
+use apply_concrete_substitutions::*;
 
 mod concrete_substitution;
 use concrete_substitution::*;

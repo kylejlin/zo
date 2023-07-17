@@ -128,11 +128,6 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         let case = &match_g0.hashee.cases[case_index];
         match case {
-            cst::MatchCase::Dismissed(_) => {
-                // TODO: Properly check dismissed match cases.
-                todo!()
-            }
-
             cst::MatchCase::Nondismissed(case) => self.check_nondismissed_match_case(
                 case_index,
                 case,
@@ -141,6 +136,16 @@ impl TypeChecker {
                 matchee_type_ind_g0,
                 matchee_type_args_g0,
                 normalized_match_return_type_g0,
+                tcon_g0,
+                scon,
+            ),
+
+            cst::MatchCase::Dismissed(_) => self.check_dismissed_match_case(
+                case_index,
+                match_g0.clone(),
+                normalized_matchee_g0,
+                matchee_type_ind_g0,
+                matchee_type_args_g0,
                 tcon_g0,
                 scon,
             ),
@@ -269,5 +274,50 @@ impl TypeChecker {
             .collect();
 
         substitutions
+    }
+
+    fn check_dismissed_match_case(
+        &mut self,
+        case_index: usize,
+        match_g0: RcHashed<cst::Match>,
+        normalized_matchee_g0: NormalForm,
+        matchee_type_ind_g0: Normalized<RcSemHashed<ast::Ind>>,
+        matchee_type_args_g0: Normalized<RcSemHashedVec<ast::Expr>>,
+        tcon_g0: LazyTypeContext,
+        scon: LazySubstitutionContext,
+    ) -> Result<(), TypeError> {
+        let vcon_type_g0 = self.get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
+            matchee_type_ind_g0.clone(),
+            case_index,
+        );
+
+        let param_types_g0 = vcon_type_g0.clone().for_param_types_or_empty_vec();
+        let param_count = param_types_g0.raw().hashee.len();
+
+        let extended_tcon_g1 =
+            LazyTypeContext::Snoc(&tcon_g0, param_types_g0.to_hashee().derefed());
+
+        let vcon_type_g1 = vcon_type_g0.upshift(param_count, 0);
+        let new_substitutions = Self::get_new_substitutions(
+            case_index,
+            normalized_matchee_g0.upshift(param_count, 0),
+            matchee_type_ind_g0.upshift(param_count, 0),
+            matchee_type_args_g0.upshift_with_constant_cutoff(param_count),
+            vcon_type_g1,
+            extended_tcon_g1.len(),
+        );
+        let extended_scon = LazySubstitutionContext::Snoc(&scon, &new_substitutions);
+
+        let subs = extended_scon.into_concrete_noncompounded_substitutions(extended_tcon_g1.len());
+        let ([], HasExploded(has_exploded)) = self.apply_concrete_substitutions(subs, []);
+
+        if !has_exploded {
+            return Err(TypeError::IllegallyDismissedMatchCase {
+                match_: match_g0.hashee.clone(),
+                match_case_index: case_index,
+            });
+        }
+
+        Ok(())
     }
 }

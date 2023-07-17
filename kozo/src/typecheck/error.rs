@@ -36,6 +36,10 @@ pub enum TypeError {
         match_: cst::Match,
         match_case_index: usize,
     },
+    IllegallyDismissedMatchCase {
+        match_: cst::Match,
+        match_case_index: usize,
+    },
     TypeMismatch {
         expr: cst::Expr,
         expected_type: NormalForm,
