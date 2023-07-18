@@ -2,6 +2,7 @@ use ipist::ByteIndex;
 
 use crate::{
     eval::{Evaluator, NormalForm, Normalized},
+    pretty_print::*,
     syntax_tree::{
         ast, ipist, ipist_to_ast::IpistToAstConverter, lexer::lex, ost::Span, parser::parse,
     },
@@ -54,7 +55,7 @@ pub fn get_type_under_empty_tcon_and_scon_or_panic(src: &str) -> NormalForm {
             LazyTypeContext::Base(empty.as_ref().convert_ref()),
             LazySubstitutionContext::Base(&[]),
         )
-        .unwrap()
+        .pretty_unwrap()
 }
 
 impl ipist::Expr {

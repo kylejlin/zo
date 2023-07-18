@@ -49,8 +49,13 @@ where
         match self {
             Ok(v) => v,
             Err(e) => {
+                // We use the "#" flag so that if the
+                // Display impl of `PrettyPrint<E>` uses
+                // `Formatter:debug_struct` (or `debug_tuple`, etc.),
+                // the output will be printed with easy-to-read
+                // indentation.
                 panic!(
-                    "called `Result::unwrap()` on an `Err` value:\n{}",
+                    "called `Result::unwrap()` on an `Err` value:\n{:#}",
                     PrettyPrint(&e)
                 );
             }
