@@ -166,3 +166,28 @@ mod impl_ast {
         }
     }
 }
+
+#[cfg(test)]
+mod impl_ast_test {
+    use super::*;
+
+    use crate::test_utils::*;
+
+    #[test]
+    fn ind_index_arg_0() {
+        let left_src = r#"0"#;
+        let right_src = r#"(ind Type0 "" (0) ())"#;
+        let left = parse_ast_or_panic(left_src);
+        let right = parse_ast_or_panic(right_src);
+        assert!(left.is_strict_subexpression_of(&right));
+    }
+
+    #[test]
+    fn ind_index_arg_1() {
+        let left_src = r#"0"#;
+        let right_src = r#"(ind Type0 "" (999 1) ())"#;
+        let left = parse_ast_or_panic(left_src);
+        let right = parse_ast_or_panic(right_src);
+        assert!(left.is_strict_subexpression_of(&right));
+    }
+}
