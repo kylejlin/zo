@@ -487,7 +487,6 @@ fn substitution_does_not_diverge_even_when_second_vcon_index_arg_is_subexpr_of_m
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
-#[ignore]
 #[test]
 fn eq_commutative() {
     let bool_def = (

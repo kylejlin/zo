@@ -209,7 +209,7 @@ impl TypeChecker {
                 actual_type: case_return_val_type_g1,
                 tcon_len: extended_tcon_g1.len(),
             },
-            scon,
+            extended_scon,
         );
         if res.is_err() {
             let subs =
