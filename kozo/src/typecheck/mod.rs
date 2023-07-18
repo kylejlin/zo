@@ -22,7 +22,7 @@ mod equality_judgment;
 use equality_judgment::*;
 
 mod error;
-use error::*;
+pub use error::TypeError;
 
 mod scon;
 pub use scon::*;

@@ -76,7 +76,7 @@ impl IpistToAstConverter {
         rc_sem_hashed(v)
     }
 
-    fn convert_vcon_def(&mut self, ist: ipist::VconDef) -> ast::VconDef {
+    pub fn convert_vcon_def(&mut self, ist: ipist::VconDef) -> ast::VconDef {
         ast::VconDef {
             param_types: self.convert_expressions(&ist.param_types),
             index_args: self.convert_expressions(&ist.index_args),

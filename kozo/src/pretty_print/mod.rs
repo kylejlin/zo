@@ -1,12 +1,37 @@
 use std::{
-    fmt::{Display, Formatter, Result as FmtResult},
+    fmt::{Debug, Display, Formatter, Result as FmtResult},
     rc::Rc,
 };
 
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct PrettyPrinted<'a, T>(pub &'a T);
+#[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct PrettyPrint<'a, T>(pub &'a T);
+
+impl<'a, T> Debug for PrettyPrint<'a, T>
+where
+    PrettyPrint<'a, T>: Display,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        Display::fmt(self, f)
+    }
+}
 
 mod impl_for_ast;
+mod impl_for_type_error;
+
+pub trait PrettyPrinted {
+    fn pretty_printed(&self) -> PrettyPrint<'_, Self>
+    where
+        Self: Sized;
+}
+
+impl<T> PrettyPrinted for T {
+    fn pretty_printed(&self) -> PrettyPrint<'_, Self>
+    where
+        Self: Sized,
+    {
+        PrettyPrint(self)
+    }
+}
 
 pub trait PrettyUnwrap {
     type Output;
@@ -16,7 +41,7 @@ pub trait PrettyUnwrap {
 
 impl<T, E> PrettyUnwrap for Result<T, E>
 where
-    for<'a> PrettyPrinted<'a, E>: Display,
+    for<'a> PrettyPrint<'a, E>: Display,
 {
     type Output = T;
 
@@ -26,7 +51,7 @@ where
             Err(e) => {
                 panic!(
                     "called `Result::unwrap()` on an `Err` value:\n{}",
-                    PrettyPrinted(&e)
+                    PrettyPrint(&e)
                 );
             }
         }

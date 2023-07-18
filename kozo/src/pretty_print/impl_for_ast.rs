@@ -2,9 +2,81 @@ use super::*;
 
 use crate::syntax_tree::ast::*;
 
-impl Display for PrettyPrinted<'_, Expr> {
+impl Display for PrettyPrint<'_, Expr> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_expr(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, RcSemHashed<Ind>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_ind(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, RcSemHashedVec<VconDef>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_parenthesized_vcon_defs(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, VconDef> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_vcon_def(self.0, f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, RcSemHashed<Vcon>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_vcon(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, RcSemHashed<Match>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_match(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, RcSemHashedVec<MatchCase>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_parenthesized_match_cases(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, MatchCase> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_match_case(self.0, f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, RcSemHashed<Fun>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_fun(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, RcSemHashed<App>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_app(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, RcSemHashed<For>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_for(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, RcSemHashed<DebNode>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_deb(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+    }
+}
+
+impl Display for PrettyPrint<'_, RcSemHashed<UniverseNode>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        fmt_universe(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 

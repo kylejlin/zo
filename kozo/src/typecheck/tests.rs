@@ -1,4 +1,4 @@
-use crate::{pretty_print::PrettyPrinted, test_utils::*};
+use crate::{pretty_print::PrettyPrint, test_utils::*};
 
 #[test]
 fn add_2_3() {
@@ -37,7 +37,7 @@ fn add_2_3() {
 
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&add_two_three_src);
 
-    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
 #[test]
@@ -190,7 +190,7 @@ fn rev_1_2_3() {
 
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&rev_one_two_three_src);
 
-    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
 #[test]
@@ -346,7 +346,7 @@ fn polymorphic_rev_1_2_3() {
 
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&polymorphic_rev_one_two_three_src);
 
-    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
 #[test]
@@ -382,7 +382,7 @@ fn eq_zero_one() {
 
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&eq_zero_one_implies_false_src);
 
-    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
 #[test]
@@ -418,7 +418,7 @@ fn eq_one_zero() {
 
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&eq_one_zero_implies_false_src);
 
-    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
 #[test]
@@ -484,7 +484,7 @@ fn substitution_does_not_diverge_even_when_second_vcon_index_arg_is_subexpr_of_m
 
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&eq_zero_one_implies_false_src);
 
-    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
 #[ignore]
@@ -526,5 +526,5 @@ fn eq_commutative() {
 
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
 
-    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
