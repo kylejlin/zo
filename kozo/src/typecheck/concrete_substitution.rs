@@ -1,9 +1,50 @@
-use crate::{eval::*, syntax_tree::ast::*};
+use crate::{
+    eval::*,
+    syntax_tree::{ast::*, is_subexpression::*},
+};
 
+/// `ConcreteSubstitution::from()` is guaranteed
+/// to return a value that is **not** a
+/// strict subexpression of `ConcreteSubstitution::to()`.
 #[derive(Debug, Clone)]
 pub struct ConcreteSubstitution {
-    pub from: NormalForm,
-    pub to: NormalForm,
+    from: NormalForm,
+    to: NormalForm,
+}
+
+impl ConcreteSubstitution {
+    /// The `tentative_from` and `tentative_to`
+    /// params are called "tentative" because
+    /// they will be swapped iff `tentative_from`
+    /// is a strict subexpression of `tentative_to`.
+    pub fn new(tentative_from: NormalForm, tentative_to: NormalForm) -> Self {
+        let (from, to) = if tentative_from
+            .raw()
+            .is_strict_subexpression_of(tentative_to.raw())
+        {
+            (tentative_to, tentative_from)
+        } else {
+            (tentative_from, tentative_to)
+        };
+        Self { from, to }
+    }
+}
+
+impl ConcreteSubstitution {
+    pub fn from(&self) -> &NormalForm {
+        &self.from
+    }
+
+    pub fn to(&self) -> &NormalForm {
+        &self.to
+    }
+}
+
+impl PartialEq for ConcreteSubstitution {
+    fn eq(&self, other: &Self) -> bool {
+        self.from.raw().digest() == other.from.raw().digest()
+            && self.to.raw().digest() == other.to.raw().digest()
+    }
 }
 
 impl ConcreteSubstitution {

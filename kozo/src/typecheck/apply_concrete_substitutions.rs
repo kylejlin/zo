@@ -57,10 +57,24 @@ impl TypeChecker {
         applied_sub: &ConcreteSubstitution,
         target_sub: &mut ConcreteSubstitution,
     ) -> HasChanged {
-        let mut has_changed = HasChanged(false);
-        has_changed |= self.perform_substitution_on_expr(applied_sub, &mut target_sub.from);
-        has_changed |= self.perform_substitution_on_expr(applied_sub, &mut target_sub.to);
-        has_changed
+        let tentative_from = {
+            let mut out = target_sub.from().clone();
+            self.perform_substitution_on_expr(applied_sub, &mut out);
+            out
+        };
+        let tentative_to = {
+            let mut out = target_sub.to().clone();
+            self.perform_substitution_on_expr(applied_sub, &mut out);
+            out
+        };
+        let new_sub = ConcreteSubstitution::new(tentative_from, tentative_to);
+
+        if *target_sub == new_sub {
+            return HasChanged(false);
+        }
+
+        *target_sub = new_sub;
+        HasChanged(true)
     }
 
     fn perform_substitution_on_expr(
@@ -97,7 +111,7 @@ fn does_any_substitution_contain_exploding_contradiction(subs: &[ConcreteSubstit
 fn does_substitution_contain_exploding_contradiction(sub: &ConcreteSubstitution) -> bool {
     use ast::Expr;
 
-    match (sub.from.raw(), sub.to.raw()) {
+    match (sub.from().raw(), sub.to().raw()) {
         (Expr::Deb(_), _) => false,
         (_, Expr::Deb(_)) => false,
 

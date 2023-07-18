@@ -70,24 +70,6 @@ fn lazy_substitution_slice_to_concrete_noncompounded_substitutions(
         let upshift_amount = current_tcon_len - sub.tcon_len;
         let tentative_from = sub.tentative_from.clone().upshift(upshift_amount, 0);
         let tentative_to = sub.tentative_to.clone().upshift(upshift_amount, 0);
-        let (from, to) = swap_if_needed(tentative_from, tentative_to);
-        ConcreteSubstitution { from, to }
+        ConcreteSubstitution::new(tentative_from, tentative_to)
     })
-}
-
-/// Swaps the two arguments iff `tentative_from`
-/// is a strict subexpression
-/// of `tentative_to`.
-fn swap_if_needed(
-    tentative_from: NormalForm,
-    tentative_to: NormalForm,
-) -> (NormalForm, NormalForm) {
-    if tentative_from
-        .raw()
-        .is_strict_subexpression_of(tentative_to.raw())
-    {
-        (tentative_to, tentative_from)
-    } else {
-        (tentative_from, tentative_to)
-    }
 }
