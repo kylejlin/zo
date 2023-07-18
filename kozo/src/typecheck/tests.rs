@@ -334,11 +334,11 @@ fn eq_one_zero() {
     ((0) ())
 ))"#,
     );
-    let zero_def = ("<ZERO>", "(vcon <NAT> 0)");
+    let zero_def = ("<0>", "(vcon <NAT> 0)");
     let succ_def = ("<SUCC>", "(vcon <NAT> 1)");
-    let one_def = ("<1>", "(<SUCC> <ZERO>)");
+    let one_def = ("<1>", "(<SUCC> <0>)");
     let eq_one_def = (
-        "<EQ_ONE>",
+        "<EQ_1>",
         r#"
 (ind Type0 "Eq1" (<NAT>) (
     (() (<1>))
@@ -346,7 +346,7 @@ fn eq_one_zero() {
     );
     let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
     let eq_one_zero_implies_false_unsubstituted_src = r#"
-(fun nonrec ((<EQ_ONE> <ZERO>)) <FALSE>
+(fun nonrec ((<EQ_1> <0>)) <FALSE>
     (match 1 <FALSE> (
         contra
     ))
