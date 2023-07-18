@@ -721,7 +721,7 @@ fn eq_transitive() {
 }
 
 #[test]
-fn index_arg_types_are_compared_against_substituted_written_index_types() {
+fn vcon_index_arg_types_are_compared_against_ind_index_types_substituted_with_vcon_index_args() {
     let src = r#"
     (ind Type1 "Precise" (Type0 0) (
         ((Type0 0) (1 0))
