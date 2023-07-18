@@ -772,3 +772,56 @@ fn can_match_when_matchee_type_is_only_inductive_after_applying_scon() {
 
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
+
+#[test]
+fn can_call_when_callee_type_is_only_a_for_after_applying_scon() {
+    let precise_def = (
+        "<PRECISE>",
+        r#"
+(ind Type1 "Precise" (Type0 0) (
+    ((Type0 0) (1 0))
+))
+"#,
+    );
+    let bool_def = (
+        "<BOOL>",
+        r#"
+(ind Type0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let true_def = ("<TRUE>", "(vcon <BOOL> 0)");
+    let bool_ident_def = (
+        "<BOOL_IDENT>",
+        r#"
+(fun nonrec (<BOOL>) <BOOL>
+    1
+)"#,
+    );
+    let bool_ident_type_def = ("<BOOL_IDENT_TYPE>", r#"(for (<BOOL>) <BOOL>)"#);
+    let unsubstituted_src = r#"
+(fun nonrec ((<PRECISE> <BOOL_IDENT_TYPE> <BOOL_IDENT>)) <BOOL>
+    (match 1 <BOOL> (
+        (
+            // Arity
+            2
+
+            // Return value
+            (0 <TRUE>)
+        )
+    ))
+)"#;
+    let src_defs = [
+        precise_def,
+        bool_def,
+        true_def,
+        bool_ident_def,
+        bool_ident_type_def,
+    ];
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
