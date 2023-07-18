@@ -5,7 +5,7 @@ pub trait IsStrictSubexpressionOf<Super: ?Sized> {
     where
         Self: PartialEq<Super> + Eq,
     {
-        self == super_ || self.is_inclusive_subexpression_of(super_)
+        self == super_ || self.is_strict_subexpression_of(super_)
     }
 }
 
@@ -46,7 +46,7 @@ mod impl_ast {
         fn is_strict_subexpression_of(&self, super_: &[VconDef]) -> bool {
             super_
                 .iter()
-                .any(|super_| self.is_strict_subexpression_of(super_))
+                .any(|super_def| self.is_strict_subexpression_of(super_def))
         }
     }
 
@@ -81,7 +81,7 @@ mod impl_ast {
         fn is_strict_subexpression_of(&self, super_: &[MatchCase]) -> bool {
             super_
                 .iter()
-                .any(|super_| self.is_strict_subexpression_of(super_))
+                .any(|super_case| self.is_strict_subexpression_of(super_case))
         }
     }
 
@@ -89,10 +89,10 @@ mod impl_ast {
         fn is_strict_subexpression_of(&self, super_: &MatchCase) -> bool {
             match super_ {
                 MatchCase::Dismissed => false,
-                MatchCase::Nondismissed(super_) => self
+                MatchCase::Nondismissed(super_nondismissed) => self
                     .clone()
-                    .replace_debs(&DebUpshifter(super_.arity), 0)
-                    .is_inclusive_subexpression_of(&super_.return_val),
+                    .replace_debs(&DebUpshifter(super_nondismissed.arity), 0)
+                    .is_inclusive_subexpression_of(&super_nondismissed.return_val),
             }
         }
     }
@@ -154,14 +154,14 @@ mod impl_ast {
         fn is_strict_subexpression_of_independent_expression_slice(&self, super_: &[Expr]) -> bool {
             super_
                 .iter()
-                .any(|super_| self.is_inclusive_subexpression_of(super_))
+                .any(|super_expr| self.is_inclusive_subexpression_of(super_expr))
         }
 
         fn is_strict_subexpression_of_dependent_expression_slice(&self, super_: &[Expr]) -> bool {
-            super_.iter().enumerate().any(|(i, super_)| {
+            super_.iter().enumerate().any(|(i, super_expr)| {
                 self.clone()
                     .replace_debs(&DebUpshifter(i), 0)
-                    .is_inclusive_subexpression_of(super_)
+                    .is_inclusive_subexpression_of(super_expr)
             })
         }
     }
