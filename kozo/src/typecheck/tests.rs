@@ -730,3 +730,45 @@ fn vcon_index_arg_types_are_compared_against_ind_index_types_substituted_with_vc
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
+
+#[test]
+fn can_handle_matchee_type_that_is_only_inductive_after_applying_scon() {
+    let precise_def = (
+        "<PRECISE>",
+        r#"
+(ind Type1 "Precise" (Type0 0) (
+    ((Type0 0) (1 0))
+))
+"#,
+    );
+    let bool_def = (
+        "<BOOL>",
+        r#"
+(ind Type0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let true_def = ("<TRUE>", "(vcon <BOOL> 0)");
+    let unsubstituted_src = r#"
+(fun nonrec ((<PRECISE> <BOOL> <TRUE>)) <BOOL>
+    (match 1 <BOOL> (
+        (
+            // Arity
+            2
+
+            // Return value
+            (match 0 <BOOL> (
+                (0 <TRUE>)
+                (0 <TRUE>)
+            ))
+        )
+    ))
+)"#;
+    let src_defs = [precise_def, bool_def, true_def];
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
