@@ -384,3 +384,69 @@ fn eq_zero_one() {
 
     insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
 }
+
+#[test]
+fn substitution_does_not_diverge_even_when_second_vcon_index_arg_is_subexpr_of_matchee_type_index_arg(
+) {
+    let direction_def = (
+        "<DIRECTION>",
+        r#"
+(ind Type0 "Direction" () (
+    (() ()) // North
+    (() ()) // East
+    (() ()) // South
+    (() ()) // West
+    ((0 1) ()) // Mix
+))"#,
+    );
+    let north_def = ("<NORTH>", "(vcon <DIRECTION> 0)");
+    let east_def = ("<EAST>", "(vcon <DIRECTION> 1)");
+    let south_def = ("<SOUTH>", "(vcon <DIRECTION> 2)");
+    let west_def = ("<WEST>", "(vcon <DIRECTION> 3)");
+    let mix_def = ("<MIX>", "(vcon <DIRECTION> 4)");
+    let northwest_def = ("<NORTHWEST>", "(<MIX> <NORTH> <WEST>)");
+    let eq_north_def = (
+        "<EQ_NORTH>",
+        r#"
+(ind Type0 "EqNorth" (<DIRECTION>) (
+    (() (<NORTH>))
+))"#,
+    );
+    let eq_south_def = (
+        "<EQ_SOUTH>",
+        r#"
+(ind Type0 "EqSouth" (<DIRECTION>) (
+    (() (<SOUTH>))
+))"#,
+    );
+    let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
+    let implies_false_src_unsubstituted = r#"
+    (fun nonrec ((<EQ_NORTH> <SOUTH>) (<EQ_SOUTH> <NORTHWEST>)) <FALSE>
+        (match 2 <FALSE> (
+            (
+                0
+                (match 1 <FALSE> (
+                    contra
+                ))
+            )
+        ))
+    )"#;
+    let src_defs = [
+        direction_def,
+        north_def,
+        east_def,
+        south_def,
+        west_def,
+        mix_def,
+        northwest_def,
+        eq_north_def,
+        eq_south_def,
+        false_def,
+    ];
+    let eq_zero_one_implies_false_src =
+        substitute_with_compounding(src_defs, implies_false_src_unsubstituted);
+
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&eq_zero_one_implies_false_src);
+
+    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+}
