@@ -486,3 +486,45 @@ fn substitution_does_not_diverge_even_when_second_vcon_index_arg_is_subexpr_of_m
 
     insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
 }
+
+#[ignore]
+#[test]
+fn eq_commutative() {
+    let bool_def = (
+        "<BOOL>",
+        r#"
+(ind Type0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let true_def = ("<TRUE>", "(vcon <BOOL> 0)");
+    let false_def = ("<FALSE>", "(vcon <BOOL> 1)");
+    let eq_bool_def = (
+        "<EQ>",
+        r#"
+(ind Type0 "Eq" (<BOOL> <BOOL>) (
+    ((<BOOL>) (0 0))
+))"#,
+    );
+    let unsubstituted_src = r#"
+(fun nonrec (<BOOL> <BOOL> (<EQ> 1 0)) (<EQ> 1 2)
+    (match 1 (<EQ> 2 3) (
+        (
+            // Arity
+            1
+            // Return val
+            (
+                (vcon <EQ> 0)
+                3
+            )
+        )
+    ))
+)"#;
+    let src_defs = [bool_def, true_def, false_def, eq_bool_def];
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+
+    insta::assert_display_snapshot!(PrettyPrinted(type_.raw()));
+}
