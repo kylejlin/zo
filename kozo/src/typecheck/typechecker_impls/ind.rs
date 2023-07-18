@@ -89,8 +89,13 @@ impl TypeChecker {
             scon,
         )?;
 
-        let normalized_index_types_g2 = normalized_index_types_g0
-            .upshift_with_constant_cutoff(1 + normalized_param_types_g1.raw().len());
+        let index_args_ast = self.cst_converter.convert_expressions(&def.index_args);
+        let normalized_index_args_g2 = self.evaluator.eval_expressions(index_args_ast);
+
+        let normalized_index_types_g2 = self.substitute_callee_type_param_types(
+            normalized_index_types_g0,
+            normalized_index_args_g2,
+        );
 
         self.assert_expected_type_equalities_holds_after_applying_scon(
             ExpectedTypeEqualities {

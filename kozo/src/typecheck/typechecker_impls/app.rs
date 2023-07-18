@@ -91,7 +91,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn substitute_callee_type_param_types(
+    pub(in crate::typecheck) fn substitute_callee_type_param_types(
         &mut self,
         param_types: Normalized<RcSemHashedVec<ast::Expr>>,
         args: Normalized<RcSemHashedVec<ast::Expr>>,

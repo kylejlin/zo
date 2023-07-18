@@ -720,7 +720,6 @@ fn eq_transitive() {
     insta::assert_display_snapshot!(PrettyPrint(type_1.raw()));
 }
 
-#[ignore]
 #[test]
 fn index_arg_types_are_compared_against_substituted_written_index_types() {
     let src = r#"
