@@ -1,6 +1,7 @@
 pub mod ast;
 pub mod ipist;
 pub mod ipist_to_ast;
+pub mod is_subexpression;
 pub mod lexer;
 pub mod ost;
 pub mod ost_to_ipist;

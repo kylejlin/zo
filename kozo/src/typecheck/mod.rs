@@ -5,6 +5,7 @@ use crate::{
         ast::{self, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
         ipist::{self as cst, RcHashed},
         ipist_to_ast::IpistToAstConverter,
+        is_subexpression::*,
         replace_debs::*,
         token::*,
     },
@@ -24,13 +25,13 @@ use equality_judgment::*;
 mod error;
 use error::*;
 
-mod typechecker_impls;
-
 mod scon;
 pub use scon::*;
 
 mod tcon;
 pub use tcon::*;
+
+mod typechecker_impls;
 
 #[cfg(test)]
 mod tests;

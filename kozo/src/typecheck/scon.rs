@@ -10,13 +10,22 @@ pub enum LazySubstitutionContext<'a> {
 }
 
 /// This substitution is "lazy" in the sense
-/// that it doesn't store the shifted `from` and `to`.
+/// that it doesn't store the shifted
+/// `tentative_from` and `tentative_to`.
 /// Instead, it lazily performs the shifting.
 #[derive(Debug, Clone)]
 pub struct LazySubstitution {
     pub tcon_len: usize,
-    pub from: NormalForm,
-    pub to: NormalForm,
+    /// This is "tentative" in the sense
+    /// that it will be swapped with `tentative_to`
+    /// iff `tentative_from` is a strict subexpression
+    /// of `tentative_to`.
+    pub tentative_from: NormalForm,
+    /// This is "tentative" in the sense
+    /// that it will be swapped with `tentative_from`
+    /// iff `tentative_from` is a strict subexpression
+    /// of `tentative_to`.
+    pub tentative_to: NormalForm,
 }
 
 impl LazySubstitutionContext<'_> {
@@ -59,8 +68,26 @@ fn lazy_substitution_slice_to_concrete_noncompounded_substitutions(
 ) -> impl Iterator<Item = ConcreteSubstitution> + '_ {
     subs.iter().map(move |sub| {
         let upshift_amount = current_tcon_len - sub.tcon_len;
-        let from = sub.from.clone().upshift(upshift_amount, 0);
-        let to = sub.to.clone().upshift(upshift_amount, 0);
+        let tentative_from = sub.tentative_from.clone().upshift(upshift_amount, 0);
+        let tentative_to = sub.tentative_to.clone().upshift(upshift_amount, 0);
+        let (from, to) = swap_if_needed(tentative_from, tentative_to);
         ConcreteSubstitution { from, to }
     })
+}
+
+/// Swaps the two arguments iff `tentative_from`
+/// is a strict subexpression
+/// of `tentative_to`.
+fn swap_if_needed(
+    tentative_from: NormalForm,
+    tentative_to: NormalForm,
+) -> (NormalForm, NormalForm) {
+    if tentative_from
+        .raw()
+        .is_strict_subexpression_of(tentative_to.raw())
+    {
+        (tentative_to, tentative_from)
+    } else {
+        (tentative_from, tentative_to)
+    }
 }

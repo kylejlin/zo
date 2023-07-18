@@ -256,8 +256,8 @@ impl TypeChecker {
             let matchee_type_arg_g1 = matchee_type_args_g1.to_hashee().index(i).cloned();
             LazySubstitution {
                 tcon_len: tcon_g1_len,
-                from: vcon_index_arg_g1,
-                to: matchee_type_arg_g1,
+                tentative_from: vcon_index_arg_g1,
+                tentative_to: matchee_type_arg_g1,
             }
         });
 
@@ -265,8 +265,8 @@ impl TypeChecker {
 
         let matchee_substitution = LazySubstitution {
             tcon_len: tcon_g1_len,
-            from: normalized_matchee_g1,
-            to: capp_g1,
+            tentative_from: normalized_matchee_g1,
+            tentative_to: capp_g1,
         };
 
         let substitutions: Vec<LazySubstitution> = index_substitutions
