@@ -732,7 +732,7 @@ fn vcon_index_arg_types_are_compared_against_ind_index_types_substituted_with_vc
 }
 
 #[test]
-fn can_handle_matchee_type_that_is_only_inductive_after_applying_scon() {
+fn can_match_when_matchee_type_is_only_inductive_after_applying_scon() {
     let precise_def = (
         "<PRECISE>",
         r#"
