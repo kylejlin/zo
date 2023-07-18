@@ -762,3 +762,46 @@ fn can_call_when_callee_type_is_only_a_for_after_applying_scon() {
 
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
+
+#[ignore]
+#[test]
+fn add_commutative() {
+    let nat_def = (
+        "<NAT>",
+        r#"(ind Type0 "Nat" () (
+(() ())
+((0) ())
+))"#,
+    );
+    let zero_def = ("<0>", "(vcon <NAT> 0)");
+    let succ_def = ("<SUCC>", "(vcon <NAT> 1)");
+    let add_def = (
+        "<ADD>",
+        "
+(fun 0 (<NAT> <NAT>) <NAT>
+    (match 2 <NAT> (
+        (0 1)
+        (1 (1 0 (<SUCC> 2)))
+    ))
+)",
+    );
+    let eq_def = (
+        "<EQ>",
+        r#"
+(fun nonrec (Type0 0) (for (1) Type0)
+    (ind Type0 "Eq" (2) (
+        (() (2))
+    ))
+)"#,
+    );
+    // TODO
+    let unsubstituted_src = r#"<EQ>"#;
+    let src = substitute_with_compounding(
+        [nat_def, zero_def, succ_def, add_def, eq_def],
+        unsubstituted_src,
+    );
+
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}

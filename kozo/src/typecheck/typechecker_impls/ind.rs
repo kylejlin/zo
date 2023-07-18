@@ -92,8 +92,10 @@ impl TypeChecker {
         let index_args_ast = self.cst_converter.convert_expressions(&def.index_args);
         let normalized_index_args_g2 = self.evaluator.eval_expressions(index_args_ast);
 
+        let normalized_index_types_g2 =
+            normalized_index_types_g0.upshift_with_increasing_cutoff(1 + def.param_types.len());
         let normalized_index_types_g2 = self.substitute_callee_type_param_types(
-            normalized_index_types_g0,
+            normalized_index_types_g2,
             normalized_index_args_g2,
         );
 

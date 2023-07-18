@@ -1,0 +1,19 @@
+---
+source: src/typecheck/tests.rs
+assertion_line: 805
+expression: PrettyPrint(type_.raw())
+---
+(
+    for
+    (
+        Type0
+        0
+    )
+    (
+        for
+        (
+            1
+        )
+        Type0
+    )
+)
