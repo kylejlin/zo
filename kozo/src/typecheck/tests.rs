@@ -719,3 +719,15 @@ fn eq_transitive() {
 
     insta::assert_display_snapshot!(PrettyPrint(type_1.raw()));
 }
+
+#[ignore]
+#[test]
+fn index_arg_types_are_compared_against_substituted_written_index_types() {
+    let src = r#"
+    (ind Type1 "Precise" (Type0 0) (
+        ((Type0 0) (1 0))
+    ))
+    "#;
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
