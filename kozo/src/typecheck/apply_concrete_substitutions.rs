@@ -20,6 +20,19 @@ impl TypeChecker {
                 self.perform_substitution_iteration(&mut subs, &mut exprs);
             if !has_changed {
                 let has_exploded = does_any_substitution_contain_exploding_contradiction(&subs);
+                // TODO: Delete
+                {
+                    use crate::pretty_print::*;
+                    println!("DONE applying concrete subs ({}).", subs.len());
+                    for (i, sub) in subs.iter().enumerate() {
+                        println!(
+                            "sub_final[{}].from = {}",
+                            i,
+                            sub.from().raw().pretty_printed()
+                        );
+                        println!("sub_final[{}].to = {}", i, sub.to().raw().pretty_printed());
+                    }
+                }
                 return (exprs, HasExploded(has_exploded));
             }
         }
