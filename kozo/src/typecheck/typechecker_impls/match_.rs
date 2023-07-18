@@ -1,5 +1,3 @@
-use crate::pretty_print::PrettyPrinted;
-
 use super::*;
 
 impl TypeChecker {
@@ -201,8 +199,7 @@ impl TypeChecker {
         let normalized_match_return_type_g1 =
             normalized_match_return_type_g0.upshift(param_count, 0);
 
-        // TODO: Restore to `?`.
-        let res = self.assert_expected_type_equality_holds_after_applying_scon(
+        self.assert_expected_type_equality_holds_after_applying_scon(
             ExpectedTypeEquality {
                 expr: case.return_val.clone(),
                 expected_type: normalized_match_return_type_g1,
@@ -210,16 +207,7 @@ impl TypeChecker {
                 tcon_len: extended_tcon_g1.len(),
             },
             extended_scon,
-        );
-        if res.is_err() {
-            let subs =
-                extended_scon.into_concrete_noncompounded_substitutions(extended_tcon_g1.len());
-            for (i, sub) in subs.iter().enumerate() {
-                println!("sub[{}].from = {}", i, sub.from().raw().pretty_printed());
-                println!("sub[{}].to = {}", i, sub.to().raw().pretty_printed());
-            }
-        }
-        res?;
+        )?;
 
         Ok(())
     }
