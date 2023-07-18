@@ -11,29 +11,22 @@ fn add_2_3() {
 ((0) ())
 ))"#,
     );
-    let zero_def = ("<ZERO>", "(vcon <NAT> 0)");
+    let zero_def = ("<0>", "(vcon <NAT> 0)");
     let succ_def = ("<SUCC>", "(vcon <NAT> 1)");
-    let add_two_three_src = substitute_with_compounding(
-        [
-            nat_def,
-            zero_def,
-            succ_def,
-            (
-                "<ADD>",
-                "(fun 0 (<NAT> <NAT>) <NAT>
-(
-    match 2 <NAT>
-
-    (
+    let two_def = ("<2>", "(<SUCC> (<SUCC> <0>))");
+    let three_def = ("<3>", "(<SUCC> <2>)");
+    let add_def = (
+        "<ADD>",
+        "
+(fun 0 (<NAT> <NAT>) <NAT>
+    (match 2 <NAT> (
         (0 1)
-
         (1 (1 0 (<SUCC> 2)))
-    )
-))",
-            ),
-            ("<2>", "(<SUCC> (<SUCC> <ZERO>))"),
-            ("<3>", "(<SUCC> <2>)"),
-        ],
+    ))
+)",
+    );
+    let add_two_three_src = substitute_with_compounding(
+        [nat_def, zero_def, succ_def, two_def, three_def, add_def],
         r#"(<ADD> <2> <3>)"#,
     );
 
