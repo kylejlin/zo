@@ -817,7 +817,40 @@ fn add_commutative() {
 )"#,
     );
     let plus_zero_def = ("<PLUS_0>", "0 // TODO:plus_zero\n");
-    let plus_succ_def = ("<PLUS_SUCC>", "0 // TODO:plus_succ\n");
+    let plus_succ_def = (
+        "<PLUS_SUCC>",
+        r#"
+(fun 0 (<NAT> <NAT>) (<FLAT_EQ> <NAT> (<SUCC> (<ADD> 1 0)) (<ADD> 1 (<SUCC> 0)))
+    (match 2 (<FLAT_EQ> <NAT> (<SUCC> (<ADD> 2 1)) (<ADD> 2 (<SUCC> 1))) (
+        // `a == 0` case
+        (
+            // Arity
+            0
+
+            // Return type
+            (<REFL> <NAT> (<SUCC> 1))
+        )
+
+        // `a == succ(a_pred)` case
+        (
+            // Arity
+            1
+
+            // Return type
+            (match (1 0 2) (<FLAT_EQ> <NAT> (<SUCC> (<ADD> 3 2)) (<ADD> 3 (<SUCC> 2))) (
+                // Only case (`refl`)
+                (
+                    // Arity
+                    0
+
+                    // Return val
+                    (<REFL> <NAT> (<SUCC> (<SUCC> (<ADD> 0 2))))
+                )
+            ))
+        )
+    ))
+)"#,
+    );
     let unsubstituted_src = r#"
 (fun 0 (<NAT> <NAT>) (<FLAT_EQ> <NAT> (<ADD> 1 0) (<ADD> 0 1))
     (match 2 (<FLAT_EQ> <NAT> (<ADD> 2 1) (<ADD> 1 2)) (
@@ -934,8 +967,11 @@ fn add_commutative() {
             plus_zero_def,
             plus_succ_def,
         ],
-        unsubstituted_src,
+        // TODO: Restore.
+        "<PLUS_SUCC>",
     );
+
+    // TODO: Rename `Plus...` to `Add...`.
 
     println!("START{src}");
 
