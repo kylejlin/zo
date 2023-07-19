@@ -766,6 +766,8 @@ fn can_call_when_callee_type_is_only_a_for_after_applying_scon() {
 #[ignore]
 #[test]
 fn add_commutative() {
+    // Proof based on
+    // https://github.com/kantu-lang/kantu/blob/fed8863341924e6622429c8f105265ec12c35bff/kanc/src/tests/sample_code/should_succeed/single_file/no_warnings/plus_commutative.k
     let nat_def = (
         "<NAT>",
         r#"(ind Type0 "Nat" () (
@@ -794,12 +796,148 @@ fn add_commutative() {
     ))
 )"#,
     );
-    // TODO
-    let unsubstituted_src = r#"<EQ>"#;
+    let flat_eq_def = (
+        "<FLAT_EQ>",
+        r#"
+(fun nonrec (Type0 0 1) Type0
+    ((<EQ> 3 2) 1)
+)"#,
+    );
+    let refl_def = (
+        "<REFL>",
+        r#"
+(fun nonrec (Type0 0) (for (1) Type0)
+    (
+        vcon
+        (ind Type0 "Eq" (2) (
+            (() (2))
+        ))
+        0
+    )
+)"#,
+    );
+    let plus_zero_def = ("<PLUS_0>", "0 // TODO:plus_zero\n");
+    let plus_succ_def = ("<PLUS_SUCC>", "0 // TODO:plus_succ\n");
+    let unsubstituted_src = r#"
+(fun 0 (<NAT> <NAT>) (<FLAT_EQ> <NAT> (<ADD> 1 0) (<ADD> 0 1))
+    (match 2 (<FLAT_EQ> <NAT> (<ADD> 2 1) (<ADD> 1 2)) (
+        // `a == 0` case
+        (
+            // Arity
+            0
+
+            // Return val
+            (match 1 (<FLAT_EQ> <NAT> (<ADD> 2 1) (<ADD> 1 2)) (
+                // `b == 0` case
+                (
+                    // Arity
+                    0
+
+                    // Return val
+                    (<REFL> <NAT> 3)
+                ) 
+
+                // `b == succ(b_pred)` case
+                (
+                    // Arity
+                    1
+
+                    // Return val
+                    (match (<PLUS_0> 0) (<FLAT_EQ> <NAT> (<ADD> 3 2) (<ADD> 2 3)) (
+                        // Only case (`refl`)
+                        (
+                            // Arity
+                            0
+
+                            // Return val
+                            (<REFL> <NAT> <0>)
+                        )
+                    ))
+                )
+            ))
+        )
+
+        // `a == succ(a_pred)` case
+        (
+            // Arity
+            1
+
+            // Return val
+            (match 2 (<FLAT_EQ> <NAT> (<ADD> 3 2) (<ADD> 2 3)) (
+                // `b == 0` case
+                (
+                    // Arity
+                    0
+                    
+                    // Return val
+                    (match (<PLUS_0> 0) (<FLAT_EQ> <NAT> (<ADD> 3 2) (<ADD> 2 3)) (
+                        // Only case (`refl`)
+                        (
+                            // Arity
+                            0
+
+                            // Return val
+                            (<REFL> <NAT> (<SUCC> (<ADD> 0 <0>)))
+                        )
+                    ))
+                )
+
+                // `b == succ(b_pred)` case
+                (
+                    // Arity
+                    1
+
+                    // Return val
+                    (match (<PLUS_SUCC> 1 0) (<FLAT_EQ> <NAT> (<ADD> 4 3) (<ADD> 3 4)) (
+                        // Only case (`refl`)
+                        (
+                            // Arity
+                            0
+
+                            // Return val
+                            (match (<PLUS_SUCC> 0 1) (<FLAT_EQ> <NAT> (<ADD> 4 3) (<ADD> 3 4)) (
+                                // Only case (`refl`)
+                                (
+                                    // Arity
+                                    0
+
+                                    // Return val
+                                    (match (2 1 0) (<FLAT_EQ> <NAT> (<ADD> 4 3) (<ADD> 3 4)) (
+                                        // Only case (`refl`)
+                                        (
+                                            // Arity
+                                            0
+
+                                            // Return val
+                                            (<REFL> <NAT> (<SUCC> (<SUCC> (<ADD> 1 0))))
+                                        )
+                                    ))
+                                )
+                            ))
+                        )
+                    ))   
+                )
+            ))
+        )
+    ))
+)"#;
+
     let src = substitute_with_compounding(
-        [nat_def, zero_def, succ_def, add_def, eq_def],
+        [
+            nat_def,
+            zero_def,
+            succ_def,
+            add_def,
+            eq_def,
+            flat_eq_def,
+            refl_def,
+            plus_zero_def,
+            plus_succ_def,
+        ],
         unsubstituted_src,
     );
+
+    println!("START{src}");
 
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
 

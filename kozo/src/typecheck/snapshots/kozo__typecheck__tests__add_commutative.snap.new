@@ -1,6 +1,6 @@
 ---
 source: src/typecheck/tests.rs
-assertion_line: 805
+assertion_line: 813
 expression: PrettyPrint(type_.raw())
 ---
 (
@@ -8,12 +8,7 @@ expression: PrettyPrint(type_.raw())
     (
         Type0
         0
+        1
     )
-    (
-        for
-        (
-            1
-        )
-        Type0
-    )
+    Type0
 )
