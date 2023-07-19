@@ -1,5 +1,9 @@
 # Zo Syntax Spec
 
+> Warning: This spec is outdated.
+> I'll probably update it after I
+> finalize v1.0.0.
+
 ## Overview
 
 - Type expressions
