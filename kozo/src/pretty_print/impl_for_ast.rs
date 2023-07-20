@@ -8,13 +8,13 @@ impl Display for PrettyPrint<'_, Expr> {
     }
 }
 
-impl Display for PrettyPrint<'_, RcSemHashed<Ind>> {
+impl Display for PrettyPrint<'_, RcHashed<Ind>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_ind(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcSemHashedVec<VconDef>> {
+impl Display for PrettyPrint<'_, RcHashedVec<VconDef>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_parenthesized_vcon_defs(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
@@ -26,19 +26,19 @@ impl Display for PrettyPrint<'_, VconDef> {
     }
 }
 
-impl Display for PrettyPrint<'_, RcSemHashed<Vcon>> {
+impl Display for PrettyPrint<'_, RcHashed<Vcon>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_vcon(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcSemHashed<Match>> {
+impl Display for PrettyPrint<'_, RcHashed<Match>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_match(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcSemHashedVec<MatchCase>> {
+impl Display for PrettyPrint<'_, RcHashedVec<MatchCase>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_parenthesized_match_cases(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
@@ -52,31 +52,31 @@ impl Display for PrettyPrint<'_, MatchCase> {
 
 // TODO: impl for Retype
 
-impl Display for PrettyPrint<'_, RcSemHashed<Fun>> {
+impl Display for PrettyPrint<'_, RcHashed<Fun>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_fun(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcSemHashed<App>> {
+impl Display for PrettyPrint<'_, RcHashed<App>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_app(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcSemHashed<For>> {
+impl Display for PrettyPrint<'_, RcHashed<For>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_for(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcSemHashed<DebNode>> {
+impl Display for PrettyPrint<'_, RcHashed<DebNode>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_deb(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcSemHashed<UniverseNode>> {
+impl Display for PrettyPrint<'_, RcHashed<UniverseNode>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_universe(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
@@ -100,7 +100,7 @@ fn fmt_expr(expr: Expr, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult
     }
 }
 
-fn fmt_ind(ind: RcSemHashed<Ind>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_ind(ind: RcHashed<Ind>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     let universe_level = ind.hashee.universe_level.0;
     write!(f, "{indent}(\n{i1}ind\n{i1}Type{universe_level}\n")?;
@@ -136,7 +136,7 @@ fn fmt_str_literal(
 }
 
 fn fmt_parenthesized_vcon_defs(
-    defs: RcSemHashedVec<VconDef>,
+    defs: RcHashedVec<VconDef>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -169,7 +169,7 @@ fn fmt_vcon_def(def: &VconDef, f: &mut Formatter<'_>, indent: Indentation) -> Fm
     Ok(())
 }
 
-fn fmt_vcon(vcon: RcSemHashed<Vcon>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_vcon(vcon: RcHashed<Vcon>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}vcon\n")?;
 
@@ -180,7 +180,7 @@ fn fmt_vcon(vcon: RcSemHashed<Vcon>, f: &mut Formatter<'_>, indent: Indentation)
     Ok(())
 }
 
-fn fmt_match(m: RcSemHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_match(m: RcHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}match\n")?;
 
@@ -196,7 +196,7 @@ fn fmt_match(m: RcSemHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) 
 }
 
 fn fmt_parenthesized_match_cases(
-    cases: RcSemHashedVec<MatchCase>,
+    cases: RcHashedVec<MatchCase>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -237,7 +237,7 @@ fn fmt_nondismissed_match_case(
     Ok(())
 }
 
-fn fmt_retype(m: RcSemHashed<Retype>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_retype(m: RcHashed<Retype>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}retype\n")?;
 
@@ -256,7 +256,7 @@ fn fmt_retype(m: RcSemHashed<Retype>, f: &mut Formatter<'_>, indent: Indentation
     // Ok(())
 }
 
-fn fmt_fun(fun: RcSemHashed<Fun>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_fun(fun: RcHashed<Fun>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}fun\n")?;
 
@@ -285,7 +285,7 @@ fn fmt_decreasing_index(
     }
 }
 
-fn fmt_app(app: RcSemHashed<App>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_app(app: RcHashed<App>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     if app.hashee.args.hashee.is_empty() {
         write!(f, "{indent}(")?;
         fmt_expr(app.hashee.callee.clone(), f, indent)?;
@@ -307,7 +307,7 @@ fn fmt_app(app: RcSemHashed<App>, f: &mut Formatter<'_>, indent: Indentation) ->
     Ok(())
 }
 
-fn fmt_for(for_: RcSemHashed<For>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_for(for_: RcHashed<For>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}for\n")?;
 
@@ -319,13 +319,13 @@ fn fmt_for(for_: RcSemHashed<For>, f: &mut Formatter<'_>, indent: Indentation) -
     Ok(())
 }
 
-fn fmt_deb(deb: RcSemHashed<DebNode>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_deb(deb: RcHashed<DebNode>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let index = deb.hashee.deb.0;
     write!(f, "{indent}{index}")
 }
 
 fn fmt_universe(
-    universe: RcSemHashed<UniverseNode>,
+    universe: RcHashed<UniverseNode>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -334,7 +334,7 @@ fn fmt_universe(
 }
 
 fn fmt_parenthesized_expressions(
-    parenthesized_expressions: RcSemHashedVec<Expr>,
+    parenthesized_expressions: RcHashedVec<Expr>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {

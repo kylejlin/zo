@@ -22,7 +22,7 @@ impl TypeChecker {
                 tcon_g0,
                 scon,
             )?
-            .into_rc_sem_hashed();
+            .into_rc_hashed();
 
         let universe_node = NormalForm::universe(ast::UniverseNode {
             level: UniverseLevel(ind.hashee.type_.level),
@@ -47,7 +47,7 @@ impl TypeChecker {
     fn typecheck_ind_vcon_defs(
         &mut self,
         ind: RcHashed<cst::Ind>,
-        normalized_index_types_g0: Normalized<RcSemHashedVec<ast::Expr>>,
+        normalized_index_types_g0: Normalized<RcHashedVec<ast::Expr>>,
         tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
@@ -67,7 +67,7 @@ impl TypeChecker {
         &mut self,
         def: &cst::VconDef,
         ind: RcHashed<cst::Ind>,
-        normalized_index_types_g0: Normalized<RcSemHashedVec<ast::Expr>>,
+        normalized_index_types_g0: Normalized<RcHashedVec<ast::Expr>>,
         tcon_g1: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {

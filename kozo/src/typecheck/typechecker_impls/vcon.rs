@@ -35,7 +35,7 @@ impl TypeChecker {
         ind: RcHashed<cst::Ind>,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
-    ) -> Result<Normalized<RcSemHashed<ast::Ind>>, TypeError> {
+    ) -> Result<Normalized<RcHashed<ast::Ind>>, TypeError> {
         self.get_type_of_ind(ind.clone(), tcon, scon)?;
 
         let ind_ast = self.cst_converter.convert_ind(ind);
@@ -45,7 +45,7 @@ impl TypeChecker {
 
     pub(in crate::typecheck::typechecker_impls) fn get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
         &mut self,
-        ind: Normalized<RcSemHashed<ast::Ind>>,
+        ind: Normalized<RcHashed<ast::Ind>>,
         vcon_index: usize,
     ) -> NormalForm {
         let defs = ind.to_hashee().vcon_defs().hashee().derefed();

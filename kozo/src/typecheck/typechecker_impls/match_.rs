@@ -48,8 +48,8 @@ impl TypeChecker {
         tcon_len: usize,
     ) -> Result<
         (
-            Normalized<RcSemHashed<ast::Ind>>,
-            Normalized<RcSemHashedVec<ast::Expr>>,
+            Normalized<RcHashed<ast::Ind>>,
+            Normalized<RcHashedVec<ast::Expr>>,
         ),
         TypeError,
     > {
@@ -76,7 +76,7 @@ impl TypeChecker {
     fn assert_number_of_match_cases_is_correct(
         &mut self,
         match_: RcHashed<cst::Match>,
-        matchee_type_ind: Normalized<RcSemHashed<ast::Ind>>,
+        matchee_type_ind: Normalized<RcHashed<ast::Ind>>,
     ) -> Result<(), TypeError> {
         let expected = matchee_type_ind.raw().hashee.vcon_defs.hashee.len();
         let actual = match_.hashee.cases.len();
@@ -94,8 +94,8 @@ impl TypeChecker {
         &mut self,
         match_: RcHashed<cst::Match>,
         normalized_matchee: NormalForm,
-        matchee_type_ind: Normalized<RcSemHashed<ast::Ind>>,
-        matchee_type_args: Normalized<RcSemHashedVec<ast::Expr>>,
+        matchee_type_ind: Normalized<RcHashed<ast::Ind>>,
+        matchee_type_args: Normalized<RcHashedVec<ast::Expr>>,
         normalized_match_return_type: NormalForm,
         tcon: LazyTypeContext,
         scon: LazySubstitutionContext,
@@ -120,8 +120,8 @@ impl TypeChecker {
         case_index: usize,
         match_g0: RcHashed<cst::Match>,
         normalized_matchee_g0: NormalForm,
-        matchee_type_ind_g0: Normalized<RcSemHashed<ast::Ind>>,
-        matchee_type_args_g0: Normalized<RcSemHashedVec<ast::Expr>>,
+        matchee_type_ind_g0: Normalized<RcHashed<ast::Ind>>,
+        matchee_type_args_g0: Normalized<RcHashedVec<ast::Expr>>,
         normalized_match_return_type_g0: NormalForm,
         tcon_g0: LazyTypeContext,
         scon: LazySubstitutionContext,
@@ -158,8 +158,8 @@ impl TypeChecker {
         case: &cst::NondismissedMatchCase,
         match_g0: RcHashed<cst::Match>,
         normalized_matchee_g0: NormalForm,
-        matchee_type_ind_g0: Normalized<RcSemHashed<ast::Ind>>,
-        matchee_type_args_g0: Normalized<RcSemHashedVec<ast::Expr>>,
+        matchee_type_ind_g0: Normalized<RcHashed<ast::Ind>>,
+        matchee_type_args_g0: Normalized<RcHashedVec<ast::Expr>>,
         normalized_match_return_type_g0: NormalForm,
         tcon_g0: LazyTypeContext,
         scon: LazySubstitutionContext,
@@ -234,8 +234,8 @@ impl TypeChecker {
     fn get_new_substitutions(
         case_index: usize,
         normalized_matchee_g1: NormalForm,
-        matchee_type_ind_g1: Normalized<RcSemHashed<ast::Ind>>,
-        matchee_type_args_g1: Normalized<RcSemHashedVec<ast::Expr>>,
+        matchee_type_ind_g1: Normalized<RcHashed<ast::Ind>>,
+        matchee_type_args_g1: Normalized<RcHashedVec<ast::Expr>>,
         vcon_type_g1: NormalForm,
         tcon_g1_len: usize,
     ) -> Vec<LazySubstitution> {
@@ -281,8 +281,8 @@ impl TypeChecker {
         case_index: usize,
         match_g0: RcHashed<cst::Match>,
         normalized_matchee_g0: NormalForm,
-        matchee_type_ind_g0: Normalized<RcSemHashed<ast::Ind>>,
-        matchee_type_args_g0: Normalized<RcSemHashedVec<ast::Expr>>,
+        matchee_type_ind_g0: Normalized<RcHashed<ast::Ind>>,
+        matchee_type_args_g0: Normalized<RcHashedVec<ast::Expr>>,
         tcon_g0: LazyTypeContext,
         scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {

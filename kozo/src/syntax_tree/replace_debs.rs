@@ -3,7 +3,7 @@ use crate::syntax_tree::ast::*;
 use std::{hash::Hash, rc::Rc};
 
 pub trait DebReplacer {
-    fn replace_deb(&self, original: RcSemHashed<DebNode>, cutoff: usize) -> Expr;
+    fn replace_deb(&self, original: RcHashed<DebNode>, cutoff: usize) -> Expr;
 }
 
 /// Replaces `0` with the last element of in `new_exprs`,
@@ -16,7 +16,7 @@ pub struct DebDownshiftSubstituter<'a> {
 }
 
 impl DebReplacer for DebDownshiftSubstituter<'_> {
-    fn replace_deb(&self, original: RcSemHashed<DebNode>, cutoff: usize) -> Expr {
+    fn replace_deb(&self, original: RcHashed<DebNode>, cutoff: usize) -> Expr {
         if original.hashee.deb.0 < cutoff {
             return Expr::Deb(original);
         }
@@ -36,7 +36,7 @@ impl DebReplacer for DebDownshiftSubstituter<'_> {
 pub struct DebUpshifter(pub usize);
 
 impl DebReplacer for DebUpshifter {
-    fn replace_deb(&self, original: RcSemHashed<DebNode>, cutoff: usize) -> Expr {
+    fn replace_deb(&self, original: RcHashed<DebNode>, cutoff: usize) -> Expr {
         if original.hashee.deb.0 < cutoff {
             return Expr::Deb(original);
         }
@@ -59,7 +59,7 @@ pub trait ReplaceDebs {
 /// and increasing cutoff, respectively.
 ///
 /// We could represent this semantic difference at the type level
-/// (e.g. `RcSemHashedIndependentVec` vs `RcSemHashedDependentVec`),
+/// (e.g. `RcHashedIndependentVec` vs `RcHashedDependentVec`),
 /// but this requires a lot of boilerplate.
 /// So instead, we leave it up to the user to call the correct method.
 pub trait ReplaceDebsInEachItem {
@@ -73,7 +73,7 @@ pub trait ReplaceDebsInEachItem {
     ) -> Self;
 }
 
-impl<T> ReplaceDebsInEachItem for RcSemHashedVec<T>
+impl<T> ReplaceDebsInEachItem for RcHashedVec<T>
 where
     T: ReplaceDebs<Output = T> + Clone,
     Vec<T>: Hash,
@@ -150,7 +150,7 @@ impl ReplaceDebs for Expr {
     }
 }
 
-impl ReplaceDebs for RcSemHashed<Ind> {
+impl ReplaceDebs for RcHashed<Ind> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
@@ -187,7 +187,7 @@ impl ReplaceDebs for VconDef {
     }
 }
 
-impl ReplaceDebs for RcSemHashed<Vcon> {
+impl ReplaceDebs for RcHashed<Vcon> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
@@ -199,7 +199,7 @@ impl ReplaceDebs for RcSemHashed<Vcon> {
     }
 }
 
-impl ReplaceDebs for RcSemHashed<Match> {
+impl ReplaceDebs for RcHashed<Match> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
@@ -238,7 +238,7 @@ impl ReplaceDebs for NondismissedMatchCase {
     }
 }
 
-impl ReplaceDebs for RcSemHashed<Retype> {
+impl ReplaceDebs for RcHashed<Retype> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
@@ -267,7 +267,7 @@ impl ReplaceDebs for Rewrite {
     }
 }
 
-impl ReplaceDebs for RcSemHashed<Fun> {
+impl ReplaceDebs for RcHashed<Fun> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
@@ -290,7 +290,7 @@ impl ReplaceDebs for RcSemHashed<Fun> {
     }
 }
 
-impl ReplaceDebs for RcSemHashed<App> {
+impl ReplaceDebs for RcHashed<App> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
@@ -305,7 +305,7 @@ impl ReplaceDebs for RcSemHashed<App> {
     }
 }
 
-impl ReplaceDebs for RcSemHashed<For> {
+impl ReplaceDebs for RcHashed<For> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
@@ -323,7 +323,7 @@ impl ReplaceDebs for RcSemHashed<For> {
     }
 }
 
-impl ReplaceDebs for RcSemHashed<DebNode> {
+impl ReplaceDebs for RcHashed<DebNode> {
     type Output = Expr;
 
     fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
@@ -331,7 +331,7 @@ impl ReplaceDebs for RcSemHashed<DebNode> {
     }
 }
 
-impl ReplaceDebs for RcSemHashed<UniverseNode> {
+impl ReplaceDebs for RcHashed<UniverseNode> {
     type Output = Self;
 
     fn replace_debs<R: DebReplacer>(self, _: &R, _: usize) -> Self::Output {

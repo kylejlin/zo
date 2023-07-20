@@ -1,39 +1,29 @@
 use std::{hash::Hash, rc::Rc};
 
-pub use crate::hash::*;
-
-// TODO: Delete `RcSemHashed`, since it's now
-// just the same as `RcHashed`.
-
-/// Reference-counted semantically hashed.
-pub type RcSemHashed<T> = Rc<Hashed<T>>;
-
-/// Reference-counted semantically hashed vector.
-pub type RcSemHashedVec<T> = Rc<Hashed<Vec<T>>>;
-
-pub fn rc_sem_hashed<T: Hash>(t: T) -> RcSemHashed<T> {
-    Rc::new(Hashed::new(t))
-}
+pub use crate::{
+    hash::*,
+    syntax_tree::ipist::{rc_hashed, RcHashed, RcHashedVec},
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Expr {
-    Ind(RcSemHashed<Ind>),
-    Vcon(RcSemHashed<Vcon>),
-    Match(RcSemHashed<Match>),
-    Retype(RcSemHashed<Retype>),
-    Fun(RcSemHashed<Fun>),
-    App(RcSemHashed<App>),
-    For(RcSemHashed<For>),
-    Deb(RcSemHashed<DebNode>),
-    Universe(RcSemHashed<UniverseNode>),
+    Ind(RcHashed<Ind>),
+    Vcon(RcHashed<Vcon>),
+    Match(RcHashed<Match>),
+    Retype(RcHashed<Retype>),
+    Fun(RcHashed<Fun>),
+    App(RcHashed<App>),
+    For(RcHashed<For>),
+    Deb(RcHashed<DebNode>),
+    Universe(RcHashed<UniverseNode>),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Ind {
     pub name: Rc<StringValue>,
     pub universe_level: UniverseLevel,
-    pub index_types: RcSemHashedVec<Expr>,
-    pub vcon_defs: RcSemHashedVec<VconDef>,
+    pub index_types: RcHashedVec<Expr>,
+    pub vcon_defs: RcHashedVec<VconDef>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
@@ -41,13 +31,13 @@ pub struct StringValue(pub String);
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct VconDef {
-    pub param_types: RcSemHashedVec<Expr>,
-    pub index_args: RcSemHashedVec<Expr>,
+    pub param_types: RcHashedVec<Expr>,
+    pub index_args: RcHashedVec<Expr>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Vcon {
-    pub ind: RcSemHashed<Ind>,
+    pub ind: RcHashed<Ind>,
     pub vcon_index: usize,
 }
 
@@ -56,7 +46,7 @@ pub struct Match {
     pub matchee: Expr,
     pub econ_extension_len: usize,
     pub return_type: Expr,
-    pub cases: RcSemHashedVec<MatchCase>,
+    pub cases: RcHashedVec<MatchCase>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -76,8 +66,8 @@ pub struct Retype {
     pub in_term: Expr,
     pub in_type: Expr,
     pub out_type: Expr,
-    pub in_rewrites: RcSemHashedVec<Rewrite>,
-    pub out_rewrites: RcSemHashedVec<Rewrite>,
+    pub in_rewrites: RcHashedVec<Rewrite>,
+    pub out_rewrites: RcHashedVec<Rewrite>,
 }
 
 pub use crate::syntax_tree::ost::Rewrite;
@@ -85,7 +75,7 @@ pub use crate::syntax_tree::ost::Rewrite;
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Fun {
     pub decreasing_index: Option<usize>,
-    pub param_types: RcSemHashedVec<Expr>,
+    pub param_types: RcHashedVec<Expr>,
     pub return_type: Expr,
     pub return_val: Expr,
 }
@@ -93,12 +83,12 @@ pub struct Fun {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct App {
     pub callee: Expr,
-    pub args: RcSemHashedVec<Expr>,
+    pub args: RcHashedVec<Expr>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct For {
-    pub param_types: RcSemHashedVec<Expr>,
+    pub param_types: RcHashedVec<Expr>,
     pub return_type: Expr,
 }
 
@@ -153,202 +143,202 @@ impl GetDigest for Expr {
         }
     }
 }
-impl GetDigest for RcSemHashed<Ind> {
+impl GetDigest for RcHashed<Ind> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcSemHashed<Vcon> {
+impl GetDigest for RcHashed<Vcon> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcSemHashed<Match> {
+impl GetDigest for RcHashed<Match> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcSemHashed<Retype> {
+impl GetDigest for RcHashed<Retype> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcSemHashed<Fun> {
+impl GetDigest for RcHashed<Fun> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcSemHashed<App> {
+impl GetDigest for RcHashed<App> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcSemHashed<For> {
+impl GetDigest for RcHashed<For> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcSemHashed<DebNode> {
+impl GetDigest for RcHashed<DebNode> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcSemHashed<UniverseNode> {
+impl GetDigest for RcHashed<UniverseNode> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
 
-impl From<RcSemHashed<Ind>> for Expr {
-    fn from(ind: RcSemHashed<Ind>) -> Self {
+impl From<RcHashed<Ind>> for Expr {
+    fn from(ind: RcHashed<Ind>) -> Self {
         Expr::Ind(ind)
     }
 }
-impl From<RcSemHashed<Vcon>> for Expr {
-    fn from(vcon: RcSemHashed<Vcon>) -> Self {
+impl From<RcHashed<Vcon>> for Expr {
+    fn from(vcon: RcHashed<Vcon>) -> Self {
         Expr::Vcon(vcon)
     }
 }
-impl From<RcSemHashed<Match>> for Expr {
-    fn from(match_: RcSemHashed<Match>) -> Self {
+impl From<RcHashed<Match>> for Expr {
+    fn from(match_: RcHashed<Match>) -> Self {
         Expr::Match(match_)
     }
 }
-impl From<RcSemHashed<Retype>> for Expr {
-    fn from(retype: RcSemHashed<Retype>) -> Self {
+impl From<RcHashed<Retype>> for Expr {
+    fn from(retype: RcHashed<Retype>) -> Self {
         Expr::Retype(retype)
     }
 }
-impl From<RcSemHashed<Fun>> for Expr {
-    fn from(fun: RcSemHashed<Fun>) -> Self {
+impl From<RcHashed<Fun>> for Expr {
+    fn from(fun: RcHashed<Fun>) -> Self {
         Expr::Fun(fun)
     }
 }
-impl From<RcSemHashed<App>> for Expr {
-    fn from(app: RcSemHashed<App>) -> Self {
+impl From<RcHashed<App>> for Expr {
+    fn from(app: RcHashed<App>) -> Self {
         Expr::App(app)
     }
 }
-impl From<RcSemHashed<For>> for Expr {
-    fn from(for_: RcSemHashed<For>) -> Self {
+impl From<RcHashed<For>> for Expr {
+    fn from(for_: RcHashed<For>) -> Self {
         Expr::For(for_)
     }
 }
-impl From<RcSemHashed<DebNode>> for Expr {
-    fn from(deb: RcSemHashed<DebNode>) -> Self {
+impl From<RcHashed<DebNode>> for Expr {
+    fn from(deb: RcHashed<DebNode>) -> Self {
         Expr::Deb(deb)
     }
 }
-impl From<RcSemHashed<UniverseNode>> for Expr {
-    fn from(universe: RcSemHashed<UniverseNode>) -> Self {
+impl From<RcHashed<UniverseNode>> for Expr {
+    fn from(universe: RcHashed<UniverseNode>) -> Self {
         Expr::Universe(universe)
     }
 }
 
 impl From<Ind> for Expr {
     fn from(ind: Ind) -> Self {
-        rc_sem_hashed(ind).into()
+        rc_hashed(ind).into()
     }
 }
 impl From<Vcon> for Expr {
     fn from(vcon: Vcon) -> Self {
-        rc_sem_hashed(vcon).into()
+        rc_hashed(vcon).into()
     }
 }
 impl From<Match> for Expr {
     fn from(match_: Match) -> Self {
-        rc_sem_hashed(match_).into()
+        rc_hashed(match_).into()
     }
 }
 impl From<Retype> for Expr {
     fn from(retype: Retype) -> Self {
-        rc_sem_hashed(retype).into()
+        rc_hashed(retype).into()
     }
 }
 impl From<Fun> for Expr {
     fn from(fun: Fun) -> Self {
-        rc_sem_hashed(fun).into()
+        rc_hashed(fun).into()
     }
 }
 impl From<App> for Expr {
     fn from(app: App) -> Self {
-        rc_sem_hashed(app).into()
+        rc_hashed(app).into()
     }
 }
 impl From<For> for Expr {
     fn from(for_: For) -> Self {
-        rc_sem_hashed(for_).into()
+        rc_hashed(for_).into()
     }
 }
 impl From<DebNode> for Expr {
     fn from(deb: DebNode) -> Self {
-        rc_sem_hashed(deb).into()
+        rc_hashed(deb).into()
     }
 }
 impl From<UniverseNode> for Expr {
     fn from(universe: UniverseNode) -> Self {
-        rc_sem_hashed(universe).into()
+        rc_hashed(universe).into()
     }
 }
 
 impl Expr {
-    pub fn try_into_ind(self) -> Result<RcSemHashed<Ind>, Self> {
+    pub fn try_into_ind(self) -> Result<RcHashed<Ind>, Self> {
         match self {
             Expr::Ind(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_vcon(self) -> Result<RcSemHashed<Vcon>, Self> {
+    pub fn try_into_vcon(self) -> Result<RcHashed<Vcon>, Self> {
         match self {
             Expr::Vcon(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_match(self) -> Result<RcSemHashed<Match>, Self> {
+    pub fn try_into_match(self) -> Result<RcHashed<Match>, Self> {
         match self {
             Expr::Match(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_retype(self) -> Result<RcSemHashed<Retype>, Self> {
+    pub fn try_into_retype(self) -> Result<RcHashed<Retype>, Self> {
         match self {
             Expr::Retype(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_fun(self) -> Result<RcSemHashed<Fun>, Self> {
+    pub fn try_into_fun(self) -> Result<RcHashed<Fun>, Self> {
         match self {
             Expr::Fun(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_app(self) -> Result<RcSemHashed<App>, Self> {
+    pub fn try_into_app(self) -> Result<RcHashed<App>, Self> {
         match self {
             Expr::App(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_for(self) -> Result<RcSemHashed<For>, Self> {
+    pub fn try_into_for(self) -> Result<RcHashed<For>, Self> {
         match self {
             Expr::For(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_deb(self) -> Result<RcSemHashed<DebNode>, Self> {
+    pub fn try_into_deb(self) -> Result<RcHashed<DebNode>, Self> {
         match self {
             Expr::Deb(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_universe(self) -> Result<RcSemHashed<UniverseNode>, Self> {
+    pub fn try_into_universe(self) -> Result<RcHashed<UniverseNode>, Self> {
         match self {
             Expr::Universe(e) => Ok(e),
             _ => Err(self),

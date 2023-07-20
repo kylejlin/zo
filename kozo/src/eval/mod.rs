@@ -9,8 +9,8 @@ pub use normalized::*;
 #[derive(Clone, Debug, Default)]
 pub struct Evaluator {
     pub eval_expr_cache: NoHashHashMap<Digest, NormalForm>,
-    pub eval_exprs_cache: NoHashHashMap<Digest, Normalized<RcSemHashedVec<Expr>>>,
-    pub eval_vcon_defs_cache: NoHashHashMap<Digest, Normalized<RcSemHashedVec<VconDef>>>,
+    pub eval_exprs_cache: NoHashHashMap<Digest, Normalized<RcHashedVec<Expr>>>,
+    pub eval_vcon_defs_cache: NoHashHashMap<Digest, Normalized<RcHashedVec<VconDef>>>,
 }
 
 impl Evaluator {
@@ -42,7 +42,7 @@ impl Evaluator {
         }
     }
 
-    fn eval_unseen_ind(&mut self, ind: RcSemHashed<Ind>) -> NormalForm {
+    fn eval_unseen_ind(&mut self, ind: RcHashed<Ind>) -> NormalForm {
         let ind_digest = ind.digest.clone();
         let ind = &ind.hashee;
         let normalized = Ind {
@@ -57,10 +57,7 @@ impl Evaluator {
         normalized
     }
 
-    pub fn eval_expressions(
-        &mut self,
-        exprs: RcSemHashedVec<Expr>,
-    ) -> Normalized<RcSemHashedVec<Expr>> {
+    pub fn eval_expressions(&mut self, exprs: RcHashedVec<Expr>) -> Normalized<RcHashedVec<Expr>> {
         if let Some(result) = self.eval_exprs_cache.get(&exprs.digest) {
             result.clone()
         } else {
@@ -70,8 +67,8 @@ impl Evaluator {
 
     fn eval_unseen_expressions(
         &mut self,
-        exprs: RcSemHashedVec<Expr>,
-    ) -> Normalized<RcSemHashedVec<Expr>> {
+        exprs: RcHashedVec<Expr>,
+    ) -> Normalized<RcHashedVec<Expr>> {
         let exprs_digest = exprs.digest.clone();
         let exprs = &exprs.hashee;
         let normalized = exprs
@@ -85,10 +82,7 @@ impl Evaluator {
         normalized
     }
 
-    fn eval_vcon_defs(
-        &mut self,
-        defs: RcSemHashedVec<VconDef>,
-    ) -> Normalized<RcSemHashedVec<VconDef>> {
+    fn eval_vcon_defs(&mut self, defs: RcHashedVec<VconDef>) -> Normalized<RcHashedVec<VconDef>> {
         if let Some(result) = self.eval_vcon_defs_cache.get(&defs.digest) {
             result.clone()
         } else {
@@ -98,8 +92,8 @@ impl Evaluator {
 
     fn eval_unseen_vcon_defs(
         &mut self,
-        defs: RcSemHashedVec<VconDef>,
-    ) -> Normalized<RcSemHashedVec<VconDef>> {
+        defs: RcHashedVec<VconDef>,
+    ) -> Normalized<RcHashedVec<VconDef>> {
         let defs_digest = defs.digest.clone();
         let defs = &defs.hashee;
         let normalized = defs
@@ -128,7 +122,7 @@ impl Evaluator {
         })
     }
 
-    fn eval_unseen_vcon(&mut self, vcon: RcSemHashed<Vcon>) -> NormalForm {
+    fn eval_unseen_vcon(&mut self, vcon: RcHashed<Vcon>) -> NormalForm {
         let vcon_digest = vcon.digest.clone();
         let vcon = &vcon.hashee;
         let normalized = Vcon {
@@ -141,7 +135,7 @@ impl Evaluator {
         normalized
     }
 
-    pub fn eval_ind(&mut self, ind: RcSemHashed<Ind>) -> Normalized<RcSemHashed<Ind>> {
+    pub fn eval_ind(&mut self, ind: RcHashed<Ind>) -> Normalized<RcHashed<Ind>> {
         if let Some(result) = self.eval_expr_cache.get(&ind.digest) {
             Normalized(
                 result
@@ -161,7 +155,7 @@ impl Evaluator {
         }
     }
 
-    fn eval_unseen_match(&mut self, m: RcSemHashed<Match>) -> NormalForm {
+    fn eval_unseen_match(&mut self, m: RcHashed<Match>) -> NormalForm {
         let match_ = &m.hashee;
         let normalized_matchee = self.eval(match_.matchee.clone()).into_raw();
 
@@ -238,8 +232,8 @@ impl Evaluator {
 
     fn eval_match_cases(
         &mut self,
-        cases: RcSemHashedVec<MatchCase>,
-    ) -> Normalized<RcSemHashedVec<MatchCase>> {
+        cases: RcHashedVec<MatchCase>,
+    ) -> Normalized<RcHashedVec<MatchCase>> {
         // It's not worth caching match case vecs,
         // so we'll just re-evaluate them every time.
         // This isn't actually that expensive,
@@ -250,8 +244,8 @@ impl Evaluator {
 
     fn eval_unseen_match_cases(
         &mut self,
-        cases: RcSemHashedVec<MatchCase>,
-    ) -> Normalized<RcSemHashedVec<MatchCase>> {
+        cases: RcHashedVec<MatchCase>,
+    ) -> Normalized<RcHashedVec<MatchCase>> {
         let cases = &cases.hashee;
         cases
             .iter()
@@ -282,11 +276,11 @@ impl Evaluator {
         }
     }
 
-    fn eval_retype(&mut self, retype: RcSemHashed<Retype>) -> NormalForm {
+    fn eval_retype(&mut self, retype: RcHashed<Retype>) -> NormalForm {
         self.eval(retype.hashee.in_term.clone())
     }
 
-    fn eval_unseen_fun(&mut self, fun: RcSemHashed<Fun>) -> NormalForm {
+    fn eval_unseen_fun(&mut self, fun: RcHashed<Fun>) -> NormalForm {
         let fun_digest = fun.digest.clone();
         let fun = &fun.hashee;
         let normalized = Fun {
@@ -301,7 +295,7 @@ impl Evaluator {
         normalized
     }
 
-    fn eval_unseen_app(&mut self, app: RcSemHashed<App>) -> NormalForm {
+    fn eval_unseen_app(&mut self, app: RcHashed<App>) -> NormalForm {
         let normalized_callee = self.eval(app.hashee.callee.clone()).into_raw();
         let normalized_args = self.eval_expressions(app.hashee.args.clone()).into_raw();
 
@@ -330,7 +324,7 @@ impl Evaluator {
         normalized
     }
 
-    fn eval_unseen_for(&mut self, for_: RcSemHashed<For>) -> NormalForm {
+    fn eval_unseen_for(&mut self, for_: RcHashed<For>) -> NormalForm {
         let for_digest = for_.digest.clone();
         let for_ = &for_.hashee;
         let normalized = For {
@@ -348,7 +342,7 @@ impl Evaluator {
     }
 }
 
-fn can_unfold_app(callee: RcSemHashed<Fun>, args: RcSemHashedVec<Expr>) -> bool {
+fn can_unfold_app(callee: RcHashed<Fun>, args: RcHashedVec<Expr>) -> bool {
     let Some(decreasing_index) = callee.hashee.decreasing_index else {
         // If there is no decreasing param index,
         // the function is non-recursive.

@@ -93,7 +93,7 @@ impl Substitute for Expr {
     }
 }
 
-impl Substitute for RcSemHashed<Ind> {
+impl Substitute for RcHashed<Ind> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -101,7 +101,7 @@ impl Substitute for RcSemHashed<Ind> {
     }
 }
 
-fn substitute_in_ind_children(ind: RcSemHashed<Ind>, sub: &ConcreteSubstitution) -> Ind {
+fn substitute_in_ind_children(ind: RcHashed<Ind>, sub: &ConcreteSubstitution) -> Ind {
     Ind {
         name: ind.hashee.name.clone(),
         universe_level: ind.hashee.universe_level,
@@ -118,7 +118,7 @@ struct DependentExprs<'a>(&'a [Expr]);
 struct IndependentExprs<'a>(&'a [Expr]);
 
 impl Substitute for DependentExprs<'_> {
-    type Output = RcSemHashedVec<Expr>;
+    type Output = RcHashedVec<Expr>;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         let subbed = self
@@ -128,12 +128,12 @@ impl Substitute for DependentExprs<'_> {
             .enumerate()
             .map(|(i, e)| e.substitute(&sub.upshift(i)))
             .collect::<Vec<_>>();
-        rc_sem_hashed(subbed)
+        rc_hashed(subbed)
     }
 }
 
 impl Substitute for IndependentExprs<'_> {
-    type Output = RcSemHashedVec<Expr>;
+    type Output = RcHashedVec<Expr>;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         let subbed = self
@@ -142,11 +142,11 @@ impl Substitute for IndependentExprs<'_> {
             .cloned()
             .map(|e| e.substitute(sub))
             .collect::<Vec<_>>();
-        rc_sem_hashed(subbed)
+        rc_hashed(subbed)
     }
 }
 
-impl Substitute for RcSemHashedVec<VconDef> {
+impl Substitute for RcHashedVec<VconDef> {
     type Output = Self;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -156,7 +156,7 @@ impl Substitute for RcSemHashedVec<VconDef> {
             .cloned()
             .map(|def| def.substitute_in_children(sub))
             .collect::<Vec<_>>();
-        rc_sem_hashed(subbed)
+        rc_hashed(subbed)
     }
 }
 
@@ -172,19 +172,19 @@ impl Substitute for VconDef {
     }
 }
 
-impl Substitute for RcSemHashed<Vcon> {
+impl Substitute for RcHashed<Vcon> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         Vcon {
-            ind: rc_sem_hashed(substitute_in_ind_children(self.hashee.ind.clone(), sub)),
+            ind: rc_hashed(substitute_in_ind_children(self.hashee.ind.clone(), sub)),
             vcon_index: self.hashee.vcon_index,
         }
         .into()
     }
 }
 
-impl Substitute for RcSemHashed<Match> {
+impl Substitute for RcHashed<Match> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -198,7 +198,7 @@ impl Substitute for RcSemHashed<Match> {
     }
 }
 
-impl Substitute for RcSemHashedVec<MatchCase> {
+impl Substitute for RcHashedVec<MatchCase> {
     type Output = Self;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -208,7 +208,7 @@ impl Substitute for RcSemHashedVec<MatchCase> {
             .cloned()
             .map(|case| case.substitute_in_children(sub))
             .collect::<Vec<_>>();
-        rc_sem_hashed(subbed)
+        rc_hashed(subbed)
     }
 }
 
@@ -236,7 +236,7 @@ impl Substitute for NondismissedMatchCase {
     }
 }
 
-impl Substitute for RcSemHashed<Retype> {
+impl Substitute for RcHashed<Retype> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -251,7 +251,7 @@ impl Substitute for RcSemHashed<Retype> {
     }
 }
 
-impl Substitute for RcSemHashed<Fun> {
+impl Substitute for RcHashed<Fun> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -274,7 +274,7 @@ impl Substitute for RcSemHashed<Fun> {
     }
 }
 
-impl Substitute for RcSemHashed<App> {
+impl Substitute for RcHashed<App> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -286,7 +286,7 @@ impl Substitute for RcSemHashed<App> {
     }
 }
 
-impl Substitute for RcSemHashed<For> {
+impl Substitute for RcHashed<For> {
     type Output = Expr;
 
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
@@ -303,7 +303,7 @@ impl Substitute for RcSemHashed<For> {
     }
 }
 
-impl Substitute for RcSemHashed<DebNode> {
+impl Substitute for RcHashed<DebNode> {
     type Output = Expr;
 
     fn substitute_in_children(self, _: &ConcreteSubstitution) -> Self::Output {
@@ -311,7 +311,7 @@ impl Substitute for RcSemHashed<DebNode> {
     }
 }
 
-impl Substitute for RcSemHashed<UniverseNode> {
+impl Substitute for RcHashed<UniverseNode> {
     type Output = Expr;
 
     fn substitute_in_children(self, _: &ConcreteSubstitution) -> Self::Output {
