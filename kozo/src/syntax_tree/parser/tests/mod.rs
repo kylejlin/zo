@@ -6,7 +6,6 @@ mod for_;
 mod fun;
 mod ind;
 mod match_;
+mod retype;
 mod universe;
 mod vcon;
-
-// TODO: Add tests for `retype`.

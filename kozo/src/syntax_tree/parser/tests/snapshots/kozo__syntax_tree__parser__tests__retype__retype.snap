@@ -1,0 +1,211 @@
+---
+source: src/syntax_tree/parser/tests/retype.rs
+expression: "&cst"
+---
+Retype(
+    Retype {
+        lparen: ByteIndex(
+            1,
+        ),
+        in_term: App(
+            App {
+                lparen: ByteIndex(
+                    33,
+                ),
+                callee: Deb(
+                    NumberLiteral {
+                        value: 100,
+                        span: (
+                            ByteIndex(
+                                34,
+                            ),
+                            ByteIndex(
+                                37,
+                            ),
+                        ),
+                    },
+                ),
+                args: Snoc(
+                    Nil,
+                    Deb(
+                        NumberLiteral {
+                            value: 200,
+                            span: (
+                                ByteIndex(
+                                    38,
+                                ),
+                                ByteIndex(
+                                    41,
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                rparen: ByteIndex(
+                    41,
+                ),
+            },
+        ),
+        in_type: App(
+            App {
+                lparen: ByteIndex(
+                    62,
+                ),
+                callee: Deb(
+                    NumberLiteral {
+                        value: 300,
+                        span: (
+                            ByteIndex(
+                                63,
+                            ),
+                            ByteIndex(
+                                66,
+                            ),
+                        ),
+                    },
+                ),
+                args: Snoc(
+                    Nil,
+                    Deb(
+                        NumberLiteral {
+                            value: 400,
+                            span: (
+                                ByteIndex(
+                                    67,
+                                ),
+                                ByteIndex(
+                                    70,
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                rparen: ByteIndex(
+                    70,
+                ),
+            },
+        ),
+        out_type: App(
+            App {
+                lparen: ByteIndex(
+                    92,
+                ),
+                callee: Deb(
+                    NumberLiteral {
+                        value: 500,
+                        span: (
+                            ByteIndex(
+                                93,
+                            ),
+                            ByteIndex(
+                                96,
+                            ),
+                        ),
+                    },
+                ),
+                args: Snoc(
+                    Nil,
+                    Deb(
+                        NumberLiteral {
+                            value: 600,
+                            span: (
+                                ByteIndex(
+                                    97,
+                                ),
+                                ByteIndex(
+                                    100,
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                rparen: ByteIndex(
+                    100,
+                ),
+            },
+        ),
+        in_rewrites_lparen: ByteIndex(
+            130,
+        ),
+        in_rewrites: Snoc(
+            Snoc(
+                Snoc(
+                    Nil,
+                    RewriteLiteral {
+                        value: Rewrite {
+                            direction: Ltr,
+                            econ_index: 0,
+                        },
+                        start: ByteIndex(
+                            131,
+                        ),
+                    },
+                ),
+                RewriteLiteral {
+                    value: Rewrite {
+                        direction: Rtl,
+                        econ_index: 2,
+                    },
+                    start: ByteIndex(
+                        134,
+                    ),
+                },
+            ),
+            RewriteLiteral {
+                value: Rewrite {
+                    direction: Rtl,
+                    econ_index: 3,
+                },
+                start: ByteIndex(
+                    137,
+                ),
+            },
+        ),
+        in_rewrites_rparen: ByteIndex(
+            139,
+        ),
+        out_rewrites_lparen: ByteIndex(
+            170,
+        ),
+        out_rewrites: Snoc(
+            Snoc(
+                Snoc(
+                    Nil,
+                    RewriteLiteral {
+                        value: Rewrite {
+                            direction: Rtl,
+                            econ_index: 1,
+                        },
+                        start: ByteIndex(
+                            171,
+                        ),
+                    },
+                ),
+                RewriteLiteral {
+                    value: Rewrite {
+                        direction: Ltr,
+                        econ_index: 2,
+                    },
+                    start: ByteIndex(
+                        174,
+                    ),
+                },
+            ),
+            RewriteLiteral {
+                value: Rewrite {
+                    direction: Rtl,
+                    econ_index: 3,
+                },
+                start: ByteIndex(
+                    177,
+                ),
+            },
+        ),
+        out_rewrites_rparen: ByteIndex(
+            179,
+        ),
+        rparen: ByteIndex(
+            181,
+        ),
+    },
+)

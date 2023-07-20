@@ -211,6 +211,7 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
         "ind" => return Some(Token::IndKw(start)),
         "vcon" => return Some(Token::VconKw(start)),
         "match" => return Some(Token::MatchKw(start)),
+        "retype" => return Some(Token::RetypeKw(start)),
         "fun" => return Some(Token::FunKw(start)),
         "for" => return Some(Token::ForKw(start)),
         "nonrec" => return Some(Token::NonrecKw(start)),
@@ -219,24 +220,51 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
     }
 
     if s.starts_with("Type") {
-        let level_src = &s["Type".len()..];
-        if level_src.is_empty() {
-            return None;
-        }
-
-        let has_extraneous_leading_zeros = level_src != "0" && level_src.starts_with('0');
-        if has_extraneous_leading_zeros {
-            return None;
-        }
-
-        let Ok(level) = level_src.parse::<usize>() else {
-            return None;
-        };
-
+        let level = get_number_after_prefix(s, "Type")?;
         return Some(Token::Universe(UniverseLiteral { level, start }));
     }
 
+    if s.starts_with("L") {
+        let econ_index = get_number_after_prefix(s, "L")?;
+        return Some(Token::Rewrite(RewriteLiteral {
+            value: Rewrite {
+                direction: RewriteDirection::Ltr,
+                econ_index,
+            },
+            start,
+        }));
+    }
+
+    if s.starts_with("R") {
+        let econ_index = get_number_after_prefix(s, "R")?;
+        return Some(Token::Rewrite(RewriteLiteral {
+            value: Rewrite {
+                direction: RewriteDirection::Rtl,
+                econ_index,
+            },
+            start,
+        }));
+    }
+
     None
+}
+
+fn get_number_after_prefix(s: &str, prefix: &str) -> Option<usize> {
+    let level_src = &s[prefix.len()..];
+    if level_src.is_empty() {
+        return None;
+    }
+
+    let has_extraneous_leading_zeros = level_src != "0" && level_src.starts_with('0');
+    if has_extraneous_leading_zeros {
+        return None;
+    }
+
+    let Ok(level) = level_src.parse::<usize>() else {
+        return None;
+    };
+
+    Some(level)
 }
 
 use string_parser::get_string_value;
@@ -576,12 +604,13 @@ mod tests {
 
     #[test]
     fn keywords() {
-        let src = r#"ind vcon match fun for nonrec contra Type0 Type1 Type33"#;
+        let src = r#"ind vcon match retype fun for nonrec contra Type0 Type1 Type33"#;
         let actual = lex(src);
         let expected = Ok(vec![
             Token::IndKw(ByteIndex(src.find("ind").unwrap())),
             Token::VconKw(ByteIndex(src.find("vcon").unwrap())),
             Token::MatchKw(ByteIndex(src.find("match").unwrap())),
+            Token::RetypeKw(ByteIndex(src.find("retype").unwrap())),
             Token::FunKw(ByteIndex(src.find("fun").unwrap())),
             Token::ForKw(ByteIndex(src.find("for").unwrap())),
             Token::NonrecKw(ByteIndex(src.find("nonrec").unwrap())),
