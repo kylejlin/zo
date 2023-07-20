@@ -23,6 +23,7 @@ mod impl_ast {
                 Expr::Ind(super_) => self.is_strict_subexpression_of(super_),
                 Expr::Vcon(super_) => self.is_strict_subexpression_of(super_),
                 Expr::Match(super_) => self.is_strict_subexpression_of(super_),
+                Expr::Retype(_) => todo!(),
                 Expr::Fun(super_) => self.is_strict_subexpression_of(super_),
                 Expr::App(super_) => self.is_strict_subexpression_of(super_),
                 Expr::For(super_) => self.is_strict_subexpression_of(super_),

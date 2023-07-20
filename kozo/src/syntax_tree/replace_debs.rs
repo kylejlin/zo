@@ -140,6 +140,7 @@ impl ReplaceDebs for Expr {
             Expr::Ind(o) => Expr::Ind(o.replace_debs(replacer, cutoff)),
             Expr::Vcon(o) => Expr::Vcon(o.replace_debs(replacer, cutoff)),
             Expr::Match(o) => Expr::Match(o.replace_debs(replacer, cutoff)),
+            Expr::Retype(o) => Expr::Retype(o.replace_debs(replacer, cutoff)),
             Expr::Fun(o) => Expr::Fun(o.replace_debs(replacer, cutoff)),
             Expr::App(o) => Expr::App(o.replace_debs(replacer, cutoff)),
             Expr::For(o) => Expr::For(o.replace_debs(replacer, cutoff)),
@@ -205,6 +206,7 @@ impl ReplaceDebs for RcSemHashed<Match> {
         let original = &self.hashee;
         Rc::new(Hashed::new(Match {
             matchee: original.matchee.clone().replace_debs(replacer, cutoff),
+            econ_extension_len: original.econ_extension_len,
             return_type: original.return_type.clone().replace_debs(replacer, cutoff),
             cases: original
                 .cases
@@ -233,6 +235,35 @@ impl ReplaceDebs for NondismissedMatchCase {
             arity: self.arity,
             return_val: self.return_val.replace_debs(replacer, cutoff + self.arity),
         }
+    }
+}
+
+impl ReplaceDebs for RcSemHashed<Retype> {
+    type Output = Self;
+
+    fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
+        let original = &self.hashee;
+        Rc::new(Hashed::new(Retype {
+            in_term: original.in_term.clone().replace_debs(replacer, cutoff),
+            in_type: original.in_type.clone().replace_debs(replacer, cutoff),
+            out_type: original.out_type.clone().replace_debs(replacer, cutoff),
+            in_rewrites: original
+                .in_rewrites
+                .clone()
+                .replace_debs_with_constant_cutoff(replacer, cutoff),
+            out_rewrites: original
+                .out_rewrites
+                .clone()
+                .replace_debs_with_constant_cutoff(replacer, cutoff),
+        }))
+    }
+}
+
+impl ReplaceDebs for Rewrite {
+    type Output = Self;
+
+    fn replace_debs<R: DebReplacer>(self, replacer: &R, cutoff: usize) -> Self::Output {
+        self
     }
 }
 

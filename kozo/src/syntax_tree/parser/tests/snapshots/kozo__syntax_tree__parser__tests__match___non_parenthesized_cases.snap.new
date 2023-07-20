@@ -1,0 +1,12 @@
+---
+source: src/syntax_tree/parser/tests/match_.rs
+assertion_line: 41
+expression: "&err"
+---
+Some(
+    RParen(
+        ByteIndex(
+            38,
+        ),
+    ),
+)

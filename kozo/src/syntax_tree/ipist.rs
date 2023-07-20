@@ -1,6 +1,8 @@
 pub use crate::{
     hash::*,
-    syntax_tree::token::{ByteIndex, NumberLiteral, StringLiteral, UniverseLiteral},
+    syntax_tree::token::{
+        ByteIndex, NumberLiteral, RewriteLiteral, StringLiteral, UniverseLiteral,
+    },
 };
 
 use std::{hash::Hash, rc::Rc};
@@ -17,6 +19,7 @@ pub enum Expr {
     Ind(RcHashed<Ind>),
     Vcon(RcHashed<Vcon>),
     Match(RcHashed<Match>),
+    Retype(RcHashed<Retype>),
     Fun(RcHashed<Fun>),
     App(RcHashed<App>),
     For(RcHashed<For>),
@@ -62,6 +65,7 @@ pub struct Vcon {
 pub struct Match {
     pub lparen: ByteIndex,
     pub matchee: Expr,
+    pub econ_extension_len: NumberLiteral,
     pub return_type: Expr,
     pub cases_lparen: ByteIndex,
     pub cases: Vec<MatchCase>,
@@ -80,6 +84,21 @@ pub struct NondismissedMatchCase {
     pub lparen: ByteIndex,
     pub arity: NumberLiteral,
     pub return_val: Expr,
+    pub rparen: ByteIndex,
+}
+
+#[derive(Debug, Clone, Hash)]
+pub struct Retype {
+    pub lparen: ByteIndex,
+    pub in_term: Expr,
+    pub in_type: Expr,
+    pub out_type: Expr,
+    pub in_rewrites_lparen: ByteIndex,
+    pub in_rewrites: Vec<RewriteLiteral>,
+    pub in_rewrites_rparen: ByteIndex,
+    pub out_rewrites_lparen: ByteIndex,
+    pub out_rewrites: Vec<RewriteLiteral>,
+    pub out_rewrites_rparen: ByteIndex,
     pub rparen: ByteIndex,
 }
 
@@ -128,6 +147,11 @@ impl From<Vcon> for Expr {
 impl From<Match> for Expr {
     fn from(match_: Match) -> Self {
         Expr::Match(rc_hashed(match_))
+    }
+}
+impl From<Retype> for Expr {
+    fn from(retype: Retype) -> Self {
+        Expr::Retype(rc_hashed(retype))
     }
 }
 impl From<Fun> for Expr {

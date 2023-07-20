@@ -3,6 +3,8 @@ use crate::{
     syntax_tree::ost,
 };
 
+// TODO: Rename `cst: ...` params to `ost: ...`.
+
 impl From<ost::Expr> for ipist::Expr {
     fn from(cst: ost::Expr) -> Self {
         match cst {
@@ -11,6 +13,8 @@ impl From<ost::Expr> for ipist::Expr {
             ost::Expr::Vcon(cst) => ipist::Vcon::from(*cst).into(),
 
             ost::Expr::Match(cst) => ipist::Match::from(*cst).into(),
+
+            ost::Expr::Retype(cst) => ipist::Retype::from(*cst).into(),
 
             ost::Expr::Fun(cst) => ipist::Fun::from(*cst).into(),
 
@@ -99,6 +103,7 @@ impl From<ost::Match> for ipist::Match {
         ipist::Match {
             lparen: cst.lparen,
             matchee: (*cst.matchee).into(),
+            econ_extension_len: cst.econ_extension_len,
             return_type: (*cst.return_type).into(),
             cases_lparen: cst.cases_lparen,
             cases: (*cst.cases).into(),
@@ -137,6 +142,37 @@ impl From<ost::NondismissedMatchCase> for ipist::NondismissedMatchCase {
             arity: cst.arity,
             return_val: (*cst.return_val.clone()).into(),
             rparen: cst.rparen,
+        }
+    }
+}
+
+impl From<ost::Retype> for ipist::Retype {
+    fn from(cst: ost::Retype) -> Self {
+        ipist::Retype {
+            lparen: cst.lparen,
+            in_term: (*cst.in_term).into(),
+            in_type: (*cst.in_type).into(),
+            out_type: (*cst.out_type).into(),
+            in_rewrites_lparen: cst.in_rewrites_lparen,
+            in_rewrites: (*cst.in_rewrites).into(),
+            in_rewrites_rparen: cst.in_rewrites_rparen,
+            out_rewrites_lparen: cst.out_rewrites_lparen,
+            out_rewrites: (*cst.out_rewrites).into(),
+            out_rewrites_rparen: cst.out_rewrites_rparen,
+            rparen: cst.rparen,
+        }
+    }
+}
+
+impl From<ost::ZeroOrMoreRewrites> for Vec<ipist::RewriteLiteral> {
+    fn from(cst: ost::ZeroOrMoreRewrites) -> Self {
+        match cst {
+            ost::ZeroOrMoreRewrites::Nil => vec![],
+            ost::ZeroOrMoreRewrites::Snoc(rdc, rac) => {
+                let mut rdc: Vec<_> = (*rdc).into();
+                rdc.push(rac);
+                rdc
+            }
         }
     }
 }

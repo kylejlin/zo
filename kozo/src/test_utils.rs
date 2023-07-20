@@ -64,6 +64,7 @@ impl ipist::Expr {
             Self::Ind(e) => (e.hashee.lparen, e.hashee.rparen),
             Self::Vcon(e) => (e.hashee.lparen, e.hashee.rparen),
             Self::Match(e) => (e.hashee.lparen, e.hashee.rparen),
+            Self::Retype(e) => (e.hashee.lparen, e.hashee.rparen),
             Self::Fun(e) => (e.hashee.lparen, e.hashee.rparen),
             Self::App(e) => (e.hashee.lparen, e.hashee.rparen),
             Self::For(e) => (e.hashee.lparen, e.hashee.rparen),

@@ -83,6 +83,7 @@ impl Substitute for Expr {
             Expr::Ind(e) => e.substitute_in_children(sub),
             Expr::Vcon(e) => e.substitute_in_children(sub),
             Expr::Match(e) => e.substitute_in_children(sub),
+            Expr::Retype(e) => e.substitute_in_children(sub),
             Expr::Fun(e) => e.substitute_in_children(sub),
             Expr::App(e) => e.substitute_in_children(sub),
             Expr::For(e) => e.substitute_in_children(sub),
@@ -189,6 +190,7 @@ impl Substitute for RcSemHashed<Match> {
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         Match {
             matchee: self.hashee.matchee.clone().substitute(sub),
+            econ_extension_len: self.hashee.econ_extension_len,
             return_type: self.hashee.return_type.clone().substitute(sub),
             cases: self.hashee.cases.clone().substitute_in_children(sub),
         }
@@ -231,6 +233,21 @@ impl Substitute for NondismissedMatchCase {
             arity: self.arity,
             return_val: self.return_val.substitute(&sub.upshift(self.arity)),
         }
+    }
+}
+
+impl Substitute for RcSemHashed<Retype> {
+    type Output = Expr;
+
+    fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
+        Retype {
+            in_term: self.hashee.in_term.clone().substitute(sub),
+            in_type: self.hashee.in_type.clone().substitute(sub),
+            out_type: self.hashee.out_type.clone().substitute(sub),
+            in_rewrites: self.hashee.in_rewrites.clone(),
+            out_rewrites: self.hashee.out_rewrites.clone(),
+        }
+        .into()
     }
 }
 

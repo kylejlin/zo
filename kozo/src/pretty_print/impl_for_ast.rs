@@ -50,6 +50,8 @@ impl Display for PrettyPrint<'_, MatchCase> {
     }
 }
 
+// TODO: impl for Retype
+
 impl Display for PrettyPrint<'_, RcSemHashed<Fun>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_fun(self.0.clone(), f, Indentation { soft_tab_count: 0 })
@@ -89,6 +91,7 @@ fn fmt_expr(expr: Expr, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult
         Expr::Ind(e) => fmt_ind(e, f, indent),
         Expr::Vcon(e) => fmt_vcon(e, f, indent),
         Expr::Match(e) => fmt_match(e, f, indent),
+        Expr::Retype(e) => fmt_retype(e, f, indent),
         Expr::Fun(e) => fmt_fun(e, f, indent),
         Expr::App(e) => fmt_app(e, f, indent),
         Expr::For(e) => fmt_for(e, f, indent),
@@ -232,6 +235,25 @@ fn fmt_nondismissed_match_case(
     fmt_expr(case.return_val.clone(), f, i1)?;
     write!(f, "\n{indent})")?;
     Ok(())
+}
+
+fn fmt_retype(m: RcSemHashed<Retype>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+    let i1 = indent.incremented();
+    write!(f, "{indent}(\n{i1}retype\n")?;
+
+    fmt_expr(m.hashee.in_term.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_expr(m.hashee.in_type.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    fmt_expr(m.hashee.out_type.clone(), f, i1)?;
+    write!(f, "\n")?;
+
+    todo!()
+    // fmt_parenthesized_match_cases(m.hashee.cases.clone(), f, i1)?;
+    // write!(f, "\n{indent})")?;
+    // Ok(())
 }
 
 fn fmt_fun(fun: RcSemHashed<Fun>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {

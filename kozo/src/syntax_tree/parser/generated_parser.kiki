@@ -5,6 +5,7 @@ enum Expr {
     Ind(Ind)
     Vcon(Vcon)
     Match(Match)
+    Retype(Retype)
     Fun(Fun)
     App(App)
     For(For)
@@ -75,6 +76,7 @@ struct Match {
 
     _: $MatchKw
     matchee: Expr
+    econ_extension_len: $Number
     return_type: Expr
 
     cases_lparen: $LParen
@@ -104,6 +106,32 @@ struct NondismissedMatchCase {
     return_val: Expr
 
     rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Retype {
+    lparen: $LParen
+
+    _: $RetypeKw
+    in_term: Expr
+    in_type: Expr
+    out_type: Expr
+
+    in_rewrites_lparen: $LParen
+    in_rewrites: ZeroOrMoreRewrites
+    in_rewrites_rparen: $RParen
+
+    out_rewrites_lparen: $LParen
+    out_rewrites: ZeroOrMoreRewrites
+    out_rewrites_rparen: $RParen
+
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum ZeroOrMoreRewrites {
+    Nil
+    Snoc(ZeroOrMoreRewrites $Rewrite)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -162,6 +190,7 @@ terminal Token {
     $IndKw: crate::syntax_tree::token::ByteIndex
     $VconKw: crate::syntax_tree::token::ByteIndex
     $MatchKw: crate::syntax_tree::token::ByteIndex
+    $RetypeKw: crate::syntax_tree::token::ByteIndex
     $FunKw: crate::syntax_tree::token::ByteIndex
     $ForKw: crate::syntax_tree::token::ByteIndex
 
@@ -170,5 +199,6 @@ terminal Token {
 
     $Number: crate::syntax_tree::token::NumberLiteral
     $String: crate::syntax_tree::token::StringLiteral
+    $Rewrite: crate::syntax_tree::token::RewriteLiteral
     $Universe: crate::syntax_tree::token::UniverseLiteral
 }

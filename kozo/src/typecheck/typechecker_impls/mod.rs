@@ -6,6 +6,7 @@ mod for_;
 mod fun;
 mod ind;
 mod match_;
+mod retype;
 mod universe_node;
 mod vcon;
 
@@ -20,6 +21,7 @@ impl TypeChecker {
             cst::Expr::Ind(e) => self.get_type_of_ind(e, tcon, scon),
             cst::Expr::Vcon(e) => self.get_type_of_vcon(e, tcon, scon),
             cst::Expr::Match(e) => self.get_type_of_match(e, tcon, scon),
+            cst::Expr::Retype(e) => self.get_type_of_retype(e, tcon, scon),
             cst::Expr::Fun(e) => self.get_type_of_fun(e, tcon, scon),
             cst::Expr::App(e) => self.get_type_of_app(e, tcon, scon),
             cst::Expr::For(e) => self.get_type_of_for(e, tcon, scon),

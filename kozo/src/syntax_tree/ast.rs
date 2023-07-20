@@ -2,6 +2,9 @@ use std::{hash::Hash, rc::Rc};
 
 pub use crate::hash::*;
 
+// TODO: Delete `RcSemHashed`, since it's now
+// just the same as `RcHashed`.
+
 /// Reference-counted semantically hashed.
 pub type RcSemHashed<T> = Rc<Hashed<T>>;
 
@@ -17,6 +20,7 @@ pub enum Expr {
     Ind(RcSemHashed<Ind>),
     Vcon(RcSemHashed<Vcon>),
     Match(RcSemHashed<Match>),
+    Retype(RcSemHashed<Retype>),
     Fun(RcSemHashed<Fun>),
     App(RcSemHashed<App>),
     For(RcSemHashed<For>),
@@ -50,6 +54,7 @@ pub struct Vcon {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Match {
     pub matchee: Expr,
+    pub econ_extension_len: usize,
     pub return_type: Expr,
     pub cases: RcSemHashedVec<MatchCase>,
 }
@@ -65,6 +70,17 @@ pub struct NondismissedMatchCase {
     pub arity: usize,
     pub return_val: Expr,
 }
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Retype {
+    pub in_term: Expr,
+    pub in_type: Expr,
+    pub out_type: Expr,
+    pub in_rewrites: RcSemHashedVec<Rewrite>,
+    pub out_rewrites: RcSemHashedVec<Rewrite>,
+}
+
+pub use crate::syntax_tree::ost::Rewrite;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Fun {
@@ -128,6 +144,7 @@ impl GetDigest for Expr {
             Expr::Ind(e) => &e.digest,
             Expr::Vcon(e) => &e.digest,
             Expr::Match(e) => &e.digest,
+            Expr::Retype(e) => &e.digest,
             Expr::Fun(e) => &e.digest,
             Expr::App(e) => &e.digest,
             Expr::For(e) => &e.digest,
@@ -147,6 +164,11 @@ impl GetDigest for RcSemHashed<Vcon> {
     }
 }
 impl GetDigest for RcSemHashed<Match> {
+    fn digest(&self) -> &Digest {
+        &self.digest
+    }
+}
+impl GetDigest for RcSemHashed<Retype> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
@@ -192,6 +214,11 @@ impl From<RcSemHashed<Match>> for Expr {
         Expr::Match(match_)
     }
 }
+impl From<RcSemHashed<Retype>> for Expr {
+    fn from(retype: RcSemHashed<Retype>) -> Self {
+        Expr::Retype(retype)
+    }
+}
 impl From<RcSemHashed<Fun>> for Expr {
     fn from(fun: RcSemHashed<Fun>) -> Self {
         Expr::Fun(fun)
@@ -231,6 +258,11 @@ impl From<Vcon> for Expr {
 impl From<Match> for Expr {
     fn from(match_: Match) -> Self {
         rc_sem_hashed(match_).into()
+    }
+}
+impl From<Retype> for Expr {
+    fn from(retype: Retype) -> Self {
+        rc_sem_hashed(retype).into()
     }
 }
 impl From<Fun> for Expr {
@@ -277,6 +309,13 @@ impl Expr {
     pub fn try_into_match(self) -> Result<RcSemHashed<Match>, Self> {
         match self {
             Expr::Match(e) => Ok(e),
+            _ => Err(self),
+        }
+    }
+
+    pub fn try_into_retype(self) -> Result<RcSemHashed<Retype>, Self> {
+        match self {
+            Expr::Retype(e) => Ok(e),
             _ => Err(self),
         }
     }

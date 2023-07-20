@@ -33,6 +33,24 @@ pub struct StringLiteral {
     pub span: (ByteIndex, ByteIndex),
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct RewriteLiteral {
+    pub value: Rewrite,
+    pub start: ByteIndex,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Rewrite {
+    pub direction: RewriteDirection,
+    pub econ_index: usize,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum RewriteDirection {
+    Ltr,
+    Rtl,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct UniverseLiteral {
     pub level: usize,

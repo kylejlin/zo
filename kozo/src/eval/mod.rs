@@ -33,6 +33,7 @@ impl Evaluator {
             Expr::Ind(e) => self.eval_unseen_ind(e),
             Expr::Vcon(e) => self.eval_unseen_vcon(e),
             Expr::Match(e) => self.eval_unseen_match(e),
+            Expr::Retype(e) => self.eval_retype(e),
             Expr::Fun(e) => self.eval_unseen_fun(e),
             Expr::App(e) => self.eval_unseen_app(e),
             Expr::For(e) => self.eval_unseen_for(e),
@@ -188,6 +189,8 @@ impl Evaluator {
             return self.eval(match_return_value);
         }
 
+        // TODO: Handle the below case and the below case
+        // as a single case, by using the "capp" (collapsing application) concept.
         if let Expr::App(normalized_matchee) = &normalized_matchee {
             if let Expr::Vcon(vcon) = &normalized_matchee.hashee.callee {
                 let vcon_index = vcon.hashee.vcon_index;
@@ -209,6 +212,7 @@ impl Evaluator {
                     }
                 };
 
+                // TODO: Downshift rewrites.
                 let unsubstituted = case.return_val.clone();
                 let substituted = self.substitute_and_downshift_debs(
                     unsubstituted,
@@ -221,6 +225,7 @@ impl Evaluator {
         let match_digest = m.digest.clone();
         let normalized = Match {
             matchee: normalized_matchee,
+            econ_extension_len: match_.econ_extension_len,
             return_type: self.eval(match_.return_type.clone()).into_raw(),
             cases: self.eval_match_cases(match_.cases.clone()).into_raw(),
         }
@@ -275,6 +280,10 @@ impl Evaluator {
                 }))
             }
         }
+    }
+
+    fn eval_retype(&mut self, retype: RcSemHashed<Retype>) -> NormalForm {
+        self.eval(retype.hashee.in_term.clone())
     }
 
     fn eval_unseen_fun(&mut self, fun: RcSemHashed<Fun>) -> NormalForm {

@@ -13,6 +13,7 @@ pub struct IpistToAstConverter {
     ind_cache: NoHashHashMap<Digest, RcSemHashed<ast::Ind>>,
     vcon_cache: NoHashHashMap<Digest, RcSemHashed<ast::Vcon>>,
     match_cache: NoHashHashMap<Digest, RcSemHashed<ast::Match>>,
+    retype_cache: NoHashHashMap<Digest, RcSemHashed<ast::Retype>>,
     fun_cache: NoHashHashMap<Digest, RcSemHashed<ast::Fun>>,
     app_cache: NoHashHashMap<Digest, RcSemHashed<ast::App>>,
     for_cache: NoHashHashMap<Digest, RcSemHashed<ast::For>>,
@@ -30,6 +31,7 @@ impl IpistToAstConverter {
             ipist::Expr::Ind(e) => self.convert_ind(e).into(),
             ipist::Expr::Vcon(e) => self.convert_vcon(e).into(),
             ipist::Expr::Match(e) => self.convert_match(e).into(),
+            ipist::Expr::Retype(e) => self.convert_retype(e).into(),
             ipist::Expr::Fun(e) => self.convert_fun(e).into(),
             ipist::Expr::App(e) => self.convert_app(e).into(),
             ipist::Expr::For(e) => self.convert_for(e).into(),
@@ -129,6 +131,7 @@ impl IpistToAstConverter {
     fn convert_unseen_match(&mut self, ist: RcHashed<ipist::Match>) -> RcSemHashed<ast::Match> {
         rc_sem_hashed(ast::Match {
             matchee: self.convert(ist.hashee.matchee.clone()),
+            econ_extension_len: ist.hashee.econ_extension_len.value,
             return_type: self.convert(ist.hashee.return_type.clone()),
             cases: self.convert_match_cases(ist.hashee.cases.clone()),
         })
@@ -162,6 +165,42 @@ impl IpistToAstConverter {
             arity: ist.arity.value,
             return_val: self.convert(ist.return_val),
         }
+    }
+
+    pub fn convert_retype(&mut self, ist: RcHashed<ipist::Retype>) -> RcSemHashed<ast::Retype> {
+        if let Some(retype) = self.retype_cache.get(&ist.digest) {
+            return retype.clone();
+        }
+
+        self.convert_and_cache_unseen_retype(ist)
+    }
+
+    fn convert_and_cache_unseen_retype(
+        &mut self,
+        ist: RcHashed<ipist::Retype>,
+    ) -> RcSemHashed<ast::Retype> {
+        let digest = ist.digest.clone();
+        let retype = self.convert_unseen_retype(ist);
+        self.retype_cache.insert(digest, retype.clone());
+        retype
+    }
+
+    fn convert_unseen_retype(&mut self, ist: RcHashed<ipist::Retype>) -> RcSemHashed<ast::Retype> {
+        rc_sem_hashed(ast::Retype {
+            in_term: self.convert(ist.hashee.in_term.clone()),
+            in_type: self.convert(ist.hashee.in_type.clone()),
+            out_type: self.convert(ist.hashee.out_type.clone()),
+            in_rewrites: self.convert_rewrites(ist.hashee.in_rewrites.clone()),
+            out_rewrites: self.convert_rewrites(ist.hashee.out_rewrites.clone()),
+        })
+    }
+
+    fn convert_rewrites(
+        &mut self,
+        ist: Vec<ipist::RewriteLiteral>,
+    ) -> RcSemHashedVec<ast::Rewrite> {
+        let v = ist.into_iter().map(|rewrite| rewrite.value).collect();
+        rc_sem_hashed(v)
     }
 
     pub fn convert_fun(&mut self, ist: RcHashed<ipist::Fun>) -> RcSemHashed<ast::Fun> {
