@@ -33,7 +33,7 @@ impl TypeChecker {
             .upshift(param_count, param_count);
 
         let fun_type_g1: NormalForm = Normalized::for_(
-            normalized_param_types_g1.clone().into_rc_sem_hashed(),
+            normalized_param_types_g1.clone().into_rc_hashed(),
             normalized_return_type_g1f.clone(),
         )
         .into();
@@ -63,7 +63,7 @@ impl TypeChecker {
         )?;
 
         Ok(Normalized::for_(
-            normalized_param_types_g0.into_rc_sem_hashed(),
+            normalized_param_types_g0.into_rc_hashed(),
             normalized_return_type_g1,
         )
         .into())

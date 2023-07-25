@@ -32,8 +32,8 @@ mod impl_ast {
         }
     }
 
-    impl IsStrictSubexpressionOf<RcSemHashed<Ind>> for Expr {
-        fn is_strict_subexpression_of(&self, super_: &RcSemHashed<Ind>) -> bool {
+    impl IsStrictSubexpressionOf<RcHashed<Ind>> for Expr {
+        fn is_strict_subexpression_of(&self, super_: &RcHashed<Ind>) -> bool {
             self.is_strict_subexpression_of_dependent_expression_slice(
                 super_.hashee.index_types.hashee.as_slice(),
             ) || Expr::from(self.clone())
@@ -63,14 +63,14 @@ mod impl_ast {
         }
     }
 
-    impl IsStrictSubexpressionOf<RcSemHashed<Vcon>> for Expr {
-        fn is_strict_subexpression_of(&self, super_: &RcSemHashed<Vcon>) -> bool {
+    impl IsStrictSubexpressionOf<RcHashed<Vcon>> for Expr {
+        fn is_strict_subexpression_of(&self, super_: &RcHashed<Vcon>) -> bool {
             self.is_inclusive_subexpression_of(&Expr::from(super_.hashee.ind.clone()))
         }
     }
 
-    impl IsStrictSubexpressionOf<RcSemHashed<Match>> for Expr {
-        fn is_strict_subexpression_of(&self, super_: &RcSemHashed<Match>) -> bool {
+    impl IsStrictSubexpressionOf<RcHashed<Match>> for Expr {
+        fn is_strict_subexpression_of(&self, super_: &RcHashed<Match>) -> bool {
             self.is_inclusive_subexpression_of(&super_.hashee.matchee)
                 || self.is_inclusive_subexpression_of(&super_.hashee.return_type)
                 || self.is_strict_subexpression_of(super_.hashee.cases.hashee.as_slice())
@@ -97,8 +97,8 @@ mod impl_ast {
         }
     }
 
-    impl IsStrictSubexpressionOf<RcSemHashed<Fun>> for Expr {
-        fn is_strict_subexpression_of(&self, super_: &RcSemHashed<Fun>) -> bool {
+    impl IsStrictSubexpressionOf<RcHashed<Fun>> for Expr {
+        fn is_strict_subexpression_of(&self, super_: &RcHashed<Fun>) -> bool {
             self.is_strict_subexpression_of_dependent_expression_slice(
                 super_.hashee.param_types.hashee.as_slice(),
             ) || self
@@ -112,8 +112,8 @@ mod impl_ast {
         }
     }
 
-    impl IsStrictSubexpressionOf<RcSemHashed<App>> for Expr {
-        fn is_strict_subexpression_of(&self, super_: &RcSemHashed<App>) -> bool {
+    impl IsStrictSubexpressionOf<RcHashed<App>> for Expr {
+        fn is_strict_subexpression_of(&self, super_: &RcHashed<App>) -> bool {
             self.is_inclusive_subexpression_of(&super_.hashee.callee)
                 || self.is_strict_subexpression_of_independent_expression_slice(
                     super_.hashee.args.hashee.as_slice(),
@@ -121,8 +121,8 @@ mod impl_ast {
         }
     }
 
-    impl IsStrictSubexpressionOf<RcSemHashed<For>> for Expr {
-        fn is_strict_subexpression_of(&self, super_: &RcSemHashed<For>) -> bool {
+    impl IsStrictSubexpressionOf<RcHashed<For>> for Expr {
+        fn is_strict_subexpression_of(&self, super_: &RcHashed<For>) -> bool {
             self.is_strict_subexpression_of_dependent_expression_slice(
                 super_.hashee.param_types.hashee.as_slice(),
             ) || self
@@ -132,14 +132,14 @@ mod impl_ast {
         }
     }
 
-    impl IsStrictSubexpressionOf<RcSemHashed<DebNode>> for Expr {
-        fn is_strict_subexpression_of(&self, _: &RcSemHashed<DebNode>) -> bool {
+    impl IsStrictSubexpressionOf<RcHashed<DebNode>> for Expr {
+        fn is_strict_subexpression_of(&self, _: &RcHashed<DebNode>) -> bool {
             false
         }
     }
 
-    impl IsStrictSubexpressionOf<RcSemHashed<UniverseNode>> for Expr {
-        fn is_strict_subexpression_of(&self, _: &RcSemHashed<UniverseNode>) -> bool {
+    impl IsStrictSubexpressionOf<RcHashed<UniverseNode>> for Expr {
+        fn is_strict_subexpression_of(&self, _: &RcHashed<UniverseNode>) -> bool {
             false
         }
     }

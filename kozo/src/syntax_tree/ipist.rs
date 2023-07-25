@@ -8,6 +8,9 @@ use std::{hash::Hash, rc::Rc};
 /// Reference-counted hashed.
 pub type RcHashed<T> = Rc<Hashed<T>>;
 
+/// Reference-counted hashed vector.
+pub type RcHashedVec<T> = RcHashed<Vec<T>>;
+
 pub fn rc_hashed<T: Hash>(t: T) -> RcHashed<T> {
     Rc::new(Hashed::new(t))
 }

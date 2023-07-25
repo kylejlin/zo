@@ -52,13 +52,13 @@ impl<'a, T> Normalized<&'a T> {
     }
 }
 
-impl<T> Normalized<RcSemHashed<T>> {
+impl<T> Normalized<RcHashed<T>> {
     /// Shorthand for `self.as_ref().hashee()`.
     pub fn to_hashee(&self) -> Normalized<&T> {
         self.as_ref().hashee()
     }
 }
-impl<'a, T> Normalized<&'a RcSemHashed<T>> {
+impl<'a, T> Normalized<&'a RcHashed<T>> {
     pub fn hashee(self) -> Normalized<&'a T> {
         Normalized(&self.0.hashee)
     }
@@ -68,8 +68,8 @@ impl<T> Normalized<T>
 where
     T: Hash,
 {
-    pub fn into_rc_sem_hashed(self) -> Normalized<RcSemHashed<T>> {
-        Normalized(rc_sem_hashed(self.0))
+    pub fn into_rc_hashed(self) -> Normalized<RcHashed<T>> {
+        Normalized(rc_hashed(self.0))
     }
 }
 
@@ -142,10 +142,7 @@ impl NormalForm {
 impl NormalForm {
     pub fn ind_or_ind_app(
         self,
-    ) -> Option<(
-        Normalized<RcSemHashed<Ind>>,
-        Normalized<RcSemHashedVec<Expr>>,
-    )> {
+    ) -> Option<(Normalized<RcHashed<Ind>>, Normalized<RcHashedVec<Expr>>)> {
         match self.0 {
             Expr::Ind(ind) => Some((Normalized(ind), Normalized(Rc::new(Hashed::new(vec![]))))),
 
@@ -163,7 +160,7 @@ impl NormalForm {
     /// If `self` is a `for` expression,
     /// this function returns the parameter types of said `for` expression.
     /// Otherwise, it returns `None`.
-    pub fn for_param_types(self) -> Option<Normalized<RcSemHashedVec<Expr>>> {
+    pub fn for_param_types(self) -> Option<Normalized<RcHashedVec<Expr>>> {
         match self.0 {
             Expr::For(for_) => Some(Normalized(for_.hashee.param_types.clone())),
             _ => None,
@@ -172,10 +169,10 @@ impl NormalForm {
 
     /// If `self` is a `for` expression,
     /// this function returns the parameter types of said `for` expression.
-    /// Otherwise, it returns an empty (RC sem-hashed) vector.
-    pub fn for_param_types_or_empty_vec(self) -> Normalized<RcSemHashedVec<Expr>> {
+    /// Otherwise, it returns an empty (RC hashed) vector.
+    pub fn for_param_types_or_empty_vec(self) -> Normalized<RcHashedVec<Expr>> {
         self.for_param_types()
-            .unwrap_or_else(|| Normalized::<Vec<_>>::new().into_rc_sem_hashed())
+            .unwrap_or_else(|| Normalized::<Vec<_>>::new().into_rc_hashed())
     }
 
     /// If `self` is a `for` expression,
@@ -198,7 +195,7 @@ impl NormalForm {
     /// If `self` is a `app` expression,
     /// this function returns the arguments of said `app` expression.
     /// Otherwise, it returns `None`.
-    pub fn app_args(self) -> Option<Normalized<RcSemHashedVec<Expr>>> {
+    pub fn app_args(self) -> Option<Normalized<RcHashedVec<Expr>>> {
         match self.0 {
             Expr::App(app) => Some(Normalized(app.hashee.args.clone())),
             _ => None,
@@ -207,33 +204,33 @@ impl NormalForm {
 
     /// If `self` is a `app` expression,
     /// this function returns the arguments of said `app` expression.
-    /// Otherwise, it returns an empty (RC sem-hashed) vector.
-    pub fn app_args_or_empty_vec(self) -> Normalized<RcSemHashedVec<Expr>> {
+    /// Otherwise, it returns an empty (RC hashed) vector.
+    pub fn app_args_or_empty_vec(self) -> Normalized<RcHashedVec<Expr>> {
         self.app_args()
-            .unwrap_or_else(|| Normalized::<Vec<_>>::new().into_rc_sem_hashed())
+            .unwrap_or_else(|| Normalized::<Vec<_>>::new().into_rc_hashed())
     }
 }
 
 impl<'a> Normalized<&'a Ind> {
-    pub fn vcon_defs(self) -> Normalized<&'a RcSemHashedVec<VconDef>> {
+    pub fn vcon_defs(self) -> Normalized<&'a RcHashedVec<VconDef>> {
         Normalized(&self.0.vcon_defs)
     }
 }
 
 impl<'a> Normalized<&'a VconDef> {
-    pub fn param_types(self) -> Normalized<&'a RcSemHashedVec<Expr>> {
+    pub fn param_types(self) -> Normalized<&'a RcHashedVec<Expr>> {
         Normalized(&self.0.param_types)
     }
 
-    pub fn index_args(self) -> Normalized<&'a RcSemHashedVec<Expr>> {
+    pub fn index_args(self) -> Normalized<&'a RcHashedVec<Expr>> {
         Normalized(&self.0.index_args)
     }
 }
 
 impl Normalized<App> {
     pub fn app_with_ind_callee(
-        callee: Normalized<RcSemHashed<Ind>>,
-        args: Normalized<RcSemHashedVec<Expr>>,
+        callee: Normalized<RcHashed<Ind>>,
+        args: Normalized<RcHashedVec<Expr>>,
     ) -> Self {
         Normalized(App {
             callee: Expr::Ind(callee.into_raw()),
@@ -247,7 +244,7 @@ impl Normalized<App> {
 }
 
 impl<'a> Normalized<&'a For> {
-    pub fn param_types(self) -> Normalized<&'a RcSemHashedVec<Expr>> {
+    pub fn param_types(self) -> Normalized<&'a RcHashedVec<Expr>> {
         Normalized(&self.0.param_types)
     }
 
@@ -257,7 +254,7 @@ impl<'a> Normalized<&'a For> {
 }
 
 impl Normalized<For> {
-    pub fn for_(param_types: Normalized<RcSemHashedVec<Expr>>, return_type: NormalForm) -> Self {
+    pub fn for_(param_types: Normalized<RcHashedVec<Expr>>, return_type: NormalForm) -> Self {
         Normalized(For {
             param_types: param_types.into_raw(),
             return_type: return_type.into_raw(),
@@ -281,7 +278,7 @@ impl NormalForm {
     /// ```
     /// where `arg_count` is the number of params
     /// that the `vcon_index`th vcon def has.
-    pub fn vcon_capp(ind: Normalized<RcSemHashed<Ind>>, vcon_index: usize) -> NormalForm {
+    pub fn vcon_capp(ind: Normalized<RcHashed<Ind>>, vcon_index: usize) -> NormalForm {
         let arg_count = ind.raw().hashee.vcon_defs.hashee[vcon_index]
             .param_types
             .hashee
@@ -298,7 +295,7 @@ impl NormalForm {
             .collect();
         let capp = App {
             callee: vcon.into(),
-            args: rc_sem_hashed(args),
+            args: rc_hashed(args),
         }
         .collapse_if_nullary();
         Normalized(capp)
@@ -342,7 +339,7 @@ impl<T: ReplaceDebsInEachItem> Normalized<T> {
 
     pub fn replace_deb0_with_ind_with_constant_cutoff(
         self,
-        ind: Normalized<RcSemHashed<Ind>>,
+        ind: Normalized<RcHashed<Ind>>,
         cutoff: usize,
     ) -> Self {
         let ind_singleton: [Expr; 1] = [ind.raw().clone().into()];
@@ -357,7 +354,7 @@ impl<T: ReplaceDebsInEachItem> Normalized<T> {
 
     pub fn replace_deb0_with_ind_with_increasing_cutoff(
         self,
-        ind: Normalized<RcSemHashed<Ind>>,
+        ind: Normalized<RcHashed<Ind>>,
         cutoff: usize,
     ) -> Self {
         let ind_singleton: [Expr; 1] = [ind.raw().clone().into()];
@@ -372,56 +369,56 @@ impl<T: ReplaceDebsInEachItem> Normalized<T> {
 }
 
 impl NormalForm {
-    pub fn try_into_ind(self) -> Result<Normalized<RcSemHashed<Ind>>, NormalForm> {
+    pub fn try_into_ind(self) -> Result<Normalized<RcHashed<Ind>>, NormalForm> {
         match self.0 {
             Expr::Ind(ind) => Ok(Normalized(ind)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_vcon(self) -> Result<Normalized<RcSemHashed<Vcon>>, NormalForm> {
+    pub fn try_into_vcon(self) -> Result<Normalized<RcHashed<Vcon>>, NormalForm> {
         match self.0 {
             Expr::Vcon(vcon) => Ok(Normalized(vcon)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_match(self) -> Result<Normalized<RcSemHashed<Match>>, NormalForm> {
+    pub fn try_into_match(self) -> Result<Normalized<RcHashed<Match>>, NormalForm> {
         match self.0 {
             Expr::Match(m) => Ok(Normalized(m)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_fun(self) -> Result<Normalized<RcSemHashed<Fun>>, NormalForm> {
+    pub fn try_into_fun(self) -> Result<Normalized<RcHashed<Fun>>, NormalForm> {
         match self.0 {
             Expr::Fun(f) => Ok(Normalized(f)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_app(self) -> Result<Normalized<RcSemHashed<App>>, NormalForm> {
+    pub fn try_into_app(self) -> Result<Normalized<RcHashed<App>>, NormalForm> {
         match self.0 {
             Expr::App(a) => Ok(Normalized(a)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_for(self) -> Result<Normalized<RcSemHashed<For>>, NormalForm> {
+    pub fn try_into_for(self) -> Result<Normalized<RcHashed<For>>, NormalForm> {
         match self.0 {
             Expr::For(f) => Ok(Normalized(f)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_deb(self) -> Result<Normalized<RcSemHashed<DebNode>>, NormalForm> {
+    pub fn try_into_deb(self) -> Result<Normalized<RcHashed<DebNode>>, NormalForm> {
         match self.0 {
             Expr::Deb(d) => Ok(Normalized(d)),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_universe(self) -> Result<Normalized<RcSemHashed<UniverseNode>>, NormalForm> {
+    pub fn try_into_universe(self) -> Result<Normalized<RcHashed<UniverseNode>>, NormalForm> {
         match self.0 {
             Expr::Universe(u) => Ok(Normalized(u)),
             _ => Err(self),
@@ -497,16 +494,16 @@ mod unchecked {
         }
     }
 
-    pub trait RcSemHashAndWrapInNormalized: Sized {
-        fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcSemHashed<Self>>;
+    pub trait RcHashAndWrapInNormalized: Sized {
+        fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcHashed<Self>>;
     }
 
-    impl<T> RcSemHashAndWrapInNormalized for T
+    impl<T> RcHashAndWrapInNormalized for T
     where
         T: Hash,
     {
-        fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcSemHashed<Self>> {
-            Normalized(rc_sem_hashed(self))
+        fn rc_hash_and_wrap_in_normalized(self) -> Normalized<RcHashed<Self>> {
+            Normalized(rc_hashed(self))
         }
     }
 }

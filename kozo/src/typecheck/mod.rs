@@ -2,8 +2,8 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::*,
     syntax_tree::{
-        ast::{self, Deb, RcSemHashed, RcSemHashedVec, UniverseLevel},
-        ipist::{self as cst, RcHashed},
+        ast::{self, Deb, RcHashed, RcHashedVec, UniverseLevel},
+        ipist::{self as cst},
         ipist_to_ast::IpistToAstConverter,
         replace_debs::*,
         token::*,
