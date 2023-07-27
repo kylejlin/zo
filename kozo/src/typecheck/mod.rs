@@ -12,8 +12,8 @@ use crate::{
 
 use std::rc::Rc;
 
-mod equality_judgment;
-use equality_judgment::*;
+mod equality_assertion;
+use equality_assertion::*;
 
 mod error;
 pub use error::TypeError;
