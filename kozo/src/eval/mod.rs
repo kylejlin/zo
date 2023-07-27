@@ -158,7 +158,7 @@ impl Evaluator {
         let match_ = &m.hashee;
         let normalized_matchee = self.eval(match_.matchee.clone()).into_raw();
 
-        if let Expr::Vcon(vcon) = &normalized_matchee {
+        if let Some((vcon, args)) = self.try_as_vcon_capp(&normalized_matchee) {
             let vcon_index = vcon.hashee.vcon_index;
             if vcon_index >= match_.cases.hashee.len() {
                 // The `match` expression does not have enough cases.
@@ -178,38 +178,10 @@ impl Evaluator {
                 }
             };
 
-            let match_return_value = case.return_val.clone();
-            return self.eval(match_return_value);
-        }
-
-        if let Expr::App(normalized_matchee) = &normalized_matchee {
-            if let Expr::Vcon(vcon) = &normalized_matchee.hashee.callee {
-                let vcon_index = vcon.hashee.vcon_index;
-                if vcon_index >= match_.cases.hashee.len() {
-                    // The `match` expression does not have enough cases.
-                    // Therefore, it is a "stuck" term.
-                    // Since we don't emit errors, we just return the term as-is.
-                    return m.convert_to_expr_and_wrap_in_normalized();
-                }
-
-                let case = match &match_.cases.hashee[vcon_index] {
-                    MatchCase::Nondismissed(case) => case,
-                    MatchCase::Dismissed => {
-                        // The match case corresponding to the matchee's vcon index
-                        // is dismissed.
-                        // Therefore, the `match` expression is a "stuck" term.
-                        // Since we don't emit errors, we just return the term as-is.
-                        return m.convert_to_expr_and_wrap_in_normalized();
-                    }
-                };
-
-                let unsubstituted = case.return_val.clone();
-                let substituted = self.substitute_and_downshift_debs(
-                    unsubstituted,
-                    &normalized_matchee.hashee.args.hashee,
-                );
-                return self.eval(substituted);
-            }
+            // TODO: Fix downshifting to account for `m.hashee.arity`.
+            let unsubstituted = case.return_val.clone();
+            let substituted = self.substitute_and_downshift_debs(unsubstituted, args);
+            return self.eval(substituted);
         }
 
         let match_digest = m.digest.clone();
@@ -223,6 +195,20 @@ impl Evaluator {
         self.eval_expr_cache
             .insert(match_digest, normalized.clone());
         normalized
+    }
+
+    fn try_as_vcon_capp<'a>(&mut self, expr: &'a Expr) -> Option<(RcHashed<Vcon>, &'a [Expr])> {
+        if let Expr::Vcon(vcon) = &expr {
+            return Some((vcon.clone(), &[]));
+        }
+
+        if let Expr::App(expr) = &expr {
+            if let Expr::Vcon(vcon) = &expr.hashee.callee {
+                return Some((vcon.clone(), &expr.hashee.args.hashee));
+            }
+        }
+
+        None
     }
 
     fn eval_match_cases(
