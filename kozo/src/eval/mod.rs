@@ -178,7 +178,6 @@ impl Evaluator {
                 }
             };
 
-            // TODO: Fix downshifting to account for `m.hashee.arity`.
             let unsubstituted = case.return_val.clone();
             let substituted = self.substitute_and_downshift_debs(unsubstituted, args);
             return self.eval(substituted);

@@ -63,20 +63,12 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .finish()
             }
 
-            TypeError::NonInductiveMatcheeType {
-                expr,
-                type_,
-                type_after_applying_scon,
-            } => {
+            TypeError::NonInductiveMatcheeType { expr, type_ } => {
                 let mut converter = IpistToAstConverter::default();
                 let expr_ast = converter.convert(expr.clone());
                 f.debug_struct("TypeError::NonInductiveMatcheeType")
                     .field("expr", &expr_ast.pretty_printed())
                     .field("type_", &type_.raw().pretty_printed())
-                    .field(
-                        "type_after_applying_scon",
-                        &type_after_applying_scon.raw().pretty_printed(),
-                    )
                     .finish()
             }
 
@@ -127,8 +119,6 @@ impl Display for PrettyPrint<'_, TypeError> {
                 expr,
                 expected_type,
                 actual_type,
-                subbed_expected,
-                subbed_actual,
             } => {
                 let mut converter = IpistToAstConverter::default();
                 let expr_ast = converter.convert(expr.clone());
@@ -136,25 +126,15 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .field("expr", &expr_ast.pretty_printed())
                     .field("expected_type", &expected_type.raw().pretty_printed())
                     .field("actual_type", &actual_type.raw().pretty_printed())
-                    .field("subbed_expected", &subbed_expected.raw().pretty_printed())
-                    .field("subbed_actual", &subbed_actual.raw().pretty_printed())
                     .finish()
             }
 
-            TypeError::CalleeTypeIsNotAForExpression {
-                app,
-                callee_type,
-                callee_type_after_applying_scon,
-            } => {
+            TypeError::CalleeTypeIsNotAForExpression { app, callee_type } => {
                 let mut converter = IpistToAstConverter::default();
                 let app_ast = converter.convert_app(rc_hashed(app.clone()));
                 f.debug_struct("TypeError::CalleeTypeIsNotAForExpression")
                     .field("app", &app_ast.pretty_printed())
                     .field("callee_type", &callee_type.raw().pretty_printed())
-                    .field(
-                        "callee_type_after_applying_scon",
-                        &callee_type_after_applying_scon.raw().pretty_printed(),
-                    )
                     .finish()
             }
 

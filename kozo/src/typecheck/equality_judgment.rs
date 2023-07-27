@@ -1,11 +1,12 @@
 use super::*;
 
+// TODO: Reconsider if we really need this module.
+
 #[derive(Clone, Debug)]
 pub struct ExpectedTypeEquality {
     pub expr: cst::Expr,
     pub expected_type: NormalForm,
     pub actual_type: NormalForm,
-    pub tcon_len: usize,
 }
 
 /// `exprs`, `expected_types`, and `actual_types` **must** all have the same length.
@@ -14,12 +15,10 @@ pub struct ExpectedTypeEqualities<'a> {
     pub exprs: &'a [cst::Expr],
     pub expected_types: Normalized<&'a [ast::Expr]>,
     pub actual_types: Normalized<&'a [ast::Expr]>,
-    pub tcon_len: usize,
 }
 
 impl<'a> ExpectedTypeEqualities<'a> {
     pub fn zip(self) -> impl Iterator<Item = ExpectedTypeEquality> + 'a {
-        let tcon_len = self.tcon_len;
         (0..self.len()).into_iter().map(move |i| {
             let expr = self.exprs[i].clone();
             let expected_type = self.expected_types.index_ref(i).cloned();
@@ -28,7 +27,6 @@ impl<'a> ExpectedTypeEqualities<'a> {
                 expr,
                 expected_type,
                 actual_type,
-                tcon_len,
             }
         })
     }
@@ -42,10 +40,9 @@ impl TypeChecker {
     pub(super) fn assert_expected_type_equalities_holds_after_applying_scon(
         &mut self,
         equalities: ExpectedTypeEqualities,
-        scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         for equality in equalities.zip() {
-            self.assert_expected_type_equality_holds_after_applying_scon(equality, scon)?;
+            self.assert_expected_type_equality_holds_after_applying_scon(equality)?;
         }
 
         Ok(())
@@ -54,22 +51,13 @@ impl TypeChecker {
     pub(super) fn assert_expected_type_equality_holds_after_applying_scon(
         &mut self,
         expected_equality: ExpectedTypeEquality,
-        scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         let ExpectedTypeEquality {
             expr,
             expected_type,
             actual_type,
-            tcon_len,
         } = expected_equality;
         if actual_type.raw().digest() == expected_type.raw().digest() {
-            return Ok(());
-        }
-
-        let (subbed_expected, subbed_actual) =
-            self.apply_scon(scon, tcon_len, expected_type.clone(), actual_type.clone());
-
-        if subbed_expected.raw().digest() == subbed_actual.raw().digest() {
             return Ok(());
         }
 
@@ -77,21 +65,6 @@ impl TypeChecker {
             expr,
             expected_type,
             actual_type,
-            subbed_expected,
-            subbed_actual,
         });
-    }
-
-    pub(super) fn apply_scon(
-        &mut self,
-        scon: LazySubstitutionContext,
-        tcon_len: usize,
-        expr1: NormalForm,
-        expr2: NormalForm,
-    ) -> (NormalForm, NormalForm) {
-        let subs = scon.into_concrete_noncompounded_substitutions(tcon_len);
-        let old_exprs = [expr1, expr2];
-        let (new_exprs, _) = self.apply_concrete_substitutions(subs, old_exprs);
-        (new_exprs[0].clone(), new_exprs[1].clone())
     }
 }

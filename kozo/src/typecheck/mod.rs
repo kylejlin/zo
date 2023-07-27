@@ -10,22 +10,13 @@ use crate::{
     },
 };
 
-use std::{ops::BitOrAssign, rc::Rc};
-
-mod apply_concrete_substitutions;
-use apply_concrete_substitutions::*;
-
-mod concrete_substitution;
-use concrete_substitution::*;
+use std::rc::Rc;
 
 mod equality_judgment;
 use equality_judgment::*;
 
 mod error;
 pub use error::TypeError;
-
-mod scon;
-pub use scon::*;
 
 mod tcon;
 pub use tcon::*;

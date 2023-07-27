@@ -14,15 +14,14 @@ impl TypeChecker {
         &mut self,
         expr: cst::Expr,
         tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         match expr {
-            cst::Expr::Ind(e) => self.get_type_of_ind(e, tcon, scon),
-            cst::Expr::Vcon(e) => self.get_type_of_vcon(e, tcon, scon),
-            cst::Expr::Match(e) => self.get_type_of_match(e, tcon, scon),
-            cst::Expr::Fun(e) => self.get_type_of_fun(e, tcon, scon),
-            cst::Expr::App(e) => self.get_type_of_app(e, tcon, scon),
-            cst::Expr::For(e) => self.get_type_of_for(e, tcon, scon),
+            cst::Expr::Ind(e) => self.get_type_of_ind(e, tcon),
+            cst::Expr::Vcon(e) => self.get_type_of_vcon(e, tcon),
+            cst::Expr::Match(e) => self.get_type_of_match(e, tcon),
+            cst::Expr::Fun(e) => self.get_type_of_fun(e, tcon),
+            cst::Expr::App(e) => self.get_type_of_app(e, tcon),
+            cst::Expr::For(e) => self.get_type_of_for(e, tcon),
             cst::Expr::Deb(e) => self.get_type_of_deb(e, tcon),
             cst::Expr::Universe(e) => self.get_type_of_universe(e),
         }
@@ -32,7 +31,6 @@ impl TypeChecker {
         &mut self,
         exprs: &[cst::Expr],
         tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
         let mut out: Normalized<Vec<ast::Expr>> = Normalized::with_capacity(exprs.len());
         let mut normalized_visited_exprs: Normalized<Vec<ast::Expr>> =
@@ -40,7 +38,7 @@ impl TypeChecker {
 
         for expr in exprs {
             let current_tcon = LazyTypeContext::Snoc(&tcon, normalized_visited_exprs.to_derefed());
-            let type_ = self.get_type(expr.clone(), current_tcon, scon)?;
+            let type_ = self.get_type(expr.clone(), current_tcon)?;
             out.push(type_);
 
             let expr_ast = self.cst_converter.convert(expr.clone());
@@ -55,12 +53,11 @@ impl TypeChecker {
         &mut self,
         exprs: &[cst::Expr],
         tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
         let mut out: Normalized<Vec<ast::Expr>> = Normalized::with_capacity(exprs.len());
 
         for expr in exprs {
-            let type_ = self.get_type(expr.clone(), tcon, scon)?;
+            let type_ = self.get_type(expr.clone(), tcon)?;
             out.push(type_);
         }
 
@@ -72,9 +69,8 @@ impl TypeChecker {
         exprs: &[cst::Expr],
         limiter: impl UniverseLimit,
         tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
-        let param_type_types = self.get_types_of_dependent_expressions(exprs, tcon, scon)?;
+        let param_type_types = self.get_types_of_dependent_expressions(exprs, tcon)?;
 
         for i in 0..param_type_types.raw().len() {
             let param_type_type: Normalized<&ast::Expr> = param_type_types.index_ref(i);
@@ -100,9 +96,8 @@ impl TypeChecker {
         &mut self,
         expr: cst::Expr,
         tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        let type_ = self.get_type(expr.clone(), tcon, scon)?;
+        let type_ = self.get_type(expr.clone(), tcon)?;
 
         if !type_.raw().is_universe() {
             return Err(TypeError::UnexpectedNonTypeExpression { expr, type_ });

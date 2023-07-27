@@ -5,22 +5,16 @@ impl TypeChecker {
         &mut self,
         app: RcHashed<cst::App>,
         tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
-        let callee_type = self.get_type(app.hashee.callee.clone(), tcon, scon)?;
-        let callee_type = self.assert_callee_type_is_a_for_expression(
-            callee_type,
-            app.clone(),
-            scon,
-            tcon.len(),
-        )?;
+        let callee_type = self.get_type(app.hashee.callee.clone(), tcon)?;
+        let callee_type = self.assert_callee_type_is_a_for_expression(callee_type, app.clone())?;
 
         let callee_type_param_types = callee_type.to_hashee().param_types().cloned();
         let callee_type_return_type_g0f = callee_type.to_hashee().return_type().cloned();
 
         self.assert_arg_count_is_correct(app.clone(), callee_type.clone())?;
 
-        let arg_types = self.get_types_of_independent_expressions(&app.hashee.args, tcon, scon)?;
+        let arg_types = self.get_types_of_independent_expressions(&app.hashee.args, tcon)?;
 
         let args_ast = self.cst_converter.convert_expressions(&app.hashee.args);
         let normalized_args = self.evaluator.eval_expressions(args_ast);
@@ -30,15 +24,11 @@ impl TypeChecker {
             normalized_args.clone(),
         );
 
-        self.assert_expected_type_equalities_holds_after_applying_scon(
-            ExpectedTypeEqualities {
-                exprs: &app.hashee.args,
-                expected_types: substituted_callee_type_param_types.to_hashee().derefed(),
-                actual_types: arg_types.to_derefed(),
-                tcon_len: tcon.len(),
-            },
-            scon,
-        )?;
+        self.assert_expected_type_equalities_holds_after_applying_scon(ExpectedTypeEqualities {
+            exprs: &app.hashee.args,
+            expected_types: substituted_callee_type_param_types.to_hashee().derefed(),
+            actual_types: arg_types.to_derefed(),
+        })?;
 
         let substituted_callee_type_return_type =
             self.substitute_callee_type_return_type(callee_type_return_type_g0f, normalized_args);
@@ -49,26 +39,14 @@ impl TypeChecker {
         &mut self,
         callee_type: NormalForm,
         app: RcHashed<cst::App>,
-        scon: LazySubstitutionContext,
-        tcon_len: usize,
     ) -> Result<Normalized<RcHashed<ast::For>>, TypeError> {
         if let Ok(for_) = callee_type.clone().try_into_for() {
-            return Ok(for_);
-        }
-
-        let subs = scon.into_concrete_noncompounded_substitutions(tcon_len);
-        let callee_type_after_applying_scon = self
-            .apply_concrete_substitutions(subs, [callee_type.clone()])
-            .0[0]
-            .clone();
-        if let Ok(for_) = callee_type_after_applying_scon.clone().try_into_for() {
             return Ok(for_);
         }
 
         Err(TypeError::CalleeTypeIsNotAForExpression {
             app: app.hashee.clone(),
             callee_type,
-            callee_type_after_applying_scon,
         })
     }
 

@@ -6,7 +6,7 @@ use crate::{
     syntax_tree::{
         ast, ipist, ipist_to_ast::IpistToAstConverter, lexer::lex, ost::Span, parser::parse,
     },
-    typecheck::{LazySubstitutionContext, LazyTypeContext, TypeChecker},
+    typecheck::{LazyTypeContext, TypeChecker},
 };
 
 pub fn substitute_with_compounding<'a>(
@@ -50,11 +50,7 @@ pub fn get_type_under_empty_tcon_and_scon_or_panic(src: &str) -> NormalForm {
     let cst = parse_rch_cst_or_panic(src);
     let empty = Normalized::<[_; 0]>::new();
     TypeChecker::default()
-        .get_type(
-            cst,
-            LazyTypeContext::Base(empty.as_ref().convert_ref()),
-            LazySubstitutionContext::Base(&[]),
-        )
+        .get_type(cst, LazyTypeContext::Base(empty.as_ref().convert_ref()))
         .pretty_unwrap()
 }
 

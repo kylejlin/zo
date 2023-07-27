@@ -5,10 +5,9 @@ impl TypeChecker {
         &mut self,
         for_g0: RcHashed<cst::For>,
         tcon_g0: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         let param_type_types_g0 =
-            self.get_types_of_dependent_expressions(&for_g0.hashee.param_types, tcon_g0, scon)?;
+            self.get_types_of_dependent_expressions(&for_g0.hashee.param_types, tcon_g0)?;
 
         self.assert_every_type_is_universe(
             param_type_types_g0.to_derefed(),
@@ -23,11 +22,8 @@ impl TypeChecker {
         let tcon_with_param_types_g1 =
             LazyTypeContext::Snoc(&tcon_g0, normalized_param_types_g0.to_hashee().derefed());
 
-        let return_type_type_g1 = self.get_type(
-            for_g0.hashee.return_type.clone(),
-            tcon_with_param_types_g1,
-            scon,
-        )?;
+        let return_type_type_g1 =
+            self.get_type(for_g0.hashee.return_type.clone(), tcon_with_param_types_g1)?;
         let return_type_type_g1_universe_level = match return_type_type_g1.raw() {
             ast::Expr::Universe(universe_node) => universe_node.hashee.level,
 

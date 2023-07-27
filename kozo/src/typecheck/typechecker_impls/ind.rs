@@ -5,7 +5,6 @@ impl TypeChecker {
         &mut self,
         ind: RcHashed<cst::Ind>,
         tcon_g0: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         // TODO: Check for strict positivity.
         // We can and should check this before
@@ -20,7 +19,6 @@ impl TypeChecker {
                 &ind.hashee.index_types,
                 LimitToIndUniverse(ind.clone()),
                 tcon_g0,
-                scon,
             )?
             .into_rc_hashed();
 
@@ -38,7 +36,6 @@ impl TypeChecker {
             ind.clone(),
             normalized_index_types_g0,
             tcon_with_ind_type_g1,
-            scon,
         )?;
 
         Ok(ind_type_g0)
@@ -49,7 +46,6 @@ impl TypeChecker {
         ind: RcHashed<cst::Ind>,
         normalized_index_types_g0: Normalized<RcHashedVec<ast::Expr>>,
         tcon_g1: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         for def in &ind.hashee.vcon_defs {
             self.typecheck_ind_vcon_def(
@@ -57,7 +53,6 @@ impl TypeChecker {
                 ind.clone(),
                 normalized_index_types_g0.clone(),
                 tcon_g1,
-                scon,
             )?;
         }
         Ok(())
@@ -69,7 +64,6 @@ impl TypeChecker {
         ind: RcHashed<cst::Ind>,
         normalized_index_types_g0: Normalized<RcHashedVec<ast::Expr>>,
         tcon_g1: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<(), TypeError> {
         self.assert_index_arg_count_is_correct(def, normalized_index_types_g0.raw().hashee.len())?;
 
@@ -77,17 +71,13 @@ impl TypeChecker {
             &def.param_types,
             LimitToIndUniverse(ind),
             tcon_g1,
-            scon,
         )?;
 
         let tcon_with_param_types_g2 =
             LazyTypeContext::Snoc(&tcon_g1, normalized_param_types_g1.to_derefed());
 
-        let index_arg_types_g2 = self.get_types_of_independent_expressions(
-            &def.index_args,
-            tcon_with_param_types_g2,
-            scon,
-        )?;
+        let index_arg_types_g2 =
+            self.get_types_of_independent_expressions(&def.index_args, tcon_with_param_types_g2)?;
 
         let index_args_ast = self.cst_converter.convert_expressions(&def.index_args);
         let normalized_index_args_g2 = self.evaluator.eval_expressions(index_args_ast);
@@ -99,15 +89,11 @@ impl TypeChecker {
             normalized_index_args_g2,
         );
 
-        self.assert_expected_type_equalities_holds_after_applying_scon(
-            ExpectedTypeEqualities {
-                exprs: &def.index_args,
-                expected_types: normalized_index_types_g2.to_hashee().derefed(),
-                actual_types: index_arg_types_g2.to_derefed(),
-                tcon_len: tcon_with_param_types_g2.len(),
-            },
-            scon,
-        )?;
+        self.assert_expected_type_equalities_holds_after_applying_scon(ExpectedTypeEqualities {
+            exprs: &def.index_args,
+            expected_types: normalized_index_types_g2.to_hashee().derefed(),
+            actual_types: index_arg_types_g2.to_derefed(),
+        })?;
 
         Ok(())
     }

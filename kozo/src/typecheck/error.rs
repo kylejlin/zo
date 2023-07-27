@@ -24,7 +24,6 @@ pub enum TypeError {
     NonInductiveMatcheeType {
         expr: cst::Expr,
         type_: NormalForm,
-        type_after_applying_scon: NormalForm,
     },
     WrongNumberOfMatchCases {
         match_: cst::Match,
@@ -44,13 +43,10 @@ pub enum TypeError {
         expr: cst::Expr,
         expected_type: NormalForm,
         actual_type: NormalForm,
-        subbed_expected: NormalForm,
-        subbed_actual: NormalForm,
     },
     CalleeTypeIsNotAForExpression {
         app: cst::App,
         callee_type: NormalForm,
-        callee_type_after_applying_scon: NormalForm,
     },
     WrongNumberOfAppArguments {
         app: cst::App,

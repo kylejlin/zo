@@ -5,12 +5,10 @@ impl TypeChecker {
         &mut self,
         vcon: RcHashed<cst::Vcon>,
         tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<NormalForm, TypeError> {
         self.assert_vcon_index_is_valid(vcon.clone())?;
 
-        let normalized_ind =
-            self.typecheck_and_normalize_ind(vcon.hashee.ind.clone(), tcon, scon)?;
+        let normalized_ind = self.typecheck_and_normalize_ind(vcon.hashee.ind.clone(), tcon)?;
 
         let vcon_index = vcon.hashee.vcon_index.value;
         Ok(
@@ -34,9 +32,8 @@ impl TypeChecker {
         &mut self,
         ind: RcHashed<cst::Ind>,
         tcon: LazyTypeContext,
-        scon: LazySubstitutionContext,
     ) -> Result<Normalized<RcHashed<ast::Ind>>, TypeError> {
-        self.get_type_of_ind(ind.clone(), tcon, scon)?;
+        self.get_type_of_ind(ind.clone(), tcon)?;
 
         let ind_ast = self.cst_converter.convert_ind(ind);
         let normalized = self.evaluator.eval_ind(ind_ast);
