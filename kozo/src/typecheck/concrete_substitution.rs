@@ -189,7 +189,6 @@ impl Substitute for RcHashed<Match> {
     fn substitute_in_children(self, sub: &ConcreteSubstitution) -> Self::Output {
         Match {
             matchee: self.hashee.matchee.clone().substitute(sub),
-            arity: self.hashee.arity,
             return_type: self.hashee.return_type.clone().substitute(sub),
             cases: self.hashee.cases.clone().substitute_in_children(sub),
         }

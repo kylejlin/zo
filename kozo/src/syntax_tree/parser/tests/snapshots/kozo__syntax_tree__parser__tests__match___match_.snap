@@ -12,40 +12,29 @@ Match(
                 value: 0,
                 span: (
                     ByteIndex(
-                        33,
+                        18,
                     ),
                     ByteIndex(
-                        34,
+                        19,
                     ),
                 ),
             },
         ),
-        arity: NumberLiteral {
-            value: 1,
-            span: (
-                ByteIndex(
-                    53,
-                ),
-                ByteIndex(
-                    54,
-                ),
-            ),
-        },
         return_type: Deb(
             NumberLiteral {
                 value: 3,
                 span: (
                     ByteIndex(
-                        79,
+                        25,
                     ),
                     ByteIndex(
-                        80,
+                        26,
                     ),
                 ),
             },
         ),
         cases_lparen: ByteIndex(
-            99,
+            45,
         ),
         cases: Snoc(
             Snoc(
@@ -54,16 +43,16 @@ Match(
                     Nondismissed(
                         NondismissedMatchCase {
                             lparen: ByteIndex(
-                                109,
+                                55,
                             ),
                             arity: NumberLiteral {
                                 value: 0,
                                 span: (
                                     ByteIndex(
-                                        110,
+                                        56,
                                     ),
                                     ByteIndex(
-                                        111,
+                                        57,
                                     ),
                                 ),
                             },
@@ -72,39 +61,39 @@ Match(
                                     value: 1,
                                     span: (
                                         ByteIndex(
-                                            112,
+                                            58,
                                         ),
                                         ByteIndex(
-                                            113,
+                                            59,
                                         ),
                                     ),
                                 },
                             ),
                             rparen: ByteIndex(
-                                113,
+                                59,
                             ),
                         },
                     ),
                 ),
                 Dismissed(
                     ByteIndex(
-                        124,
+                        70,
                     ),
                 ),
             ),
             Nondismissed(
                 NondismissedMatchCase {
                     lparen: ByteIndex(
-                        140,
+                        86,
                     ),
                     arity: NumberLiteral {
                         value: 1,
                         span: (
                             ByteIndex(
-                                141,
+                                87,
                             ),
                             ByteIndex(
-                                142,
+                                88,
                             ),
                         ),
                     },
@@ -113,25 +102,25 @@ Match(
                             value: 2,
                             span: (
                                 ByteIndex(
-                                    143,
+                                    89,
                                 ),
                                 ByteIndex(
-                                    144,
+                                    90,
                                 ),
                             ),
                         },
                     ),
                     rparen: ByteIndex(
-                        144,
+                        90,
                     ),
                 },
             ),
         ),
         cases_rparen: ByteIndex(
-            150,
+            96,
         ),
         rparen: ByteIndex(
-            152,
+            98,
         ),
     },
 )

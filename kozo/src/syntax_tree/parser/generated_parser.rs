@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 70619b4f20a09a2dc81427aeeca42605ec96bdc7c62b5d5257e772204f3f85a5
+// @sha256 013d48662d9d803130eca3d15d09dac2bcc829a223f2db14eb3b257d7722548c
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -113,7 +113,6 @@ pub struct Vcon {
 pub struct Match {
     pub lparen: crate::syntax_tree::token::ByteIndex,
     pub matchee: Box<Expr>,
-    pub arity: crate::syntax_tree::token::NumberLiteral,
     pub return_type: Box<Expr>,
     pub cases_lparen: crate::syntax_tree::token::ByteIndex,
     pub cases: Box<ZeroOrMoreMatchCases>,
@@ -339,7 +338,6 @@ enum State {
     S66 = 66,
     S67 = 67,
     S68 = 68,
-    S69 = 69,
 }
 
 enum Node {
@@ -624,28 +622,26 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R15 => {
-            let rparen_8 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
-            let cases_rparen_7 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
-            let cases_6 = Box::new(ZeroOrMoreMatchCases::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let cases_lparen_5 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
-            let return_type_4 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let arity_3 = nodes.pop().unwrap().try_into_number_9().ok().unwrap();
+            let rparen_7 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
+            let cases_rparen_6 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
+            let cases_5 = Box::new(ZeroOrMoreMatchCases::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let cases_lparen_4 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
+            let return_type_3 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             let matchee_2 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             nodes.pop().unwrap();
             let lparen_0 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
             
-            states.truncate(states.len() - 9);
+            states.truncate(states.len() - 8);
             
             (
                 Node::Match(Match {
                     lparen: lparen_0,
                     matchee: matchee_2,
-                    arity: arity_3,
-                    return_type: return_type_4,
-                    cases_lparen: cases_lparen_5,
-                    cases: cases_6,
-                    cases_rparen: cases_rparen_7,
-                    rparen: rparen_8,
+                    return_type: return_type_3,
+                    cases_lparen: cases_lparen_4,
+                    cases: cases_5,
+                    cases_rparen: cases_rparen_6,
+                    rparen: rparen_7,
                 }),
                 NonterminalKind::Match,
             )
@@ -861,15 +857,15 @@ impl Quasiterminal {
     }
 }
 
-const ACTION_TABLE: [[Action; 13]; 70] = [
+const ACTION_TABLE: [[Action; 13]; 69] = [
     [
         Action::Shift(State::S0),
         Action::Err,
         Action::Shift(State::S22),
         Action::Shift(State::S31),
-        Action::Shift(State::S10),
-        Action::Shift(State::S59),
-        Action::Shift(State::S66),
+        Action::Shift(State::S7),
+        Action::Shift(State::S58),
+        Action::Shift(State::S65),
         Action::Err,
         Action::Err,
         Action::Shift(State::S20),
@@ -924,7 +920,7 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
     ],
     [
         Action::Shift(State::S0),
-        Action::Shift(State::S7),
+        Action::Shift(State::S8),
         Action::Err,
         Action::Err,
         Action::Err,
@@ -939,7 +935,7 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
     ],
     [
         Action::Shift(State::S0),
-        Action::Shift(State::S65),
+        Action::Shift(State::S64),
         Action::Err,
         Action::Err,
         Action::Err,
@@ -998,21 +994,6 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
         Action::Err,
     ],
     [
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Reduce(RuleKind::R0),
-        Action::Err,
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-    ],
-    [
         Action::Shift(State::S0),
         Action::Err,
         Action::Err,
@@ -1026,6 +1007,21 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
         Action::Err,
         Action::Shift(State::S21),
         Action::Err,
+    ],
+    [
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Reduce(RuleKind::R0),
+        Action::Err,
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
     ],
     [
         Action::Shift(State::S0),
@@ -1568,22 +1564,7 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
         Action::Reduce(RuleKind::R14),
     ],
     [
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S8),
-        Action::Err,
-        Action::Err,
-        Action::Err,
-    ],
-    [
-        Action::Shift(State::S49),
+        Action::Shift(State::S48),
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1613,15 +1594,15 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
         Action::Err,
     ],
     [
-        Action::Shift(State::S56),
-        Action::Shift(State::S51),
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
         Action::Shift(State::S55),
+        Action::Shift(State::S50),
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S54),
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1629,7 +1610,7 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
     ],
     [
         Action::Err,
-        Action::Shift(State::S52),
+        Action::Shift(State::S51),
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1719,7 +1700,7 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
     ],
     [
         Action::Err,
-        Action::Shift(State::S58),
+        Action::Shift(State::S57),
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1754,10 +1735,10 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
-        Action::Shift(State::S64),
         Action::Err,
         Action::Shift(State::S63),
+        Action::Err,
+        Action::Shift(State::S62),
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1779,7 +1760,7 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
     ],
     [
         Action::Err,
-        Action::Shift(State::S62),
+        Action::Shift(State::S61),
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1869,7 +1850,7 @@ const ACTION_TABLE: [[Action; 13]; 70] = [
     ],
     [
         Action::Err,
-        Action::Shift(State::S68),
+        Action::Shift(State::S67),
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1918,10 +1899,10 @@ fn get_action(top_state: State, next_quasiterminal_kind: QuasiterminalKind) -> A
     ACTION_TABLE[top_state as usize][next_quasiterminal_kind as usize]
 }
 
-const GOTO_TABLE: [[Option<State>; 14]; 70] = [
+const GOTO_TABLE: [[Option<State>; 14]; 69] = [
     [
         Some(State::S36),
-        Some(State::S9),
+        Some(State::S10),
         None,
         None,
         None,
@@ -1937,7 +1918,7 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
     ],
     [
         Some(State::S38),
-        Some(State::S9),
+        Some(State::S10),
         None,
         None,
         None,
@@ -1953,7 +1934,7 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
     ],
     [
         Some(State::S38),
-        Some(State::S9),
+        Some(State::S10),
         None,
         None,
         None,
@@ -1969,7 +1950,7 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
     ],
     [
         Some(State::S38),
-        Some(State::S9),
+        Some(State::S10),
         None,
         None,
         None,
@@ -1985,7 +1966,7 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
     ],
     [
         Some(State::S38),
-        Some(State::S9),
+        Some(State::S10),
         None,
         None,
         None,
@@ -2001,7 +1982,7 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
     ],
     [
         Some(State::S38),
-        Some(State::S9),
+        Some(State::S10),
         None,
         None,
         None,
@@ -2017,7 +1998,23 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
     ],
     [
         Some(State::S38),
+        Some(State::S10),
+        None,
+        None,
+        None,
+        Some(State::S15),
+        Some(State::S16),
+        None,
+        None,
+        None,
+        Some(State::S17),
+        None,
+        Some(State::S18),
+        Some(State::S19),
+    ],
+    [
         Some(State::S9),
+        Some(State::S10),
         None,
         None,
         None,
@@ -2033,7 +2030,7 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
     ],
     [
         Some(State::S12),
-        Some(State::S9),
+        Some(State::S10),
         None,
         None,
         None,
@@ -2046,42 +2043,10 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
         None,
         Some(State::S18),
         Some(State::S19),
-    ],
-    [
-        Some(State::S48),
-        Some(State::S9),
-        None,
-        None,
-        None,
-        Some(State::S15),
-        Some(State::S16),
-        None,
-        None,
-        None,
-        Some(State::S17),
-        None,
-        Some(State::S18),
-        Some(State::S19),
-    ],
-    [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
     ],
     [
         Some(State::S47),
-        Some(State::S9),
+        Some(State::S10),
         None,
         None,
         None,
@@ -2096,8 +2061,24 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
         Some(State::S19),
     ],
     [
-        Some(State::S57),
-        Some(State::S9),
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    ],
+    [
+        Some(State::S56),
+        Some(State::S10),
         None,
         None,
         None,
@@ -2112,8 +2093,8 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
         Some(State::S19),
     ],
     [
-        Some(State::S61),
-        Some(State::S9),
+        Some(State::S60),
+        Some(State::S10),
         None,
         None,
         None,
@@ -2128,8 +2109,8 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
         Some(State::S19),
     ],
     [
-        Some(State::S67),
-        Some(State::S9),
+        Some(State::S66),
+        Some(State::S10),
         None,
         None,
         None,
@@ -2144,8 +2125,8 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
         Some(State::S19),
     ],
     [
-        Some(State::S69),
-        Some(State::S9),
+        Some(State::S68),
+        Some(State::S10),
         None,
         None,
         None,
@@ -2695,23 +2676,7 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
         None,
         None,
         None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    ],
-    [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(State::S50),
+        Some(State::S49),
         None,
         None,
         None,
@@ -2728,8 +2693,8 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
         None,
         None,
         None,
+        Some(State::S52),
         Some(State::S53),
-        Some(State::S54),
         None,
         None,
         None,
@@ -2875,7 +2840,7 @@ const GOTO_TABLE: [[Option<State>; 14]; 70] = [
         None,
         None,
         None,
-        Some(State::S60),
+        Some(State::S59),
         None,
         None,
     ],
