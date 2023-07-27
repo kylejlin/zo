@@ -19,7 +19,7 @@ fn add_2_3() {
         "<ADD>",
         "
 (fun 0 (<NAT> <NAT>) <NAT>
-    (match 2 <NAT> (
+    (match 2 1 <NAT> (
         (0 1)
         (1 (1 0 (<SUCC> 2)))
     ))
@@ -118,7 +118,7 @@ fn rev_1_2_3() {
     (<POLYMORPHIC_LIST> <NAT>)
     
     (
-        match 2 (<POLYMORPHIC_LIST> <NAT>)
+        match 2 1 (<POLYMORPHIC_LIST> <NAT>)
 
         (
             (0 1)
@@ -244,7 +244,7 @@ fn polymorphic_rev_1_2_3() {
     (<POLYMORPHIC_LIST> 2)
     
     (
-        match 2 (<POLYMORPHIC_LIST> 3)
+        match 2 1 (<POLYMORPHIC_LIST> 3)
 
         (
             (0 1)
@@ -311,7 +311,7 @@ fn eq_zero_one() {
     let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
     let eq_zero_one_implies_false_unsubstituted_src = r#"
 (fun nonrec ((<EQ_0> <1>)) <FALSE>
-    (match 1 <FALSE> (
+    (match 1 2 <FALSE> (
         contra
     ))
 )"#;
@@ -347,7 +347,7 @@ fn eq_one_zero() {
     let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
     let eq_one_zero_implies_false_unsubstituted_src = r#"
 (fun nonrec ((<EQ_1> <0>)) <FALSE>
-    (match 1 <FALSE> (
+    (match 1 2 <FALSE> (
         contra
     ))
 )"#;
@@ -397,10 +397,10 @@ fn substitution_does_not_diverge_even_when_second_vcon_index_arg_is_subexpr_of_m
     let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
     let implies_false_src_unsubstituted = r#"
     (fun nonrec ((<EQ_NORTH> <SOUTH>) (<EQ_SOUTH> <NORTHWEST>)) <FALSE>
-        (match 2 <FALSE> (
+        (match 2 2 <FALSE> (
             (
                 0
-                (match 1 <FALSE> (
+                (match 1 2 <FALSE> (
                     contra
                 ))
             )
@@ -447,7 +447,7 @@ fn eq_commutative() {
     );
     let unsubstituted_src_1 = r#"
 (fun nonrec (<BOOL> <BOOL> (<EQ> 1 0)) (<EQ> 1 2)
-    (match 1 (<EQ> 2 3) (
+    (match 1 3 (<EQ> 2 3) (
         (
             // Arity
             1
@@ -461,7 +461,7 @@ fn eq_commutative() {
 )"#;
     let unsubstituted_src_2 = r#"
 (fun nonrec (<BOOL> <BOOL> (<EQ> 1 0)) (<EQ> 1 2)
-    (match 1 (<EQ> 2 3) (
+    (match 1 3 (<EQ> 2 3) (
         (
             // Arity
             1
@@ -475,7 +475,7 @@ fn eq_commutative() {
 )"#;
     let unsubstituted_src_3 = r#"
 (fun nonrec (<BOOL> <BOOL> (<EQ> 1 0)) (<EQ> 1 2)
-    (match 1 (<EQ> 2 3) (
+    (match 1 3 (<EQ> 2 3) (
         (
             // Arity
             1
@@ -523,13 +523,13 @@ fn eq_transitive() {
     );
     let unsubstituted_src_1 = r#"
 (fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
-    (match 2 (<EQ> 5 3) (
+    (match 2 3 (<EQ> 5 3) (
         (
             // Arity
             1
 
             // Return val
-            (match 2 (<EQ> 6 4) (
+            (match 2 3 (<EQ> 6 4) (
                 (
                     // Arity
                     1
@@ -546,13 +546,13 @@ fn eq_transitive() {
 )"#;
     let unsubstituted_src_2 = r#"
 (fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
-    (match 2 (<EQ> 5 3) (
+    (match 2 3 (<EQ> 5 3) (
         (
             // Arity
             1
 
             // Return val
-            (match 2 (<EQ> 6 4) (
+            (match 2 3 (<EQ> 6 4) (
                 (
                     // Arity
                     1
@@ -569,13 +569,13 @@ fn eq_transitive() {
 )"#;
     let unsubstituted_src_3 = r#"
 (fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
-    (match 2 (<EQ> 5 3) (
+    (match 2 3 (<EQ> 5 3) (
         (
             // Arity
             1
 
             // Return val
-            (match 2 (<EQ> 6 4) (
+            (match 2 3 (<EQ> 6 4) (
                 (
                     // Arity
                     1
@@ -592,13 +592,13 @@ fn eq_transitive() {
 )"#;
     let unsubstituted_src_4 = r#"
 (fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
-    (match 2 (<EQ> 5 3) (
+    (match 2 3 (<EQ> 5 3) (
         (
             // Arity
             1
 
             // Return val
-            (match 2 (<EQ> 6 4) (
+            (match 2 3 (<EQ> 6 4) (
                 (
                     // Arity
                     1
@@ -615,13 +615,13 @@ fn eq_transitive() {
 )"#;
     let unsubstituted_src_5 = r#"
 (fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
-    (match 2 (<EQ> 5 3) (
+    (match 2 3 (<EQ> 5 3) (
         (
             // Arity
             1
 
             // Return val
-            (match 2 (<EQ> 6 4) (
+            (match 2 3 (<EQ> 6 4) (
                 (
                     // Arity
                     1
@@ -689,13 +689,13 @@ fn can_match_when_matchee_type_is_only_inductive_after_applying_scon() {
     let true_def = ("<TRUE>", "(vcon <BOOL> 0)");
     let unsubstituted_src = r#"
 (fun nonrec ((<PRECISE> <BOOL> <TRUE>)) <BOOL>
-    (match 1 <BOOL> (
+    (match 1 3 <BOOL> (
         (
             // Arity
             2
 
             // Return value
-            (match 0 <BOOL> (
+            (match 0 1 <BOOL> (
                 (0 <TRUE>)
                 (0 <TRUE>)
             ))
@@ -739,7 +739,7 @@ fn can_call_when_callee_type_is_only_a_for_after_applying_scon() {
     let bool_ident_type_def = ("<BOOL_IDENT_TYPE>", r#"(for (<BOOL>) <BOOL>)"#);
     let unsubstituted_src = r#"
 (fun nonrec ((<PRECISE> <BOOL_IDENT_TYPE> <BOOL_IDENT>)) <BOOL>
-    (match 1 <BOOL> (
+    (match 1 3 <BOOL> (
         (
             // Arity
             2
