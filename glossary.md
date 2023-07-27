@@ -11,8 +11,7 @@ with the ordinary definitions.
   **AST nodes only contain semantically relevant information.**
   This implies that any two AST nodes are equal
   under Rust's `std::cmp::Eq` iff
-  they are semantically equal under Zo's semantic rules
-  (assuming an empty substitution context).
+  they are semantically equal under Zo's semantic rules.
 
 - deb: De Bruijn index
 - digest: the output of a hash algorithm.
@@ -32,7 +31,6 @@ with the ordinary definitions.
   The tree is later converted into an IPIST,
   and then into an AST.
 - RC: reference counted
-- scon: substitution context
 - tcon: type context
 - vcon: variant constructor
 
@@ -45,9 +43,8 @@ As another example, you read "OST" as "oh ess tee".
 **There is one exception: "IPIST".**
 You should read "IPIST" as "eye pissed".
 
-## Pronunciation of scon, tcon, and vcon
+## Pronunciation of tcon and vcon
 
-- "ess con"
 - "tee con"
 - "vee con"
 
