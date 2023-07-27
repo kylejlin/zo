@@ -140,19 +140,7 @@ impl IpistToAstConverter {
     }
 
     fn convert_match_case(&mut self, ist: ipist::MatchCase) -> ast::MatchCase {
-        match ist {
-            ipist::MatchCase::Nondismissed(ist) => {
-                ast::MatchCase::Nondismissed(self.convert_nondismissed_match_case(ist))
-            }
-            ipist::MatchCase::Dismissed(_) => ast::MatchCase::Dismissed,
-        }
-    }
-
-    fn convert_nondismissed_match_case(
-        &mut self,
-        ist: ipist::NondismissedMatchCase,
-    ) -> ast::NondismissedMatchCase {
-        ast::NondismissedMatchCase {
+        ast::MatchCase {
             arity: ist.arity.value,
             return_val: self.convert(ist.return_val),
         }

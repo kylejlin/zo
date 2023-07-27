@@ -214,7 +214,6 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
         "fun" => return Some(Token::FunKw(start)),
         "for" => return Some(Token::ForKw(start)),
         "nonrec" => return Some(Token::NonrecKw(start)),
-        "contra" => return Some(Token::ContraKw(start)),
         _ => {}
     }
 
@@ -576,7 +575,7 @@ mod tests {
 
     #[test]
     fn keywords() {
-        let src = r#"ind vcon match fun for nonrec contra Type0 Type1 Type33"#;
+        let src = r#"ind vcon match fun for nonrec Type0 Type1 Type33"#;
         let actual = lex(src);
         let expected = Ok(vec![
             Token::IndKw(ByteIndex(src.find("ind").unwrap())),
@@ -585,7 +584,6 @@ mod tests {
             Token::FunKw(ByteIndex(src.find("fun").unwrap())),
             Token::ForKw(ByteIndex(src.find("for").unwrap())),
             Token::NonrecKw(ByteIndex(src.find("nonrec").unwrap())),
-            Token::ContraKw(ByteIndex(src.find("contra").unwrap())),
             Token::Universe(UniverseLiteral {
                 level: 0,
                 start: ByteIndex(src.find("Type0").unwrap()),

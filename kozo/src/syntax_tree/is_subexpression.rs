@@ -1,3 +1,5 @@
+// TODO: Delete this module.
+
 pub trait IsStrictSubexpressionOf<Super: ?Sized> {
     fn is_strict_subexpression_of(&self, super_: &Super) -> bool;
 
@@ -87,13 +89,9 @@ mod impl_ast {
 
     impl IsStrictSubexpressionOf<MatchCase> for Expr {
         fn is_strict_subexpression_of(&self, super_: &MatchCase) -> bool {
-            match super_ {
-                MatchCase::Dismissed => false,
-                MatchCase::Nondismissed(super_nondismissed) => self
-                    .clone()
-                    .replace_debs(&DebUpshifter(super_nondismissed.arity), 0)
-                    .is_inclusive_subexpression_of(&super_nondismissed.return_val),
-            }
+            self.clone()
+                .replace_debs(&DebUpshifter(super_.arity), 0)
+                .is_inclusive_subexpression_of(&super_.return_val)
         }
     }
 

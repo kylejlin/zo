@@ -47,13 +47,7 @@ pub struct Match {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum MatchCase {
-    Dismissed,
-    Nondismissed(NondismissedMatchCase),
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct NondismissedMatchCase {
+pub struct MatchCase {
     pub arity: usize,
     pub return_val: Expr,
 }

@@ -40,87 +40,110 @@ Match(
             Snoc(
                 Snoc(
                     Nil,
-                    Nondismissed(
-                        NondismissedMatchCase {
-                            lparen: ByteIndex(
-                                55,
+                    MatchCase {
+                        lparen: ByteIndex(
+                            55,
+                        ),
+                        arity: NumberLiteral {
+                            value: 0,
+                            span: (
+                                ByteIndex(
+                                    56,
+                                ),
+                                ByteIndex(
+                                    57,
+                                ),
                             ),
-                            arity: NumberLiteral {
-                                value: 0,
+                        },
+                        return_val: Deb(
+                            NumberLiteral {
+                                value: 1,
                                 span: (
                                     ByteIndex(
-                                        56,
+                                        58,
                                     ),
                                     ByteIndex(
-                                        57,
+                                        59,
                                     ),
                                 ),
                             },
-                            return_val: Deb(
-                                NumberLiteral {
-                                    value: 1,
-                                    span: (
-                                        ByteIndex(
-                                            58,
-                                        ),
-                                        ByteIndex(
-                                            59,
-                                        ),
-                                    ),
-                                },
-                            ),
-                            rparen: ByteIndex(
-                                59,
-                            ),
-                        },
-                    ),
+                        ),
+                        rparen: ByteIndex(
+                            59,
+                        ),
+                    },
                 ),
-                Dismissed(
-                    ByteIndex(
+                MatchCase {
+                    lparen: ByteIndex(
                         70,
                     ),
-                ),
-            ),
-            Nondismissed(
-                NondismissedMatchCase {
-                    lparen: ByteIndex(
-                        86,
-                    ),
                     arity: NumberLiteral {
-                        value: 1,
+                        value: 3,
                         span: (
                             ByteIndex(
-                                87,
+                                71,
                             ),
                             ByteIndex(
-                                88,
+                                72,
                             ),
                         ),
                     },
                     return_val: Deb(
                         NumberLiteral {
-                            value: 2,
+                            value: 400,
                             span: (
                                 ByteIndex(
-                                    89,
+                                    73,
                                 ),
                                 ByteIndex(
-                                    90,
+                                    76,
                                 ),
                             ),
                         },
                     ),
                     rparen: ByteIndex(
-                        90,
+                        76,
                     ),
                 },
             ),
+            MatchCase {
+                lparen: ByteIndex(
+                    87,
+                ),
+                arity: NumberLiteral {
+                    value: 1,
+                    span: (
+                        ByteIndex(
+                            88,
+                        ),
+                        ByteIndex(
+                            89,
+                        ),
+                    ),
+                },
+                return_val: Deb(
+                    NumberLiteral {
+                        value: 2,
+                        span: (
+                            ByteIndex(
+                                90,
+                            ),
+                            ByteIndex(
+                                91,
+                            ),
+                        ),
+                    },
+                ),
+                rparen: ByteIndex(
+                    91,
+                ),
+            },
         ),
         cases_rparen: ByteIndex(
-            96,
+            97,
         ),
         rparen: ByteIndex(
-            98,
+            99,
         ),
     },
 )

@@ -1,6 +1,8 @@
 use super::*;
 
 // TODO: Remove unused params.
+// TODO: Consider whether to sub normalized matchee
+// or original matchee.
 
 impl TypeChecker {
     pub fn get_type_of_match(
@@ -100,47 +102,13 @@ impl TypeChecker {
         &mut self,
         case_index: usize,
         match_g0: RcHashed<cst::Match>,
-        normalized_matchee_g0: NormalForm,
-        matchee_type_ind_g0: Normalized<RcHashed<ast::Ind>>,
-        matchee_type_args_g0: Normalized<RcHashedVec<ast::Expr>>,
-        normalized_match_return_type_g0: NormalForm,
-        tcon_g0: LazyTypeContext,
-    ) -> Result<(), TypeError> {
-        let case = &match_g0.hashee.cases[case_index];
-        match case {
-            cst::MatchCase::Nondismissed(case) => self.typecheck_nondismissed_match_case(
-                case_index,
-                case,
-                match_g0.clone(),
-                normalized_matchee_g0,
-                matchee_type_ind_g0,
-                matchee_type_args_g0,
-                normalized_match_return_type_g0,
-                tcon_g0,
-            ),
-
-            cst::MatchCase::Dismissed(_) => self.typecheck_dismissed_match_case(
-                case_index,
-                match_g0.clone(),
-                normalized_matchee_g0,
-                matchee_type_ind_g0,
-                matchee_type_args_g0,
-                tcon_g0,
-            ),
-        }
-    }
-
-    fn typecheck_nondismissed_match_case(
-        &mut self,
-        case_index: usize,
-        case: &cst::NondismissedMatchCase,
-        match_g0: RcHashed<cst::Match>,
         _normalized_matchee_g0: NormalForm,
         matchee_type_ind_g0: Normalized<RcHashed<ast::Ind>>,
         _matchee_type_args_g0: Normalized<RcHashedVec<ast::Expr>>,
         normalized_match_return_type_g0: NormalForm,
         tcon_g0: LazyTypeContext,
     ) -> Result<(), TypeError> {
+        let case = &match_g0.hashee.cases[case_index];
         let vcon_type_g0 = self.get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
             matchee_type_ind_g0.clone(),
             case_index,
@@ -190,21 +158,5 @@ impl TypeChecker {
         }
 
         Ok(())
-    }
-
-    // TODO: Delete this once we remove `contra` syntax.
-    fn typecheck_dismissed_match_case(
-        &mut self,
-        case_index: usize,
-        match_g0: RcHashed<cst::Match>,
-        _normalized_matchee_g0: NormalForm,
-        _matchee_type_ind_g0: Normalized<RcHashed<ast::Ind>>,
-        _matchee_type_args_g0: Normalized<RcHashedVec<ast::Expr>>,
-        _tcon_g0: LazyTypeContext,
-    ) -> Result<(), TypeError> {
-        return Err(TypeError::IllegallyDismissedMatchCase {
-            match_: match_g0.hashee.clone(),
-            match_case_index: case_index,
-        });
     }
 }

@@ -167,16 +167,7 @@ impl Evaluator {
                 return m.convert_to_expr_and_wrap_in_normalized();
             }
 
-            let case = match &match_.cases.hashee[vcon_index] {
-                MatchCase::Nondismissed(case) => case,
-                MatchCase::Dismissed => {
-                    // The match case corresponding to the matchee's vcon index
-                    // is dismissed.
-                    // Therefore, the `match` expression is a "stuck" term.
-                    // Since we don't emit errors, we just return the term as-is.
-                    return m.convert_to_expr_and_wrap_in_normalized();
-                }
-            };
+            let case = &match_.cases.hashee[vcon_index];
 
             let unsubstituted = case.return_val.clone();
             let substituted = self.substitute_and_downshift_debs(unsubstituted, args);
@@ -244,16 +235,10 @@ impl Evaluator {
     }
 
     fn eval_unseen_match_case(&mut self, case: &MatchCase) -> Normalized<MatchCase> {
-        match case {
-            MatchCase::Dismissed => Normalized(MatchCase::Dismissed),
-
-            MatchCase::Nondismissed(original) => {
-                Normalized(MatchCase::Nondismissed(NondismissedMatchCase {
-                    arity: original.arity,
-                    return_val: self.eval(original.return_val.clone()).into_raw(),
-                }))
-            }
-        }
+        Normalized(MatchCase {
+            arity: case.arity,
+            return_val: self.eval(case.return_val.clone()).into_raw(),
+        })
     }
 
     fn eval_unseen_fun(&mut self, fun: RcHashed<Fun>) -> NormalForm {

@@ -91,13 +91,7 @@ enum ZeroOrMoreMatchCases {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum MatchCase {
-    Nondismissed(NondismissedMatchCase)
-    Dismissed($ContraKw)
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct NondismissedMatchCase {
+struct MatchCase {
     lparen: $LParen
 
     arity: $Number
@@ -166,7 +160,6 @@ terminal Token {
     $ForKw: crate::syntax_tree::token::ByteIndex
 
     $NonrecKw: crate::syntax_tree::token::ByteIndex
-    $ContraKw: crate::syntax_tree::token::ByteIndex
 
     $Number: crate::syntax_tree::token::NumberLiteral
     $String: crate::syntax_tree::token::StringLiteral

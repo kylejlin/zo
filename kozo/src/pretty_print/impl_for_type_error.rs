@@ -103,18 +103,6 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .finish()
             }
 
-            TypeError::IllegallyDismissedMatchCase {
-                match_,
-                match_case_index,
-            } => {
-                let mut converter = IpistToAstConverter::default();
-                let match_ast = converter.convert_match(rc_hashed(match_.clone()));
-                f.debug_struct("TypeError::IllegallyDismissedMatchCase")
-                    .field("match_", &match_ast.pretty_printed())
-                    .field("match_case_index", match_case_index)
-                    .finish()
-            }
-
             TypeError::TypeMismatch {
                 expr,
                 expected_type,
