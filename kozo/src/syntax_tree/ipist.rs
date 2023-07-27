@@ -65,6 +65,7 @@ pub struct Vcon {
 pub struct Match {
     pub lparen: ByteIndex,
     pub matchee: Expr,
+    pub arity: NumberLiteral,
     pub return_type: Expr,
     pub cases_lparen: ByteIndex,
     pub cases: Vec<MatchCase>,

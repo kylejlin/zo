@@ -75,6 +75,7 @@ struct Match {
 
     _: $MatchKw
     matchee: Expr
+    arity: $Number
     return_type: Expr
 
     cases_lparen: $LParen
@@ -93,6 +94,7 @@ enum ZeroOrMoreMatchCases {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum MatchCase {
     Nondismissed(NondismissedMatchCase)
+    // TODO: Remove `contra`.
     Dismissed($ContraKw)
 }
 

@@ -6,8 +6,13 @@ fn match_() {
 (
     match
 
+    // Matchee
     0
 
+    // Arity
+    1
+
+    // Return type
     3
 
     // Cases
@@ -30,8 +35,13 @@ fn non_parenthesized_cases() {
 (
     match
 
+    // Matchee
     0
 
+    // Arity
+    1
+
+    // Return type
     3
 
     (0 1)

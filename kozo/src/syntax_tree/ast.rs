@@ -42,6 +42,7 @@ pub struct Vcon {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Match {
     pub matchee: Expr,
+    pub arity: usize,
     pub return_type: Expr,
     pub cases: RcHashedVec<MatchCase>,
 }

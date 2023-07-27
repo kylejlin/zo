@@ -155,6 +155,8 @@ impl Evaluator {
     }
 
     fn eval_unseen_match(&mut self, m: RcHashed<Match>) -> NormalForm {
+        // TODO: Fix shifting to account for `m.hashee.arity`.
+
         let match_ = &m.hashee;
         let normalized_matchee = self.eval(match_.matchee.clone()).into_raw();
 
@@ -215,6 +217,7 @@ impl Evaluator {
         let match_digest = m.digest.clone();
         let normalized = Match {
             matchee: normalized_matchee,
+            arity: match_.arity,
             return_type: self.eval(match_.return_type.clone()).into_raw(),
             cases: self.eval_match_cases(match_.cases.clone()).into_raw(),
         }

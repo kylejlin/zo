@@ -126,6 +126,7 @@ impl IpistToAstConverter {
     fn convert_unseen_match(&mut self, ist: RcHashed<ipist::Match>) -> RcHashed<ast::Match> {
         rc_hashed(ast::Match {
             matchee: self.convert(ist.hashee.matchee.clone()),
+            arity: ist.hashee.arity.value,
             return_type: self.convert(ist.hashee.return_type.clone()),
             cases: self.convert_match_cases(ist.hashee.cases.clone()),
         })
