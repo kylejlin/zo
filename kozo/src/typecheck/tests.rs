@@ -244,7 +244,7 @@ fn polymorphic_rev_1_2_3() {
     (<POLYMORPHIC_LIST> 2)
     
     (
-        match 2 (<POLYMORPHIC_LIST> 3)
+        match 2 (<POLYMORPHIC_LIST> 4)
 
         (
             (0 1)
