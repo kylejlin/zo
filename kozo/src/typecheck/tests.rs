@@ -288,8 +288,6 @@ fn polymorphic_rev_1_2_3() {
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
-// TODO: Rewrite this test to conform with the new `match` semantics.
-#[ignore]
 #[test]
 fn eq_zero_one() {
     let nat_def = (
@@ -311,13 +309,35 @@ fn eq_zero_one() {
 ))"#,
     );
     let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
+    let unit_def = ("<UNIT>", r#"(ind Type0 "Unit" () ((() ())))"#);
+    let unitc_def = ("<UNITC>", "(vcon <UNIT> 0)");
+    let is_zero_ty_def = (
+        "<IS_ZERO_TY>",
+        r#"
+(fun nonrec (<NAT>) Type0
+    (match 1 Type0 (
+        (0 <UNIT>)
+        (1 <FALSE>)
+    ))
+)"#,
+    );
     let eq_zero_one_implies_false_unsubstituted_src = r#"
 (fun nonrec ((<EQ_0> <1>)) <FALSE>
-    (match 1 <FALSE> (
-        contra
+    (match 1 (<IS_ZERO_TY> 1) (
+        (0 <UNITC>)
     ))
 )"#;
-    let src_defs = [nat_def, zero_def, succ_def, one_def, eq_zero_def, false_def];
+    let src_defs = [
+        nat_def,
+        zero_def,
+        succ_def,
+        one_def,
+        eq_zero_def,
+        false_def,
+        unit_def,
+        unitc_def,
+        is_zero_ty_def,
+    ];
     let eq_zero_one_implies_false_src =
         substitute_with_compounding(src_defs, eq_zero_one_implies_false_unsubstituted_src);
 
