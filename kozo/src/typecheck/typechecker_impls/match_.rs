@@ -1,39 +1,57 @@
 use super::*;
 
-// TODO: Remove unused params.
-// TODO: Consider whether to sub normalized matchee
-// or original matchee.
-
 impl TypeChecker {
     pub fn get_type_of_match(
         &mut self,
-        match_: RcHashed<cst::Match>,
-        tcon: LazyTypeContext,
+        match_g0: RcHashed<cst::Match>,
+        tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
-        let matchee_type = self.get_type(match_.hashee.matchee.clone(), tcon)?;
+        let matchee_type_g0 = self.get_type(match_g0.hashee.matchee.clone(), tcon_g0)?;
 
-        let matchee_ast = self.cst_converter.convert(match_.hashee.matchee.clone());
-        let normalized_matchee = self.evaluator.eval(matchee_ast);
-
-        let (matchee_type_ind, matchee_type_args) = self.assert_matchee_type_is_inductive(
-            match_.hashee.matchee.clone(),
-            matchee_type.clone(),
+        let (matchee_type_ind_g0, matchee_type_args_g0) = self.assert_matchee_type_is_inductive(
+            match_g0.hashee.matchee.clone(),
+            matchee_type_g0.clone(),
         )?;
 
-        self.assert_number_of_match_cases_is_correct(match_.clone(), matchee_type_ind.clone())?;
+        self.assert_number_of_match_cases_is_correct(
+            match_g0.clone(),
+            matchee_type_ind_g0.clone(),
+        )?;
 
-        let normalized_return_type = self
-            .assert_expr_type_is_universe_and_then_eval(match_.hashee.return_type.clone(), tcon)?;
+        let tcon_extension = {
+            let matchee_type_ind_index_types_g0 = matchee_type_ind_g0.to_hashee().index_types();
+            let mut out = matchee_type_ind_index_types_g0.hashee().cloned();
+            let ind_capp_g0matchparamspartial =
+                NormalForm::ind_capp_of_descending_debs(matchee_type_ind_g0.clone());
+            out.push(ind_capp_g0matchparamspartial);
+            out
+        };
+        let tcon_g0matchparams = LazyTypeContext::Snoc(&tcon_g0, tcon_extension.to_derefed());
+        self.assert_expr_type_is_universe(match_g0.hashee.return_type.clone(), tcon_g0matchparams)?;
 
         self.typecheck_match_cases_assuming_number_of_cases_is_correct(
-            match_,
-            normalized_matchee,
-            matchee_type_ind,
-            matchee_type_args,
-            normalized_return_type.clone(),
-            tcon,
+            match_g0.clone(),
+            matchee_type_ind_g0.clone(),
+            matchee_type_args_g0.clone(),
+            tcon_g0,
         )?;
 
+        let matchee_g0 = self.cst_converter.convert(match_g0.hashee.matchee.clone());
+        let substituter_new_exprs: Vec<ast::Expr> = matchee_type_args_g0
+            .raw()
+            .hashee
+            .iter()
+            .cloned()
+            .chain(std::iter::once(matchee_g0))
+            .collect();
+        let substituter = DebDownshiftSubstituter {
+            new_exprs: &substituter_new_exprs,
+        };
+        let return_type = self
+            .cst_converter
+            .convert(match_g0.hashee.return_type.clone())
+            .replace_debs(&substituter, 0);
+        let normalized_return_type = self.evaluator.eval(return_type);
         Ok(normalized_return_type)
     }
 
@@ -78,20 +96,16 @@ impl TypeChecker {
     fn typecheck_match_cases_assuming_number_of_cases_is_correct(
         &mut self,
         match_: RcHashed<cst::Match>,
-        normalized_matchee: NormalForm,
         matchee_type_ind: Normalized<RcHashed<ast::Ind>>,
         matchee_type_args: Normalized<RcHashedVec<ast::Expr>>,
-        normalized_match_return_type: NormalForm,
         tcon: LazyTypeContext,
     ) -> Result<(), TypeError> {
         for i in 0..match_.hashee.cases.len() {
             self.typecheck_match_case(
                 i,
                 match_.clone(),
-                normalized_matchee.clone(),
                 matchee_type_ind.clone(),
                 matchee_type_args.clone(),
-                normalized_match_return_type.clone(),
                 tcon,
             )?;
         }
@@ -102,10 +116,8 @@ impl TypeChecker {
         &mut self,
         case_index: usize,
         match_g0: RcHashed<cst::Match>,
-        _normalized_matchee_g0: NormalForm,
         matchee_type_ind_g0: Normalized<RcHashed<ast::Ind>>,
-        _matchee_type_args_g0: Normalized<RcHashedVec<ast::Expr>>,
-        normalized_match_return_type_g0: NormalForm,
+        matchee_type_args_g0: Normalized<RcHashedVec<ast::Expr>>,
         tcon_g0: LazyTypeContext,
     ) -> Result<(), TypeError> {
         let case = &match_g0.hashee.cases[case_index];
@@ -115,22 +127,45 @@ impl TypeChecker {
         );
 
         let param_types_g0 = vcon_type_g0.clone().for_param_types_or_empty_vec();
-        let param_count = param_types_g0.raw().hashee.len();
 
         self.assert_stated_case_arity_is_correct(
             case.arity,
-            param_count,
+            param_types_g0.raw().hashee.len(),
             case_index,
             match_g0.clone(),
         )?;
+        let case_arity = case.arity.value;
 
         let extended_tcon_g1 =
             LazyTypeContext::Snoc(&tcon_g0, param_types_g0.to_hashee().derefed());
 
         let case_return_val_type_g1 = self.get_type(case.return_val.clone(), extended_tcon_g1)?;
 
-        let normalized_match_return_type_g1 =
-            normalized_match_return_type_g0.upshift(param_count, 0);
+        // TODO: Clean this up.
+        let match_arity = 1 + matchee_type_args_g0.raw().hashee.len();
+        let vcon_type_cfor_return_type_capp_args_g1 = vcon_type_g0
+            .for_return_type_or_self()
+            .app_args_or_empty_vec();
+        let matchee_type_ind_g1 = matchee_type_ind_g0.upshift(case_arity, 0);
+        let vcon_capp_g1 =
+            NormalForm::vcon_capp_of_descending_debs(matchee_type_ind_g1, case_index).into_raw();
+        let substituter_new_exprs = vcon_type_cfor_return_type_capp_args_g1
+            .raw()
+            .hashee
+            .iter()
+            .cloned()
+            .chain(std::iter::once(vcon_capp_g1))
+            .collect::<Vec<_>>();
+        let substituter = DebDownshiftSubstituter {
+            new_exprs: &substituter_new_exprs,
+        };
+        let match_return_type_g0matchparams = self
+            .cst_converter
+            .convert(match_g0.hashee.return_type.clone());
+        let match_return_type_g1 = match_return_type_g0matchparams
+            .replace_debs(&DebUpshifter(case_arity), match_arity)
+            .replace_debs(&substituter, 0);
+        let normalized_match_return_type_g1 = self.evaluator.eval(match_return_type_g1);
 
         self.assert_expected_type_equality_holds_after_applying_scon(ExpectedTypeEquality {
             expr: case.return_val.clone(),

@@ -212,6 +212,10 @@ impl NormalForm {
 }
 
 impl<'a> Normalized<&'a Ind> {
+    pub fn index_types(self) -> Normalized<&'a RcHashedVec<Expr>> {
+        Normalized(&self.0.index_types)
+    }
+
     pub fn vcon_defs(self) -> Normalized<&'a RcHashedVec<VconDef>> {
         Normalized(&self.0.vcon_defs)
     }
@@ -278,7 +282,10 @@ impl NormalForm {
     /// ```
     /// where `arg_count` is the number of params
     /// that the `vcon_index`th vcon def has.
-    pub fn vcon_capp(ind: Normalized<RcHashed<Ind>>, vcon_index: usize) -> NormalForm {
+    pub fn vcon_capp_of_descending_debs(
+        ind: Normalized<RcHashed<Ind>>,
+        vcon_index: usize,
+    ) -> NormalForm {
         let arg_count = ind.raw().hashee.vcon_defs.hashee[vcon_index]
             .param_types
             .hashee
@@ -295,6 +302,33 @@ impl NormalForm {
             .collect();
         let capp = App {
             callee: vcon.into(),
+            args: rc_hashed(args),
+        }
+        .collapse_if_nullary();
+        Normalized(capp)
+    }
+
+    /// Returns an expression of the form
+    /// ```zolike
+    /// (@capp <ind> (
+    ///     <index_count - 1>
+    ///     <index_count - 2>
+    ///     ...
+    ///     0
+    /// ))
+    /// ```
+    /// where `index_count` is the number of indices
+    /// that the `ind` has.
+    pub fn ind_capp_of_descending_debs(ind: Normalized<RcHashed<Ind>>) -> NormalForm {
+        let index_count = ind.raw().hashee.index_types.hashee.len();
+
+        let args: Vec<Expr> = (0..index_count)
+            .into_iter()
+            .rev()
+            .map(|i| DebNode { deb: Deb(i) }.into())
+            .collect();
+        let capp = App {
+            callee: ind.into_raw().into(),
             args: rc_hashed(args),
         }
         .collapse_if_nullary();
@@ -323,19 +357,20 @@ impl<T: ReplaceDebsInEachItem> Normalized<T> {
         )
     }
 
-    pub fn downshift_n_with_constant_cutoff_n(self, amount: usize) -> Self {
-        let decreasing_debs: Vec<Expr> = (0..amount)
-            .rev()
-            .map(|i| DebNode { deb: Deb(i) }.into())
-            .collect();
-        let substituter = DebDownshiftSubstituter {
-            new_exprs: &decreasing_debs,
-        };
-        Normalized(
-            self.0
-                .replace_debs_with_constant_cutoff(&substituter, amount),
-        )
-    }
+    // TODO: Delete.
+    // pub fn downshift_n_with_constant_cutoff_n(self, amount: usize) -> Self {
+    //     let decreasing_debs: Vec<Expr> = (0..amount)
+    //         .rev()
+    //         .map(|i| DebNode { deb: Deb(i) }.into())
+    //         .collect();
+    //     let substituter = DebDownshiftSubstituter {
+    //         new_exprs: &decreasing_debs,
+    //     };
+    //     Normalized(
+    //         self.0
+    //             .replace_debs_with_constant_cutoff(&substituter, amount),
+    //     )
+    // }
 
     pub fn replace_deb0_with_ind_with_constant_cutoff(
         self,

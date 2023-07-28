@@ -25,13 +25,13 @@ impl TypeChecker {
             .clone()
             .upshift_with_increasing_cutoff(param_count);
 
-        let normalized_return_type_g1f = normalized_return_type_g1
+        let normalized_return_type_g1forparams = normalized_return_type_g1
             .clone()
             .upshift(param_count, param_count);
 
         let fun_type_g1: NormalForm = Normalized::for_(
             normalized_param_types_g1.clone().into_rc_hashed(),
-            normalized_return_type_g1f.clone(),
+            normalized_return_type_g1forparams.clone(),
         )
         .into();
 

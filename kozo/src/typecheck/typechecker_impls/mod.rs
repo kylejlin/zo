@@ -92,6 +92,20 @@ impl TypeChecker {
         Ok(normalized.to_hashee().cloned())
     }
 
+    fn assert_expr_type_is_universe(
+        &mut self,
+        expr: cst::Expr,
+        tcon: LazyTypeContext,
+    ) -> Result<(), TypeError> {
+        let type_ = self.get_type(expr.clone(), tcon)?;
+
+        if !type_.raw().is_universe() {
+            return Err(TypeError::UnexpectedNonTypeExpression { expr, type_ });
+        }
+
+        Ok(())
+    }
+
     fn assert_expr_type_is_universe_and_then_eval(
         &mut self,
         expr: cst::Expr,
