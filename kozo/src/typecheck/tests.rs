@@ -369,8 +369,6 @@ fn eq_zero_one() {
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
-// TODO: Rewrite this test to conform with the new `match` semantics.
-#[ignore]
 #[test]
 fn eq_one_zero() {
     let nat_def = (
@@ -392,13 +390,38 @@ fn eq_one_zero() {
 ))"#,
     );
     let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
+    let unit_def = ("<UNIT>", r#"(ind Type0 "Unit" () ((() ())))"#);
+    let unitc_def = ("<UNITC>", "(vcon <UNIT> 0)");
+    let is_one_ty_def = (
+        "<IS_ONE_TY>",
+        r#"
+(fun nonrec (<NAT>) Type0
+    (match 1 Type0 (
+        (0 <FALSE>)
+        (1 (match 0 Type0 (
+            (0 <UNIT>)
+            (1 <FALSE>)
+        )))
+    ))
+)"#,
+    );
     let eq_one_zero_implies_false_unsubstituted_src = r#"
 (fun nonrec ((<EQ_1> <0>)) <FALSE>
-    (match 1 <FALSE> (
-        contra
+    (match 1 (<IS_ONE_TY> 1) (
+        (0 <UNITC>)
     ))
 )"#;
-    let src_defs = [nat_def, zero_def, succ_def, one_def, eq_one_def, false_def];
+    let src_defs = [
+        nat_def,
+        zero_def,
+        succ_def,
+        one_def,
+        eq_one_def,
+        false_def,
+        unit_def,
+        unitc_def,
+        is_one_ty_def,
+    ];
     let eq_one_zero_implies_false_src =
         substitute_with_compounding(src_defs, eq_one_zero_implies_false_unsubstituted_src);
 
