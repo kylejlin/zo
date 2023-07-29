@@ -449,7 +449,7 @@ fn eq_commutative() {
     ((<BOOL>) (0 0))
 ))"#,
     );
-    let unsubstituted_src_1 = r#"
+    let unsubstituted_src = r#"
 (fun nonrec (<BOOL> <BOOL> (<EQ> 1 0)) (<EQ> 1 2)
     (match 1 (<EQ> 1 2) (
         (
@@ -465,14 +465,12 @@ fn eq_commutative() {
 )"#;
 
     let src_defs = [bool_def, true_def, false_def, eq_bool_def];
-    let src = substitute_with_compounding(src_defs, unsubstituted_src_1);
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
 
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
-// TODO: Rewrite this test to conform with the new `match` semantics.
-#[ignore]
 #[test]
 fn eq_transitive() {
     let bool_def = (
@@ -492,140 +490,26 @@ fn eq_transitive() {
     ((<BOOL>) (0 0))
 ))"#,
     );
-    let unsubstituted_src_1 = r#"
+    let unsubstituted_src = r#"
 (fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
-    (match 2 (<EQ> 5 3) (
-        (
-            // Arity
-            1
+    (
+        (match 2 (for ((<EQ> 1 6)) (<EQ> 3 7)) (
+            (
+                // Arity
+                1
+    
+                // Return val
+                (fun nonrec ((<EQ> 0 4)) (<EQ> 1 5) 1)
+            )
+        ))
 
-            // Return val
-            (match 2 (<EQ> 6 4) (
-                (
-                    // Arity
-                    1
-
-                    // Return val
-                    (
-                        (vcon <EQ> 0)
-                        7 // First function param
-                    )
-                )
-            ))
-        )
-    ))
-)"#;
-    let unsubstituted_src_2 = r#"
-(fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
-    (match 2 (<EQ> 5 3) (
-        (
-            // Arity
-            1
-
-            // Return val
-            (match 2 (<EQ> 6 4) (
-                (
-                    // Arity
-                    1
-
-                    // Return val
-                    (
-                        (vcon <EQ> 0)
-                        6 // Second function param
-                    )
-                )
-            ))
-        )
-    ))
-)"#;
-    let unsubstituted_src_3 = r#"
-(fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
-    (match 2 (<EQ> 5 3) (
-        (
-            // Arity
-            1
-
-            // Return val
-            (match 2 (<EQ> 6 4) (
-                (
-                    // Arity
-                    1
-
-                    // Return val
-                    (
-                        (vcon <EQ> 0)
-                        5 // Third function param
-                    )
-                )
-            ))
-        )
-    ))
-)"#;
-    let unsubstituted_src_4 = r#"
-(fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
-    (match 2 (<EQ> 5 3) (
-        (
-            // Arity
-            1
-
-            // Return val
-            (match 2 (<EQ> 6 4) (
-                (
-                    // Arity
-                    1
-
-                    // Return val
-                    (
-                        (vcon <EQ> 0)
-                        1 // Outer match case param
-                    )
-                )
-            ))
-        )
-    ))
-)"#;
-    let unsubstituted_src_5 = r#"
-(fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
-    (match 2 (<EQ> 5 3) (
-        (
-            // Arity
-            1
-
-            // Return val
-            (match 2 (<EQ> 6 4) (
-                (
-                    // Arity
-                    1
-
-                    // Return val
-                    (
-                        (vcon <EQ> 0)
-                        0 // Inner match case param
-                    )
-                )
-            ))
-        )
-    ))
+        1
+    )
 )"#;
     let src_defs = [bool_def, true_def, false_def, eq_bool_def];
-    let src_1 = substitute_with_compounding(src_defs, unsubstituted_src_1);
-    let src_2 = substitute_with_compounding(src_defs, unsubstituted_src_2);
-    let src_3 = substitute_with_compounding(src_defs, unsubstituted_src_3);
-    let src_4 = substitute_with_compounding(src_defs, unsubstituted_src_4);
-    let src_5 = substitute_with_compounding(src_defs, unsubstituted_src_5);
-
-    let type_1 = get_type_under_empty_tcon_and_scon_or_panic(&src_1);
-    let type_2 = get_type_under_empty_tcon_and_scon_or_panic(&src_2);
-    let type_3 = get_type_under_empty_tcon_and_scon_or_panic(&src_3);
-    let type_4 = get_type_under_empty_tcon_and_scon_or_panic(&src_4);
-    let type_5 = get_type_under_empty_tcon_and_scon_or_panic(&src_5);
-
-    assert_eq!(PrettyPrint(type_1.raw()), PrettyPrint(type_2.raw()));
-    assert_eq!(PrettyPrint(type_1.raw()), PrettyPrint(type_3.raw()));
-    assert_eq!(PrettyPrint(type_1.raw()), PrettyPrint(type_4.raw()));
-    assert_eq!(PrettyPrint(type_1.raw()), PrettyPrint(type_5.raw()));
-
-    insta::assert_display_snapshot!(PrettyPrint(type_1.raw()));
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
 #[test]
