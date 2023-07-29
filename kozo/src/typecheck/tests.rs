@@ -430,8 +430,6 @@ fn eq_one_zero() {
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
-// TODO: Rewrite this test to conform with the new `match` semantics.
-#[ignore]
 #[test]
 fn eq_commutative() {
     let bool_def = (
@@ -453,59 +451,24 @@ fn eq_commutative() {
     );
     let unsubstituted_src_1 = r#"
 (fun nonrec (<BOOL> <BOOL> (<EQ> 1 0)) (<EQ> 1 2)
-    (match 1 (<EQ> 2 3) (
+    (match 1 (<EQ> 1 2) (
         (
             // Arity
             1
             // Return val
             (
                 (vcon <EQ> 0)
-                4 // First function param
+                0
             )
         )
     ))
 )"#;
-    let unsubstituted_src_2 = r#"
-(fun nonrec (<BOOL> <BOOL> (<EQ> 1 0)) (<EQ> 1 2)
-    (match 1 (<EQ> 2 3) (
-        (
-            // Arity
-            1
-            // Return val
-            (
-                (vcon <EQ> 0)
-                3 // Second function param
-            )
-        )
-    ))
-)"#;
-    let unsubstituted_src_3 = r#"
-(fun nonrec (<BOOL> <BOOL> (<EQ> 1 0)) (<EQ> 1 2)
-    (match 1 (<EQ> 2 3) (
-        (
-            // Arity
-            1
-            // Return val
-            (
-                (vcon <EQ> 0)
-                0 // Match case param
-            )
-        )
-    ))
-)"#;
+
     let src_defs = [bool_def, true_def, false_def, eq_bool_def];
-    let src_1 = substitute_with_compounding(src_defs, unsubstituted_src_1);
-    let src_2 = substitute_with_compounding(src_defs, unsubstituted_src_2);
-    let src_3 = substitute_with_compounding(src_defs, unsubstituted_src_3);
+    let src = substitute_with_compounding(src_defs, unsubstituted_src_1);
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
 
-    let type_1 = get_type_under_empty_tcon_and_scon_or_panic(&src_1);
-    let type_2 = get_type_under_empty_tcon_and_scon_or_panic(&src_2);
-    let type_3 = get_type_under_empty_tcon_and_scon_or_panic(&src_3);
-
-    assert_eq!(PrettyPrint(type_1.raw()), PrettyPrint(type_2.raw()));
-    assert_eq!(PrettyPrint(type_1.raw()), PrettyPrint(type_3.raw()));
-
-    insta::assert_display_snapshot!(PrettyPrint(type_1.raw()));
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
 // TODO: Rewrite this test to conform with the new `match` semantics.
