@@ -289,6 +289,29 @@ fn polymorphic_rev_1_2_3() {
 }
 
 #[test]
+fn ex_falso() {
+    let nat_def = (
+        "<NAT>",
+        r#"
+(ind Type0 "Nat" () (
+    (() ())
+    ((0) ())
+))"#,
+    );
+    let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
+    let src_defs = [nat_def, false_def];
+    let unsubstituted_src = r#"
+    (fun nonrec (<FALSE>) <NAT>
+        (match 1 <NAT> ())
+    )"#;
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
+
+#[test]
 fn eq_zero_one() {
     let nat_def = (
         "<NAT>",

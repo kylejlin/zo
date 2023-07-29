@@ -1,0 +1,34 @@
+---
+source: src/typecheck/tests.rs
+expression: PrettyPrint(type_.raw())
+---
+(
+    for
+    (
+        (
+            ind
+            Type0
+            "False"
+            ()
+            ()
+        )
+    )
+    (
+        ind
+        Type0
+        "Nat"
+        ()
+        (
+            (
+                ()
+                ()
+            )
+            (
+                (
+                    0
+                )
+                ()
+            )
+        )
+    )
+)
