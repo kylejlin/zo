@@ -1,7 +1,5 @@
 use crate::{pretty_print::PrettyPrint, test_utils::*};
 
-use pretty_assertions::assert_eq;
-
 #[test]
 fn add_2_3() {
     let nat_def = (
