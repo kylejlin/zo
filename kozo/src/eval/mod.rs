@@ -319,10 +319,10 @@ fn can_unfold_app(callee: RcHashed<Fun>, args: RcHashedVec<Expr>) -> bool {
         return false;
     };
 
-    is_vconlike(decreasing_arg.clone())
+    is_vcon_or_vcon_app(decreasing_arg.clone())
 }
 
-fn is_vconlike(expr: Expr) -> bool {
+fn is_vcon_or_vcon_app(expr: Expr) -> bool {
     match expr {
         Expr::Vcon(_) => true,
         Expr::App(app) => match &app.hashee.callee {
