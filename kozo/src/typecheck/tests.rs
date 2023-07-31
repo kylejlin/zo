@@ -13,8 +13,8 @@ fn add_2_3() {
     let succ_def = ("<SUCC>", "(vcon <NAT> 1)");
     let two_def = ("<2>", "(<SUCC> (<SUCC> <0>))");
     let three_def = ("<3>", "(<SUCC> <2>)");
-    let add_def = (
-        "<ADD>",
+    let add_tailcall_impl_def = (
+        "<ADD_TAILCALL_IMPL>",
         "
 (fun 0 (<NAT> <NAT>) <NAT>
     (match 2 <NAT> (
@@ -24,8 +24,15 @@ fn add_2_3() {
 )",
     );
     let add_two_three_src = substitute_with_compounding(
-        [nat_def, zero_def, succ_def, two_def, three_def, add_def],
-        r#"(<ADD> <2> <3>)"#,
+        [
+            nat_def,
+            zero_def,
+            succ_def,
+            two_def,
+            three_def,
+            add_tailcall_impl_def,
+        ],
+        r#"(<ADD_TAILCALL_IMPL> <2> <3>)"#,
     );
 
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&add_two_three_src);
