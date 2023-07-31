@@ -520,3 +520,92 @@ fn vcon_index_arg_types_are_compared_against_ind_index_types_substituted_with_vc
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
+
+#[ignore]
+#[test]
+fn add_zero() {
+    let nat_def = (
+        "<NAT>",
+        r#"(ind Type0 "Nat" () (
+(() ())
+((0) ())
+))"#,
+    );
+    let zero_def = ("<0>", "(vcon <NAT> 0)");
+    let succ_def = ("<SUCC>", "(vcon <NAT> 1)");
+    let add_def = (
+        "<ADD>",
+        "
+(fun 0 (<NAT> <NAT>) <NAT>
+    (match 2 <NAT> (
+        (0 1)
+        (1 (1 0 (<SUCC> 2)))
+    ))
+)",
+    );
+    let eq_def = (
+        "<EQ>",
+        r#"
+(fun nonrec (<NAT> <NAT>) Type0
+    (
+        (ind Type0 "Eq" (<NAT>) (
+            (() (3))
+        ))
+        1
+    )
+)"#,
+    );
+    let refl_def = (
+        "<REFL>",
+        r#"
+(fun nonrec (<NAT>) (<EQ> 0 0)
+    (
+        vcon
+        (ind Type0 "Eq" (<NAT>) (
+            (() (2))
+        ))
+        0
+    )
+)"#,
+    );
+    let src_defs = [nat_def, zero_def, succ_def, add_def, eq_def, refl_def];
+
+    let unsubstituted_src = r#"
+(fun 0 (<NAT>) (<EQ> 0 (<ADD> 0 <0>))
+    (match 1 (<EQ> 0 (<ADD> 0 <0>)) (
+        // `zero` case
+        (
+            // Case arity
+            0
+
+            // Return val
+            (<REFL> <0>)
+        )
+
+        // `(succ pred)` case
+        (
+            // Case arity
+            1
+
+            // Return val
+            //   [goal: (EQ (SUCC 0) (ADD (SUCC 0) ZERO))]
+            //   [goal: (EQ (SUCC 0) (SUCC (ADD 0 ZERO)))]
+            //   [(1 0): (EQ 0 (ADD 0 ZERO))]
+            (match (1 0) (<EQ> (<SUCC> 2) (<SUCC> 1)) (
+                // `refl` case (only case)
+                (
+                    // Case arity
+                    0
+
+                    // Return val
+                    (<REFL> (<SUCC> 0))
+                )
+            ))
+        )
+    ))
+)"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}

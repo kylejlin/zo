@@ -46,6 +46,7 @@ pub fn eval_or_panic(src: &str) -> NormalForm {
     Evaluator::default().eval(ast)
 }
 
+// Remove "scon" from name.
 pub fn get_type_under_empty_tcon_and_scon_or_panic(src: &str) -> NormalForm {
     let cst = parse_rch_cst_or_panic(src);
     let empty = Normalized::<[_; 0]>::new();
