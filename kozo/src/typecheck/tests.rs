@@ -521,7 +521,6 @@ fn vcon_index_arg_types_are_compared_against_ind_index_types_substituted_with_vc
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
-#[ignore]
 #[test]
 fn add_zero() {
     let nat_def = (
@@ -539,7 +538,7 @@ fn add_zero() {
 (fun 0 (<NAT> <NAT>) <NAT>
     (match 2 <NAT> (
         (0 1)
-        (1 (1 0 (<SUCC> 2)))
+        (1 (<SUCC> (1 0 2)))
     ))
 )",
     );
