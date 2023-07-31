@@ -357,21 +357,6 @@ impl<T: ReplaceDebsInEachItem> Normalized<T> {
         )
     }
 
-    // TODO: Delete.
-    // pub fn downshift_n_with_constant_cutoff_n(self, amount: usize) -> Self {
-    //     let decreasing_debs: Vec<Expr> = (0..amount)
-    //         .rev()
-    //         .map(|i| DebNode { deb: Deb(i) }.into())
-    //         .collect();
-    //     let substituter = DebDownshiftSubstituter {
-    //         new_exprs: &decreasing_debs,
-    //     };
-    //     Normalized(
-    //         self.0
-    //             .replace_debs_with_constant_cutoff(&substituter, amount),
-    //     )
-    // }
-
     pub fn replace_deb0_with_ind_with_constant_cutoff(
         self,
         ind: Normalized<RcHashed<Ind>>,
