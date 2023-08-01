@@ -74,5 +74,5 @@ fun eq_commutative(T: Set0, a: T, b: T, eq: Fleq(T, a, b)): Fleq(T, b, a)
     match eq
     case refl:
         refl(T, a)
-    using [c] return Fleq(T, c, a)
+    use [c] return Fleq(T, c, a)
     

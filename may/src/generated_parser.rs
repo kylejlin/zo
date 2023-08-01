@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 54423a8832a23ad6ff10aa45a3698cded3852b6b235c5bac6be736de4b79ae15
+// @sha256 4dabb672d8beb27ade39cffb2f2e18b380c3e5dc258060c448a145632813a4d2
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -34,7 +34,7 @@ pub enum Token {
     ForKw(crate::syntax_tree::token::ByteIndex),
     CaseKw(crate::syntax_tree::token::ByteIndex),
     ReturnKw(crate::syntax_tree::token::ByteIndex),
-    UsingKw(crate::syntax_tree::token::ByteIndex),
+    UseKw(crate::syntax_tree::token::ByteIndex),
     Ident(crate::syntax_tree::token::Ident),
     Number(crate::syntax_tree::token::NumberLiteral),
     String(crate::syntax_tree::token::StringLiteral),
@@ -214,27 +214,27 @@ pub struct Match {
     pub matchkw: crate::syntax_tree::token::ByteIndex,
     pub matchee: Box<Expr>,
     pub cases: Box<ZeroOrMoreMatchCases>,
-    pub using_clause: Box<OptUsingClause>,
+    pub use_clause: Box<OptUseClause>,
     pub returnkw: crate::syntax_tree::token::ByteIndex,
     pub return_type: Box<Expr>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum OptUsingClause {
+pub enum OptUseClause {
     None,
     Some(
-        Box<UsingClause>,
+        Box<UseClause>,
     ),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct UsingClause {
-    pub usingkw: crate::syntax_tree::token::ByteIndex,
-    pub defs: Box<UsingClauseDefs>,
+pub struct UseClause {
+    pub usekw: crate::syntax_tree::token::ByteIndex,
+    pub defs: Box<UseClauseDefs>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum UsingClauseDefs {
+pub enum UseClauseDefs {
     Matchee(
         crate::syntax_tree::token::Ident,
     ),
@@ -424,7 +424,7 @@ enum QuasiterminalKind {
     ForKw = 16,
     CaseKw = 17,
     ReturnKw = 18,
-    UsingKw = 19,
+    UseKw = 19,
     Ident = 20,
     Number = 21,
     String = 22,
@@ -454,9 +454,9 @@ enum NonterminalKind {
     Aind = 16,
     Vcon = 17,
     Match = 18,
-    OptUsingClause = 19,
-    UsingClause = 20,
-    UsingClauseDefs = 21,
+    OptUseClause = 19,
+    UseClause = 20,
+    UseClauseDefs = 21,
     SquareBracketedCommaSeparatedIdentsOrUnderscores = 22,
     CommaSeparatedIdentsOrUnderscores = 23,
     ZeroOrMoreMatchCases = 24,
@@ -605,9 +605,9 @@ enum Node {
     Aind(Aind),
     Vcon(Vcon),
     Match(Match),
-    OptUsingClause(OptUsingClause),
-    UsingClause(UsingClause),
-    UsingClauseDefs(UsingClauseDefs),
+    OptUseClause(OptUseClause),
+    UseClause(UseClause),
+    UseClauseDefs(UseClauseDefs),
     SquareBracketedCommaSeparatedIdentsOrUnderscores(SquareBracketedCommaSeparatedIdentsOrUnderscores),
     CommaSeparatedIdentsOrUnderscores(CommaSeparatedIdentsOrUnderscores),
     ZeroOrMoreMatchCases(ZeroOrMoreMatchCases),
@@ -640,7 +640,7 @@ enum Node {
     ForKw(crate::syntax_tree::token::ByteIndex),
     CaseKw(crate::syntax_tree::token::ByteIndex),
     ReturnKw(crate::syntax_tree::token::ByteIndex),
-    UsingKw(crate::syntax_tree::token::ByteIndex),
+    UseKw(crate::syntax_tree::token::ByteIndex),
     Ident(crate::syntax_tree::token::Ident),
     Number(crate::syntax_tree::token::NumberLiteral),
     String(crate::syntax_tree::token::StringLiteral),
@@ -1153,7 +1153,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         RuleKind::R33 => {
             let return_type_5 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             let returnkw_4 = nodes.pop().unwrap().try_into_return_kw_18().ok().unwrap();
-            let using_clause_3 = Box::new(OptUsingClause::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let use_clause_3 = Box::new(OptUseClause::try_from(nodes.pop().unwrap()).ok().unwrap());
             let cases_2 = Box::new(ZeroOrMoreMatchCases::try_from(nodes.pop().unwrap()).ok().unwrap());
             let matchee_1 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             let matchkw_0 = nodes.pop().unwrap().try_into_match_kw_14().ok().unwrap();
@@ -1165,7 +1165,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
                     matchkw: matchkw_0,
                     matchee: matchee_1,
                     cases: cases_2,
-                    using_clause: using_clause_3,
+                    use_clause: use_clause_3,
                     returnkw: returnkw_4,
                     return_type: return_type_5,
                 }),
@@ -1174,34 +1174,34 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R34 => {
             (
-                Node::OptUsingClause(OptUsingClause::None),
-                NonterminalKind::OptUsingClause,
+                Node::OptUseClause(OptUseClause::None),
+                NonterminalKind::OptUseClause,
             )
         }
         RuleKind::R35 => {
-            let t0 = Box::new(UsingClause::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(UseClause::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::OptUsingClause(OptUsingClause::Some(
+                Node::OptUseClause(OptUseClause::Some(
                     t0,
                 )),
-                NonterminalKind::OptUsingClause,
+                NonterminalKind::OptUseClause,
             )
         }
         RuleKind::R36 => {
-            let defs_1 = Box::new(UsingClauseDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let usingkw_0 = nodes.pop().unwrap().try_into_using_kw_19().ok().unwrap();
+            let defs_1 = Box::new(UseClauseDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let usekw_0 = nodes.pop().unwrap().try_into_use_kw_19().ok().unwrap();
             
             states.truncate(states.len() - 2);
             
             (
-                Node::UsingClause(UsingClause {
-                    usingkw: usingkw_0,
+                Node::UseClause(UseClause {
+                    usekw: usekw_0,
                     defs: defs_1,
                 }),
-                NonterminalKind::UsingClause,
+                NonterminalKind::UseClause,
             )
         }
         RuleKind::R37 => {
@@ -1210,10 +1210,10 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 1);
             
             (
-                Node::UsingClauseDefs(UsingClauseDefs::Matchee(
+                Node::UseClauseDefs(UseClauseDefs::Matchee(
                     t0,
                 )),
-                NonterminalKind::UsingClauseDefs,
+                NonterminalKind::UseClauseDefs,
             )
         }
         RuleKind::R38 => {
@@ -1222,10 +1222,10 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 1);
             
             (
-                Node::UsingClauseDefs(UsingClauseDefs::Indices(
+                Node::UseClauseDefs(UseClauseDefs::Indices(
                     t0,
                 )),
-                NonterminalKind::UsingClauseDefs,
+                NonterminalKind::UseClauseDefs,
             )
         }
         RuleKind::R39 => {
@@ -1236,11 +1236,11 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 3);
             
             (
-                Node::UsingClauseDefs(UsingClauseDefs::MatcheeAndIndices(
+                Node::UseClauseDefs(UseClauseDefs::MatcheeAndIndices(
                     t0,
                     t2,
                 )),
-                NonterminalKind::UsingClauseDefs,
+                NonterminalKind::UseClauseDefs,
             )
         }
         RuleKind::R40 => {
@@ -1535,7 +1535,7 @@ impl QuasiterminalKind {
             Token::ForKw(_) => Self::ForKw,
             Token::CaseKw(_) => Self::CaseKw,
             Token::ReturnKw(_) => Self::ReturnKw,
-            Token::UsingKw(_) => Self::UsingKw,
+            Token::UseKw(_) => Self::UseKw,
             Token::Ident(_) => Self::Ident,
             Token::Number(_) => Self::Number,
             Token::String(_) => Self::String,
@@ -1567,7 +1567,7 @@ impl Node {
             Token::ForKw(t) => Self::ForKw(t),
             Token::CaseKw(t) => Self::CaseKw(t),
             Token::ReturnKw(t) => Self::ReturnKw(t),
-            Token::UsingKw(t) => Self::UsingKw(t),
+            Token::UseKw(t) => Self::UseKw(t),
             Token::Ident(t) => Self::Ident(t),
             Token::Number(t) => Self::Number(t),
             Token::String(t) => Self::String(t),
@@ -8894,34 +8894,34 @@ impl TryFrom<Node> for Match {
     }
 }
 
-impl TryFrom<Node> for OptUsingClause {
+impl TryFrom<Node> for OptUseClause {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::OptUsingClause(n) => Ok(n),
+            Node::OptUseClause(n) => Ok(n),
             _ => Err(node),
         }
     }
 }
 
-impl TryFrom<Node> for UsingClause {
+impl TryFrom<Node> for UseClause {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::UsingClause(n) => Ok(n),
+            Node::UseClause(n) => Ok(n),
             _ => Err(node),
         }
     }
 }
 
-impl TryFrom<Node> for UsingClauseDefs {
+impl TryFrom<Node> for UseClauseDefs {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::UsingClauseDefs(n) => Ok(n),
+            Node::UseClauseDefs(n) => Ok(n),
             _ => Err(node),
         }
     }
@@ -9204,9 +9204,9 @@ impl Node {
         }
     }
     
-    fn try_into_using_kw_19(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_use_kw_19(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
         match self {
-            Self::UsingKw(t) => Ok(t),
+            Self::UseKw(t) => Ok(t),
             _ => Err(self),
         }
     }

@@ -156,25 +156,25 @@ struct Match {
     matchkw: $MatchKw
     matchee: Expr
     cases: ZeroOrMoreMatchCases
-    using_clause: OptUsingClause
+    use_clause: OptUseClause
     returnkw: $ReturnKw
     return_type: Expr
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptUsingClause {
+enum OptUseClause {
     None
-    Some(UsingClause)
+    Some(UseClause)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct UsingClause {
-    usingkw: $UsingKw
-    defs: UsingClauseDefs
+struct UseClause {
+    usekw: $UseKw
+    defs: UseClauseDefs
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum UsingClauseDefs {
+enum UseClauseDefs {
     Matchee($Ident)
     Indices(SquareBracketedCommaSeparatedIdentsOrUnderscores)
     MatcheeAndIndices(
@@ -307,7 +307,7 @@ terminal Token {
 
     $CaseKw: crate::syntax_tree::token::ByteIndex
     $ReturnKw: crate::syntax_tree::token::ByteIndex
-    $UsingKw: crate::syntax_tree::token::ByteIndex
+    $UseKw: crate::syntax_tree::token::ByteIndex
 
     $Ident: crate::syntax_tree::token::Ident
     $Number: crate::syntax_tree::token::NumberLiteral
