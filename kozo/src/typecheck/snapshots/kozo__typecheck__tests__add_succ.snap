@@ -1,6 +1,5 @@
 ---
 source: src/typecheck/tests.rs
-assertion_line: 704
 expression: PrettyPrint(type_.raw())
 ---
 (
