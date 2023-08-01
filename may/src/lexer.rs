@@ -19,6 +19,7 @@ enum State {
     Word { start: ByteIndex, byte_len: usize },
     String { start: ByteIndex, byte_len: usize },
     Slash(ByteIndex),
+    Dash(ByteIndex),
     SingleLineComment,
 }
 
@@ -51,6 +52,7 @@ impl Lexer<'_> {
                 self.handle_char_assuming_state_is_string(current, start, byte_len)
             }
             State::Slash(_) => self.handle_char_assuming_state_is_slash(current_index, current),
+            State::Dash(_) => self.handle_char_assuming_state_is_dash(current_index, current),
             State::SingleLineComment => {
                 self.handle_char_assuming_state_is_single_line_comment(current)
             }
@@ -78,6 +80,12 @@ impl Lexer<'_> {
             }
             '(' => self.out.push(Token::LParen(current_index)),
             ')' => self.out.push(Token::RParen(current_index)),
+            '[' => self.out.push(Token::LSquare(current_index)),
+            ']' => self.out.push(Token::RSquare(current_index)),
+            '=' => self.out.push(Token::Eq(current_index)),
+            ':' => self.out.push(Token::Colon(current_index)),
+            ',' => self.out.push(Token::Comma(current_index)),
+            '-' => self.state = State::Dash(current_index),
             '/' => self.state = State::Slash(current_index),
             _ => {
                 return Err(LexError(
@@ -143,6 +151,22 @@ impl Lexer<'_> {
         self.handle_char(current_index, current)
     }
 
+    fn handle_char_assuming_state_is_dash(
+        &mut self,
+        current_index: ByteIndex,
+        current: char,
+    ) -> Result<(), LexError> {
+        if current == '>' {
+            let dash_index = ByteIndex(current_index.0 - '-'.len_utf8());
+            self.out.push(Token::ThinArrow(dash_index));
+            self.state = State::Main;
+            return Ok(());
+        }
+
+        self.finish_pending_state_and_reset()?;
+        self.handle_char(current_index, current)
+    }
+
     fn handle_char_assuming_state_is_single_line_comment(
         &mut self,
         current: char,
@@ -194,6 +218,10 @@ impl Lexer<'_> {
                 Ok(())
             }
             State::Slash(start) => Err(LexError(start, ByteIndex(start.0 + '/'.len_utf8()))),
+            State::Dash(start) => {
+                self.out.push(Token::Dash(start));
+                Ok(())
+            }
             State::SingleLineComment => Ok(()),
         }
     }
@@ -285,6 +313,20 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
     if s.starts_with("vcon") {
         let index = get_number_after_prefix(s, "vcon")?;
         return Some(Token::VconIndex(VconIndexLiteral { index, start }));
+    }
+
+    if s.is_empty() {
+        return None;
+    }
+
+    match s.chars().next().unwrap() {
+        'a'..='z' | 'A'..='Z' | '_' => {
+            return Some(Token::Ident(Ident {
+                value: s.to_owned(),
+                start,
+            }))
+        }
+        _ => {}
     }
 
     None

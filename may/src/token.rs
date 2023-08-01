@@ -24,7 +24,7 @@ pub type Span = (ByteIndex, ByteIndex);
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct Ident {
     pub value: String,
-    pub span: (ByteIndex, ByteIndex),
+    pub start: ByteIndex,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
