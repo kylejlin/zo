@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 4dabb672d8beb27ade39cffb2f2e18b380c3e5dc258060c448a145632813a4d2
+// @sha256 f1e7f26aa99010933992029fd002ed350d936a78829f272192952197f0bf3d97
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -15,31 +15,31 @@
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Token {
-    LParen(crate::syntax_tree::token::ByteIndex),
-    RParen(crate::syntax_tree::token::ByteIndex),
-    LSquare(crate::syntax_tree::token::ByteIndex),
-    RSquare(crate::syntax_tree::token::ByteIndex),
-    Eq(crate::syntax_tree::token::ByteIndex),
-    Colon(crate::syntax_tree::token::ByteIndex),
-    Comma(crate::syntax_tree::token::ByteIndex),
-    ThinArrow(crate::syntax_tree::token::ByteIndex),
-    Dash(crate::syntax_tree::token::ByteIndex),
-    Underscore(crate::syntax_tree::token::ByteIndex),
-    LetKw(crate::syntax_tree::token::ByteIndex),
-    IndKw(crate::syntax_tree::token::ByteIndex),
-    FunKw(crate::syntax_tree::token::ByteIndex),
-    AindKw(crate::syntax_tree::token::ByteIndex),
-    MatchKw(crate::syntax_tree::token::ByteIndex),
-    AfunKw(crate::syntax_tree::token::ByteIndex),
-    ForKw(crate::syntax_tree::token::ByteIndex),
-    CaseKw(crate::syntax_tree::token::ByteIndex),
-    ReturnKw(crate::syntax_tree::token::ByteIndex),
-    UseKw(crate::syntax_tree::token::ByteIndex),
-    Ident(crate::syntax_tree::token::Ident),
-    Number(crate::syntax_tree::token::NumberLiteral),
-    String(crate::syntax_tree::token::StringLiteral),
-    Universe(crate::syntax_tree::token::UniverseLiteral),
-    VconIndex(crate::syntax_tree::token::VconIndexLiteral),
+    LParen(crate::token::ByteIndex),
+    RParen(crate::token::ByteIndex),
+    LSquare(crate::token::ByteIndex),
+    RSquare(crate::token::ByteIndex),
+    Eq(crate::token::ByteIndex),
+    Colon(crate::token::ByteIndex),
+    Comma(crate::token::ByteIndex),
+    ThinArrow(crate::token::ByteIndex),
+    Dash(crate::token::ByteIndex),
+    Underscore(crate::token::ByteIndex),
+    LetKw(crate::token::ByteIndex),
+    IndKw(crate::token::ByteIndex),
+    FunKw(crate::token::ByteIndex),
+    AindKw(crate::token::ByteIndex),
+    MatchKw(crate::token::ByteIndex),
+    AfunKw(crate::token::ByteIndex),
+    ForKw(crate::token::ByteIndex),
+    CaseKw(crate::token::ByteIndex),
+    ReturnKw(crate::token::ByteIndex),
+    UseKw(crate::token::ByteIndex),
+    Ident(crate::token::Ident),
+    Number(crate::token::NumberLiteral),
+    String(crate::token::StringLiteral),
+    Universe(crate::token::UniverseLiteral),
+    VconIndex(crate::token::VconIndexLiteral),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -72,21 +72,21 @@ pub enum Expr {
         Box<VarOrApp>,
     ),
     Universe(
-        crate::syntax_tree::token::UniverseLiteral,
+        crate::token::UniverseLiteral,
     ),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Let {
-    pub letkw: crate::syntax_tree::token::ByteIndex,
-    pub name: crate::syntax_tree::token::Ident,
+    pub letkw: crate::token::ByteIndex,
+    pub name: crate::token::Ident,
     pub val: Box<Expr>,
     pub next_val: Box<Expr>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Ind {
-    pub indkw: crate::syntax_tree::token::ByteIndex,
+    pub indkw: crate::token::ByteIndex,
     pub params: Box<OptParenthesizedParamDefs>,
     pub innards: Box<IndCommonInnards>,
     pub next_val: Box<Expr>,
@@ -94,11 +94,11 @@ pub struct Ind {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct IndCommonInnards {
-    pub name: crate::syntax_tree::token::Ident,
+    pub name: crate::token::Ident,
     pub indices: Box<OptSquareBracketedParamDefs>,
     pub cases: Box<ZeroOrMoreIndCases>,
-    pub returnkw: crate::syntax_tree::token::ByteIndex,
-    pub universe: crate::syntax_tree::token::UniverseLiteral,
+    pub returnkw: crate::token::ByteIndex,
+    pub universe: crate::token::UniverseLiteral,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -111,9 +111,9 @@ pub enum OptParenthesizedParamDefs {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ParenthesizedCommaSeparatedParamDefs {
-    pub lparen: crate::syntax_tree::token::ByteIndex,
+    pub lparen: crate::token::ByteIndex,
     pub params: Box<CommaSeparatedParamDefs>,
-    pub rparen: crate::syntax_tree::token::ByteIndex,
+    pub rparen: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -138,7 +138,7 @@ pub struct ParamDef {
 pub enum OptDash {
     None,
     Some(
-        crate::syntax_tree::token::ByteIndex,
+        crate::token::ByteIndex,
     ),
 }
 
@@ -152,9 +152,9 @@ pub enum OptSquareBracketedParamDefs {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SquareBracketedParamDefs {
-    pub lsquare: crate::syntax_tree::token::ByteIndex,
+    pub lsquare: crate::token::ByteIndex,
     pub params: Box<CommaSeparatedParamDefs>,
-    pub rsquare: crate::syntax_tree::token::ByteIndex,
+    pub rsquare: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -168,8 +168,8 @@ pub enum ZeroOrMoreIndCases {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct IndCase {
-    pub casekw: crate::syntax_tree::token::ByteIndex,
-    pub name: crate::syntax_tree::token::Ident,
+    pub casekw: crate::token::ByteIndex,
+    pub name: crate::token::Ident,
     pub params: Box<OptParenthesizedParamDefs>,
     pub return_type: Box<OptSquareBracketedExprs>,
 }
@@ -184,8 +184,8 @@ pub enum OptSquareBracketedExprs {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Fun {
-    pub funkw: crate::syntax_tree::token::ByteIndex,
-    pub name: crate::syntax_tree::token::Ident,
+    pub funkw: crate::token::ByteIndex,
+    pub name: crate::token::Ident,
     pub innards: Box<FunCommonInnards>,
     pub next_val: Box<Expr>,
 }
@@ -199,23 +199,23 @@ pub struct FunCommonInnards {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Aind {
-    pub aindkw: crate::syntax_tree::token::ByteIndex,
+    pub aindkw: crate::token::ByteIndex,
     pub innards: Box<IndCommonInnards>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Vcon {
-    pub vconkw: crate::syntax_tree::token::VconIndexLiteral,
+    pub vconkw: crate::token::VconIndexLiteral,
     pub innards: Box<IndCommonInnards>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Match {
-    pub matchkw: crate::syntax_tree::token::ByteIndex,
+    pub matchkw: crate::token::ByteIndex,
     pub matchee: Box<Expr>,
     pub cases: Box<ZeroOrMoreMatchCases>,
     pub use_clause: Box<OptUseClause>,
-    pub returnkw: crate::syntax_tree::token::ByteIndex,
+    pub returnkw: crate::token::ByteIndex,
     pub return_type: Box<Expr>,
 }
 
@@ -229,29 +229,29 @@ pub enum OptUseClause {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct UseClause {
-    pub usekw: crate::syntax_tree::token::ByteIndex,
+    pub usekw: crate::token::ByteIndex,
     pub defs: Box<UseClauseDefs>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum UseClauseDefs {
     Matchee(
-        crate::syntax_tree::token::Ident,
+        crate::token::Ident,
     ),
     Indices(
         Box<SquareBracketedCommaSeparatedIdentsOrUnderscores>,
     ),
     MatcheeAndIndices(
-        crate::syntax_tree::token::Ident,
+        crate::token::Ident,
         Box<SquareBracketedCommaSeparatedIdentsOrUnderscores>,
     ),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SquareBracketedCommaSeparatedIdentsOrUnderscores {
-    pub lparen: crate::syntax_tree::token::ByteIndex,
+    pub lparen: crate::token::ByteIndex,
     pub idents: Box<CommaSeparatedIdentsOrUnderscores>,
-    pub rparen: crate::syntax_tree::token::ByteIndex,
+    pub rparen: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -276,8 +276,8 @@ pub enum ZeroOrMoreMatchCases {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MatchCase {
-    pub casekw: crate::syntax_tree::token::ByteIndex,
-    pub name: crate::syntax_tree::token::Ident,
+    pub casekw: crate::token::ByteIndex,
+    pub name: crate::token::Ident,
     pub params: Box<OptParenthesizedCommaSeparatedIdentsOrUnderscores>,
     pub return_val: Box<Expr>,
 }
@@ -292,14 +292,14 @@ pub enum OptParenthesizedCommaSeparatedIdentsOrUnderscores {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ParenthesizedCommaSeparatedIdentsOrUnderscores {
-    pub lparen: crate::syntax_tree::token::ByteIndex,
+    pub lparen: crate::token::ByteIndex,
     pub idents: Box<CommaSeparatedIdentsOrUnderscores>,
-    pub rparen: crate::syntax_tree::token::ByteIndex,
+    pub rparen: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Afun {
-    pub afunkw: crate::syntax_tree::token::ByteIndex,
+    pub afunkw: crate::token::ByteIndex,
     pub name: Box<OptIdent>,
     pub innards: Box<FunCommonInnards>,
 }
@@ -308,22 +308,22 @@ pub struct Afun {
 pub enum OptIdent {
     None,
     Some(
-        crate::syntax_tree::token::Ident,
+        crate::token::Ident,
     ),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct App {
     pub callee: Box<VarOrApp>,
-    pub lparen: crate::syntax_tree::token::ByteIndex,
+    pub lparen: crate::token::ByteIndex,
     pub args: Box<CommaSeparatedExprs>,
-    pub rparen: crate::syntax_tree::token::ByteIndex,
+    pub rparen: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum VarOrApp {
     Var(
-        crate::syntax_tree::token::Ident,
+        crate::token::Ident,
     ),
     App(
         Box<App>,
@@ -343,7 +343,7 @@ pub enum CommaSeparatedExprs {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct For {
-    pub forkw: crate::syntax_tree::token::ByteIndex,
+    pub forkw: crate::token::ByteIndex,
     pub params: Box<ParenthesizedCommaSeparatedParamDefs>,
     pub return_type: Box<Expr>,
 }
@@ -351,10 +351,10 @@ pub struct For {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum IdentOrUnderscore {
     Ident(
-        crate::syntax_tree::token::Ident,
+        crate::token::Ident,
     ),
     Underscore(
-        crate::syntax_tree::token::ByteIndex,
+        crate::token::ByteIndex,
     ),
 }
 
@@ -621,31 +621,31 @@ enum Node {
     CommaSeparatedExprs(CommaSeparatedExprs),
     For(For),
     IdentOrUnderscore(IdentOrUnderscore),
-    LParen(crate::syntax_tree::token::ByteIndex),
-    RParen(crate::syntax_tree::token::ByteIndex),
-    LSquare(crate::syntax_tree::token::ByteIndex),
-    RSquare(crate::syntax_tree::token::ByteIndex),
-    Eq(crate::syntax_tree::token::ByteIndex),
-    Colon(crate::syntax_tree::token::ByteIndex),
-    Comma(crate::syntax_tree::token::ByteIndex),
-    ThinArrow(crate::syntax_tree::token::ByteIndex),
-    Dash(crate::syntax_tree::token::ByteIndex),
-    Underscore(crate::syntax_tree::token::ByteIndex),
-    LetKw(crate::syntax_tree::token::ByteIndex),
-    IndKw(crate::syntax_tree::token::ByteIndex),
-    FunKw(crate::syntax_tree::token::ByteIndex),
-    AindKw(crate::syntax_tree::token::ByteIndex),
-    MatchKw(crate::syntax_tree::token::ByteIndex),
-    AfunKw(crate::syntax_tree::token::ByteIndex),
-    ForKw(crate::syntax_tree::token::ByteIndex),
-    CaseKw(crate::syntax_tree::token::ByteIndex),
-    ReturnKw(crate::syntax_tree::token::ByteIndex),
-    UseKw(crate::syntax_tree::token::ByteIndex),
-    Ident(crate::syntax_tree::token::Ident),
-    Number(crate::syntax_tree::token::NumberLiteral),
-    String(crate::syntax_tree::token::StringLiteral),
-    Universe(crate::syntax_tree::token::UniverseLiteral),
-    VconIndex(crate::syntax_tree::token::VconIndexLiteral),
+    LParen(crate::token::ByteIndex),
+    RParen(crate::token::ByteIndex),
+    LSquare(crate::token::ByteIndex),
+    RSquare(crate::token::ByteIndex),
+    Eq(crate::token::ByteIndex),
+    Colon(crate::token::ByteIndex),
+    Comma(crate::token::ByteIndex),
+    ThinArrow(crate::token::ByteIndex),
+    Dash(crate::token::ByteIndex),
+    Underscore(crate::token::ByteIndex),
+    LetKw(crate::token::ByteIndex),
+    IndKw(crate::token::ByteIndex),
+    FunKw(crate::token::ByteIndex),
+    AindKw(crate::token::ByteIndex),
+    MatchKw(crate::token::ByteIndex),
+    AfunKw(crate::token::ByteIndex),
+    ForKw(crate::token::ByteIndex),
+    CaseKw(crate::token::ByteIndex),
+    ReturnKw(crate::token::ByteIndex),
+    UseKw(crate::token::ByteIndex),
+    Ident(crate::token::Ident),
+    Number(crate::token::NumberLiteral),
+    String(crate::token::StringLiteral),
+    Universe(crate::token::UniverseLiteral),
+    VconIndex(crate::token::VconIndexLiteral),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -9071,175 +9071,175 @@ impl TryFrom<Node> for IdentOrUnderscore {
 }
 
 impl Node {
-    fn try_into_l_paren_0(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_l_paren_0(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::LParen(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_r_paren_1(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_r_paren_1(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::RParen(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_l_square_2(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_l_square_2(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::LSquare(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_r_square_3(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_r_square_3(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::RSquare(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_eq_4(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_eq_4(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::Eq(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_colon_5(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_colon_5(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::Colon(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_comma_6(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_comma_6(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::Comma(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_thin_arrow_7(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_thin_arrow_7(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::ThinArrow(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_dash_8(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_dash_8(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::Dash(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_underscore_9(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_underscore_9(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::Underscore(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_let_kw_10(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_let_kw_10(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::LetKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_ind_kw_11(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_ind_kw_11(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::IndKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_fun_kw_12(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_fun_kw_12(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::FunKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_aind_kw_13(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_aind_kw_13(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::AindKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_match_kw_14(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_match_kw_14(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::MatchKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_afun_kw_15(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_afun_kw_15(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::AfunKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_for_kw_16(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_for_kw_16(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::ForKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_case_kw_17(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_case_kw_17(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::CaseKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_return_kw_18(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_return_kw_18(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::ReturnKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_use_kw_19(self) -> Result<crate::syntax_tree::token::ByteIndex, Self> {
+    fn try_into_use_kw_19(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::UseKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_ident_20(self) -> Result<crate::syntax_tree::token::Ident, Self> {
+    fn try_into_ident_20(self) -> Result<crate::token::Ident, Self> {
         match self {
             Self::Ident(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_number_21(self) -> Result<crate::syntax_tree::token::NumberLiteral, Self> {
+    fn try_into_number_21(self) -> Result<crate::token::NumberLiteral, Self> {
         match self {
             Self::Number(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_string_22(self) -> Result<crate::syntax_tree::token::StringLiteral, Self> {
+    fn try_into_string_22(self) -> Result<crate::token::StringLiteral, Self> {
         match self {
             Self::String(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_universe_23(self) -> Result<crate::syntax_tree::token::UniverseLiteral, Self> {
+    fn try_into_universe_23(self) -> Result<crate::token::UniverseLiteral, Self> {
         match self {
             Self::Universe(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_vcon_index_24(self) -> Result<crate::syntax_tree::token::VconIndexLiteral, Self> {
+    fn try_into_vcon_index_24(self) -> Result<crate::token::VconIndexLiteral, Self> {
         match self {
             Self::VconIndex(t) => Ok(t),
             _ => Err(self),

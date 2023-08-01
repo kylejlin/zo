@@ -285,33 +285,33 @@ enum IdentOrUnderscore {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 terminal Token {
-    $LParen: crate::syntax_tree::token::ByteIndex
-    $RParen: crate::syntax_tree::token::ByteIndex
-    $LSquare: crate::syntax_tree::token::ByteIndex
-    $RSquare: crate::syntax_tree::token::ByteIndex
-    $Eq: crate::syntax_tree::token::ByteIndex
-    $Colon: crate::syntax_tree::token::ByteIndex
-    $Comma: crate::syntax_tree::token::ByteIndex
-    $ThinArrow: crate::syntax_tree::token::ByteIndex
-    $Dash: crate::syntax_tree::token::ByteIndex
-    $Underscore: crate::syntax_tree::token::ByteIndex
+    $LParen: crate::token::ByteIndex
+    $RParen: crate::token::ByteIndex
+    $LSquare: crate::token::ByteIndex
+    $RSquare: crate::token::ByteIndex
+    $Eq: crate::token::ByteIndex
+    $Colon: crate::token::ByteIndex
+    $Comma: crate::token::ByteIndex
+    $ThinArrow: crate::token::ByteIndex
+    $Dash: crate::token::ByteIndex
+    $Underscore: crate::token::ByteIndex
 
-    $LetKw: crate::syntax_tree::token::ByteIndex
-    $IndKw: crate::syntax_tree::token::ByteIndex
-    $FunKw: crate::syntax_tree::token::ByteIndex
+    $LetKw: crate::token::ByteIndex
+    $IndKw: crate::token::ByteIndex
+    $FunKw: crate::token::ByteIndex
 
-    $AindKw: crate::syntax_tree::token::ByteIndex
-    $MatchKw: crate::syntax_tree::token::ByteIndex
-    $AfunKw: crate::syntax_tree::token::ByteIndex
-    $ForKw: crate::syntax_tree::token::ByteIndex
+    $AindKw: crate::token::ByteIndex
+    $MatchKw: crate::token::ByteIndex
+    $AfunKw: crate::token::ByteIndex
+    $ForKw: crate::token::ByteIndex
 
-    $CaseKw: crate::syntax_tree::token::ByteIndex
-    $ReturnKw: crate::syntax_tree::token::ByteIndex
-    $UseKw: crate::syntax_tree::token::ByteIndex
+    $CaseKw: crate::token::ByteIndex
+    $ReturnKw: crate::token::ByteIndex
+    $UseKw: crate::token::ByteIndex
 
-    $Ident: crate::syntax_tree::token::Ident
-    $Number: crate::syntax_tree::token::NumberLiteral
-    $String: crate::syntax_tree::token::StringLiteral
-    $Universe: crate::syntax_tree::token::UniverseLiteral
-    $VconIndex: crate::syntax_tree::token::VconIndexLiteral
+    $Ident: crate::token::Ident
+    $Number: crate::token::NumberLiteral
+    $String: crate::token::StringLiteral
+    $Universe: crate::token::UniverseLiteral
+    $VconIndex: crate::token::VconIndexLiteral
 }
