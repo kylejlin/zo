@@ -508,7 +508,9 @@ mod string_parser {
     mod tests {
         use super::*;
 
-        use pretty_assertions::assert_eq;
+        // TODO: Uncomment this once I can
+        // download dependencies from Cargo.
+        // use pretty_assertions::assert_eq;
 
         #[test]
         fn empty() {
@@ -628,7 +630,9 @@ mod string_parser {
 mod tests {
     use super::*;
 
-    use pretty_assertions::assert_eq;
+    // TODO: Uncomment this once I can
+    // download dependencies from Cargo.
+    // use pretty_assertions::assert_eq;
 
     #[test]
     fn empty() {
@@ -731,28 +735,44 @@ mod tests {
         let src = r#"(// Hello world!
 // You can write comments on their own line.
 ind // You can also write them at the end of a line 
-nonrec)"#;
+use)"#;
         let actual = lex(src);
         let expected = Ok(vec![
             Token::LParen(ByteIndex(src.find("(").unwrap())),
             Token::IndKw(ByteIndex(src.find("ind").unwrap())),
-            Token::NonrecKw(ByteIndex(src.find("nonrec").unwrap())),
+            Token::UseKw(ByteIndex(src.find("use").unwrap())),
             Token::RParen(ByteIndex(src.find(")").unwrap())),
         ]);
         assert_eq!(expected, actual);
     }
 
     #[test]
-    fn universe_zero_zero() {
-        let src = r#"Type00"#;
+    fn set_zero_zero() {
+        let src = r#"Set00"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);
     }
 
     #[test]
-    fn universe_zero_one() {
-        let src = r#"Type01"#;
+    fn prop_zero_zero() {
+        let src = r#"Prop00"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn set_zero_one() {
+        let src = r#"Set01"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn prop_zero_one() {
+        let src = r#"Prop01"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);
