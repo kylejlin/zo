@@ -648,47 +648,46 @@ mod tests {
         assert_eq!(expected, actual);
     }
 
-    // TODO: Fix
-    // #[test]
-    // fn ind() {
-    //     let actual = lex(r#"(ind Type0 "Nat" () ((() ()) ((0) ())))"#);
-    //     let expected = Ok(vec![
-    //         Token::LParen(ByteIndex(0)),
-    //         Token::IndKw(ByteIndex(1)),
-    //         Token::Universe(UniverseLiteral {
-    //             level: 0,
-    //             start: ByteIndex(5),
-    //         }),
-    //         Token::String(StringLiteral {
-    //             value: "Nat".to_owned(),
-    //             span: (ByteIndex(11), ByteIndex(16)),
-    //         }),
-    //         // Begin parenthesized constructor definitions
-    //         Token::LParen(ByteIndex(17)),
-    //         Token::RParen(ByteIndex(18)),
-    //         Token::LParen(ByteIndex(20)),
-    //         Token::LParen(ByteIndex(21)),
-    //         Token::LParen(ByteIndex(22)),
-    //         Token::RParen(ByteIndex(23)),
-    //         Token::LParen(ByteIndex(25)),
-    //         Token::RParen(ByteIndex(26)),
-    //         Token::RParen(ByteIndex(27)),
-    //         Token::LParen(ByteIndex(29)),
-    //         Token::LParen(ByteIndex(30)),
-    //         Token::Number(NumberLiteral {
-    //             value: 0,
-    //             span: (ByteIndex(31), ByteIndex(32)),
-    //         }),
-    //         Token::RParen(ByteIndex(32)),
-    //         Token::LParen(ByteIndex(34)),
-    //         Token::RParen(ByteIndex(35)),
-    //         Token::RParen(ByteIndex(36)),
-    //         Token::RParen(ByteIndex(37)),
-    //         // End parenthesized constructor definitions
-    //         Token::RParen(ByteIndex(38)),
-    //     ]);
-    //     assert_eq!(expected, actual);
-    // }
+    #[test]
+    fn ind() {
+        let src = r#"ind Nat case zero case succ(pred: Nat) return Set0"#;
+        let actual = lex(src);
+        let expected = Ok(vec![
+            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::Ident(Ident {
+                value: "Nat".to_owned(),
+                start: ByteIndex(src.find("Nat").unwrap()),
+            }),
+            Token::CaseKw(ByteIndex(8)),
+            Token::Ident(Ident {
+                value: "zero".to_owned(),
+                start: ByteIndex(src.find("zero").unwrap()),
+            }),
+            Token::CaseKw(ByteIndex(18)),
+            Token::Ident(Ident {
+                value: "succ".to_owned(),
+                start: ByteIndex(src.find("succ").unwrap()),
+            }),
+            Token::LParen(ByteIndex(src.find("(").unwrap())),
+            Token::Ident(Ident {
+                value: "pred".to_owned(),
+                start: ByteIndex(src.find("pred").unwrap()),
+            }),
+            Token::Colon(ByteIndex(src.find(":").unwrap())),
+            Token::Ident(Ident {
+                value: "Nat".to_owned(),
+                start: ByteIndex(34),
+            }),
+            Token::RParen(ByteIndex(src.find(")").unwrap())),
+            Token::ReturnKw(ByteIndex(src.find("return").unwrap())),
+            Token::Universe(UniverseLiteral {
+                level: 0,
+                start: ByteIndex(src.find("Set0").unwrap()),
+                erasable: false,
+            }),
+        ]);
+        assert_eq!(expected, actual);
+    }
 
     // TODO: Fix
     // #[test]
