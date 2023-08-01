@@ -1,3 +1,11 @@
 [workspace]
 
-members = ["zoc", "may"]
+members = ["zoc"]
+# This is just a temporary measure
+# (until I get Internet connection back).
+# I deleted the `target/` directory
+# after `git checkout add-retype; git clean -df`.
+# This means I don't have zoc's dependencies,
+# which means the workspace cannot build.
+# Thus, I must test May on its own.
+exclude = ["may"]

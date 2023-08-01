@@ -8,6 +8,6 @@ edition = "2021"
 [dependencies]
 
 [build-dependencies]
-kiki = "7"
-walkdir = "2"
-sha256-string = { package = "sha256", version = "1.1.4" }
+# kiki = "7"
+# walkdir = "2"
+# sha256-string = { package = "sha256", version = "1.1.4" }
