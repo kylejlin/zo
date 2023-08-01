@@ -1,0 +1,61 @@
+// def ind Nat Set0 {
+//     zero Nat
+//     succ(pred Nat) Nat
+// }
+
+def ind Nat: Set0
+    case zero
+    case succ(pred: Nat)
+
+def ind Eq0(_: Nat): Prop0
+    case refl: Eq0(zero)
+
+def one = succ(zero)
+
+def ind(T: Set0, left: T) Eq(_: T): Set0
+    case refl: Eq(left)
+
+// Using non-def ind:
+def Eq2 = fun(T: Set0, left: T): Set0
+    ind Eq2(_: T): Set0
+        case refl: Eq2(left)
+
+def refl2 = fun(T: Set0, left: T): Eq2(T, left)(left)
+    vcon0(Eq2(T, left))
+
+// Flat-equality
+def fun Fleq(T: Set0, left: T, right: T): Set0
+    Eq(T, left)(right)
+
+def ind(T: Set0) List: Set0
+    case nil
+    case cons(car: T, cdr: List)
+
+def fun add(-a: Nat, b: Nat): Nat
+    match a return Nat
+    case zero: b
+    case succ(pred): succ(add(pred, b))
+
+// Using non-def fun:
+def add2 = fun add2(-a: Nat, b: Nat): Nat
+    match a return Nat
+    case zero: b
+    case succ(pred): succ(add2(pred, b))
+
+def two = add(one, one)
+
+def ind Bool: Set0
+    case true
+    case false
+
+def fun filter(T: Set0, -list: List(T), pred: For(_: T) -> Bool): List(T)
+    match list return List(T)
+    case nil: nil(T)
+    case cons(car, cdr):
+        match pred(car) return List(T)
+        case true: cons(T)(car, filter(cdr, pred))
+        case false: filter(cdr, pred)
+
+def fun eq_commutative(T: Set0, a: T, b: T, eq: Fleq(T, a, b)): Fleq(T, b, a)
+    match eq as _: _(c) return Fleq(T, c, a)
+    case refl: refl(T, a)

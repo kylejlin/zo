@@ -1,0 +1,43 @@
+start Expr
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum Expr {
+    Let(Let)
+    Ind(Ind)
+    Vcon(Vcon)
+    Match(Match)
+    Fun(Fun)
+    App(App)
+    For(For)
+    Deb($Number)
+    Universe($Universe)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Let {
+    letkw: $LetKw
+    name: $Ident
+    _: $Eq
+    val: $Expr
+    inkw: $InKw
+    return_val: $Expr
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Ind {
+    indkw: $IndKw
+    name: $Ident
+    index_args: TODO
+    type_: $Universe
+    
+
+    index_types_lparen: $LParen
+    index_types: ZeroOrMoreExprs
+    index_types_rparen: $RParen
+
+    vcon_defs_lparen: $LParen
+    vcon_defs: ZeroOrMoreVconDefs
+    vcon_defs_rparen: $RParen
+
+    rparen: $RParen
+}

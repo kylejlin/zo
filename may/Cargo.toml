@@ -1,15 +1,11 @@
 [package]
-name = "zoc"
+name = "mayshow"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-hmac-sha256 = "1.1.7"
-nohash-hasher = "0.2.0"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dev-dependencies]
-pretty_assertions = "1.3.0"
-insta = "1.29.0"
+[dependencies]
 
 [build-dependencies]
 kiki = "7"

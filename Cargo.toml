@@ -1,3 +1,3 @@
 [workspace]
 
-members = ["zoc"]
+members = ["zoc", "may"]
