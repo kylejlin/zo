@@ -177,6 +177,11 @@ struct UsingClause {
 enum UsingClauseDefs {
     Matchee($Ident)
     Indices(SquareBracketedCommaSeparatedIdentsOrUnderscores)
+    MatcheeAndIndices(
+        $Ident
+        _: $Colon
+        SquareBracketedCommaSeparatedIdentsOrUnderscores
+    )
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
