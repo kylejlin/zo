@@ -615,3 +615,91 @@ fn add_zero() {
     let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
+
+#[test]
+fn add_succ() {
+    let nat_def = (
+        "<NAT>",
+        r#"(ind Type0 "Nat" () (
+(() ())
+((0) ())
+))"#,
+    );
+    let zero_def = ("<0>", "(vcon <NAT> 0)");
+    let succ_def = ("<SUCC>", "(vcon <NAT> 1)");
+    let add_def = (
+        "<ADD>",
+        "
+(fun 0 (<NAT> <NAT>) <NAT>
+    (match 2 <NAT> (
+        (0 1)
+        (1 (<SUCC> (1 0 2)))
+    ))
+)",
+    );
+    let eq_def = (
+        "<EQ>",
+        r#"
+(fun nonrec (<NAT> <NAT>) Type0
+    (
+        (ind Type0 "Eq" (<NAT>) (
+            (() (3))
+        ))
+        1
+    )
+)"#,
+    );
+    let refl_def = (
+        "<REFL>",
+        r#"
+(fun nonrec (<NAT>) (<EQ> 0 0)
+    (
+        vcon
+        (ind Type0 "Eq" (<NAT>) (
+            (() (2))
+        ))
+        0
+    )
+)"#,
+    );
+    let src_defs = [nat_def, zero_def, succ_def, add_def, eq_def, refl_def];
+
+    let unsubstituted_src = r#"
+(fun 0 (<NAT> <NAT>) (<EQ> (<ADD> 1 (<SUCC> 0)) (<SUCC> (<ADD> 1 0)))
+    (match 2 (<EQ> (<ADD> 0 (<SUCC> 2)) (<SUCC> (<ADD> 0 2))) (
+        // `zero` case
+        (
+            // Case arity
+            0
+
+            // Return val
+            (<REFL> (<SUCC> 1))
+        )
+
+        // `(succ pred)` case
+        (
+            // Case arity
+            1
+
+            // Return val
+            //   [goal: (EQ (ADD (SUCC 0) (SUCC 2)) (SUCC (ADD (SUCC 0) 2)))]
+            //   [goal: (EQ (SUCC (ADD 0 (SUCC 2))) (SUCC (SUCC (ADD 0 2))))]
+            //   [(1 0 2): (EQ (ADD 0 (SUCC 2)) (SUCC (ADD 0 2)))]
+            (match (1 0 2) (<EQ> (<SUCC> (<ADD> 2 (<SUCC> 4))) (<SUCC> 1)) (
+                // `refl` case (only case)
+                (
+                    // Case arity
+                    0
+
+                    // Return val
+                    (<REFL> (<SUCC> (<ADD> 0 (<SUCC> 2))))
+                )
+            ))
+        )
+    ))
+)"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
