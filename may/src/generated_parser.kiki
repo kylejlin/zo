@@ -39,9 +39,9 @@ struct IndCommonInnards {
     name: $Ident
     // TODO: Add support for `custom_zo_name`.
     indices: OptSquareBracketedParamDefs
-    _: $Colon
-    universe: $Universe
     cases: ZeroOrMoreIndCases
+    returnkw: $ReturnKw
+    universe: $Universe
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -156,9 +156,9 @@ struct Match {
     matchkw: $MatchKw
     matchee: Expr
     cases: ZeroOrMoreMatchCases
+    using_clause: OptUsingClause
     returnkw: $ReturnKw
     return_type: Expr
-    using_clause: OptUsingClause
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

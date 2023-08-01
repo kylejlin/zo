@@ -1,0 +1,6 @@
+If a symbol is defined as a terminal
+but you reference it as a nonterminal
+(i.e., forget the `$` prefix),
+then Kiki panics.
+
+Expected behavior: It returns an `Err`.
