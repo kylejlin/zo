@@ -16,7 +16,8 @@ let Eq2 = afun(T: Set0, left: T): Set0
         case refl: Eq2(left)
 
 let refl2 = afun(T: Set0, left: T): Eq2(T, left)(left)
-    vcon0(Eq2(T, left))
+    vcon0 Eq2(_: T): Set0
+        case refl: Eq2(left)
 
 // Flat-equality
 fun Fleq(T: Set0, left: T, right: T): Set0
