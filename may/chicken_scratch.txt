@@ -2,22 +2,22 @@ ind Nat: Set0
     case zero
     case succ(pred: Nat)
 
-ind Eq0(_: Nat): Prop0
-    case refl: Eq0(zero)
+ind Eq0[_: Nat]: Prop0
+    case refl: [zero]
 
 let one = succ(zero)
 
-ind(T: Set0, left: T) Eq(_: T): Set0
-    case refl: Eq(left)
+ind(T: Set0, left: T) Eq[_: T]: Set0
+    case refl: [left]
 
 // Using non-def ind:
 let Eq2 = afun(T: Set0, left: T): Set0
-    aind Eq2(_: T): Set0
-        case refl: Eq2(left)
+    aind Eq2[_: T]: Set0
+        case refl: [left]
 
 let refl2 = afun(T: Set0, left: T): Eq2(T, left)(left)
-    vcon0 Eq2(_: T): Set0
-        case refl: Eq2(left)
+    vcon0 Eq2[_: T]: Set0
+        case refl: [left]
 
 // Flat-equality
 fun Fleq(T: Set0, left: T, right: T): Set0
@@ -28,15 +28,17 @@ ind(T: Set0) List: Set0
     case cons(car: T, cdr: List)
 
 fun add(-a: Nat, b: Nat): Nat
-    match a return Nat
+    match a
     case zero: b
     case succ(pred): succ(add(pred, b))
+    return Nat
 
 // Using non-def fun:
 let add2 = afun add2(-a: Nat, b: Nat): Nat
-    match a return Nat
+    match a
     case zero: b
     case succ(pred): succ(add2(pred, b))
+    return Nat
 
 let two = add(one, one)
 
@@ -45,13 +47,17 @@ ind Bool: Set0
     case false
 
 fun filter(T: Set0, -list: List(T), pred: For(_: T) -> Bool): List(T)
-    match list return List(T)
+    match list
     case nil: nil(T)
     case cons(car, cdr):
-        match pred(car) return List(T)
+        match pred(car)
         case true: cons(T)(car, filter(cdr, pred))
         case false: filter(cdr, pred)
+        return List(T)
+    return List(T)
 
 fun eq_commutative(T: Set0, a: T, b: T, eq: Fleq(T, a, b)): Fleq(T, b, a)
-    match eq as _: _(c) return Fleq(T, c, a)
+    match eq
     case refl: refl(T, a)
+    return Fleq(T, c, a) using [c]
+    

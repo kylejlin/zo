@@ -27,6 +27,7 @@ struct Let {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Ind {
     indkw: $IndKw
+    params: OptParenthesizedParamDefs
     innards: IndCommonInnards
     next_val: Expr
 }
@@ -35,10 +36,9 @@ struct Ind {
 // shared between `ind` and `aind`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct IndCommonInnards {
-    params: OptParenthesizedParamDefs
     name: $Ident
     // TODO: Add support for `custom_zo_name`.
-    indices: OptParenthesizedParamDefs
+    indices: OptSquareBracketedParamDefs
     _: $Colon
     universe: $Universe
     cases: ZeroOrMoreIndCases
@@ -82,6 +82,19 @@ enum OptDash {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptSquareBracketedParamDefs {
+    None
+    Some(SquareBracketedParamDefs)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct SquareBracketedParamDefs {
+    lsquare: $LSquare
+    params: CommaSeparatedParamDefs
+    rsquare: $RSquare
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ZeroOrMoreIndCases {
     Nil
     Snoc(
@@ -95,15 +108,16 @@ struct IndCase {
     casekw: $CaseKw
     name: $Ident
     params: OptParenthesizedParamDefs
-    return_type: OptColonExpr
+    return_type: OptSquareBracketedExprs
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptColonExpr {
+enum OptSquareBracketedExprs {
     None
     Some(
-        _: $Colon
-        Expr
+        _: $LSquare
+        CommaSeparatedExprs
+        _: $RSquare
     )
 }
 
@@ -133,56 +147,40 @@ struct Aind {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Vcon {
-    vconkw: $VconKw
-    // We can't use `IndCommonInnards` here
-    // because parameters are not allowed.
-    name: $Ident
-    // TODO: Support `custom_zo_name`.
-    indices: OptParenthesizedParamDefs
-    _: $Colon
-    universe: $Universe
-    cases: ZeroOrMoreIndCases
+    vconkw: $VconIndex
+    innards: IndCommonInnards
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Match {
     matchkw: $MatchKw
     matchee: Expr
-    as_clause: OptAsClause
+    cases: ZeroOrMoreMatchCases
     returnkw: $ReturnKw
     return_type: Expr
-    cases: ZeroOrMoreMatchCases
+    using_clause: OptUsingClause
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptAsClause {
+enum OptUsingClause {
     None
-    Some(AsClause)
+    Some(UsingClause)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct AsClause {
-    askw: $AsKw
-    name: IdentOrUnderscore
-    index_params: OptColonMatchIndexParamDefs
+struct UsingClause {
+    usingkw: $UsingKw
+    defs: UsingClauseDefs
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptColonMatchIndexParamDefs {
-    None
-    Some(
-        _: $Colon
-        MatchIndexParamDefs
-    )
+enum UsingClauseDefs {
+    Matchee($Ident)
+    Indices(SquareBracketedCommaSeparatedIdentsOrUnderscores)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct MatchIndexParamDefs {
-    underscore: $Underscore
-    parenthesized: ParenthesizedCommaSeparatedIdentsOrUnderscores
-}
-
-struct ParenthesizedCommaSeparatedIdentsOrUnderscores {
+struct SquareBracketedCommaSeparatedIdentsOrUnderscores {
     lparen: $LParen
     idents: CommaSeparatedIdentsOrUnderscores
     rparen: $RParen
@@ -220,6 +218,13 @@ struct MatchCase {
 enum OptParenthesizedCommaSeparatedIdentsOrUnderscores {
     None
     Some(ParenthesizedCommaSeparatedIdentsOrUnderscores)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct ParenthesizedCommaSeparatedIdentsOrUnderscores {
+    lparen: $LParen
+    idents: CommaSeparatedIdentsOrUnderscores
+    rparen: $RParen
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -277,6 +282,8 @@ enum IdentOrUnderscore {
 terminal Token {
     $LParen: crate::syntax_tree::token::ByteIndex
     $RParen: crate::syntax_tree::token::ByteIndex
+    $LSquare: crate::syntax_tree::token::ByteIndex
+    $RSquare: crate::syntax_tree::token::ByteIndex
     $Eq: crate::syntax_tree::token::ByteIndex
     $Colon: crate::syntax_tree::token::ByteIndex
     $Comma: crate::syntax_tree::token::ByteIndex
@@ -289,17 +296,17 @@ terminal Token {
     $FunKw: crate::syntax_tree::token::ByteIndex
 
     $AindKw: crate::syntax_tree::token::ByteIndex
-    $VconKw: crate::syntax_tree::token::ByteIndex
     $MatchKw: crate::syntax_tree::token::ByteIndex
     $AfunKw: crate::syntax_tree::token::ByteIndex
     $ForKw: crate::syntax_tree::token::ByteIndex
 
     $CaseKw: crate::syntax_tree::token::ByteIndex
-    $AsKw: crate::syntax_tree::token::ByteIndex
     $ReturnKw: crate::syntax_tree::token::ByteIndex
+    $UsingKw: crate::syntax_tree::token::ByteIndex
 
     $Ident: crate::syntax_tree::token::Ident
     $Number: crate::syntax_tree::token::NumberLiteral
     $String: crate::syntax_tree::token::StringLiteral
     $Universe: crate::syntax_tree::token::UniverseLiteral
+    $VconIndex: crate::syntax_tree::token::VconIndexLiteral
 }
