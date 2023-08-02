@@ -39,3 +39,13 @@ add(nine, three)
     let cst = parse(tokens).unwrap();
     insta::assert_debug_snapshot!(cst);
 }
+
+#[test]
+fn no_next_val() {
+    let src = r#"
+let three = succ(two)
+"#;
+    let tokens = lex(src).unwrap();
+    let err = parse(tokens).unwrap_err();
+    assert_eq!(None, err);
+}
