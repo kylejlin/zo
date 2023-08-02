@@ -712,6 +712,26 @@ mod tests {
     }
 
     #[test]
+    fn dashes_and_thin_arrows() {
+        let src = r#"-a-->->-->-"#;
+        let actual = lex(src);
+        let expected = Ok(vec![
+            Token::Dash(ByteIndex(0)),
+            Token::Ident(Ident {
+                value: "a".to_owned(),
+                start: ByteIndex(1),
+            }),
+            Token::Dash(ByteIndex(2)),
+            Token::ThinArrow(ByteIndex(3)),
+            Token::ThinArrow(ByteIndex(5)),
+            Token::Dash(ByteIndex(7)),
+            Token::ThinArrow(ByteIndex(8)),
+            Token::Dash(ByteIndex(10)),
+        ]);
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
     fn keywords() {
         let src = r#"_ let ind fun aind match afun For case return use Set0 Set1 Set33 Prop0 Prop1 Prop33 vcon0 vcon1 vcon33"#;
         let actual = lex(src);
