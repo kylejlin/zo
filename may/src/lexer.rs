@@ -607,7 +607,7 @@ mod tests {
     }
 
     #[test]
-    fn ind() {
+    fn ind_nat() {
         let src = r#"ind Nat case zero case succ(pred: Nat) return Set0"#;
         let actual = lex(src);
         let expected = Ok(vec![
