@@ -1,0 +1,93 @@
+---
+source: may/src/parser/tests/let_.rs
+expression: cst
+---
+Let(
+    Let {
+        letkw: ByteIndex(
+            1,
+        ),
+        name: Ident {
+            value: "three",
+            start: ByteIndex(
+                5,
+            ),
+        },
+        val: VarOrApp(
+            App(
+                App {
+                    callee: Var(
+                        Ident {
+                            value: "succ",
+                            start: ByteIndex(
+                                13,
+                            ),
+                        },
+                    ),
+                    lparen: ByteIndex(
+                        17,
+                    ),
+                    args: One(
+                        VarOrApp(
+                            Var(
+                                Ident {
+                                    value: "two",
+                                    start: ByteIndex(
+                                        18,
+                                    ),
+                                },
+                            ),
+                        ),
+                    ),
+                    rparen: ByteIndex(
+                        21,
+                    ),
+                },
+            ),
+        ),
+        next_val: VarOrApp(
+            App(
+                App {
+                    callee: Var(
+                        Ident {
+                            value: "add",
+                            start: ByteIndex(
+                                24,
+                            ),
+                        },
+                    ),
+                    lparen: ByteIndex(
+                        27,
+                    ),
+                    args: Snoc(
+                        One(
+                            VarOrApp(
+                                Var(
+                                    Ident {
+                                        value: "three",
+                                        start: ByteIndex(
+                                            28,
+                                        ),
+                                    },
+                                ),
+                            ),
+                        ),
+                        VarOrApp(
+                            Var(
+                                Ident {
+                                    value: "three",
+                                    start: ByteIndex(
+                                        35,
+                                    ),
+                                },
+                            ),
+                        ),
+                    ),
+                    rparen: ByteIndex(
+                        40,
+                    ),
+                },
+            ),
+        ),
+    },
+)
