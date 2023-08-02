@@ -647,33 +647,67 @@ mod tests {
         assert_eq!(expected, actual);
     }
 
-    // TODO: Fix
-    // #[test]
-    // fn keywords() {
-    //     let src = r#"ind vcon match fun for nonrec Type0 Type1 Type33"#;
-    //     let actual = lex(src);
-    //     let expected = Ok(vec![
-    //         Token::IndKw(ByteIndex(src.find("ind").unwrap())),
-    //         Token::VconKw(ByteIndex(src.find("vcon").unwrap())),
-    //         Token::MatchKw(ByteIndex(src.find("match").unwrap())),
-    //         Token::FunKw(ByteIndex(src.find("fun").unwrap())),
-    //         Token::ForKw(ByteIndex(src.find("for").unwrap())),
-    //         Token::NonrecKw(ByteIndex(src.find("nonrec").unwrap())),
-    //         Token::Universe(UniverseLiteral {
-    //             level: 0,
-    //             start: ByteIndex(src.find("Type0").unwrap()),
-    //         }),
-    //         Token::Universe(UniverseLiteral {
-    //             level: 1,
-    //             start: ByteIndex(src.find("Type1").unwrap()),
-    //         }),
-    //         Token::Universe(UniverseLiteral {
-    //             level: 33,
-    //             start: ByteIndex(src.find("Type33").unwrap()),
-    //         }),
-    //     ]);
-    //     assert_eq!(expected, actual);
-    // }
+    #[test]
+    fn keywords() {
+        let src = r#"_ let ind fun aind match afun For case return use Set0 Set1 Set33 Prop0 Prop1 Prop33 vcon0 vcon1 vcon33"#;
+        let actual = lex(src);
+        let expected = Ok(vec![
+            Token::Underscore(ByteIndex(src.find("_").unwrap())),
+            Token::LetKw(ByteIndex(src.find("let").unwrap())),
+            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::FunKw(ByteIndex(src.find("fun").unwrap())),
+            Token::AindKw(ByteIndex(src.find("aind").unwrap())),
+            Token::MatchKw(ByteIndex(src.find("match").unwrap())),
+            Token::AfunKw(ByteIndex(src.find("afun").unwrap())),
+            Token::ForKw(ByteIndex(src.find("For").unwrap())),
+            Token::CaseKw(ByteIndex(src.find("case").unwrap())),
+            Token::ReturnKw(ByteIndex(src.find("return").unwrap())),
+            Token::UseKw(ByteIndex(src.find("use").unwrap())),
+            Token::Universe(UniverseLiteral {
+                level: 0,
+                start: ByteIndex(src.find("Set0").unwrap()),
+                erasable: false,
+            }),
+            Token::Universe(UniverseLiteral {
+                level: 1,
+                start: ByteIndex(src.find("Set1").unwrap()),
+                erasable: false,
+            }),
+            Token::Universe(UniverseLiteral {
+                level: 33,
+                start: ByteIndex(src.find("Set33").unwrap()),
+                erasable: false,
+            }),
+            Token::Universe(UniverseLiteral {
+                level: 0,
+                start: ByteIndex(src.find("Prop0").unwrap()),
+                erasable: true,
+            }),
+            Token::Universe(UniverseLiteral {
+                level: 1,
+                start: ByteIndex(src.find("Prop1").unwrap()),
+                erasable: true,
+            }),
+            Token::Universe(UniverseLiteral {
+                level: 33,
+                start: ByteIndex(src.find("Prop33").unwrap()),
+                erasable: true,
+            }),
+            Token::VconIndex(VconIndexLiteral {
+                index: 0,
+                start: ByteIndex(src.find("vcon0").unwrap()),
+            }),
+            Token::VconIndex(VconIndexLiteral {
+                index: 1,
+                start: ByteIndex(src.find("vcon1").unwrap()),
+            }),
+            Token::VconIndex(VconIndexLiteral {
+                index: 33,
+                start: ByteIndex(src.find("vcon33").unwrap()),
+            }),
+        ]);
+        assert_eq!(expected, actual);
+    }
 
     #[test]
     fn no_whitespace() {
