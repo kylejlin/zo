@@ -227,44 +227,6 @@ impl Lexer<'_> {
     }
 }
 
-// TODO: Delete
-// fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
-//     if let Ok(val) = s.parse::<usize>() {
-//         return Some(Token::Number(NumberLiteral {
-//             value: val,
-//             span: (start, ByteIndex(start.0 + s.len())),
-//         }));
-//     }
-
-//     match s {
-//         "ind" => return Some(Token::IndKw(start)),
-//         "match" => return Some(Token::MatchKw(start)),
-//         "fun" => return Some(Token::FunKw(start)),
-//         "for" => return Some(Token::ForKw(start)),
-//         _ => {}
-//     }
-
-//     if s.starts_with("Type") {
-//         let level_src = &s["Type".len()..];
-//         if level_src.is_empty() {
-//             return None;
-//         }
-
-//         let has_extraneous_leading_zeros = level_src != "0" && level_src.starts_with('0');
-//         if has_extraneous_leading_zeros {
-//             return None;
-//         }
-
-//         let Ok(level) = level_src.parse::<usize>() else {
-//             return None;
-//         };
-
-//         return Some(Token::Universe(UniverseLiteral { level, start }));
-//     }
-
-//     None
-// }
-
 fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
     if let Ok(val) = s.parse::<usize>() {
         return Some(Token::Number(NumberLiteral {
