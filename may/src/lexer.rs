@@ -648,6 +648,70 @@ mod tests {
     }
 
     #[test]
+    fn ind_eq() {
+        let src = r#"ind(T: Set0, left: T) Eq[_: T] case refl: [left] return Prop0"#;
+        let actual = lex(src);
+        let expected = Ok(vec![
+            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::LParen(ByteIndex(src.find("(").unwrap())),
+            Token::Ident(Ident {
+                value: "T".to_owned(),
+                start: ByteIndex(src.find("T").unwrap()),
+            }),
+            Token::Colon(ByteIndex(src.find(":").unwrap())),
+            Token::Universe(UniverseLiteral {
+                level: 0,
+                start: ByteIndex(src.find("Set0").unwrap()),
+                erasable: false,
+            }),
+            Token::Comma(ByteIndex(src.find(",").unwrap())),
+            Token::Ident(Ident {
+                value: "left".to_owned(),
+                start: ByteIndex(src.find("left").unwrap()),
+            }),
+            Token::Colon(ByteIndex(17)),
+            Token::Ident(Ident {
+                value: "T".to_owned(),
+                start: ByteIndex(19),
+            }),
+            Token::RParen(ByteIndex(src.find(")").unwrap())),
+            //
+            Token::Ident(Ident {
+                value: "Eq".to_owned(),
+                start: ByteIndex(src.find("Eq").unwrap()),
+            }),
+            Token::LSquare(ByteIndex(src.find("[").unwrap())),
+            Token::Underscore(ByteIndex(src.find("_").unwrap())),
+            Token::Colon(ByteIndex(26)),
+            Token::Ident(Ident {
+                value: "T".to_owned(),
+                start: ByteIndex(28),
+            }),
+            Token::RSquare(ByteIndex(src.find("]").unwrap())),
+            //
+            Token::CaseKw(ByteIndex(src.find("case").unwrap())),
+            Token::Ident(Ident {
+                value: "refl".to_owned(),
+                start: ByteIndex(src.find("refl").unwrap()),
+            }),
+            Token::Colon(ByteIndex(40)),
+            Token::LSquare(ByteIndex(42)),
+            Token::Ident(Ident {
+                value: "left".to_owned(),
+                start: ByteIndex(43),
+            }),
+            Token::RSquare(ByteIndex(47)),
+            Token::ReturnKw(ByteIndex(src.find("return").unwrap())),
+            Token::Universe(UniverseLiteral {
+                level: 0,
+                start: ByteIndex(src.find("Prop0").unwrap()),
+                erasable: true,
+            }),
+        ]);
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
     fn keywords() {
         let src = r#"_ let ind fun aind match afun For case return use Set0 Set1 Set33 Prop0 Prop1 Prop33 vcon0 vcon1 vcon33"#;
         let actual = lex(src);
