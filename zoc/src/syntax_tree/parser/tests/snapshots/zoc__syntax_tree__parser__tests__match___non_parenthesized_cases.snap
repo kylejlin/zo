@@ -1,0 +1,19 @@
+---
+source: zoc/src/syntax_tree/parser/tests/match_.rs
+expression: "&err"
+---
+Some(
+    Number(
+        NumberLiteral {
+            value: 0,
+            span: (
+                ByteIndex(
+                    33,
+                ),
+                ByteIndex(
+                    34,
+                ),
+            ),
+        },
+    ),
+)

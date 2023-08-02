@@ -1,0 +1,12 @@
+---
+source: zoc/src/syntax_tree/parser/tests/universe.rs
+expression: "&cst"
+---
+Universe(
+    UniverseLiteral {
+        level: 42,
+        start: ByteIndex(
+            0,
+        ),
+    },
+)

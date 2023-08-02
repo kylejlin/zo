@@ -1,0 +1,11 @@
+---
+source: zoc/src/syntax_tree/parser/tests/vcon.rs
+expression: "&err"
+---
+Some(
+    LParen(
+        ByteIndex(
+            117,
+        ),
+    ),
+)

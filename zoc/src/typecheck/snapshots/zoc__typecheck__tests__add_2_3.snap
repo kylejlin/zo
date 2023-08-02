@@ -1,0 +1,22 @@
+---
+source: zoc/src/typecheck/tests.rs
+expression: PrettyPrint(type_.raw())
+---
+(
+    ind
+    Type0
+    "Nat"
+    ()
+    (
+        (
+            ()
+            ()
+        )
+        (
+            (
+                0
+            )
+            ()
+        )
+    )
+)
