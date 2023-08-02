@@ -508,9 +508,7 @@ mod string_parser {
     mod tests {
         use super::*;
 
-        // TODO: Uncomment this once I can
-        // download dependencies from Cargo.
-        // use pretty_assertions::assert_eq;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn empty() {
@@ -630,9 +628,7 @@ mod string_parser {
 mod tests {
     use super::*;
 
-    // TODO: Uncomment this once I can
-    // download dependencies from Cargo.
-    // use pretty_assertions::assert_eq;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn empty() {
