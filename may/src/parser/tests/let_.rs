@@ -13,7 +13,7 @@ add(three, three)
 }
 
 #[test]
-fn let_val_is_let() {
+fn val_is_let() {
     let src = r#"
 let three =
     let two = succ(one)
@@ -27,7 +27,7 @@ add(three, three)
 }
 
 #[test]
-fn let_next_val_is_let() {
+fn next_val_is_let() {
     let src = r#"
 let three = succ(two)
 
