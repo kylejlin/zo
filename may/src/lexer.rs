@@ -754,6 +754,14 @@ use)"#;
     }
 
     #[test]
+    fn vcon_zero_zero() {
+        let src = r#"vcon00"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
     fn set_zero_one() {
         let src = r#"Set01"#;
         let actual = lex(src);
@@ -764,6 +772,14 @@ use)"#;
     #[test]
     fn prop_zero_one() {
         let src = r#"Prop01"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn vcon_zero_one() {
+        let src = r#"vcon01"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);
