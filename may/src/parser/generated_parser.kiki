@@ -108,13 +108,14 @@ struct IndCase {
     casekw: $CaseKw
     name: $Ident
     params: OptParenthesizedParamDefs
-    return_type: OptSquareBracketedExprs
+    return_type: OptColonSquareBracketedExprs
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptSquareBracketedExprs {
+enum OptColonSquareBracketedExprs {
     None
     Some(
+        _: $Colon
         _: $LSquare
         CommaSeparatedExprs
         _: $RSquare
