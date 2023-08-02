@@ -1,0 +1,150 @@
+---
+source: may/src/parser/tests/let_.rs
+expression: cst
+---
+Let(
+    Let {
+        letkw: ByteIndex(
+            1,
+        ),
+        name: Ident {
+            value: "three",
+            start: ByteIndex(
+                5,
+            ),
+        },
+        val: VarOrApp(
+            App(
+                App {
+                    callee: Var(
+                        Ident {
+                            value: "succ",
+                            start: ByteIndex(
+                                13,
+                            ),
+                        },
+                    ),
+                    lparen: ByteIndex(
+                        17,
+                    ),
+                    args: One(
+                        VarOrApp(
+                            Var(
+                                Ident {
+                                    value: "two",
+                                    start: ByteIndex(
+                                        18,
+                                    ),
+                                },
+                            ),
+                        ),
+                    ),
+                    rparen: ByteIndex(
+                        21,
+                    ),
+                },
+            ),
+        ),
+        next_val: Let(
+            Let {
+                letkw: ByteIndex(
+                    24,
+                ),
+                name: Ident {
+                    value: "nine",
+                    start: ByteIndex(
+                        28,
+                    ),
+                },
+                val: VarOrApp(
+                    App(
+                        App {
+                            callee: Var(
+                                Ident {
+                                    value: "mult",
+                                    start: ByteIndex(
+                                        35,
+                                    ),
+                                },
+                            ),
+                            lparen: ByteIndex(
+                                39,
+                            ),
+                            args: Snoc(
+                                One(
+                                    VarOrApp(
+                                        Var(
+                                            Ident {
+                                                value: "three",
+                                                start: ByteIndex(
+                                                    40,
+                                                ),
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                VarOrApp(
+                                    Var(
+                                        Ident {
+                                            value: "three",
+                                            start: ByteIndex(
+                                                47,
+                                            ),
+                                        },
+                                    ),
+                                ),
+                            ),
+                            rparen: ByteIndex(
+                                52,
+                            ),
+                        },
+                    ),
+                ),
+                next_val: VarOrApp(
+                    App(
+                        App {
+                            callee: Var(
+                                Ident {
+                                    value: "add",
+                                    start: ByteIndex(
+                                        55,
+                                    ),
+                                },
+                            ),
+                            lparen: ByteIndex(
+                                58,
+                            ),
+                            args: Snoc(
+                                One(
+                                    VarOrApp(
+                                        Var(
+                                            Ident {
+                                                value: "nine",
+                                                start: ByteIndex(
+                                                    59,
+                                                ),
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                VarOrApp(
+                                    Var(
+                                        Ident {
+                                            value: "three",
+                                            start: ByteIndex(
+                                                65,
+                                            ),
+                                        },
+                                    ),
+                                ),
+                            ),
+                            rparen: ByteIndex(
+                                70,
+                            ),
+                        },
+                    ),
+                ),
+            },
+        ),
+    },
+)

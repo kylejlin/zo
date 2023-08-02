@@ -25,3 +25,17 @@ add(three, three)
     let cst = parse(tokens).unwrap();
     insta::assert_debug_snapshot!(cst);
 }
+
+#[test]
+fn let_next_val_is_let() {
+    let src = r#"
+let three = succ(two)
+
+let nine = mult(three, three)
+
+add(nine, three)
+"#;
+    let tokens = lex(src).unwrap();
+    let cst = parse(tokens).unwrap();
+    insta::assert_debug_snapshot!(cst);
+}
