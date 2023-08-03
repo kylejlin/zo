@@ -46,6 +46,7 @@ Ind(
                     14,
                 ),
             },
+            custom_zo_name: None,
             indices: None,
             cases: Snoc(
                 Snoc(

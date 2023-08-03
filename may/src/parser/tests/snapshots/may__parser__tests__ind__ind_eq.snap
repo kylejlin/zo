@@ -69,6 +69,7 @@ Ind(
                     23,
                 ),
             },
+            custom_zo_name: None,
             indices: Some(
                 SquareBracketedParamDefs {
                     lsquare: ByteIndex(
