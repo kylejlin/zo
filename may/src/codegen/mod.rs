@@ -6,7 +6,9 @@ mod mnode {
 
 use zoc::{
     hash::{Digest, NoHashHashMap},
-    syntax_tree::ast::{rc_hashed as bypass_cache_and_rc_hash, Deb, RcHashed, UniverseLevel},
+    syntax_tree::ast::{
+        rc_hashed as bypass_cache_and_rc_hash, Deb, RcHashed, RcHashedVec, UniverseLevel,
+    },
 };
 
 pub mod error;
@@ -22,6 +24,7 @@ pub fn may_to_zo(expr: &mnode::Expr) -> Result<znode::Expr, SemanticError> {
 #[derive(Debug, Default)]
 struct MayConverter {
     znode_cache: NoHashHashMap<Digest, znode::Expr>,
+    znode_vec_cache: NoHashHashMap<Digest, RcHashedVec<znode::Expr>>,
 }
 
 impl MayConverter {
@@ -128,27 +131,88 @@ impl MayConverter {
         expr: &mnode::App,
         con: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        todo!()
+        let callee = self.convert_var_or_app(&expr.callee, con)?;
+        let args = self.convert_exprs(&expr.args, con)?;
+        Ok(self.cache_app(znode::App { callee, args }))
     }
 
     fn convert_universe(
         &mut self,
         expr: &mnode::UniverseLiteral,
     ) -> Result<znode::Expr, SemanticError> {
-        Ok(self.make_universe(znode::UniverseNode {
+        Ok(self.cache_universe(znode::UniverseNode {
             level: UniverseLevel(expr.level),
         }))
     }
 }
 
 impl MayConverter {
-    fn make_universe(&mut self, node: znode::UniverseNode) -> znode::Expr {
+    fn convert_exprs(
+        &mut self,
+        exprs: &mnode::CommaSeparatedExprs,
+        con: Context,
+    ) -> Result<RcHashedVec<znode::Expr>, SemanticError> {
+        let v = self.convert_exprs_without_hashing(exprs, con)?;
+        Ok(self.cache_expr_vec(v))
+    }
+
+    fn convert_exprs_without_hashing(
+        &mut self,
+        exprs: &mnode::CommaSeparatedExprs,
+        con: Context,
+    ) -> Result<Vec<znode::Expr>, SemanticError> {
+        match exprs {
+            mnode::CommaSeparatedExprs::One(e) => {
+                let e = self.convert(e, con)?;
+                Ok(vec![e])
+            }
+            mnode::CommaSeparatedExprs::Snoc(rdc, rac) => {
+                let mut rdc = self.convert_exprs_without_hashing(rdc, con)?;
+                let rac = self.convert(rac, con)?;
+                rdc.push(rac);
+                Ok(rdc)
+            }
+        }
+    }
+}
+
+impl MayConverter {
+    fn cache_app(&mut self, node: znode::App) -> znode::Expr {
         let hashed = bypass_cache_and_rc_hash(node);
 
         if let Some(existing) = self.znode_cache.get(&hashed.digest) {
             return existing.clone();
         }
 
-        znode::Expr::Universe(hashed)
+        let digest = hashed.digest.clone();
+        let out = znode::Expr::App(hashed);
+        self.znode_cache.insert(digest, out.clone());
+        out
+    }
+
+    fn cache_universe(&mut self, node: znode::UniverseNode) -> znode::Expr {
+        let hashed = bypass_cache_and_rc_hash(node);
+
+        if let Some(existing) = self.znode_cache.get(&hashed.digest) {
+            return existing.clone();
+        }
+
+        let digest = hashed.digest.clone();
+        let out = znode::Expr::Universe(hashed);
+        self.znode_cache.insert(digest, out.clone());
+        out
+    }
+
+    fn cache_expr_vec(&mut self, node: Vec<znode::Expr>) -> RcHashedVec<znode::Expr> {
+        let hashed = bypass_cache_and_rc_hash(node);
+
+        if let Some(existing) = self.znode_vec_cache.get(&hashed.digest) {
+            return existing.clone();
+        }
+
+        let digest = hashed.digest.clone();
+        let out = hashed;
+        self.znode_vec_cache.insert(digest, out.clone());
+        out
     }
 }
