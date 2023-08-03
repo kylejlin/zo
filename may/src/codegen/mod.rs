@@ -12,11 +12,14 @@ use zoc::{
     },
 };
 
-pub mod error;
-pub use error::*;
-
 pub mod context;
 pub use context::*;
+
+mod convert_param_defs_to_context_extension;
+use convert_param_defs_to_context_extension::*;
+
+pub mod error;
+pub use error::*;
 
 pub fn may_to_zo(expr: &mnode::Expr) -> Result<znode::Expr, SemanticError> {
     MayConverter::default().convert(expr, Context::empty())
@@ -118,7 +121,17 @@ impl MayConverter {
         expr: &mnode::For,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        todo!()
+        let (extension, param_types, ()) =
+            self.convert_param_defs_to_context_extension(&expr.params.params, context, ForbidDash)?;
+        let extended_context = Context::Snoc(&context, &extension);
+        let return_type = self.convert(&expr.return_type, extended_context)?;
+
+        let param_types = self.cache_expr_vec(param_types);
+
+        Ok(self.cache_for(znode::For {
+            param_types,
+            return_type,
+        }))
     }
 
     fn convert_var_or_app(
@@ -161,6 +174,17 @@ impl MayConverter {
         Ok(self.cache_universe(znode::UniverseNode {
             level: UniverseLevel(expr.level),
         }))
+    }
+}
+
+impl MayConverter {
+    fn get_deb_defining_entry<'a>(&mut self, key: &'a str) -> UnshiftedEntry<'a> {
+        let val = self.cache_deb(znode::DebNode { deb: Deb(0) });
+        UnshiftedEntry {
+            key,
+            val,
+            defines_deb: true,
+        }
     }
 }
 
@@ -218,6 +242,32 @@ impl MayConverter {
         out
     }
 
+    fn cache_for(&mut self, node: znode::For) -> znode::Expr {
+        let hashed = bypass_cache_and_rc_hash(node);
+
+        if let Some(existing) = self.znode_cache.get(&hashed.digest) {
+            return existing.clone();
+        }
+
+        let digest = hashed.digest.clone();
+        let out = znode::Expr::For(hashed);
+        self.znode_cache.insert(digest, out.clone());
+        out
+    }
+
+    fn cache_deb(&mut self, node: znode::DebNode) -> znode::Expr {
+        let hashed = bypass_cache_and_rc_hash(node);
+
+        if let Some(existing) = self.znode_cache.get(&hashed.digest) {
+            return existing.clone();
+        }
+
+        let digest = hashed.digest.clone();
+        let out = znode::Expr::Deb(hashed);
+        self.znode_cache.insert(digest, out.clone());
+        out
+    }
+
     fn cache_universe(&mut self, node: znode::UniverseNode) -> znode::Expr {
         let hashed = bypass_cache_and_rc_hash(node);
 
@@ -242,5 +292,18 @@ impl MayConverter {
         let out = hashed;
         self.znode_vec_cache.insert(digest, out.clone());
         out
+    }
+}
+
+impl mnode::IdentOrUnderscore {
+    /// If `self` is an identifier,
+    /// its value is returned.
+    /// Otherwise, `self` is an underscore,
+    /// in which case the string `"_"` is returned.
+    fn val(&self) -> &str {
+        match self {
+            Self::Ident(ident) => &ident.value,
+            Self::Underscore(_) => "_",
+        }
     }
 }
