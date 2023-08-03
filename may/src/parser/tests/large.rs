@@ -1,4 +1,9 @@
-ind Nat
+use super::*;
+
+#[test]
+fn showcase() {
+    let src = r#"
+    ind Nat
     case zero
     case succ(pred: Nat)
     return Set0
@@ -91,3 +96,9 @@ fun eq_commutative(T: Set0, a: T, b: T, eq: Fleq(T, a, b)): Fleq(T, b, a)
     use [c] return Fleq(T, c, a)
     
 succ(succ(zero))
+
+"#;
+    let tokens = lex(src).unwrap();
+    let cst = parse(tokens).unwrap();
+    insta::assert_debug_snapshot!(cst);
+}

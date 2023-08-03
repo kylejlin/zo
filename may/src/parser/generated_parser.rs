@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 7ad0e41efb46f398aa4e568f5b102dbb25bda212cff4202df2faa829cf53bc26
+// @sha256 d52d7412570327c8a735e2d9d219294c68b23cdd16d37797a321202b2ae9442d
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -249,9 +249,9 @@ pub enum UseClauseDefs {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SquareBracketedCommaSeparatedIdentsOrUnderscores {
-    pub lparen: crate::token::ByteIndex,
+    pub lsquare: crate::token::ByteIndex,
     pub idents: Box<CommaSeparatedIdentsOrUnderscores>,
-    pub rparen: crate::token::ByteIndex,
+    pub rsquare: crate::token::ByteIndex,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -1246,17 +1246,17 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R40 => {
-            let rparen_2 = nodes.pop().unwrap().try_into_r_paren_1().ok().unwrap();
+            let rsquare_2 = nodes.pop().unwrap().try_into_r_square_3().ok().unwrap();
             let idents_1 = Box::new(CommaSeparatedIdentsOrUnderscores::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let lparen_0 = nodes.pop().unwrap().try_into_l_paren_0().ok().unwrap();
+            let lsquare_0 = nodes.pop().unwrap().try_into_l_square_2().ok().unwrap();
             
             states.truncate(states.len() - 3);
             
             (
                 Node::SquareBracketedCommaSeparatedIdentsOrUnderscores(SquareBracketedCommaSeparatedIdentsOrUnderscores {
-                    lparen: lparen_0,
+                    lsquare: lsquare_0,
                     idents: idents_1,
-                    rparen: rparen_2,
+                    rsquare: rsquare_2,
                 }),
                 NonterminalKind::SquareBracketedCommaSeparatedIdentsOrUnderscores,
             )
@@ -3690,9 +3690,9 @@ const ACTION_TABLE: [[Action; 26]; 110] = [
         Action::Err,
     ],
     [
+        Action::Err,
+        Action::Err,
         Action::Shift(State::S81),
-        Action::Err,
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3802,9 +3802,9 @@ const ACTION_TABLE: [[Action; 26]; 110] = [
         Action::Err,
     ],
     [
+        Action::Err,
+        Action::Err,
         Action::Shift(State::S81),
-        Action::Err,
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3887,9 +3887,9 @@ const ACTION_TABLE: [[Action; 26]; 110] = [
     ],
     [
         Action::Err,
+        Action::Err,
+        Action::Err,
         Action::Shift(State::S83),
-        Action::Err,
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Shift(State::S87),
@@ -3973,7 +3973,7 @@ const ACTION_TABLE: [[Action; 26]; 110] = [
         Action::Err,
         Action::Reduce(RuleKind::R41),
         Action::Err,
-        Action::Err,
+        Action::Reduce(RuleKind::R41),
         Action::Err,
         Action::Err,
         Action::Reduce(RuleKind::R41),
@@ -4057,7 +4057,7 @@ const ACTION_TABLE: [[Action; 26]; 110] = [
         Action::Err,
         Action::Reduce(RuleKind::R42),
         Action::Err,
-        Action::Err,
+        Action::Reduce(RuleKind::R42),
         Action::Err,
         Action::Err,
         Action::Reduce(RuleKind::R42),
@@ -4589,7 +4589,7 @@ const ACTION_TABLE: [[Action; 26]; 110] = [
         Action::Err,
         Action::Reduce(RuleKind::R58),
         Action::Err,
-        Action::Err,
+        Action::Reduce(RuleKind::R58),
         Action::Err,
         Action::Reduce(RuleKind::R58),
         Action::Reduce(RuleKind::R58),
@@ -4617,7 +4617,7 @@ const ACTION_TABLE: [[Action; 26]; 110] = [
         Action::Err,
         Action::Reduce(RuleKind::R59),
         Action::Err,
-        Action::Err,
+        Action::Reduce(RuleKind::R59),
         Action::Err,
         Action::Reduce(RuleKind::R59),
         Action::Reduce(RuleKind::R59),

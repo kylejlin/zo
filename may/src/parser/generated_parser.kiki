@@ -187,9 +187,9 @@ enum UseClauseDefs {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct SquareBracketedCommaSeparatedIdentsOrUnderscores {
-    lparen: $LParen
+    lsquare: $LSquare
     idents: CommaSeparatedIdentsOrUnderscores
-    rparen: $RParen
+    rsquare: $RSquare
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
