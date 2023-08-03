@@ -54,4 +54,10 @@ pub struct VconIndexLiteral {
     pub start: ByteIndex,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
+pub struct ReturnArityLiteral {
+    pub arity: usize,
+    pub start: ByteIndex,
+}
+
 pub use crate::cst::Token;

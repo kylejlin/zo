@@ -277,6 +277,12 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
         return Some(Token::VconIndex(VconIndexLiteral { index, start }));
     }
 
+    if s.starts_with("return") {
+        let arity = get_number_after_prefix(s, "return")?;
+
+        return Some(Token::ReturnArity(ReturnArityLiteral { arity, start }));
+    }
+
     if s.is_empty() {
         return None;
     }
@@ -733,7 +739,7 @@ mod tests {
 
     #[test]
     fn keywords() {
-        let src = r#"_ let ind fun aind match afun For case return use Set0 Set1 Set33 Prop0 Prop1 Prop33 vcon0 vcon1 vcon33"#;
+        let src = r#"_ let ind fun aind match afun For case return use Set0 Set1 Set33 Prop0 Prop1 Prop33 vcon0 vcon1 vcon33 return0 return1 return33"#;
         let actual = lex(src);
         let expected = Ok(vec![
             Token::Underscore(ByteIndex(src.find("_").unwrap())),
@@ -788,6 +794,18 @@ mod tests {
             Token::VconIndex(VconIndexLiteral {
                 index: 33,
                 start: ByteIndex(src.find("vcon33").unwrap()),
+            }),
+            Token::ReturnArity(ReturnArityLiteral {
+                arity: 0,
+                start: ByteIndex(src.find("return0").unwrap()),
+            }),
+            Token::ReturnArity(ReturnArityLiteral {
+                arity: 1,
+                start: ByteIndex(src.find("return1").unwrap()),
+            }),
+            Token::ReturnArity(ReturnArityLiteral {
+                arity: 33,
+                start: ByteIndex(src.find("return33").unwrap()),
             }),
         ]);
         assert_eq!(expected, actual);
@@ -846,6 +864,14 @@ use)"#;
     }
 
     #[test]
+    fn return_zero_zero() {
+        let src = r#"return00"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
     fn set_zero_one() {
         let src = r#"Set01"#;
         let actual = lex(src);
@@ -864,6 +890,14 @@ use)"#;
     #[test]
     fn vcon_zero_one() {
         let src = r#"vcon01"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn return_zero_one() {
+        let src = r#"return01"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);

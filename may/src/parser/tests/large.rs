@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn showcase() {
     let src = r#"
-    ind Nat
+ind Nat
     case zero
     case succ(pred: Nat)
     return Set0
@@ -58,7 +58,7 @@ fun add(-a: Nat, b: Nat): Nat
         b
     case succ(pred):
         succ(add(pred, b))
-    return Nat
+    return1 Nat
 
 // Using non-def fun:
 let add2 = afun add2(-a: Nat, b: Nat): Nat
@@ -67,7 +67,7 @@ let add2 = afun add2(-a: Nat, b: Nat): Nat
         b
     case succ(pred):
         succ(add2(pred, b))
-    return Nat
+    return1 Nat
 
 let two = add(one, one)
 
@@ -86,8 +86,8 @@ fun filter(T: Set0, -list: List(T), pred: For(_: T) -> Bool): List(T)
             cons(T)(car, filter(cdr, pred))
         case false:
             filter(cdr, pred)
-        return List(T)
-    return List(T)
+        return1 List(T)
+    return1 List(T)
 
 fun eq_commutative(T: Set0, a: T, b: T, eq: Fleq(T, a, b)): Fleq(T, b, a)
     match eq
@@ -96,6 +96,7 @@ fun eq_commutative(T: Set0, a: T, b: T, eq: Fleq(T, a, b)): Fleq(T, b, a)
     use [c] return Fleq(T, c, a)
     
 succ(succ(zero))
+
 
 "#;
     let tokens = lex(src).unwrap();

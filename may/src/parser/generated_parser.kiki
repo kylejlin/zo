@@ -163,15 +163,17 @@ struct Match {
     matchkw: $MatchKw
     matchee: Expr
     cases: ZeroOrMoreMatchCases
-    use_clause: OptUseClause
-    returnkw: $ReturnKw
+    return_arity: ReturnArityClause
     return_type: Expr
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptUseClause {
-    None
-    Some(UseClause)
+enum ReturnArityClause {
+    Named(
+        UseClause
+        _: $ReturnKw
+    )
+    Unnamed($ReturnArity)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -321,4 +323,5 @@ terminal Token {
     $String: crate::token::StringLiteral
     $Universe: crate::token::UniverseLiteral
     $VconIndex: crate::token::VconIndexLiteral
+    $ReturnArity: crate::token::ReturnArityLiteral
 }
