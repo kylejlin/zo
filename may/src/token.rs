@@ -54,4 +54,4 @@ pub struct VconIndexLiteral {
     pub start: ByteIndex,
 }
 
-pub use crate::parser::Token;
+pub use crate::cst::Token;
