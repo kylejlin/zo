@@ -28,3 +28,18 @@ List(Nat)
     let cst = parse(tokens).unwrap();
     insta::assert_debug_snapshot!(cst);
 }
+
+#[test]
+fn non_universe_return_type() {
+    let src = r#"
+ind(T: Set0) List
+    case nil
+    case cons(car: T, cdr: List)
+    return illegal
+
+List(Nat)
+"#;
+    let tokens = lex(src).unwrap();
+    let err = parse(tokens).unwrap_err();
+    insta::assert_debug_snapshot!(err);
+}
