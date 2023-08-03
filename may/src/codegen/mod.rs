@@ -1,7 +1,8 @@
-use crate::cst as mnode;
 use zoc::syntax_tree::ast as znode;
 
-use crate::token::UniverseLiteral;
+mod mnode {
+    pub use crate::{cst::*, token::*};
+}
 
 use zoc::{
     hash::{Digest, NoHashHashMap},
@@ -108,10 +109,32 @@ impl MayConverter {
         expr: &mnode::VarOrApp,
         con: Context,
     ) -> Result<znode::Expr, SemanticError> {
+        match expr {
+            mnode::VarOrApp::Var(e) => self.convert_var(e, con),
+            mnode::VarOrApp::App(e) => self.convert_app(e, con),
+        }
+    }
+
+    fn convert_var(
+        &mut self,
+        expr: &mnode::Ident,
+        con: Context,
+    ) -> Result<znode::Expr, SemanticError> {
         todo!()
     }
 
-    fn convert_universe(&mut self, expr: &UniverseLiteral) -> Result<znode::Expr, SemanticError> {
+    fn convert_app(
+        &mut self,
+        expr: &mnode::App,
+        con: Context,
+    ) -> Result<znode::Expr, SemanticError> {
+        todo!()
+    }
+
+    fn convert_universe(
+        &mut self,
+        expr: &mnode::UniverseLiteral,
+    ) -> Result<znode::Expr, SemanticError> {
         Ok(znode::Expr::Universe(rc_hashed(znode::UniverseNode {
             level: UniverseLevel(expr.level),
         })))
