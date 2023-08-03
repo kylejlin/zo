@@ -3,7 +3,10 @@ use zoc::syntax_tree::ast as znode;
 
 use crate::token::UniverseLiteral;
 
-use zoc::hash::{Digest, NoHashHashMap};
+use zoc::{
+    hash::{Digest, NoHashHashMap},
+    syntax_tree::ast::{rc_hashed, Deb, RcHashed, UniverseLevel},
+};
 
 pub mod error;
 pub use error::*;
@@ -32,7 +35,7 @@ impl MayConverter {
             mnode::Expr::Afun(e) => self.convert_afun(e, con),
             mnode::Expr::For(e) => self.convert_for(e, con),
             mnode::Expr::VarOrApp(e) => self.convert_var_or_app(e, con),
-            mnode::Expr::Universe(e) => self.convert_universe(e, con),
+            mnode::Expr::Universe(e) => self.convert_universe(e),
         }
     }
 
@@ -108,11 +111,9 @@ impl MayConverter {
         todo!()
     }
 
-    fn convert_universe(
-        &mut self,
-        expr: &UniverseLiteral,
-        con: Context,
-    ) -> Result<znode::Expr, SemanticError> {
-        todo!()
+    fn convert_universe(&mut self, expr: &UniverseLiteral) -> Result<znode::Expr, SemanticError> {
+        Ok(znode::Expr::Universe(rc_hashed(znode::UniverseNode {
+            level: UniverseLevel(expr.level),
+        })))
     }
 }
