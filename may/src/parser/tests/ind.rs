@@ -13,3 +13,18 @@ Eq(Nat, zero)(zero)
     let cst = parse(tokens).unwrap();
     insta::assert_debug_snapshot!(cst);
 }
+
+#[test]
+fn ind_list() {
+    let src = r#"
+ind(T: Set0) List
+    case nil
+    case cons(car: T, cdr: List)
+    return Set0
+
+List(Nat)
+"#;
+    let tokens = lex(src).unwrap();
+    let cst = parse(tokens).unwrap();
+    insta::assert_debug_snapshot!(cst);
+}
