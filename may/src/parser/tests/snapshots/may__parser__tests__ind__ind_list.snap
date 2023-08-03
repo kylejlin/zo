@@ -7,39 +7,39 @@ Ind(
         indkw: ByteIndex(
             1,
         ),
-        params: Some(
-            ParenthesizedCommaSeparatedParamDefs {
-                lparen: ByteIndex(
-                    4,
-                ),
-                params: One(
-                    ParamDef {
-                        dash: None,
-                        name: Ident(
-                            Ident {
-                                value: "T",
-                                start: ByteIndex(
-                                    5,
-                                ),
-                            },
-                        ),
-                        type_: Universe(
-                            UniverseLiteral {
-                                level: 0,
-                                start: ByteIndex(
-                                    8,
-                                ),
-                                erasable: false,
-                            },
-                        ),
-                    },
-                ),
-                rparen: ByteIndex(
-                    12,
-                ),
-            },
-        ),
         innards: IndCommonInnards {
+            params: Some(
+                ParenthesizedCommaSeparatedParamDefs {
+                    lparen: ByteIndex(
+                        4,
+                    ),
+                    params: One(
+                        ParamDef {
+                            dash: None,
+                            name: Ident(
+                                Ident {
+                                    value: "T",
+                                    start: ByteIndex(
+                                        5,
+                                    ),
+                                },
+                            ),
+                            type_: Universe(
+                                UniverseLiteral {
+                                    level: 0,
+                                    start: ByteIndex(
+                                        8,
+                                    ),
+                                    erasable: false,
+                                },
+                            ),
+                        },
+                    ),
+                    rparen: ByteIndex(
+                        12,
+                    ),
+                },
+            ),
             name: Ident {
                 value: "List",
                 start: ByteIndex(

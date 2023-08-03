@@ -27,7 +27,6 @@ struct Let {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Ind {
     indkw: $IndKw
-    params: OptParenthesizedParamDefs
     innards: IndCommonInnards
     next_val: Expr
 }
@@ -36,6 +35,7 @@ struct Ind {
 // shared between `ind` and `aind`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct IndCommonInnards {
+    params: OptParenthesizedParamDefs
     name: $Ident
     // TODO: Add support for `custom_zo_name`.
     indices: OptSquareBracketedParamDefs
