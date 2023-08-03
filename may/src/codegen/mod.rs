@@ -6,7 +6,7 @@ mod mnode {
 
 use zoc::{
     hash::{Digest, NoHashHashMap},
-    syntax_tree::ast::{rc_hashed, Deb, RcHashed, UniverseLevel},
+    syntax_tree::ast::{rc_hashed as bypass_cache_and_rc_hash, Deb, RcHashed, UniverseLevel},
 };
 
 pub mod error;
@@ -135,8 +135,20 @@ impl MayConverter {
         &mut self,
         expr: &mnode::UniverseLiteral,
     ) -> Result<znode::Expr, SemanticError> {
-        Ok(znode::Expr::Universe(rc_hashed(znode::UniverseNode {
+        Ok(self.make_universe(znode::UniverseNode {
             level: UniverseLevel(expr.level),
-        })))
+        }))
+    }
+}
+
+impl MayConverter {
+    fn make_universe(&mut self, node: znode::UniverseNode) -> znode::Expr {
+        let hashed = bypass_cache_and_rc_hash(node);
+
+        if let Some(existing) = self.znode_cache.get(&hashed.digest) {
+            return existing.clone();
+        }
+
+        znode::Expr::Universe(hashed)
     }
 }
