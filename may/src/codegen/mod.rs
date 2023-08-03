@@ -4,8 +4,9 @@ mod mnode {
     pub use crate::{cst::*, token::*};
 }
 
+use zoc::syntax_tree::replace_debs::{DebUpshifter, ReplaceDebs};
 use zoc::{
-    hash::{Digest, NoHashHashMap},
+    hash::{Digest, GetDigest, NoHashHashMap},
     syntax_tree::ast::{
         rc_hashed as bypass_cache_and_rc_hash, Deb, RcHashed, RcHashedVec, UniverseLevel,
     },
@@ -28,17 +29,21 @@ struct MayConverter {
 }
 
 impl MayConverter {
-    fn convert(&mut self, expr: &mnode::Expr, con: Context) -> Result<znode::Expr, SemanticError> {
+    fn convert(
+        &mut self,
+        expr: &mnode::Expr,
+        context: Context,
+    ) -> Result<znode::Expr, SemanticError> {
         match expr {
-            mnode::Expr::Let(e) => self.convert_let(e, con),
-            mnode::Expr::Ind(e) => self.convert_ind(e, con),
-            mnode::Expr::Fun(e) => self.convert_fun(e, con),
-            mnode::Expr::Aind(e) => self.convert_aind(e, con),
-            mnode::Expr::Vcon(e) => self.convert_vcon(e, con),
-            mnode::Expr::Match(e) => self.convert_match(e, con),
-            mnode::Expr::Afun(e) => self.convert_afun(e, con),
-            mnode::Expr::For(e) => self.convert_for(e, con),
-            mnode::Expr::VarOrApp(e) => self.convert_var_or_app(e, con),
+            mnode::Expr::Let(e) => self.convert_let(e, context),
+            mnode::Expr::Ind(e) => self.convert_ind(e, context),
+            mnode::Expr::Fun(e) => self.convert_fun(e, context),
+            mnode::Expr::Aind(e) => self.convert_aind(e, context),
+            mnode::Expr::Vcon(e) => self.convert_vcon(e, context),
+            mnode::Expr::Match(e) => self.convert_match(e, context),
+            mnode::Expr::Afun(e) => self.convert_afun(e, context),
+            mnode::Expr::For(e) => self.convert_for(e, context),
+            mnode::Expr::VarOrApp(e) => self.convert_var_or_app(e, context),
             mnode::Expr::Universe(e) => self.convert_universe(e),
         }
     }
@@ -46,7 +51,7 @@ impl MayConverter {
     fn convert_let(
         &mut self,
         expr: &mnode::Let,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
         todo!()
     }
@@ -54,7 +59,7 @@ impl MayConverter {
     fn convert_ind(
         &mut self,
         expr: &mnode::Ind,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
         todo!()
     }
@@ -62,7 +67,7 @@ impl MayConverter {
     fn convert_fun(
         &mut self,
         expr: &mnode::Fun,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
         todo!()
     }
@@ -70,7 +75,7 @@ impl MayConverter {
     fn convert_aind(
         &mut self,
         expr: &mnode::Aind,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
         todo!()
     }
@@ -78,7 +83,7 @@ impl MayConverter {
     fn convert_vcon(
         &mut self,
         expr: &mnode::Vcon,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
         todo!()
     }
@@ -86,7 +91,7 @@ impl MayConverter {
     fn convert_match(
         &mut self,
         expr: &mnode::Match,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
         todo!()
     }
@@ -94,7 +99,7 @@ impl MayConverter {
     fn convert_afun(
         &mut self,
         expr: &mnode::Afun,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
         todo!()
     }
@@ -102,7 +107,7 @@ impl MayConverter {
     fn convert_for(
         &mut self,
         expr: &mnode::For,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
         todo!()
     }
@@ -110,29 +115,33 @@ impl MayConverter {
     fn convert_var_or_app(
         &mut self,
         expr: &mnode::VarOrApp,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
         match expr {
-            mnode::VarOrApp::Var(e) => self.convert_var(e, con),
-            mnode::VarOrApp::App(e) => self.convert_app(e, con),
+            mnode::VarOrApp::Var(e) => self.convert_var(e, context),
+            mnode::VarOrApp::App(e) => self.convert_app(e, context),
         }
     }
 
     fn convert_var(
         &mut self,
         expr: &mnode::Ident,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        todo!()
+        let Some((entry, Distance(dist))) = context.get(&expr.value) else {
+            return Err(SemanticError::VarNotDefined(expr.clone()));
+        };
+        let val = entry.val.clone().replace_debs(&DebUpshifter(dist), 0);
+        Ok(self.cache_expr(val))
     }
 
     fn convert_app(
         &mut self,
         expr: &mnode::App,
-        con: Context,
+        context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        let callee = self.convert_var_or_app(&expr.callee, con)?;
-        let args = self.convert_exprs(&expr.args, con)?;
+        let callee = self.convert_var_or_app(&expr.callee, context)?;
+        let args = self.convert_exprs(&expr.args, context)?;
         Ok(self.cache_app(znode::App { callee, args }))
     }
 
@@ -150,25 +159,25 @@ impl MayConverter {
     fn convert_exprs(
         &mut self,
         exprs: &mnode::CommaSeparatedExprs,
-        con: Context,
+        context: Context,
     ) -> Result<RcHashedVec<znode::Expr>, SemanticError> {
-        let v = self.convert_exprs_without_hashing(exprs, con)?;
+        let v = self.convert_exprs_without_hashing(exprs, context)?;
         Ok(self.cache_expr_vec(v))
     }
 
     fn convert_exprs_without_hashing(
         &mut self,
         exprs: &mnode::CommaSeparatedExprs,
-        con: Context,
+        context: Context,
     ) -> Result<Vec<znode::Expr>, SemanticError> {
         match exprs {
             mnode::CommaSeparatedExprs::One(e) => {
-                let e = self.convert(e, con)?;
+                let e = self.convert(e, context)?;
                 Ok(vec![e])
             }
             mnode::CommaSeparatedExprs::Snoc(rdc, rac) => {
-                let mut rdc = self.convert_exprs_without_hashing(rdc, con)?;
-                let rac = self.convert(rac, con)?;
+                let mut rdc = self.convert_exprs_without_hashing(rdc, context)?;
+                let rac = self.convert(rac, context)?;
                 rdc.push(rac);
                 Ok(rdc)
             }
@@ -177,6 +186,16 @@ impl MayConverter {
 }
 
 impl MayConverter {
+    fn cache_expr(&mut self, node: znode::Expr) -> znode::Expr {
+        let digest = node.digest();
+        if let Some(existing) = self.znode_cache.get(digest) {
+            return existing.clone();
+        }
+
+        self.znode_cache.insert(digest.clone(), node.clone());
+        node
+    }
+
     fn cache_app(&mut self, node: znode::App) -> znode::Expr {
         let hashed = bypass_cache_and_rc_hash(node);
 

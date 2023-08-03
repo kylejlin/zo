@@ -1,2 +1,6 @@
+use super::*;
+
 #[derive(Clone, Debug)]
-pub enum SemanticError {}
+pub enum SemanticError {
+    VarNotDefined(mnode::Ident),
+}
