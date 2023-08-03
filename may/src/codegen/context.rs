@@ -1,11 +1,11 @@
 #[derive(Clone, Copy, Debug)]
 pub enum Context<'a> {
-    Base(&'a [Entry]),
-    Snoc(&'a Context<'a>, &'a [Entry]),
+    Base(&'a [UnshiftedEntry]),
+    Snoc(&'a Context<'a>, &'a [UnshiftedEntry]),
 }
 
 #[derive(Debug)]
-pub enum Entry {}
+pub enum UnshiftedEntry {}
 
 impl Context<'static> {
     pub fn empty() -> Self {
