@@ -30,6 +30,19 @@ List(Nat)
 }
 
 #[test]
+fn custom_zo_name() {
+    let src = r#"
+ind Foo "Empty"
+    return Set0
+
+Foo
+"#;
+    let tokens = lex(src).unwrap();
+    let cst = parse(tokens).unwrap();
+    insta::assert_debug_snapshot!(cst);
+}
+
+#[test]
 fn non_universe_return_type() {
     let src = r#"
 ind(T: Set0) List
