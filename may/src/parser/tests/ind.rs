@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn ind_eq() {
+fn eq() {
     let src = r#"
 ind(T: Set0, left: T) Eq[_: T]
     case refl: [left]
@@ -15,7 +15,7 @@ Eq(Nat, zero)(zero)
 }
 
 #[test]
-fn ind_list() {
+fn list() {
     let src = r#"
 ind(T: Set0) List
     case nil
