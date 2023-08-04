@@ -169,27 +169,23 @@ struct Match {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ReturnArityClause {
-    Named(
-        UseClause
+    Unnamed($ReturnArity)
+    Matchee(
+        _: $UseKw
+        $Ident
+        $ReturnArity
+    )
+    Indices(
+        _: $UseKw
+        SquareBracketedCommaSeparatedIdentsOrUnderscores
         _: $ReturnKw
     )
-    Unnamed($ReturnArity)
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct UseClause {
-    usekw: $UseKw
-    defs: UseClauseDefs
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum UseClauseDefs {
-    Matchee($Ident)
-    Indices(SquareBracketedCommaSeparatedIdentsOrUnderscores)
     MatcheeAndIndices(
+        _: $UseKw
         $Ident
         _: $Colon
         SquareBracketedCommaSeparatedIdentsOrUnderscores
+        _: $ReturnKw
     )
 }
 

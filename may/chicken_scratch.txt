@@ -71,6 +71,22 @@ ind Bool
     case false
     return Set0
 
+fun not(b: Bool): Bool
+    match b
+    case true:
+        false
+    case false:
+        true
+    return1 Bool
+
+fun not_involutive(b: Bool): Fleq(Bool, b, not(not(b)))
+    match b
+    case true:
+        refl(Bool)(true)
+    case false:
+        refl(Bool)(false)
+    use b1 return1 Fleq(Bool, b, not(not(b1)))
+
 fun filter(T: Set0, -list: List(T), pred: For(_: T) -> Bool): List(T)
     match list
     case nil:
@@ -87,7 +103,7 @@ fun filter(T: Set0, -list: List(T), pred: For(_: T) -> Bool): List(T)
 fun eq_commutative(T: Set0, a: T, b: T, eq: Fleq(T, a, b)): Fleq(T, b, a)
     match eq
     case refl:
-        refl(T, a)
+        refl(T)(a)
     use [c] return Fleq(T, c, a)
     
 succ(succ(zero))
