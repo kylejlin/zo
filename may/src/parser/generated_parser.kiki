@@ -154,7 +154,7 @@ struct Aind {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Vcon {
-    vconkw: $VconIndex
+    vcon_index: $VconIndex
     innards: IndCommonInnards
 }
 

@@ -520,7 +520,7 @@ Ind(
                                                 },
                                                 val: Vcon(
                                                     Vcon {
-                                                        vconkw: VconIndexLiteral {
+                                                        vcon_index: VconIndexLiteral {
                                                             index: 0,
                                                             start: ByteIndex(
                                                                 321,
@@ -969,7 +969,7 @@ Ind(
                                                                             ),
                                                                             return_val: Vcon(
                                                                                 Vcon {
-                                                                                    vconkw: VconIndexLiteral {
+                                                                                    vcon_index: VconIndexLiteral {
                                                                                         index: 0,
                                                                                         start: ByteIndex(
                                                                                             601,

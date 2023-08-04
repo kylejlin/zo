@@ -30,11 +30,11 @@ impl MayConverter {
         expr: &mnode::IndCommonInnards,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        let ind = self.convert_unparameterized_aind_to_zo_ind(expr, context)?;
+        let ind = self.convert_unparameterized_ind_innards_to_zo_ind(expr, context)?;
         Ok(self.cache_ind(ind))
     }
 
-    fn convert_unparameterized_aind_to_zo_ind(
+    pub(crate) fn convert_unparameterized_ind_innards_to_zo_ind(
         &mut self,
         expr: &mnode::IndCommonInnards,
         context: Context,
@@ -116,7 +116,7 @@ impl MayConverter {
         let param_types = self.cache_expr_vec(param_types);
 
         let context_with_params = Context::Snoc(&context, &extension);
-        let ind = self.convert_unparameterized_aind_to_zo_ind(expr, context_with_params)?;
+        let ind = self.convert_unparameterized_ind_innards_to_zo_ind(expr, context_with_params)?;
 
         let ind_cfor = znode::For {
             param_types: ind.index_types.clone(),

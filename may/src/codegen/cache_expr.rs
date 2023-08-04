@@ -24,6 +24,19 @@ impl MayConverter {
         out
     }
 
+    pub(crate) fn cache_vcon(&mut self, node: znode::Vcon) -> znode::Expr {
+        let hashed = bypass_cache_and_rc_hash(node);
+
+        if let Some(existing) = self.znode_cache.get(&hashed.digest) {
+            return existing.clone();
+        }
+
+        let digest = hashed.digest.clone();
+        let out = znode::Expr::Vcon(hashed);
+        self.znode_cache.insert(digest, out.clone());
+        out
+    }
+
     pub(crate) fn cache_match(&mut self, node: znode::Match) -> znode::Expr {
         let hashed = bypass_cache_and_rc_hash(node);
 

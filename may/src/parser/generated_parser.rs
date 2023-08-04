@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 e2b4783c625ab9ce569146b61e03982175b57f40248abbd819c9f84791487235
+// @sha256 7c83e69b879a059f19430d12351b43fe5adf373969949f0103ae55cae0f7a9b1
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -215,7 +215,7 @@ pub struct Aind {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Vcon {
-    pub vconkw: crate::token::VconIndexLiteral,
+    pub vcon_index: crate::token::VconIndexLiteral,
     pub innards: Box<IndCommonInnards>,
 }
 
@@ -1162,13 +1162,13 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R34 => {
             let innards_1 = Box::new(IndCommonInnards::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let vconkw_0 = nodes.pop().unwrap().try_into_vcon_index_24().ok().unwrap();
+            let vcon_index_0 = nodes.pop().unwrap().try_into_vcon_index_24().ok().unwrap();
             
             states.truncate(states.len() - 2);
             
             (
                 Node::Vcon(Vcon {
-                    vconkw: vconkw_0,
+                    vcon_index: vcon_index_0,
                     innards: innards_1,
                 }),
                 NonterminalKind::Vcon,
