@@ -55,3 +55,12 @@ impl mnode::ZeroOrMoreMatchCases {
         }
     }
 }
+
+impl mnode::OptSquareBracketedParamDefs {
+    pub(crate) fn defs(&self) -> Option<&mnode::CommaSeparatedParamDefs> {
+        match self {
+            Self::Some(defs) => Some(&defs.params),
+            Self::None => None,
+        }
+    }
+}

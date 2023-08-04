@@ -3,7 +3,24 @@ use super::*;
 impl MayConverter {
     /// If the params are valid,
     /// this function returns `Ok((entries, param_types, dash_index))`.
-    pub(crate) fn convert_param_defs_to_context_extension<'a, D: DashPolicy>(
+    pub(crate) fn convert_optional_typed_param_defs_to_context_extension<'a, D: DashPolicy>(
+        &mut self,
+        params: Option<&'a mnode::CommaSeparatedParamDefs>,
+        context: Context,
+        mut dash_policy: D,
+    ) -> Result<(Vec<UnshiftedEntry<'a>>, Vec<znode::Expr>, Option<D::Output>), SemanticError> {
+        if let Some(params) = params {
+            let (entries, param_types, dash_index) =
+                self.convert_typed_param_defs_to_context_extension(params, context, dash_policy)?;
+            Ok((entries, param_types, Some(dash_index)))
+        } else {
+            Ok((vec![], vec![], None))
+        }
+    }
+
+    /// If the params are valid,
+    /// this function returns `Ok((entries, param_types, dash_index))`.
+    pub(crate) fn convert_typed_param_defs_to_context_extension<'a, D: DashPolicy>(
         &mut self,
         params: &'a mnode::CommaSeparatedParamDefs,
         context: Context,

@@ -16,7 +16,7 @@ impl MayConverter {
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
         let (extension, param_types, decreasing_index) = self
-            .convert_param_defs_to_context_extension(
+            .convert_typed_param_defs_to_context_extension(
                 &expr.params.params,
                 context,
                 AtMostOneDash::default(),
