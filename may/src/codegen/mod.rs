@@ -113,7 +113,33 @@ impl MayConverter {
         expr: &mnode::Afun,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        todo!()
+        let (extension, param_types, decreasing_index) = self
+            .convert_param_defs_to_context_extension(
+                &expr.innards.params.params,
+                context,
+                AtMostOneDash::default(),
+            )?;
+        let context_with_params = Context::Snoc(&context, &extension);
+
+        let return_type = self.convert(&expr.innards.return_type, context_with_params)?;
+
+        let recursive_fun_param_singleton =
+            [self.get_deb_defining_entry(expr.name.val_or_underscore())];
+
+        let context_with_recursive_fun_param =
+            Context::Snoc(&context_with_params, &recursive_fun_param_singleton);
+
+        let return_val =
+            self.convert(&expr.innards.return_val, context_with_recursive_fun_param)?;
+
+        let param_types = self.cache_expr_vec(param_types);
+
+        Ok(self.cache_fun(znode::Fun {
+            decreasing_index,
+            param_types,
+            return_type,
+            return_val,
+        }))
     }
 
     fn convert_for(
@@ -229,6 +255,19 @@ impl MayConverter {
         node
     }
 
+    fn cache_fun(&mut self, node: znode::Fun) -> znode::Expr {
+        let hashed = bypass_cache_and_rc_hash(node);
+
+        if let Some(existing) = self.znode_cache.get(&hashed.digest) {
+            return existing.clone();
+        }
+
+        let digest = hashed.digest.clone();
+        let out = znode::Expr::Fun(hashed);
+        self.znode_cache.insert(digest, out.clone());
+        out
+    }
+
     fn cache_app(&mut self, node: znode::App) -> znode::Expr {
         let hashed = bypass_cache_and_rc_hash(node);
 
@@ -304,6 +343,18 @@ impl mnode::IdentOrUnderscore {
         match self {
             Self::Ident(ident) => &ident.value,
             Self::Underscore(_) => "_",
+        }
+    }
+}
+
+impl mnode::OptIdent {
+    /// If `self` is `Some(ident)`,
+    /// then `ident` is returned.
+    /// Otherwise, `"_"` is returned.
+    fn val_or_underscore(&self) -> &str {
+        match self {
+            Self::Some(ident) => &ident.value,
+            Self::None => "_",
         }
     }
 }

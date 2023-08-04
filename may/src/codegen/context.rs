@@ -30,18 +30,41 @@ impl Context<'_> {
         }
     }
 
+    /// If the `key == "_"`, this function returns `None`.
+    ///
+    /// Otherwise, if the context has an entry with `key`,
+    /// this function returns `Some(entry, distance)`.
+    ///
+    /// We define `distance` as the current length of the context minus the
+    /// length of the context at the time the entry was added.
+    ///
+    /// If there are multiple entries with `key`,
+    /// we choose the rightmost.
+    pub fn get(&self, key: &str) -> Option<(&UnshiftedEntry, Distance)> {
+        if key == "_" {
+            return None;
+        }
+
+        self.get_unchecked(key)
+    }
+
+    /// > Note: This function does **not** check whether `key == "_"`.
+    ///
     /// If the context has an entry with `key`,
     /// this function returns `Some(entry, distance)`.
     ///
     /// We define `distance` as the current length of the context minus the
     /// length of the context at the time the entry was added.
-    pub fn get(&self, key: &str) -> Option<(&UnshiftedEntry, Distance)> {
+    ///
+    /// If there are multiple entries with `key`,
+    /// we choose the rightmost.
+    fn get_unchecked(&self, key: &str) -> Option<(&UnshiftedEntry, Distance)> {
         match self {
-            Context::Base(entries) => get_entry(key, entries).ok(),
-            Context::Snoc(rdc, rac) => match get_entry(key, rac) {
+            Context::Base(entries) => get_entry_unchecked(key, entries).ok(),
+            Context::Snoc(rdc, rac) => match get_entry_unchecked(key, rac) {
                 Ok(entry_and_dist) => Some(entry_and_dist),
                 Err(num_of_debs_defined) => {
-                    let (entry, subdist) = rdc.get(key)?;
+                    let (entry, subdist) = rdc.get_unchecked(key)?;
                     let dist = Distance(subdist.0 + num_of_debs_defined);
                     Some((entry, dist))
                 }
@@ -50,6 +73,8 @@ impl Context<'_> {
     }
 }
 
+/// > Note: This function does **not** check whether `key == "_"`.
+///
 /// - If the slice has an entry with `key`,
 ///   this function returns `Ok((entry, distance))`.
 ///   
@@ -57,9 +82,12 @@ impl Context<'_> {
 ///   entries between the entry with `key` and the end of the slice.
 ///   The entry with `key` does **not** count towards `distance`.
 ///
+///   If there are multiple entries with `key`,
+///   we choose the rightmost.
+///
 /// - If the slice does not have an entry with `key`,
 ///   this function returns `Err(num_of_debs_defined)`.
-fn get_entry<'a>(
+fn get_entry_unchecked<'a>(
     key: &str,
     entries: &'a [UnshiftedEntry<'a>],
 ) -> Result<(&'a UnshiftedEntry<'a>, Distance), usize> {

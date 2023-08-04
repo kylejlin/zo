@@ -31,7 +31,7 @@ impl MayConverter {
     ) -> Result<(Vec<UnshiftedEntry<'a>>, Vec<znode::Expr>), SemanticError> {
         match params {
             mnode::CommaSeparatedParamDefs::One(param) => {
-                dash_policy.check(param)?;
+                dash_policy.check(param, 0)?;
 
                 let param_type = self.convert(&param.type_, context)?;
                 let entry = self.get_deb_defining_entry(param.name.val());
@@ -40,14 +40,14 @@ impl MayConverter {
             }
 
             mnode::CommaSeparatedParamDefs::Snoc(rdc, rac) => {
-                dash_policy.check(rac)?;
-
                 let (mut entries, mut param_types) = self
                     .convert_param_defs_to_context_extension_without_finishing(
                         rdc,
                         context,
                         dash_policy,
                     )?;
+
+                dash_policy.check(rac, param_types.len())?;
 
                 let extended_context = Context::Snoc(&context, &entries);
                 let rac_type = self.convert(&rac.type_, extended_context)?;
@@ -65,7 +65,7 @@ pub trait DashPolicy {
 
     fn reset(&mut self);
 
-    fn check(&mut self, param: &mnode::ParamDef) -> Result<(), SemanticError>;
+    fn check(&mut self, param: &mnode::ParamDef, param_index: usize) -> Result<(), SemanticError>;
 
     fn finish(&mut self) -> Result<Self::Output, SemanticError>;
 }
@@ -79,7 +79,7 @@ impl DashPolicy for ForbidDash {
         // No-op.
     }
 
-    fn check(&mut self, param: &mnode::ParamDef) -> Result<(), SemanticError> {
+    fn check(&mut self, param: &mnode::ParamDef, _: usize) -> Result<(), SemanticError> {
         match &*param.dash {
             mnode::OptDash::None => Ok(()),
             mnode::OptDash::Some(_) => Err(SemanticError::IllegalDashedParam(param.clone())),
@@ -89,5 +89,49 @@ impl DashPolicy for ForbidDash {
     fn finish(&mut self) -> Result<Self::Output, SemanticError> {
         // No-op.
         Ok(())
+    }
+}
+
+pub struct AtMostOneDash {
+    dashed_index_and_param: Option<(usize, mnode::ParamDef)>,
+}
+
+impl Default for AtMostOneDash {
+    fn default() -> Self {
+        Self {
+            dashed_index_and_param: None,
+        }
+    }
+}
+
+impl DashPolicy for AtMostOneDash {
+    type Output = Option<usize>;
+
+    fn reset(&mut self) {
+        self.dashed_index_and_param = None;
+    }
+
+    fn check(&mut self, param: &mnode::ParamDef, param_index: usize) -> Result<(), SemanticError> {
+        match &*param.dash {
+            mnode::OptDash::None => Ok(()),
+            mnode::OptDash::Some(_) => {
+                if let Some((_, existing_param)) = self.dashed_index_and_param.as_ref() {
+                    return Err(SemanticError::MultipleDashedParams(
+                        existing_param.clone(),
+                        param.clone(),
+                    ));
+                }
+
+                self.dashed_index_and_param = Some((param_index, param.clone()));
+                Ok(())
+            }
+        }
+    }
+
+    fn finish(&mut self) -> Result<Self::Output, SemanticError> {
+        Ok(self
+            .dashed_index_and_param
+            .as_ref()
+            .map(|(index, _)| *index))
     }
 }
