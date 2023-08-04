@@ -18,6 +18,8 @@ pub use context::*;
 mod convert_param_defs_to_context_extension;
 use convert_param_defs_to_context_extension::*;
 
+mod cst_impls;
+
 pub mod error;
 pub use error::*;
 
@@ -126,7 +128,7 @@ impl MayConverter {
         cases: &mnode::ZeroOrMoreMatchCases,
         context: Context,
     ) -> Result<RcHashedVec<znode::MatchCase>, SemanticError> {
-        let mut cases = convert_match_case_snoc_to_vec(cases);
+        let mut cases = cases.to_vec();
         cases.sort_unstable_by(|a, b| a.name.value.cmp(&b.name.value));
         self.convert_ordered_match_cases(&cases, context)
     }
@@ -383,59 +385,5 @@ impl MayConverter {
         let out = hashed;
         self.znode_vec_cache.insert(digest, out.clone());
         out
-    }
-}
-
-impl mnode::IdentOrUnderscore {
-    /// If `self` is an identifier,
-    /// its value is returned.
-    /// Otherwise, `self` is an underscore,
-    /// in which case the string `"_"` is returned.
-    fn val(&self) -> &str {
-        match self {
-            Self::Ident(ident) => &ident.value,
-            Self::Underscore(_) => "_",
-        }
-    }
-}
-
-impl mnode::OptIdent {
-    /// If `self` is `Some(ident)`,
-    /// then `ident` is returned.
-    /// Otherwise, `"_"` is returned.
-    fn val_or_underscore(&self) -> &str {
-        match self {
-            Self::Some(ident) => &ident.value,
-            Self::None => "_",
-        }
-    }
-}
-
-impl mnode::OptParenthesizedCommaSeparatedIdentsOrUnderscores {
-    fn len(&self) -> usize {
-        match self {
-            Self::None => 0,
-            Self::Some(parenthesized) => parenthesized.idents.len(),
-        }
-    }
-}
-
-impl mnode::CommaSeparatedIdentsOrUnderscores {
-    fn len(&self) -> usize {
-        match self {
-            Self::One(_) => 1,
-            Self::Snoc(rdc, _) => rdc.len() + 1,
-        }
-    }
-}
-
-fn convert_match_case_snoc_to_vec(cases: &mnode::ZeroOrMoreMatchCases) -> Vec<&mnode::MatchCase> {
-    match cases {
-        mnode::ZeroOrMoreMatchCases::Nil => vec![],
-        mnode::ZeroOrMoreMatchCases::Snoc(rdc, rac) => {
-            let mut rdc = convert_match_case_snoc_to_vec(rdc);
-            rdc.push(rac);
-            rdc
-        }
     }
 }
