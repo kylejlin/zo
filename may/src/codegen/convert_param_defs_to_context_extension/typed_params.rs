@@ -7,7 +7,7 @@ impl MayConverter {
         &mut self,
         params: Option<&'a mnode::CommaSeparatedParamDefs>,
         context: Context,
-        mut dash_policy: D,
+        dash_policy: D,
     ) -> Result<(Vec<UnshiftedEntry<'a>>, Vec<znode::Expr>, Option<D::Output>), SemanticError> {
         if let Some(params) = params {
             let (entries, param_types, dash_index) =
