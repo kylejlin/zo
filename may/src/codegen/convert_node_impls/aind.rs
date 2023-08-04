@@ -6,18 +6,26 @@ impl MayConverter {
         expr: &mnode::Aind,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        match &*expr.innards.params {
+        self.convert_ind_innards(&expr.innards, context)
+    }
+
+    pub(crate) fn convert_ind_innards(
+        &mut self,
+        expr: &mnode::IndCommonInnards,
+        context: Context,
+    ) -> Result<znode::Expr, SemanticError> {
+        match &*expr.params {
             mnode::OptParenthesizedParamDefs::None => {
-                self.convert_unparameterized_aind(&expr.innards, context)
+                self.convert_unparameterized_ind_innards(&expr, context)
             }
 
             mnode::OptParenthesizedParamDefs::Some(parenthesized) => {
-                self.convert_parameterized_ind(&expr.innards, &parenthesized.params, context)
+                self.convert_parameterized_ind_innards(&expr, &parenthesized.params, context)
             }
         }
     }
 
-    fn convert_unparameterized_aind(
+    fn convert_unparameterized_ind_innards(
         &mut self,
         expr: &mnode::IndCommonInnards,
         context: Context,
@@ -96,7 +104,7 @@ impl MayConverter {
         })
     }
 
-    fn convert_parameterized_ind(
+    fn convert_parameterized_ind_innards(
         &mut self,
         expr: &mnode::IndCommonInnards,
         params: &mnode::CommaSeparatedParamDefs,
