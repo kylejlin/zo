@@ -263,11 +263,11 @@ impl MayConverter {
         exprs: &mnode::CommaSeparatedExprs,
         context: Context,
     ) -> Result<RcHashedVec<znode::Expr>, SemanticError> {
-        let v = self.convert_exprs_without_hashing(exprs, context)?;
+        let v = self.convert_exprs_without_hashing_vec(exprs, context)?;
         Ok(self.cache_expr_vec(v))
     }
 
-    fn convert_exprs_without_hashing(
+    fn convert_exprs_without_hashing_vec(
         &mut self,
         exprs: &mnode::CommaSeparatedExprs,
         context: Context,
@@ -278,7 +278,7 @@ impl MayConverter {
                 Ok(vec![e])
             }
             mnode::CommaSeparatedExprs::Snoc(rdc, rac) => {
-                let mut rdc = self.convert_exprs_without_hashing(rdc, context)?;
+                let mut rdc = self.convert_exprs_without_hashing_vec(rdc, context)?;
                 let rac = self.convert(rac, context)?;
                 rdc.push(rac);
                 Ok(rdc)
