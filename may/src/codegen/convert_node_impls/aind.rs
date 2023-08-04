@@ -29,7 +29,7 @@ impl MayConverter {
         let name = self.cache_string_value(name);
 
         let (_, index_types, _) = self.convert_optional_typed_param_defs_to_context_extension(
-            expr.indices.defs(),
+            expr.indices.to_std_option(),
             context,
             ForbidDash,
         )?;
@@ -67,6 +67,21 @@ impl MayConverter {
         case: &mnode::IndCase,
         context: Context,
     ) -> Result<znode::VconDef, SemanticError> {
-        todo!()
+        let (extension, param_types, _) = self
+            .convert_optional_typed_param_defs_to_context_extension(
+                case.params.to_std_option(),
+                context,
+                ForbidDash,
+            )?;
+        let param_types = self.cache_expr_vec(param_types);
+
+        let extended_context = Context::Snoc(&context, &extension);
+        let index_args =
+            self.convert_optional_exprs(case.return_type.to_std_option(), extended_context)?;
+
+        Ok(znode::VconDef {
+            param_types,
+            index_args,
+        })
     }
 }

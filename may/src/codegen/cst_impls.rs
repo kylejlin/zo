@@ -56,10 +56,28 @@ impl mnode::ZeroOrMoreMatchCases {
     }
 }
 
-impl mnode::OptSquareBracketedParamDefs {
-    pub(crate) fn defs(&self) -> Option<&mnode::CommaSeparatedParamDefs> {
+impl mnode::OptParenthesizedParamDefs {
+    pub(crate) fn to_std_option(&self) -> Option<&mnode::CommaSeparatedParamDefs> {
         match self {
             Self::Some(defs) => Some(&defs.params),
+            Self::None => None,
+        }
+    }
+}
+
+impl mnode::OptSquareBracketedParamDefs {
+    pub(crate) fn to_std_option(&self) -> Option<&mnode::CommaSeparatedParamDefs> {
+        match self {
+            Self::Some(defs) => Some(&defs.params),
+            Self::None => None,
+        }
+    }
+}
+
+impl mnode::OptColonSquareBracketedExprs {
+    pub(crate) fn to_std_option(&self) -> Option<&mnode::CommaSeparatedExprs> {
+        match self {
+            Self::Some(defs) => Some(defs),
             Self::None => None,
         }
     }

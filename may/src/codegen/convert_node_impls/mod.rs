@@ -34,6 +34,18 @@ impl MayConverter {
 }
 
 impl MayConverter {
+    fn convert_optional_exprs(
+        &mut self,
+        exprs: Option<&mnode::CommaSeparatedExprs>,
+        context: Context,
+    ) -> Result<RcHashedVec<znode::Expr>, SemanticError> {
+        if let Some(exprs) = exprs {
+            self.convert_exprs(exprs, context)
+        } else {
+            Ok(self.cache_expr_vec(vec![]))
+        }
+    }
+
     fn convert_exprs(
         &mut self,
         exprs: &mnode::CommaSeparatedExprs,
