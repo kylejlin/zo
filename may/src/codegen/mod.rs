@@ -105,7 +105,57 @@ impl MayConverter {
         expr: &mnode::Match,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        todo!()
+        let matchee = self.convert(&expr.matchee, context)?;
+
+        let extension =
+            self.convert_return_arity_clause_to_context_extension(&expr.return_arity)?;
+        let context_with_return_params = Context::Snoc(&context, &extension);
+        let return_type = self.convert(&expr.return_type, context_with_return_params)?;
+
+        let cases = self.convert_match_cases(&expr.cases, context)?;
+
+        Ok(self.cache_match(znode::Match {
+            matchee,
+            return_type,
+            cases,
+        }))
+    }
+
+    fn convert_match_cases(
+        &mut self,
+        cases: &mnode::ZeroOrMoreMatchCases,
+        context: Context,
+    ) -> Result<RcHashedVec<znode::MatchCase>, SemanticError> {
+        let mut cases = convert_match_case_snoc_to_vec(cases);
+        cases.sort_unstable_by(|a, b| a.name.value.cmp(&b.name.value));
+        self.convert_ordered_match_cases(&cases, context)
+    }
+
+    fn convert_ordered_match_cases(
+        &mut self,
+        cases: &[&mnode::MatchCase],
+        context: Context,
+    ) -> Result<RcHashedVec<znode::MatchCase>, SemanticError> {
+        let v: Vec<znode::MatchCase> = cases
+            .into_iter()
+            .map(|case| self.convert_match_case(case, context))
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(bypass_cache_and_rc_hash(v))
+    }
+
+    fn convert_match_case(
+        &mut self,
+        case: &mnode::MatchCase,
+        context: Context,
+    ) -> Result<znode::MatchCase, SemanticError> {
+        let arity = case.params.len();
+
+        let extension = self.convert_match_case_params_to_context_extension(&case.params);
+        let context_with_params = Context::Snoc(&context, &extension);
+
+        let return_val = self.convert(&case.return_val, context_with_params)?;
+
+        Ok(znode::MatchCase { arity, return_val })
     }
 
     fn convert_afun(
@@ -204,6 +254,101 @@ impl MayConverter {
 }
 
 impl MayConverter {
+    fn convert_return_arity_clause_to_context_extension<'a>(
+        &mut self,
+        arity_clause: &'a mnode::ReturnArityClause,
+    ) -> Result<Vec<UnshiftedEntry<'a>>, SemanticError> {
+        match arity_clause {
+            mnode::ReturnArityClause::Unnamed(arity_literal) => {
+                self.convert_return_arity_literal_to_context_extension(arity_literal, "_")
+            }
+
+            mnode::ReturnArityClause::Matchee(matchee_name, arity_literal) => self
+                .convert_return_arity_literal_to_context_extension(
+                    arity_literal,
+                    &matchee_name.value,
+                ),
+
+            mnode::ReturnArityClause::Indices(index_names) => Ok(self
+                .convert_return_arity_matchee_and_index_names_to_context_extension(
+                    "_",
+                    &index_names.idents,
+                )),
+
+            mnode::ReturnArityClause::MatcheeAndIndices(matchee_name, index_names) => Ok(self
+                .convert_return_arity_matchee_and_index_names_to_context_extension(
+                    &matchee_name.value,
+                    &index_names.idents,
+                )),
+        }
+    }
+
+    fn convert_return_arity_literal_to_context_extension<'a>(
+        &mut self,
+        arity_literal: &'a mnode::ReturnArityLiteral,
+        matchee_name: &'a str,
+    ) -> Result<Vec<UnshiftedEntry<'a>>, SemanticError> {
+        let arity = arity_literal.arity;
+
+        let Some(arity_minus_one) = arity.checked_sub(1) else {
+            return Err(SemanticError::ReturnArityIsZero(arity_literal.clone()));
+        };
+
+        let matchee_singleton = std::iter::once(self.get_deb_defining_entry(matchee_name));
+
+        Ok((0..arity_minus_one)
+            .map(|_| self.get_deb_defining_entry("_"))
+            .chain(matchee_singleton)
+            .collect())
+    }
+
+    fn convert_return_arity_matchee_and_index_names_to_context_extension<'a>(
+        &mut self,
+        matchee_name: &'a str,
+        index_names: &'a mnode::CommaSeparatedIdentsOrUnderscores,
+    ) -> Vec<UnshiftedEntry<'a>> {
+        let mut out = vec![];
+        self.push_index_names(index_names, &mut out);
+        out.push(self.get_deb_defining_entry(matchee_name));
+        out
+    }
+
+    fn push_index_names<'a>(
+        &mut self,
+        index_names: &'a mnode::CommaSeparatedIdentsOrUnderscores,
+        out: &mut Vec<UnshiftedEntry<'a>>,
+    ) {
+        match index_names {
+            mnode::CommaSeparatedIdentsOrUnderscores::One(ident_or_underscore) => {
+                out.push(self.get_deb_defining_entry(ident_or_underscore.val()));
+            }
+
+            mnode::CommaSeparatedIdentsOrUnderscores::Snoc(rdc, rac) => {
+                self.push_index_names(rdc, out);
+                out.push(self.get_deb_defining_entry(rac.val()));
+            }
+        }
+    }
+}
+
+impl MayConverter {
+    fn convert_match_case_params_to_context_extension<'a>(
+        &mut self,
+        params: &'a mnode::OptParenthesizedCommaSeparatedIdentsOrUnderscores,
+    ) -> Vec<UnshiftedEntry<'a>> {
+        match params {
+            mnode::OptParenthesizedCommaSeparatedIdentsOrUnderscores::None => vec![],
+
+            mnode::OptParenthesizedCommaSeparatedIdentsOrUnderscores::Some(parenthesized) => {
+                let mut out = vec![];
+                self.push_index_names(&parenthesized.idents, &mut out);
+                out
+            }
+        }
+    }
+}
+
+impl MayConverter {
     fn get_deb_defining_entry<'a>(&mut self, key: &'a str) -> UnshiftedEntry<'a> {
         let val = self.cache_deb(znode::DebNode { deb: Deb(0) });
         UnshiftedEntry {
@@ -253,6 +398,19 @@ impl MayConverter {
 
         self.znode_cache.insert(digest.clone(), node.clone());
         node
+    }
+
+    fn cache_match(&mut self, node: znode::Match) -> znode::Expr {
+        let hashed = bypass_cache_and_rc_hash(node);
+
+        if let Some(existing) = self.znode_cache.get(&hashed.digest) {
+            return existing.clone();
+        }
+
+        let digest = hashed.digest.clone();
+        let out = znode::Expr::Match(hashed);
+        self.znode_cache.insert(digest, out.clone());
+        out
     }
 
     fn cache_fun(&mut self, node: znode::Fun) -> znode::Expr {
@@ -355,6 +513,35 @@ impl mnode::OptIdent {
         match self {
             Self::Some(ident) => &ident.value,
             Self::None => "_",
+        }
+    }
+}
+
+impl mnode::OptParenthesizedCommaSeparatedIdentsOrUnderscores {
+    fn len(&self) -> usize {
+        match self {
+            Self::None => 0,
+            Self::Some(parenthesized) => parenthesized.idents.len(),
+        }
+    }
+}
+
+impl mnode::CommaSeparatedIdentsOrUnderscores {
+    fn len(&self) -> usize {
+        match self {
+            Self::One(_) => 1,
+            Self::Snoc(rdc, _) => rdc.len() + 1,
+        }
+    }
+}
+
+fn convert_match_case_snoc_to_vec(cases: &mnode::ZeroOrMoreMatchCases) -> Vec<&mnode::MatchCase> {
+    match cases {
+        mnode::ZeroOrMoreMatchCases::Nil => vec![],
+        mnode::ZeroOrMoreMatchCases::Snoc(rdc, rac) => {
+            let mut rdc = convert_match_case_snoc_to_vec(rdc);
+            rdc.push(rac);
+            rdc
         }
     }
 }

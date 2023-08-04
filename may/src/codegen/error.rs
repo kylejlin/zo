@@ -5,4 +5,5 @@ pub enum SemanticError {
     VarNotDefined(mnode::Ident),
     IllegalDashedParam(mnode::ParamDef),
     MultipleDashedParams(mnode::ParamDef, mnode::ParamDef),
+    ReturnArityIsZero(mnode::ReturnArityLiteral),
 }
