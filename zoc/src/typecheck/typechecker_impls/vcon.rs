@@ -40,7 +40,7 @@ impl TypeChecker {
         Ok(normalized)
     }
 
-    pub(in crate::typecheck::typechecker_impls) fn get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
+    pub fn get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
         &mut self,
         ind: Normalized<RcHashed<ast::Ind>>,
         vcon_index: usize,

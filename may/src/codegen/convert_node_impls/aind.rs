@@ -118,7 +118,7 @@ impl MayConverter {
         let context_with_params = Context::Snoc(&context, &extension);
         let ind = self.convert_unparameterized_ind_innards_to_zo_ind(expr, context_with_params)?;
 
-        let ind_cfor = znode::For {
+        let ind_type_cfor = znode::For {
             param_types: ind.index_types.clone(),
             return_type: znode::UniverseNode {
                 level: ind.universe_level,
@@ -132,7 +132,7 @@ impl MayConverter {
         Ok(self.cache_fun(znode::Fun {
             decreasing_index: None,
             param_types,
-            return_type: ind_cfor,
+            return_type: ind_type_cfor,
             return_val: ind,
         }))
     }

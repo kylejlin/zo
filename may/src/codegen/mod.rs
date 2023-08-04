@@ -38,4 +38,6 @@ pub fn may_to_zo(expr: &mnode::Expr) -> Result<znode::Expr, SemanticError> {
 struct MayConverter {
     znode_cache: NoHashHashMap<Digest, znode::Expr>,
     znode_vec_cache: NoHashHashMap<Digest, RcHashedVec<znode::Expr>>,
+
+    zo_typechecker: zoc::typecheck::TypeChecker,
 }
