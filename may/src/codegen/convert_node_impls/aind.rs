@@ -11,7 +11,9 @@ impl MayConverter {
                 self.convert_unparameterized_aind(&expr.innards, context)
             }
 
-            mnode::OptParenthesizedParamDefs::Some(parenthesized) => todo!(),
+            mnode::OptParenthesizedParamDefs::Some(parenthesized) => {
+                self.convert_parameterized_ind(&expr.innards, &parenthesized.params, context)
+            }
         }
     }
 
@@ -20,6 +22,15 @@ impl MayConverter {
         expr: &mnode::IndCommonInnards,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
+        let ind = self.convert_unparameterized_aind_to_zo_ind(expr, context)?;
+        Ok(self.cache_ind(ind))
+    }
+
+    fn convert_unparameterized_aind_to_zo_ind(
+        &mut self,
+        expr: &mnode::IndCommonInnards,
+        context: Context,
+    ) -> Result<znode::Ind, SemanticError> {
         let universe_level = UniverseLevel(expr.universe.level);
 
         let name = match &*expr.custom_zo_name {
@@ -41,12 +52,12 @@ impl MayConverter {
         cases.sort_unstable_by(|a, b| a.name.value.cmp(&b.name.value));
         let vcon_defs = self.convert_ordered_ind_cases(&cases, context_with_recursive_ind)?;
 
-        Ok(self.cache_ind(znode::Ind {
+        Ok(znode::Ind {
             universe_level,
             name,
             index_types,
             vcon_defs,
-        }))
+        })
     }
 
     /// `context` should already contain the recursive ind entry.
@@ -83,5 +94,38 @@ impl MayConverter {
             param_types,
             index_args,
         })
+    }
+
+    fn convert_parameterized_ind(
+        &mut self,
+        expr: &mnode::IndCommonInnards,
+        params: &mnode::CommaSeparatedParamDefs,
+        context: Context,
+    ) -> Result<znode::Expr, SemanticError> {
+        let (extension, param_types, ()) =
+            self.convert_typed_param_defs_to_context_extension(params, context, ForbidDash)?;
+
+        let param_types = self.cache_expr_vec(param_types);
+
+        let context_with_params = Context::Snoc(&context, &extension);
+        let ind = self.convert_unparameterized_aind_to_zo_ind(expr, context_with_params)?;
+
+        let ind_cfor = znode::For {
+            param_types: ind.index_types.clone(),
+            return_type: znode::UniverseNode {
+                level: ind.universe_level,
+            }
+            .into(),
+        }
+        .collapse_if_nullary();
+
+        let ind = self.cache_ind(ind);
+
+        Ok(self.cache_fun(znode::Fun {
+            decreasing_index: None,
+            param_types,
+            return_type: ind_cfor,
+            return_val: ind,
+        }))
     }
 }
