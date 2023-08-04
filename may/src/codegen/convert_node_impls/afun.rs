@@ -6,24 +6,31 @@ impl MayConverter {
         expr: &mnode::Afun,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
+        self.convert_fun_common_innards(&expr.innards, expr.name.val_or_underscore(), context)
+    }
+
+    pub(crate) fn convert_fun_common_innards(
+        &mut self,
+        expr: &mnode::FunCommonInnards,
+        fun_name: &str,
+        context: Context,
+    ) -> Result<znode::Expr, SemanticError> {
         let (extension, param_types, decreasing_index) = self
             .convert_param_defs_to_context_extension(
-                &expr.innards.params.params,
+                &expr.params.params,
                 context,
                 AtMostOneDash::default(),
             )?;
         let context_with_params = Context::Snoc(&context, &extension);
 
-        let return_type = self.convert(&expr.innards.return_type, context_with_params)?;
+        let return_type = self.convert(&expr.return_type, context_with_params)?;
 
-        let recursive_fun_param_singleton =
-            [self.get_deb_defining_entry(expr.name.val_or_underscore())];
+        let recursive_fun_param_singleton = [self.get_deb_defining_entry(fun_name)];
 
         let context_with_recursive_fun_param =
             Context::Snoc(&context_with_params, &recursive_fun_param_singleton);
 
-        let return_val =
-            self.convert(&expr.innards.return_val, context_with_recursive_fun_param)?;
+        let return_val = self.convert(&expr.return_val, context_with_recursive_fun_param)?;
 
         let param_types = self.cache_expr_vec(param_types);
 
