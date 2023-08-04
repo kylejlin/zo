@@ -64,3 +64,16 @@ impl mnode::OptSquareBracketedParamDefs {
         }
     }
 }
+
+impl mnode::ZeroOrMoreIndCases {
+    pub(crate) fn to_vec(&self) -> Vec<&mnode::IndCase> {
+        match self {
+            mnode::ZeroOrMoreIndCases::Nil => vec![],
+            mnode::ZeroOrMoreIndCases::Snoc(rdc, rac) => {
+                let mut rdc = rdc.to_vec();
+                rdc.push(rac);
+                rdc
+            }
+        }
+    }
+}
