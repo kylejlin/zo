@@ -6,10 +6,10 @@ impl MayConverter {
         expr: &mnode::Afun,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        self.convert_fun_common_innards(&expr.innards, expr.name.val_or_underscore(), context)
+        self.convert_fun_innards(&expr.innards, expr.name.val_or_underscore(), context)
     }
 
-    pub(crate) fn convert_fun_common_innards(
+    pub(crate) fn convert_fun_innards(
         &mut self,
         expr: &mnode::FunCommonInnards,
         fun_name: &str,

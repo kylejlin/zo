@@ -6,7 +6,7 @@ impl MayConverter {
         expr: &mnode::Fun,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        let fun = self.convert_fun_common_innards(&expr.innards, &expr.name.value, context)?;
+        let fun = self.convert_fun_innards(&expr.innards, &expr.name.value, context)?;
         let fun_singleton = [UnshiftedEntry {
             key: &expr.name.value,
             val: fun,
