@@ -7,9 +7,7 @@ mod mnode {
 use zoc::syntax_tree::replace_debs::{DebUpshifter, ReplaceDebs};
 use zoc::{
     hash::{Digest, GetDigest, NoHashHashMap},
-    syntax_tree::ast::{
-        rc_hashed as bypass_cache_and_rc_hash, Deb, RcHashed, RcHashedVec, UniverseLevel,
-    },
+    syntax_tree::ast::{rc_hashed as bypass_cache_and_rc_hash, Deb, RcHashedVec, UniverseLevel},
 };
 
 mod cache_expr;
