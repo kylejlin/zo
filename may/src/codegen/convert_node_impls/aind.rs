@@ -110,12 +110,20 @@ impl MayConverter {
         params: &mnode::CommaSeparatedParamDefs,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        let (extension, param_types, ()) =
+        let (param_def_entries, param_types, ()) =
             self.convert_typed_param_defs_to_context_extension(params, context, ForbidDash)?;
 
         let param_types = self.cache_expr_vec(param_types);
 
-        let context_with_params = Context::Snoc(&context, &extension);
+        let param_def_entries_and_unusable_recursive_fun_entry = {
+            let mut out = param_def_entries;
+            out.push(self.get_deb_defining_entry("_"));
+            out
+        };
+        let context_with_params = Context::Snoc(
+            &context,
+            &param_def_entries_and_unusable_recursive_fun_entry,
+        );
         let ind = self.convert_unparameterized_ind_innards_to_zo_ind(expr, context_with_params)?;
 
         let ind_type_cfor = znode::For {
