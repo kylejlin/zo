@@ -113,6 +113,23 @@ nil
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
 
+#[test]
+fn list_cons() {
+    let src = r#"
+ind(T: Set0) List
+    case nil
+    case cons(_: T, _: List)
+    return Set0
+cons
+"#;
+    let cst = parse_or_panic(src);
+    let zo = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+
+    insta::assert_display_snapshot!(PrettyPrint(&zo));
+}
+
 // TODO: Fix
 #[ignore]
 #[test]
