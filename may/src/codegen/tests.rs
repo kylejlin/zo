@@ -82,6 +82,25 @@ add(_2, _3)
 // TODO: Fix
 #[ignore]
 #[test]
+fn list() {
+    let src = r#"
+ind(T: Set0) List
+    case nil
+    case cons(_: T, _: List(T))
+    return Set0
+List
+"#;
+    let cst = parse_or_panic(src);
+    let zo = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+
+    insta::assert_display_snapshot!(PrettyPrint(&zo));
+}
+
+// TODO: Fix
+#[ignore]
+#[test]
 fn rev() {
     let src = r#"
 ind(T: Set0) List
