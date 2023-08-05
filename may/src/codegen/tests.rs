@@ -130,14 +130,12 @@ cons
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
 
-// TODO: Fix
-#[ignore]
 #[test]
 fn rev() {
     let src = r#"
 ind(T: Set0) List
     case nil
-    case cons(_: T, _: List(T))
+    case cons(_: T, _: List)
     return Set0
 
 fun rev(T: Set0, xs: List(T)): List(T)
