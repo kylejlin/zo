@@ -17,6 +17,7 @@ pub fn rc_hashed<T: Hash>(t: T) -> RcHashed<T> {
 
 mod conversion;
 mod hash;
+mod span;
 
 #[derive(Debug, Clone)]
 pub enum Expr {
