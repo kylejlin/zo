@@ -35,7 +35,7 @@ fn add_2_3() {
         r#"(<ADD_TAILCALL_IMPL> <2> <3>)"#,
     );
 
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&add_two_three_src);
+    let type_ = get_type_under_empty_tcon_or_panic(&add_two_three_src);
 
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
@@ -160,7 +160,7 @@ fn rev_1_2_3() {
     ];
     let rev_one_two_three_src = substitute_with_compounding(src_defs, r#"(<REV> <123> <NAT_NIL>)"#);
 
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&rev_one_two_three_src);
+    let type_ = get_type_under_empty_tcon_or_panic(&rev_one_two_three_src);
 
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
@@ -288,7 +288,7 @@ fn polymorphic_rev_1_2_3() {
     let polymorphic_rev_one_two_three_src =
         substitute_with_compounding(src_defs, r#"(<POLYMORPHIC_REV> <NAT> <123> <NAT_NIL>)"#);
 
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&polymorphic_rev_one_two_three_src);
+    let type_ = get_type_under_empty_tcon_or_panic(&polymorphic_rev_one_two_three_src);
 
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
@@ -311,7 +311,7 @@ fn ex_falso() {
     )"#;
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
 
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
 
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
@@ -369,7 +369,7 @@ fn eq_zero_one() {
     let eq_zero_one_implies_false_src =
         substitute_with_compounding(src_defs, eq_zero_one_implies_false_unsubstituted_src);
 
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&eq_zero_one_implies_false_src);
+    let type_ = get_type_under_empty_tcon_or_panic(&eq_zero_one_implies_false_src);
 
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
@@ -430,7 +430,7 @@ fn eq_one_zero() {
     let eq_one_zero_implies_false_src =
         substitute_with_compounding(src_defs, eq_one_zero_implies_false_unsubstituted_src);
 
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&eq_one_zero_implies_false_src);
+    let type_ = get_type_under_empty_tcon_or_panic(&eq_one_zero_implies_false_src);
 
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
@@ -471,7 +471,7 @@ fn eq_commutative() {
 
     let src_defs = [bool_def, true_def, false_def, eq_bool_def];
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
 
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
@@ -513,7 +513,7 @@ fn eq_transitive() {
 )"#;
     let src_defs = [bool_def, true_def, false_def, eq_bool_def];
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
@@ -524,7 +524,7 @@ fn vcon_index_arg_types_are_compared_against_ind_index_types_substituted_with_vc
         ((Type0 0) (1 0))
     ))
     "#;
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
@@ -612,7 +612,7 @@ fn add_zero() {
 )"#;
 
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
@@ -700,6 +700,6 @@ fn add_succ() {
 )"#;
 
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let type_ = get_type_under_empty_tcon_and_scon_or_panic(&src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }

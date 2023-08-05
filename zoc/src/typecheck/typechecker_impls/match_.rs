@@ -167,7 +167,7 @@ impl TypeChecker {
             .replace_debs(&substituter, 0);
         let normalized_match_return_type_g1 = self.evaluator.eval(match_return_type_g1);
 
-        self.assert_expected_type_equality_holds_after_applying_scon(ExpectedTypeEquality {
+        self.assert_expected_type_equality_holds(ExpectedTypeEquality {
             expr: case.return_val.clone(),
             expected_type: normalized_match_return_type_g1,
             actual_type: case_return_val_type_g1,

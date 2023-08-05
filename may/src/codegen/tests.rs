@@ -7,6 +7,27 @@ fn parse_or_panic(src: &str) -> mnode::Expr {
     crate::parser::parse(tokens).unwrap()
 }
 
+fn assert_expr_is_well_typed_under_empty_tcon(ast: znode::Expr) {
+    use zoc::{
+        eval::Normalized,
+        pretty_print::PrettyUnwrap,
+        syntax_tree::{lexer::lex as zo_lex, parser::parse as zo_parse},
+        typecheck::{LazyTypeContext, TypeChecker},
+    };
+
+    let src = PrettyPrint(&ast).to_string();
+    let tokens = zo_lex(&src).unwrap();
+    let ost = zo_parse(tokens).unwrap();
+
+    let empty = Normalized::<[_; 0]>::new();
+    TypeChecker::default()
+        .get_type(
+            ost.into(),
+            LazyTypeContext::Base(empty.as_ref().convert_ref()),
+        )
+        .pretty_unwrap();
+}
+
 #[test]
 fn two() {
     let src = r#"
@@ -19,6 +40,9 @@ succ(succ(zero))
 "#;
     let cst = parse_or_panic(src);
     let zo = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
 
@@ -46,5 +70,8 @@ add(_2, _3)
 "#;
     let cst = parse_or_panic(src);
     let zo = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }

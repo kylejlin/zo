@@ -48,7 +48,7 @@ impl TypeChecker {
             tcon_with_param_types_and_fun_types_g2,
         )?;
 
-        self.assert_expected_type_equality_holds_after_applying_scon(ExpectedTypeEquality {
+        self.assert_expected_type_equality_holds(ExpectedTypeEquality {
             expr: fun_g0.hashee.return_val.clone(),
             expected_type: normalized_return_type_g2,
             actual_type: return_val_type_g2,

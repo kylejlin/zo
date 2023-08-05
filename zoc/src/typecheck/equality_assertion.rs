@@ -37,18 +37,18 @@ impl<'a> ExpectedTypeEqualities<'a> {
 }
 
 impl TypeChecker {
-    pub(super) fn assert_expected_type_equalities_holds_after_applying_scon(
+    pub(super) fn assert_expected_type_equalities_holds(
         &mut self,
         equalities: ExpectedTypeEqualities,
     ) -> Result<(), TypeError> {
         for equality in equalities.zip() {
-            self.assert_expected_type_equality_holds_after_applying_scon(equality)?;
+            self.assert_expected_type_equality_holds(equality)?;
         }
 
         Ok(())
     }
 
-    pub(super) fn assert_expected_type_equality_holds_after_applying_scon(
+    pub(super) fn assert_expected_type_equality_holds(
         &mut self,
         expected_equality: ExpectedTypeEquality,
     ) -> Result<(), TypeError> {

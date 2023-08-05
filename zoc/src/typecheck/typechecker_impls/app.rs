@@ -24,7 +24,7 @@ impl TypeChecker {
             normalized_args.clone(),
         );
 
-        self.assert_expected_type_equalities_holds_after_applying_scon(ExpectedTypeEqualities {
+        self.assert_expected_type_equalities_holds(ExpectedTypeEqualities {
             exprs: &app.hashee.args,
             expected_types: substituted_callee_type_param_types.to_hashee().derefed(),
             actual_types: arg_types.to_derefed(),
