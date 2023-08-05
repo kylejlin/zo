@@ -170,3 +170,5 @@ rev(Abc, a_b_c)
 
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
+
+// TODO: Test inds with indices.
