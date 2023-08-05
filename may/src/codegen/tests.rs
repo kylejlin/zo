@@ -166,4 +166,18 @@ rev(Abc, a_b_c)
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
 
-// TODO: Test inds with indices.
+#[test]
+fn eq() {
+    let src = r#"
+ind(T: Set0, left: T) Eq[_: T]
+    case refl: [left]
+    return Prop0
+Eq
+"#;
+    let cst = parse_or_panic(src);
+    let zo = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+
+    insta::assert_display_snapshot!(PrettyPrint(&zo));
+}
