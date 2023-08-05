@@ -6,4 +6,5 @@ pub enum SemanticError {
     IllegalDashedParam(mnode::ParamDef),
     MultipleDashedParams(mnode::ParamDef, mnode::ParamDef),
     ReturnArityIsZero(mnode::ReturnArityLiteral),
+    InvalidVconIndex(mnode::VconIndexLiteral),
 }

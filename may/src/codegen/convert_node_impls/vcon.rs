@@ -28,9 +28,21 @@ impl MayConverter {
             .try_into_ind()
             .expect("cache_ind should always return (the same) ind");
 
-        let vcon_index = expr.vcon_index.index;
+        let vcon_index = self.check_vcon_index(&expr.vcon_index, &ind.hashee)?;
 
         Ok(self.cache_vcon(znode::Vcon { ind, vcon_index }))
+    }
+
+    fn check_vcon_index(
+        &mut self,
+        index: &mnode::VconIndexLiteral,
+        ind: &znode::Ind,
+    ) -> Result<usize, SemanticError> {
+        if index.index < ind.vcon_defs.hashee.len() {
+            Ok(index.index)
+        } else {
+            Err(SemanticError::InvalidVconIndex(index.clone()))
+        }
     }
 
     fn convert_parameterized_vcon(
@@ -52,7 +64,7 @@ impl MayConverter {
             .try_into_ind()
             .expect("cache_ind should always return (the same) ind");
 
-        let vcon_index = expr.vcon_index.index;
+        let vcon_index = self.check_vcon_index(&expr.vcon_index, &ind.hashee)?;
         let normalized_ind = self.zo_typechecker.evaluator.eval_ind(ind.clone());
         let return_type = self
             .zo_typechecker
