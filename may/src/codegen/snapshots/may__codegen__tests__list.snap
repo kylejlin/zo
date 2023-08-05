@@ -1,6 +1,5 @@
 ---
 source: may/src/codegen/tests.rs
-assertion_line: 96
 expression: PrettyPrint(&zo)
 ---
 (
