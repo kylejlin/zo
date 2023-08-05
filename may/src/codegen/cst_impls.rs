@@ -94,4 +94,11 @@ impl mnode::ZeroOrMoreIndCases {
             }
         }
     }
+
+    pub(crate) fn len(&self) -> usize {
+        match self {
+            mnode::ZeroOrMoreIndCases::Nil => 0,
+            mnode::ZeroOrMoreIndCases::Snoc(rdc, _) => rdc.len() + 1,
+        }
+    }
 }

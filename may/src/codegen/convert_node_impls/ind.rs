@@ -26,9 +26,20 @@ impl MayConverter {
         expr: &'a mnode::Ind,
         context: Context,
     ) -> Result<Vec<UnshiftedEntry<'a>>, SemanticError> {
-        todo!()
-
-        // let mut cases = expr.innards.cases.to_vec();
-        // cases.sort_by(|a, b| a.name.cmp(&b.name));
+        let mut cases = expr.innards.cases.to_vec();
+        cases.sort_by(|a, b| a.name.cmp(&b.name));
+        cases
+            .into_iter()
+            .enumerate()
+            .map(|(index, case)| {
+                let vcon =
+                    self.convert_vcon_with_valid_vcon_index(&expr.innards, index, context)?;
+                Ok(UnshiftedEntry {
+                    key: &case.name.value,
+                    val: vcon,
+                    defines_deb: false,
+                })
+            })
+            .collect()
     }
 }
