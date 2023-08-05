@@ -19,9 +19,6 @@ fn assert_expr_is_well_typed_under_empty_tcon(ast: znode::Expr) {
     let tokens = zo_lex(&src).unwrap();
     let ost = zo_parse(tokens).unwrap();
 
-    // TODO: Delete
-    println!("XXX.src:\n{}", src);
-
     let empty = Normalized::<[_; 0]>::new();
     TypeChecker::default()
         .get_type(
