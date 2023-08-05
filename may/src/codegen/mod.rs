@@ -29,6 +29,9 @@ mod cst_impls;
 pub mod error;
 pub use error::*;
 
+#[cfg(test)]
+mod tests;
+
 pub fn may_to_zo(expr: &mnode::Expr) -> Result<znode::Expr, SemanticError> {
     MayConverter::default().convert(expr, Context::empty())
 }
