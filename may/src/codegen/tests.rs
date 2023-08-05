@@ -75,3 +75,42 @@ add(_2, _3)
 
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
+
+#[test]
+fn rev() {
+    let src = r#"
+ind(T: Set0) List
+    case nil
+    case cons(_: T, _: List(T))
+    return Set0
+
+fun rev(T: Set0, xs: List(T)): List(T)
+    fun helper(-xs: List(T), acc: List(T)): List(T)
+        match xs
+        case nil:
+            acc
+        case cons(x, xs):
+            helper(xs, cons(T)(x, acc))
+        return1 List(T)
+    helper(xs, nil(T))
+
+ind Abc
+    case a
+    case b
+    case c
+    return Set0
+
+let acons = cons(Abc)
+let anil = nil(Abc)
+
+let a_b_c = acons(a, acons(b, acons(c, anil)))
+
+rev(Abc, a_b_c)
+"#;
+    let cst = parse_or_panic(src);
+    let zo = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+
+    insta::assert_display_snapshot!(PrettyPrint(&zo));
+}
