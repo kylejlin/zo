@@ -1,0 +1,51 @@
+---
+source: may/src/codegen/tests.rs
+expression: PrettyPrint(&zo)
+---
+(
+    fun
+    nonrec
+    (
+        Type0
+        0
+    )
+    (
+        (
+            ind
+            Type0
+            "Eq"
+            (
+                1
+            )
+            (
+                (
+                    ()
+                    (
+                        1
+                    )
+                )
+            )
+        )
+        0
+    )
+    (
+        vcon
+        (
+            ind
+            Type0
+            "Eq"
+            (
+                2
+            )
+            (
+                (
+                    ()
+                    (
+                        2
+                    )
+                )
+            )
+        )
+        0
+    )
+)
