@@ -115,33 +115,34 @@ impl MayConverter {
 
         let param_types = self.cache_expr_vec(param_types);
 
-        let param_def_entries_and_unusable_recursive_fun_entry = {
-            let mut out = param_def_entries;
-            out.push(self.get_deb_defining_entry("_"));
-            out
-        };
-        let context_with_params = Context::Snoc(
-            &context,
-            &param_def_entries_and_unusable_recursive_fun_entry,
-        );
-        let ind = self.convert_unparameterized_ind_innards_to_zo_ind(expr, context_with_params)?;
+        let context_with_params = Context::Snoc(&context, &param_def_entries);
+        let return_type_ind =
+            self.convert_unparameterized_ind_innards_to_zo_ind(expr, context_with_params)?;
 
         let ind_type_cfor = znode::For {
-            param_types: ind.index_types.clone(),
+            param_types: return_type_ind.index_types.clone(),
             return_type: znode::UniverseNode {
-                level: ind.universe_level,
+                level: return_type_ind.universe_level,
             }
             .into(),
         }
         .collapse_if_nullary();
 
-        let ind = self.cache_ind(ind);
+        let unusable_singleton = [self.get_deb_defining_entry("_")];
+        let context_with_params_and_recursive_fun =
+            Context::Snoc(&context_with_params, &unusable_singleton);
+        let return_val = self.convert_unparameterized_ind_innards_to_zo_ind(
+            expr,
+            context_with_params_and_recursive_fun,
+        )?;
+
+        let return_val = self.cache_ind(return_val);
 
         Ok(self.cache_fun(znode::Fun {
             decreasing_index: None,
             param_types,
             return_type: ind_type_cfor,
-            return_val: ind,
+            return_val,
         }))
     }
 }
