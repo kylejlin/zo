@@ -79,14 +79,12 @@ add(_2, _3)
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
 
-// TODO: Fix
-#[ignore]
 #[test]
 fn list() {
     let src = r#"
 ind(T: Set0) List
     case nil
-    case cons(_: T, _: List(T))
+    case cons(_: T, _: List)
     return Set0
 List
 "#;

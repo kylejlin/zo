@@ -1,0 +1,32 @@
+---
+source: may/src/codegen/tests.rs
+assertion_line: 96
+expression: PrettyPrint(&zo)
+---
+(
+    fun
+    nonrec
+    (
+        Type0
+    )
+    Type0
+    (
+        ind
+        Type0
+        "List"
+        ()
+        (
+            (
+                (
+                    2
+                    1
+                )
+                ()
+            )
+            (
+                ()
+                ()
+            )
+        )
+    )
+)
