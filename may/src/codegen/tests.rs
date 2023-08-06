@@ -19,6 +19,9 @@ fn assert_expr_is_well_typed_under_empty_tcon(ast: znode::Expr) {
     let tokens = zo_lex(&src).unwrap();
     let ost = zo_parse(tokens).unwrap();
 
+    // TODO: Delete after debugging.
+    println!("XXX.start:{src}");
+
     let empty = Normalized::<[_; 0]>::new();
     TypeChecker::default()
         .get_type(
@@ -338,7 +341,6 @@ add_n_succ_m
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
 
-#[ignore]
 #[test]
 fn add_commutative() {
     let src = r#"
@@ -386,6 +388,11 @@ fun add_n_succ_m(-n: Nat, m: Nat): Eq(Nat, succ(add(n, m)))(add(n, succ(m)))
     use n_capp
     return1 Eq(Nat, succ(add(n_capp, m)))(add(n_capp, succ(m)))
 
+// TODO: Delete after debugging.
+ind TodoWrong
+    case todo_wrong
+    return Set0
+
 // TODO: Rename `a` and `b` to `m` and `n`.
 // This is not essential.
 // However, it would be nice for the params
@@ -396,7 +403,8 @@ afun add_commutative(-a: Nat, b: Nat): Eq(Nat, add(a, b))(add(b, a))
     case zero:
         match add_n_zero(b)
         case refl:
-            refl(Nat, b)
+            // refl(Nat, b)
+            todo_wrong
         use [in_b_out_add_b_zero]
         return Eq(Nat, b)(in_b_out_add_b_zero)
     case succ(a_pred):
@@ -406,7 +414,8 @@ afun add_commutative(-a: Nat, b: Nat): Eq(Nat, add(a, b))(add(b, a))
             // Goal: Eq(Nat, succ(add(a_pred, b)))(succ(add(b, a_pred)))
             match add_commutative(a_pred, b)
             case refl:
-                refl(Nat, succ(add(a_pred, b)))
+                // refl(Nat, succ(add(a_pred, b)))
+                todo_wrong
             use [in_apred_b_out_b_apred]
             return Eq(Nat, succ(add(a_pred, b)))(succ(in_apred_b_out_b_apred))
         use [in_succ_add_out_add_succ]
