@@ -250,3 +250,46 @@ afun(
 
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
+
+#[test]
+fn add_n_zero() {
+    let src = r#"
+ind(T: Set0, left: T) Eq[_: T]
+    case refl: [left]
+    return Prop0
+
+ind Nat
+    case zero
+    case succ(_: Nat)
+    return Set0
+
+fun add(-a: Nat, b: Nat): Nat
+    match a
+    case zero:
+        b
+    case succ(a_pred):
+        succ(add(a_pred, b))
+    return1 Nat
+
+fun add_n_zero(-n: Nat): Eq(Nat, n)(add(n, zero))
+    match n
+    case zero:
+        refl(Nat, zero)
+    case succ(n_pred):
+        match add_n_zero(n_pred)
+        case refl:
+            refl(Nat, succ(n_pred))
+        use [in_n_pred_out_add_n_pred_zero]
+        return Eq(Nat, succ(n_pred))(succ(in_n_pred_out_add_n_pred_zero))
+    use n_capp
+    return1 Eq(Nat, n_capp)(add(n_capp, zero))
+
+add_n_zero
+"#;
+    let cst = parse_or_panic(src);
+    let zo = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+
+    insta::assert_display_snapshot!(PrettyPrint(&zo));
+}
