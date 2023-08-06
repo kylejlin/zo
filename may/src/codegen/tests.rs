@@ -218,3 +218,35 @@ afun(T: Set0, a: T, b: T, eq: Eq(T, a)(b)): Eq(T, b)(a)
 
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
+
+#[test]
+fn eq_transitive() {
+    let src = r#"
+ind(T: Set0, left: T) Eq[_: T]
+    case refl: [left]
+    return Prop0
+
+afun(
+    T: Set0,
+    a: T,
+    b: T,
+    c: T,
+    ab: Eq(T, a)(b),
+    bc: Eq(T, b)(c) // TODO: Support trailing commas.
+): Eq(T, a)(c)
+    let f =
+        match ab
+        case refl:
+            afun(ac: Eq(T, a)(c)): Eq(T, a)(c)
+                ac
+        use [ina_outb]
+        return For(_: Eq(T, ina_outb)(c)) -> Eq(T, a)(c)
+    f(bc)
+"#;
+    let cst = parse_or_panic(src);
+    let zo = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+
+    insta::assert_display_snapshot!(PrettyPrint(&zo));
+}
