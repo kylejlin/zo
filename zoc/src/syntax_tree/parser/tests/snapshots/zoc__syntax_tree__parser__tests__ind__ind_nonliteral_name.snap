@@ -8,10 +8,10 @@ Some(
             value: 2,
             span: (
                 ByteIndex(
-                    15,
+                    14,
                 ),
                 ByteIndex(
-                    16,
+                    15,
                 ),
             ),
         },

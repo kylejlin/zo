@@ -6,7 +6,7 @@ fn ind() {
 (
 ind
 
-Type0
+Set0
 
 "Nat"
 
@@ -54,7 +54,7 @@ fn ind_nonliteral_name() {
 (
 ind
 
-Type0
+Set0
 
 2
 

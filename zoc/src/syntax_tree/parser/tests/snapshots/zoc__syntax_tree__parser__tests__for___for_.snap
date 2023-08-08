@@ -20,6 +20,7 @@ For(
                             start: ByteIndex(
                                 36,
                             ),
+                            erasable: false,
                         },
                     ),
                 ),
@@ -28,10 +29,10 @@ For(
                         value: 0,
                         span: (
                             ByteIndex(
-                                42,
+                                41,
                             ),
                             ByteIndex(
-                                43,
+                                42,
                             ),
                         ),
                     },
@@ -42,28 +43,29 @@ For(
                     value: 1,
                     span: (
                         ByteIndex(
-                            44,
+                            43,
                         ),
                         ByteIndex(
-                            45,
+                            44,
                         ),
                     ),
                 },
             ),
         ),
         param_types_rparen: ByteIndex(
-            45,
+            44,
         ),
         return_type: Universe(
             UniverseLiteral {
                 level: 0,
                 start: ByteIndex(
-                    71,
+                    70,
                 ),
+                erasable: true,
             },
         ),
         rparen: ByteIndex(
-            77,
+            76,
         ),
     },
 )

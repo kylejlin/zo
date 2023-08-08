@@ -16,60 +16,61 @@ Vcon(
                 start: ByteIndex(
                     24,
                 ),
+                erasable: false,
             },
             name: StringLiteral {
                 value: "Nat",
                 span: (
                     ByteIndex(
-                        35,
+                        34,
                     ),
                     ByteIndex(
-                        40,
+                        39,
                     ),
                 ),
             },
             index_types_lparen: ByteIndex(
-                65,
+                64,
             ),
             index_types: Nil,
             index_types_rparen: ByteIndex(
-                66,
+                65,
             ),
             vcon_defs_lparen: ByteIndex(
-                73,
+                72,
             ),
             vcon_defs: Snoc(
                 Snoc(
                     Nil,
                     VconDef {
                         lparen: ByteIndex(
-                            83,
+                            82,
                         ),
                         param_types_lparen: ByteIndex(
-                            84,
+                            83,
                         ),
                         param_types: Nil,
                         param_types_rparen: ByteIndex(
-                            85,
+                            84,
                         ),
                         index_args_lparen: ByteIndex(
-                            87,
+                            86,
                         ),
                         index_args: Nil,
                         index_args_rparen: ByteIndex(
-                            88,
+                            87,
                         ),
                         rparen: ByteIndex(
-                            89,
+                            88,
                         ),
                     },
                 ),
                 VconDef {
                     lparen: ByteIndex(
-                        99,
+                        98,
                     ),
                     param_types_lparen: ByteIndex(
-                        100,
+                        99,
                     ),
                     param_types: Snoc(
                         Nil,
@@ -78,50 +79,50 @@ Vcon(
                                 value: 0,
                                 span: (
                                     ByteIndex(
-                                        101,
+                                        100,
                                     ),
                                     ByteIndex(
-                                        102,
+                                        101,
                                     ),
                                 ),
                             },
                         ),
                     ),
                     param_types_rparen: ByteIndex(
-                        102,
+                        101,
                     ),
                     index_args_lparen: ByteIndex(
-                        104,
+                        103,
                     ),
                     index_args: Nil,
                     index_args_rparen: ByteIndex(
-                        105,
+                        104,
                     ),
                     rparen: ByteIndex(
-                        106,
+                        105,
                     ),
                 },
             ),
             vcon_defs_rparen: ByteIndex(
-                112,
+                111,
             ),
             rparen: ByteIndex(
-                114,
+                113,
             ),
         },
         vcon_index: NumberLiteral {
             value: 0,
             span: (
                 ByteIndex(
-                    179,
+                    178,
                 ),
                 ByteIndex(
-                    180,
+                    179,
                 ),
             ),
         },
         rparen: ByteIndex(
-            181,
+            180,
         ),
     },
 )

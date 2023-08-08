@@ -4,7 +4,7 @@ use super::*;
 fn add_2_3() {
     let nat_def = (
         "<NAT>",
-        r#"(ind Type0 "Nat" () (
+        r#"(ind Set0 "Nat" () (
 (() ())
 ((0) ())
 ))"#,
@@ -45,7 +45,7 @@ fn rev_1_2_3() {
     let nat_def = (
         "<NAT>",
         r#"
-(ind Type0 "Nat" () (
+(ind Set0 "Nat" () (
     (() ())
     ((0) ())
 ))"#,
@@ -58,7 +58,7 @@ fn rev_1_2_3() {
     let list_0_def = (
         "<LIST_0>",
         r#"
-(ind Type0 "List" () (
+(ind Set0 "List" () (
     // DB index stack is
     // 0 =>  List(T)
     // 1 => List 
@@ -83,21 +83,21 @@ fn rev_1_2_3() {
     let polymorphic_list_def = (
         "<POLYMORPHIC_LIST>",
         r#"
-(fun nonrec (Type0) Type0
+(fun nonrec (Set0) Set0
     <LIST_0>
 )"#,
     );
     let polymorphic_nil_def = (
         "<POLYMORPHIC_NIL>",
         r#"
-(fun nonrec (Type0) (<POLYMORPHIC_LIST> 0)
+(fun nonrec (Set0) (<POLYMORPHIC_LIST> 0)
     (vcon <LIST_0> 0)
 )"#,
     );
     let polymorphic_cons_def = (
         "<POLYMORPHIC_CONS>",
         r#"
-(fun nonrec (Type0) (for (0 (<POLYMORPHIC_LIST> 1)) (<POLYMORPHIC_LIST> 2))
+(fun nonrec (Set0) (for (0 (<POLYMORPHIC_LIST> 1)) (<POLYMORPHIC_LIST> 2))
     (vcon <LIST_0> 1)
 )"#,
     );
@@ -170,7 +170,7 @@ fn polymorphic_rev_1_2_3() {
     let nat_def = (
         "<NAT>",
         r#"
-(ind Type0 "Nat" () (
+(ind Set0 "Nat" () (
     (() ())
     ((0) ())
 ))"#,
@@ -183,7 +183,7 @@ fn polymorphic_rev_1_2_3() {
     let list_0_def = (
         "<LIST_0>",
         r#"
-(ind Type0 "List" () (
+(ind Set0 "List" () (
     // DB index stack is
     // 0 =>  List(T)
     // 1 => List 
@@ -208,21 +208,21 @@ fn polymorphic_rev_1_2_3() {
     let polymorphic_list_def = (
         "<POLYMORPHIC_LIST>",
         r#"
-(fun nonrec (Type0) Type0
+(fun nonrec (Set0) Set0
     <LIST_0>
 )"#,
     );
     let polymorphic_nil_def = (
         "<POLYMORPHIC_NIL>",
         r#"
-(fun nonrec (Type0) (<POLYMORPHIC_LIST> 0)
+(fun nonrec (Set0) (<POLYMORPHIC_LIST> 0)
     (vcon <LIST_0> 0)
 )"#,
     );
     let polymorphic_cons_def = (
         "<POLYMORPHIC_CONS>",
         r#"
-(fun nonrec (Type0) (for (0 (<POLYMORPHIC_LIST> 1)) (<POLYMORPHIC_LIST> 2))
+(fun nonrec (Set0) (for (0 (<POLYMORPHIC_LIST> 1)) (<POLYMORPHIC_LIST> 2))
     (vcon <LIST_0> 1)
 )"#,
     );
@@ -241,7 +241,7 @@ fn polymorphic_rev_1_2_3() {
     1
     
     (
-        Type0 // T
+        Set0 // T
         (<POLYMORPHIC_LIST> 0) // reversee
         (<POLYMORPHIC_LIST> 1) // out
     )
@@ -298,12 +298,12 @@ fn ex_falso() {
     let nat_def = (
         "<NAT>",
         r#"
-(ind Type0 "Nat" () (
+(ind Set0 "Nat" () (
     (() ())
     ((0) ())
 ))"#,
     );
-    let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
+    let false_def = ("<FALSE>", r#"(ind Prop0 "False" () ())"#);
     let src_defs = [nat_def, false_def];
     let unsubstituted_src = r#"
     (fun nonrec (<FALSE>) <NAT>
@@ -321,7 +321,7 @@ fn eq_zero_one() {
     let nat_def = (
         "<NAT>",
         r#"
-(ind Type0 "Nat" () (
+(ind Set0 "Nat" () (
     (() ())
     ((0) ())
 ))"#,
@@ -332,18 +332,18 @@ fn eq_zero_one() {
     let eq_zero_def = (
         "<EQ_0>",
         r#"
-(ind Type0 "Eq0" (<NAT>) (
+(ind Prop0 "Eq0" (<NAT>) (
     (() (<0>))
 ))"#,
     );
-    let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
-    let unit_def = ("<UNIT>", r#"(ind Type0 "Unit" () ((() ())))"#);
+    let false_def = ("<FALSE>", r#"(ind Prop0 "False" () ())"#);
+    let unit_def = ("<UNIT>", r#"(ind Prop0 "Unit" () ((() ())))"#);
     let unitc_def = ("<UNITC>", "(vcon <UNIT> 0)");
     let is_zero_predicate_def = (
         "<IS_ZERO_PREDICATE>",
         r#"
-(fun nonrec (<NAT>) Type0
-    (match 1 1 Type0 (
+(fun nonrec (<NAT>) Prop0
+    (match 1 1 Prop0 (
         (0 <UNIT>)
         (1 <FALSE>)
     ))
@@ -379,7 +379,7 @@ fn eq_one_zero() {
     let nat_def = (
         "<NAT>",
         r#"
-(ind Type0 "Nat" () (
+(ind Set0 "Nat" () (
     (() ())
     ((0) ())
 ))"#,
@@ -390,20 +390,20 @@ fn eq_one_zero() {
     let eq_one_def = (
         "<EQ_1>",
         r#"
-(ind Type0 "Eq1" (<NAT>) (
+(ind Prop0 "Eq1" (<NAT>) (
     (() (<1>))
 ))"#,
     );
-    let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
-    let unit_def = ("<UNIT>", r#"(ind Type0 "Unit" () ((() ())))"#);
+    let false_def = ("<FALSE>", r#"(ind Prop0 "False" () ())"#);
+    let unit_def = ("<UNIT>", r#"(ind Prop0 "Unit" () ((() ())))"#);
     let unitc_def = ("<UNITC>", "(vcon <UNIT> 0)");
     let is_one_predicate_def = (
         "<IS_ONE_PREDICATE>",
         r#"
-(fun nonrec (<NAT>) Type0
-    (match 1 1 Type0 (
+(fun nonrec (<NAT>) Prop0
+    (match 1 1 Prop0 (
         (0 <FALSE>)
-        (1 (match 0 1 Type0 (
+        (1 (match 0 1 Prop0 (
             (0 <UNIT>)
             (1 <FALSE>)
         )))
@@ -440,7 +440,7 @@ fn eq_commutative() {
     let bool_def = (
         "<BOOL>",
         r#"
-(ind Type0 "Bool" () (
+(ind Set0 "Bool" () (
     (() ())
     (() ())
 ))"#,
@@ -450,7 +450,7 @@ fn eq_commutative() {
     let eq_bool_def = (
         "<EQ>",
         r#"
-(ind Type0 "Eq" (<BOOL> <BOOL>) (
+(ind Prop0 "Eq" (<BOOL> <BOOL>) (
     ((<BOOL>) (0 0))
 ))"#,
     );
@@ -481,7 +481,7 @@ fn eq_transitive() {
     let bool_def = (
         "<BOOL>",
         r#"
-(ind Type0 "Bool" () (
+(ind Set0 "Bool" () (
     (() ())
     (() ())
 ))"#,
@@ -491,7 +491,7 @@ fn eq_transitive() {
     let eq_bool_def = (
         "<EQ>",
         r#"
-(ind Type0 "Eq" (<BOOL> <BOOL>) (
+(ind Prop0 "Eq" (<BOOL> <BOOL>) (
     ((<BOOL>) (0 0))
 ))"#,
     );
@@ -520,8 +520,8 @@ fn eq_transitive() {
 #[test]
 fn vcon_index_arg_types_are_compared_against_ind_index_types_substituted_with_vcon_index_args() {
     let src = r#"
-    (ind Type1 "Precise" (Type0 0) (
-        ((Type0 0) (1 0))
+    (ind Set1 "Precise" (Set0 0) (
+        ((Set0 0) (1 0))
     ))
     "#;
     let type_ = get_type_under_empty_tcon_or_panic(&src);
@@ -532,7 +532,7 @@ fn vcon_index_arg_types_are_compared_against_ind_index_types_substituted_with_vc
 fn add_zero() {
     let nat_def = (
         "<NAT>",
-        r#"(ind Type0 "Nat" () (
+        r#"(ind Set0 "Nat" () (
 (() ())
 ((0) ())
 ))"#,
@@ -552,9 +552,9 @@ fn add_zero() {
     let eq_def = (
         "<EQ>",
         r#"
-(fun nonrec (<NAT> <NAT>) Type0
+(fun nonrec (<NAT> <NAT>) Prop0
     (
-        (ind Type0 "Eq" (<NAT>) (
+        (ind Prop0 "Eq" (<NAT>) (
             (() (3))
         ))
         1
@@ -567,7 +567,7 @@ fn add_zero() {
 (fun nonrec (<NAT>) (<EQ> 0 0)
     (
         vcon
-        (ind Type0 "Eq" (<NAT>) (
+        (ind Prop0 "Eq" (<NAT>) (
             (() (2))
         ))
         0
@@ -620,7 +620,7 @@ fn add_zero() {
 fn add_succ() {
     let nat_def = (
         "<NAT>",
-        r#"(ind Type0 "Nat" () (
+        r#"(ind Set0 "Nat" () (
 (() ())
 ((0) ())
 ))"#,
@@ -640,9 +640,9 @@ fn add_succ() {
     let eq_def = (
         "<EQ>",
         r#"
-(fun nonrec (<NAT> <NAT>) Type0
+(fun nonrec (<NAT> <NAT>) Prop0
     (
-        (ind Type0 "Eq" (<NAT>) (
+        (ind Prop0 "Eq" (<NAT>) (
             (() (3))
         ))
         1
@@ -655,7 +655,7 @@ fn add_succ() {
 (fun nonrec (<NAT>) (<EQ> 0 0)
     (
         vcon
-        (ind Type0 "Eq" (<NAT>) (
+        (ind Prop0 "Eq" (<NAT>) (
             (() (2))
         ))
         0

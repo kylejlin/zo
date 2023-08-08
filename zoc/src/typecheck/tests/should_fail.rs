@@ -5,7 +5,7 @@ fn wrong_match_return_type_arity() {
     let bool_def = (
         "<BOOL>",
         r#"
-(ind Type0 "Bool" () (
+(ind Set0 "Bool" () (
     (() ())
     (() ())
 ))"#,
@@ -15,7 +15,7 @@ fn wrong_match_return_type_arity() {
     let eq_bool_def = (
         "<EQ>",
         r#"
-(ind Type0 "Eq" (<BOOL> <BOOL>) (
+(ind Prop0 "Eq" (<BOOL> <BOOL>) (
     ((<BOOL>) (0 0))
 ))"#,
     );

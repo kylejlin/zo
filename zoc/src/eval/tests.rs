@@ -8,7 +8,7 @@ use pretty_assertions::assert_eq;
 fn add_2_3() {
     let nat_def = (
         "<NAT>",
-        r#"(ind Type0 "Nat" () (
+        r#"(ind Set0 "Nat" () (
 (() ())
 ((0) ())
 ))"#,
@@ -53,7 +53,7 @@ fn add_2_3() {
 fn nullary_match_case() {
     let dummy_ind_def = (
         "<DUMMY_IND>",
-        r#"(ind Type0 "Dummy" () (
+        r#"(ind Set0 "Dummy" () (
 (() ())
 ((0) ())
 ((0 1) ())
@@ -82,7 +82,7 @@ fn nullary_match_case() {
 fn match_case_param_substitution() {
     let dummy_ind_def = (
         "<DUMMY_IND>",
-        r#"(ind Type0 "Dummy" () (
+        r#"(ind Set0 "Dummy" () (
 (() ())
 ((0) ())
 ((0 1) ())
@@ -111,7 +111,7 @@ fn match_case_param_substitution() {
 fn rev_1_2_3() {
     let nat_def = (
         "<NAT>",
-        r#"(ind Type0 "Nat" () (
+        r#"(ind Set0 "Nat" () (
     (() ())
     ((0) ())
 ))"#,
@@ -126,7 +126,7 @@ fn rev_1_2_3() {
         r#"(
             ind
     
-            Type0
+            Set0
     
             "List"
     
@@ -162,9 +162,9 @@ fn rev_1_2_3() {
 
     nonrec
 
-    (Type0)
+    (Set0)
 
-    Type0
+    Set0
 
     <LIST_0>
 )"#,
@@ -176,9 +176,9 @@ fn rev_1_2_3() {
 
     nonrec
 
-    (Type0)
+    (Set0)
 
-    Type0
+    Set0
 
     (vcon <LIST_0> 0)
 )"#,
@@ -190,9 +190,9 @@ fn rev_1_2_3() {
 
     nonrec
 
-    (Type0)
+    (Set0)
 
-    Type0
+    Set0
 
     (vcon <LIST_0> 1)
 )"#,
@@ -204,7 +204,7 @@ fn rev_1_2_3() {
         r#"(
             ind
     
-            Type0
+            Set0
     
             "List"
     
@@ -303,7 +303,7 @@ fn rev_1_2_3() {
 fn polymorphic_rev_1_2_3() {
     let nat_def = (
         "<NAT>",
-        r#"(ind Type0 "Nat" () (
+        r#"(ind Set0 "Nat" () (
     (() ())
     ((0) ())
 ))"#,
@@ -318,7 +318,7 @@ fn polymorphic_rev_1_2_3() {
         r#"(
             ind
     
-            Type0
+            Set0
     
             "List"
     
@@ -354,9 +354,9 @@ fn polymorphic_rev_1_2_3() {
 
     nonrec
 
-    (Type0)
+    (Set0)
 
-    Type0
+    Set0
 
     <LIST_0>
 )"#,
@@ -368,9 +368,9 @@ fn polymorphic_rev_1_2_3() {
 
     nonrec
 
-    (Type0)
+    (Set0)
 
-    Type0
+    Set0
 
     (vcon <LIST_0> 0)
 )"#,
@@ -382,9 +382,9 @@ fn polymorphic_rev_1_2_3() {
 
     nonrec
 
-    (Type0)
+    (Set0)
 
-    Type0
+    Set0
 
     (vcon <LIST_0> 1)
 )"#,
@@ -396,7 +396,7 @@ fn polymorphic_rev_1_2_3() {
         r#"(
             ind
     
-            Type0
+            Set0
     
             "List"
     
@@ -436,7 +436,7 @@ fn polymorphic_rev_1_2_3() {
     1
     
     (
-        Type0 // T
+        Set0 // T
         (<POLYMORPHIC_LIST> 0) // reversee
         (<POLYMORPHIC_LIST> 1) // out
     )
@@ -498,7 +498,7 @@ fn polymorphic_rev_1_2_3() {
 fn recursive_fun_app_stops_unfolding_when_decreasing_arg_not_vconlike() {
     let nat_def = (
         "<NAT>",
-        r#"(ind Type0 "Nat" () (
+        r#"(ind Set0 "Nat" () (
 (() ())
 ((0) ())
 ))"#,
@@ -545,7 +545,7 @@ fn substitution_upshifts_new_expr_debs() {
 (
     ind
 
-    Type0
+    Set0
 
     "DummyInd"
 

@@ -153,7 +153,7 @@ TypeError::WrongMatchReturnTypeArity {
                 )
             )
         )
-    )@(ByteIndex(520)..ByteIndex(1286)),
+    )@(ByteIndex(512)..ByteIndex(1272)),
     matchee_type_args: [
         3,
         2,

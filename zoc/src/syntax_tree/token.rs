@@ -37,6 +37,9 @@ pub struct StringLiteral {
 pub struct UniverseLiteral {
     pub level: usize,
     pub start: ByteIndex,
+    /// This is true if the literal is a `Prop`
+    /// and false if the literal is a `Set`.
+    pub erasable: bool,
 }
 
 pub use crate::syntax_tree::parser::Token;

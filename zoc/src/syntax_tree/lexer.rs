@@ -217,25 +217,43 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
         _ => {}
     }
 
-    if s.starts_with("Type") {
-        let level_src = &s["Type".len()..];
-        if level_src.is_empty() {
-            return None;
-        }
+    if s.starts_with("Set") {
+        let level = get_number_after_prefix(s, "Set")?;
+        return Some(Token::Universe(UniverseLiteral {
+            level,
+            start,
+            erasable: false,
+        }));
+    }
 
-        let has_extraneous_leading_zeros = level_src != "0" && level_src.starts_with('0');
-        if has_extraneous_leading_zeros {
-            return None;
-        }
-
-        let Ok(level) = level_src.parse::<usize>() else {
-            return None;
-        };
-
-        return Some(Token::Universe(UniverseLiteral { level, start }));
+    if s.starts_with("Prop") {
+        let level = get_number_after_prefix(s, "Prop")?;
+        return Some(Token::Universe(UniverseLiteral {
+            level,
+            start,
+            erasable: true,
+        }));
     }
 
     None
+}
+
+fn get_number_after_prefix(s: &str, prefix: &str) -> Option<usize> {
+    let level_src = &s[prefix.len()..];
+    if level_src.is_empty() {
+        return None;
+    }
+
+    let has_extraneous_leading_zeros = level_src != "0" && level_src.starts_with('0');
+    if has_extraneous_leading_zeros {
+        return None;
+    }
+
+    let Ok(level) = level_src.parse::<usize>() else {
+        return None;
+    };
+
+    Some(level)
 }
 
 use string_parser::get_string_value;
@@ -534,48 +552,49 @@ mod tests {
 
     #[test]
     fn ind() {
-        let actual = lex(r#"(ind Type0 "Nat" () ((() ()) ((0) ())))"#);
+        let actual = lex(r#"(ind Set0 "Nat" () ((() ()) ((0) ())))"#);
         let expected = Ok(vec![
             Token::LParen(ByteIndex(0)),
             Token::IndKw(ByteIndex(1)),
             Token::Universe(UniverseLiteral {
                 level: 0,
                 start: ByteIndex(5),
+                erasable: false,
             }),
             Token::String(StringLiteral {
                 value: "Nat".to_owned(),
-                span: (ByteIndex(11), ByteIndex(16)),
+                span: (ByteIndex(10), ByteIndex(15)),
             }),
             // Begin parenthesized constructor definitions
-            Token::LParen(ByteIndex(17)),
-            Token::RParen(ByteIndex(18)),
+            Token::LParen(ByteIndex(16)),
+            Token::RParen(ByteIndex(17)),
+            Token::LParen(ByteIndex(19)),
             Token::LParen(ByteIndex(20)),
             Token::LParen(ByteIndex(21)),
-            Token::LParen(ByteIndex(22)),
-            Token::RParen(ByteIndex(23)),
-            Token::LParen(ByteIndex(25)),
+            Token::RParen(ByteIndex(22)),
+            Token::LParen(ByteIndex(24)),
+            Token::RParen(ByteIndex(25)),
             Token::RParen(ByteIndex(26)),
-            Token::RParen(ByteIndex(27)),
+            Token::LParen(ByteIndex(28)),
             Token::LParen(ByteIndex(29)),
-            Token::LParen(ByteIndex(30)),
             Token::Number(NumberLiteral {
                 value: 0,
-                span: (ByteIndex(31), ByteIndex(32)),
+                span: (ByteIndex(30), ByteIndex(31)),
             }),
-            Token::RParen(ByteIndex(32)),
-            Token::LParen(ByteIndex(34)),
+            Token::RParen(ByteIndex(31)),
+            Token::LParen(ByteIndex(33)),
+            Token::RParen(ByteIndex(34)),
             Token::RParen(ByteIndex(35)),
             Token::RParen(ByteIndex(36)),
-            Token::RParen(ByteIndex(37)),
             // End parenthesized constructor definitions
-            Token::RParen(ByteIndex(38)),
+            Token::RParen(ByteIndex(37)),
         ]);
         assert_eq!(expected, actual);
     }
 
     #[test]
     fn keywords() {
-        let src = r#"ind vcon match fun for nonrec Type0 Type1 Type33"#;
+        let src = r#"ind vcon match fun for nonrec Set0 Set1 Set33 Prop0 Prop1 Prop33"#;
         let actual = lex(src);
         let expected = Ok(vec![
             Token::IndKw(ByteIndex(src.find("ind").unwrap())),
@@ -586,15 +605,33 @@ mod tests {
             Token::NonrecKw(ByteIndex(src.find("nonrec").unwrap())),
             Token::Universe(UniverseLiteral {
                 level: 0,
-                start: ByteIndex(src.find("Type0").unwrap()),
+                start: ByteIndex(src.find("Set0").unwrap()),
+                erasable: false,
             }),
             Token::Universe(UniverseLiteral {
                 level: 1,
-                start: ByteIndex(src.find("Type1").unwrap()),
+                start: ByteIndex(src.find("Set1").unwrap()),
+                erasable: false,
             }),
             Token::Universe(UniverseLiteral {
                 level: 33,
-                start: ByteIndex(src.find("Type33").unwrap()),
+                start: ByteIndex(src.find("Set33").unwrap()),
+                erasable: false,
+            }),
+            Token::Universe(UniverseLiteral {
+                level: 0,
+                start: ByteIndex(src.find("Prop0").unwrap()),
+                erasable: true,
+            }),
+            Token::Universe(UniverseLiteral {
+                level: 1,
+                start: ByteIndex(src.find("Prop1").unwrap()),
+                erasable: true,
+            }),
+            Token::Universe(UniverseLiteral {
+                level: 33,
+                start: ByteIndex(src.find("Prop33").unwrap()),
+                erasable: true,
             }),
         ]);
         assert_eq!(expected, actual);
@@ -629,16 +666,32 @@ nonrec)"#;
     }
 
     #[test]
-    fn universe_zero_zero() {
-        let src = r#"Type00"#;
+    fn set_zero_zero() {
+        let src = r#"Set00"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);
     }
 
     #[test]
-    fn universe_zero_one() {
-        let src = r#"Type01"#;
+    fn set_zero_one() {
+        let src = r#"Set01"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn prop_zero_zero() {
+        let src = r#"Prop00"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn prop_zero_one() {
+        let src = r#"Prop01"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);

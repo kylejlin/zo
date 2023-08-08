@@ -7,10 +7,10 @@ fn for_() {
     for
 
     // Param types
-    (Type0 0 1)
+    (Set0 0 1)
 
     // Return type
-    Type0
+    Prop0
 )"#;
     let tokens = lex(src).unwrap();
     let cst = parse(tokens).unwrap();

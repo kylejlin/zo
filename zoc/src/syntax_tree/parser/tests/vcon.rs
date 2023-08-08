@@ -9,7 +9,7 @@ vcon
 (
     ind
 
-    Type0
+    Set0
 
     "Nat"
 
@@ -54,7 +54,7 @@ vcon
 (
     ind
 
-    Type0
+    Set0
 
     "Nat"
 

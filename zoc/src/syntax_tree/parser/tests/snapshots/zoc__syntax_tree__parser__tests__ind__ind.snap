@@ -12,60 +12,61 @@ Ind(
             start: ByteIndex(
                 8,
             ),
+            erasable: false,
         },
         name: StringLiteral {
             value: "Nat",
             span: (
                 ByteIndex(
-                    15,
+                    14,
                 ),
                 ByteIndex(
-                    20,
+                    19,
                 ),
             ),
         },
         index_types_lparen: ByteIndex(
-            37,
+            36,
         ),
         index_types: Nil,
         index_types_rparen: ByteIndex(
-            38,
+            37,
         ),
         vcon_defs_lparen: ByteIndex(
-            69,
+            68,
         ),
         vcon_defs: Snoc(
             Snoc(
                 Nil,
                 VconDef {
                     lparen: ByteIndex(
-                        75,
+                        74,
                     ),
                     param_types_lparen: ByteIndex(
-                        76,
+                        75,
                     ),
                     param_types: Nil,
                     param_types_rparen: ByteIndex(
-                        77,
+                        76,
                     ),
                     index_args_lparen: ByteIndex(
-                        79,
+                        78,
                     ),
                     index_args: Nil,
                     index_args_rparen: ByteIndex(
-                        80,
+                        79,
                     ),
                     rparen: ByteIndex(
-                        81,
+                        80,
                     ),
                 },
             ),
             VconDef {
                 lparen: ByteIndex(
-                    87,
+                    86,
                 ),
                 param_types_lparen: ByteIndex(
-                    88,
+                    87,
                 ),
                 param_types: Snoc(
                     Nil,
@@ -74,35 +75,35 @@ Ind(
                             value: 0,
                             span: (
                                 ByteIndex(
-                                    89,
+                                    88,
                                 ),
                                 ByteIndex(
-                                    90,
+                                    89,
                                 ),
                             ),
                         },
                     ),
                 ),
                 param_types_rparen: ByteIndex(
-                    90,
+                    89,
                 ),
                 index_args_lparen: ByteIndex(
-                    92,
+                    91,
                 ),
                 index_args: Nil,
                 index_args_rparen: ByteIndex(
-                    93,
+                    92,
                 ),
                 rparen: ByteIndex(
-                    94,
+                    93,
                 ),
             },
         ),
         vcon_defs_rparen: ByteIndex(
-            96,
+            95,
         ),
         rparen: ByteIndex(
-            98,
+            97,
         ),
     },
 )
