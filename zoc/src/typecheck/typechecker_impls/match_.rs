@@ -18,6 +18,11 @@ impl TypeChecker {
             matchee_type_ind_g0.clone(),
         )?;
 
+        self.assert_stated_return_type_arity_is_correct(
+            match_g0.clone(),
+            matchee_type_args_g0.clone(),
+        )?;
+
         let tcon_extension = {
             let matchee_type_ind_index_types_g0 = matchee_type_ind_g0.to_hashee().index_types();
             let mut out = matchee_type_ind_index_types_g0.hashee().cloned();
@@ -87,6 +92,24 @@ impl TypeChecker {
             return Err(TypeError::WrongNumberOfMatchCases {
                 match_: match_.hashee.clone(),
                 matchee_type_ind: matchee_type_ind.to_hashee().cloned(),
+            });
+        }
+
+        Ok(())
+    }
+
+    fn assert_stated_return_type_arity_is_correct(
+        &mut self,
+        match_: RcHashed<cst::Match>,
+        matchee_type_args: Normalized<RcHashedVec<ast::Expr>>,
+    ) -> Result<(), TypeError> {
+        let correct_return_type_arity = 1 + matchee_type_args.raw().hashee.len();
+
+        if match_.hashee.return_type_arity.value != correct_return_type_arity {
+            let matchee_type_args = matchee_type_args.to_hashee().into_vec();
+            return Err(TypeError::WrongReturnTypeArity {
+                match_: match_.hashee.clone(),
+                matchee_type_args,
             });
         }
 

@@ -119,6 +119,27 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .finish()
             }
 
+            TypeError::WrongReturnTypeArity {
+                match_,
+                matchee_type_args,
+            } => {
+                let mut converter = IpistToAstConverter::default();
+                let match_ast = converter.convert_match(rc_hashed(match_.clone()));
+                let matchee_type_args: Vec<_> = matchee_type_args
+                    .iter()
+                    .map(|arg| arg.raw().pretty_printed())
+                    .collect();
+                f.debug_struct("TypeError::WrongReturnTypeArity")
+                    .field(
+                        "match_",
+                        &match_ast
+                            .pretty_printed()
+                            .with_location_appended(match_.span()),
+                    )
+                    .field("matchee_type_args", &matchee_type_args)
+                    .finish()
+            }
+
             TypeError::WrongMatchCaseArity {
                 actual_node,
                 expected,

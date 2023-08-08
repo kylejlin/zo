@@ -102,6 +102,14 @@ where
     pub fn index_ref(&self, index: usize) -> Normalized<&T> {
         self.as_ref().index(index)
     }
+
+    /// Shorthand for `self.as_ref().into_vec()`.
+    pub fn to_vec(&self) -> Vec<Normalized<T>>
+    where
+        T: Clone,
+    {
+        self.as_ref().into_vec()
+    }
 }
 impl<'a, T, S> Normalized<&'a S>
 where
@@ -114,6 +122,13 @@ where
     /// A panicking version of `get`.
     pub fn index(self, index: usize) -> Normalized<&'a T> {
         Normalized(&self.0[index])
+    }
+
+    pub fn into_vec(self) -> Vec<Normalized<T>>
+    where
+        T: Clone,
+    {
+        self.0.iter().cloned().map(Normalized).collect()
     }
 }
 
