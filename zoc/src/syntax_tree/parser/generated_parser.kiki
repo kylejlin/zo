@@ -75,6 +75,7 @@ struct Match {
 
     _: $MatchKw
     matchee: Expr
+    return_type_arity: $Number
     return_type: Expr
 
     cases_lparen: $LParen

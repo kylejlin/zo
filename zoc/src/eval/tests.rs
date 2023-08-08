@@ -24,7 +24,7 @@ fn add_2_3() {
                 "<ADD>",
                 "(fun 0 (<NAT> <NAT>) <NAT>
 (
-    match 2 <NAT>
+    match 2 1 <NAT>
 
     (
         (0 1)
@@ -63,7 +63,7 @@ fn nullary_match_case() {
         [dummy_ind_def],
         r#"
 (
-    match (vcon <DUMMY_IND> 0) <DUMMY_IND> (
+    match (vcon <DUMMY_IND> 0) 1 <DUMMY_IND> (
         (0 12)
         (1 14)
         (2 (16 1 0))
@@ -92,7 +92,7 @@ fn match_case_param_substitution() {
         [dummy_ind_def],
         r#"
 (
-    match ((vcon <DUMMY_IND> 2) 10 11) <DUMMY_IND> (
+    match ((vcon <DUMMY_IND> 2) 10 11) 1 <DUMMY_IND> (
         (0 12)
         (1 14)
         (2 (16 1 0))
@@ -251,7 +251,7 @@ fn rev_1_2_3() {
     (<POLYMORPHIC_LIST> <NAT>)
     
     (
-        match 2 (<POLYMORPHIC_LIST> <NAT>)
+        match 2 1 (<POLYMORPHIC_LIST> <NAT>)
 
         (
             (0 1)
@@ -444,7 +444,7 @@ fn polymorphic_rev_1_2_3() {
     (<POLYMORPHIC_LIST> 2)
     
     (
-        match 2 (<POLYMORPHIC_LIST> 3)
+        match 2 1 (<POLYMORPHIC_LIST> 3)
 
         (
             (0 1)
@@ -518,7 +518,7 @@ fn recursive_fun_app_stops_unfolding_when_decreasing_arg_not_vconlike() {
     <NAT>
 
     (
-        match 1 <NAT> (
+        match 1 1 <NAT> (
             (0 <ZERO>)
             (1 (<SUCC> (1 0)))
         )
@@ -561,14 +561,14 @@ fn substitution_upshifts_new_expr_debs() {
         [dummy_ind_def],
         r#"
 (
-    match ((vcon <DUMMY_IND> 1) 5 ((vcon <DUMMY_IND> 0) 100)) 120 (
+    match ((vcon <DUMMY_IND> 1) 5 ((vcon <DUMMY_IND> 0) 100)) 1 120 (
         (1 140)
 
         (
             2
 
             (
-                match 0 160 (
+                match 0 1 160 (
                     (1 2)
 
                     (2 180)

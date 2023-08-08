@@ -17,7 +17,7 @@ fn add_2_3() {
         "<ADD_TAILCALL_IMPL>",
         "
 (fun 0 (<NAT> <NAT>) <NAT>
-    (match 2 <NAT> (
+    (match 2 1 <NAT> (
         (0 1)
         (1 (1 0 (<SUCC> 2)))
     ))
@@ -123,7 +123,7 @@ fn rev_1_2_3() {
     (<POLYMORPHIC_LIST> <NAT>)
     
     (
-        match 2 (<POLYMORPHIC_LIST> <NAT>)
+        match 2 1 (<POLYMORPHIC_LIST> <NAT>)
 
         (
             (0 1)
@@ -249,7 +249,7 @@ fn polymorphic_rev_1_2_3() {
     (<POLYMORPHIC_LIST> 2)
     
     (
-        match 2 (<POLYMORPHIC_LIST> 4)
+        match 2 1 (<POLYMORPHIC_LIST> 4)
 
         (
             (0 1)
@@ -307,7 +307,7 @@ fn ex_falso() {
     let src_defs = [nat_def, false_def];
     let unsubstituted_src = r#"
     (fun nonrec (<FALSE>) <NAT>
-        (match 1 <NAT> ())
+        (match 1 1 <NAT> ())
     )"#;
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
 
@@ -339,11 +339,11 @@ fn eq_zero_one() {
     let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
     let unit_def = ("<UNIT>", r#"(ind Type0 "Unit" () ((() ())))"#);
     let unitc_def = ("<UNITC>", "(vcon <UNIT> 0)");
-    let is_zero_ty_def = (
-        "<IS_ZERO_TY>",
+    let is_zero_predicate_def = (
+        "<IS_ZERO_PREDICATE>",
         r#"
 (fun nonrec (<NAT>) Type0
-    (match 1 Type0 (
+    (match 1 1 Type0 (
         (0 <UNIT>)
         (1 <FALSE>)
     ))
@@ -351,7 +351,7 @@ fn eq_zero_one() {
     );
     let eq_zero_one_implies_false_unsubstituted_src = r#"
 (fun nonrec ((<EQ_0> <1>)) <FALSE>
-    (match 1 (<IS_ZERO_TY> 1) (
+    (match 1 2 (<IS_ZERO_PREDICATE> 1) (
         (0 <UNITC>)
     ))
 )"#;
@@ -364,7 +364,7 @@ fn eq_zero_one() {
         false_def,
         unit_def,
         unitc_def,
-        is_zero_ty_def,
+        is_zero_predicate_def,
     ];
     let eq_zero_one_implies_false_src =
         substitute_with_compounding(src_defs, eq_zero_one_implies_false_unsubstituted_src);
@@ -397,13 +397,13 @@ fn eq_one_zero() {
     let false_def = ("<FALSE>", r#"(ind Type0 "False" () ())"#);
     let unit_def = ("<UNIT>", r#"(ind Type0 "Unit" () ((() ())))"#);
     let unitc_def = ("<UNITC>", "(vcon <UNIT> 0)");
-    let is_one_ty_def = (
-        "<IS_ONE_TY>",
+    let is_one_predicate_def = (
+        "<IS_ONE_PREDICATE>",
         r#"
 (fun nonrec (<NAT>) Type0
-    (match 1 Type0 (
+    (match 1 1 Type0 (
         (0 <FALSE>)
-        (1 (match 0 Type0 (
+        (1 (match 0 1 Type0 (
             (0 <UNIT>)
             (1 <FALSE>)
         )))
@@ -412,7 +412,7 @@ fn eq_one_zero() {
     );
     let eq_one_zero_implies_false_unsubstituted_src = r#"
 (fun nonrec ((<EQ_1> <0>)) <FALSE>
-    (match 1 (<IS_ONE_TY> 1) (
+    (match 1 2 (<IS_ONE_PREDICATE> 1) (
         (0 <UNITC>)
     ))
 )"#;
@@ -425,7 +425,7 @@ fn eq_one_zero() {
         false_def,
         unit_def,
         unitc_def,
-        is_one_ty_def,
+        is_one_predicate_def,
     ];
     let eq_one_zero_implies_false_src =
         substitute_with_compounding(src_defs, eq_one_zero_implies_false_unsubstituted_src);
@@ -456,7 +456,7 @@ fn eq_commutative() {
     );
     let unsubstituted_src = r#"
 (fun nonrec (<BOOL> <BOOL> (<EQ> 1 0)) (<EQ> 1 2)
-    (match 1 (<EQ> 1 2) (
+    (match 1 3 (<EQ> 1 2) (
         (
             // Arity
             1
@@ -498,7 +498,7 @@ fn eq_transitive() {
     let unsubstituted_src = r#"
 (fun nonrec (<BOOL> <BOOL> <BOOL> (<EQ> 2 1) (<EQ> 2 1)) (<EQ> 4 2)
     (
-        (match 2 (for ((<EQ> 1 6)) (<EQ> 3 7)) (
+        (match 2 3 (for ((<EQ> 1 6)) (<EQ> 3 7)) (
             (
                 // Arity
                 1
@@ -543,7 +543,7 @@ fn add_zero() {
         "<ADD>",
         "
 (fun 0 (<NAT> <NAT>) <NAT>
-    (match 2 <NAT> (
+    (match 2 1 <NAT> (
         (0 1)
         (1 (<SUCC> (1 0 2)))
     ))
@@ -578,7 +578,7 @@ fn add_zero() {
 
     let unsubstituted_src = r#"
 (fun 0 (<NAT>) (<EQ> 0 (<ADD> 0 <0>))
-    (match 1 (<EQ> 0 (<ADD> 0 <0>)) (
+    (match 1 1 (<EQ> 0 (<ADD> 0 <0>)) (
         // `zero` case
         (
             // Case arity
@@ -597,7 +597,7 @@ fn add_zero() {
             //   [goal: (EQ (SUCC 0) (ADD (SUCC 0) ZERO))]
             //   [goal: (EQ (SUCC 0) (SUCC (ADD 0 ZERO)))]
             //   [(1 0): (EQ 0 (ADD 0 ZERO))]
-            (match (1 0) (<EQ> (<SUCC> 2) (<SUCC> 1)) (
+            (match (1 0) 2 (<EQ> (<SUCC> 2) (<SUCC> 1)) (
                 // `refl` case (only case)
                 (
                     // Case arity
@@ -631,7 +631,7 @@ fn add_succ() {
         "<ADD>",
         "
 (fun 0 (<NAT> <NAT>) <NAT>
-    (match 2 <NAT> (
+    (match 2 1 <NAT> (
         (0 1)
         (1 (<SUCC> (1 0 2)))
     ))
@@ -666,7 +666,7 @@ fn add_succ() {
 
     let unsubstituted_src = r#"
 (fun 0 (<NAT> <NAT>) (<EQ> (<ADD> 1 (<SUCC> 0)) (<SUCC> (<ADD> 1 0)))
-    (match 2 (<EQ> (<ADD> 0 (<SUCC> 2)) (<SUCC> (<ADD> 0 2))) (
+    (match 2 1 (<EQ> (<ADD> 0 (<SUCC> 2)) (<SUCC> (<ADD> 0 2))) (
         // `zero` case
         (
             // Case arity
@@ -685,7 +685,7 @@ fn add_succ() {
             //   [goal: (EQ (ADD (SUCC 0) (SUCC 2)) (SUCC (ADD (SUCC 0) 2)))]
             //   [goal: (EQ (SUCC (ADD 0 (SUCC 2))) (SUCC (SUCC (ADD 0 2))))]
             //   [(1 0 2): (EQ (ADD 0 (SUCC 2)) (SUCC (ADD 0 2)))]
-            (match (1 0 2) (<EQ> (<SUCC> (<ADD> 2 (<SUCC> 4))) (<SUCC> 1)) (
+            (match (1 0 2) 2 (<EQ> (<SUCC> (<ADD> 2 (<SUCC> 4))) (<SUCC> 1)) (
                 // `refl` case (only case)
                 (
                     // Case arity
