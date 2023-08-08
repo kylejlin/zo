@@ -385,33 +385,28 @@ fun add_n_succ_m(-n: Nat, m: Nat): Eq(Nat, succ(add(n, m)))(add(n, succ(m)))
     use n_capp
     return1 Eq(Nat, succ(add(n_capp, m)))(add(n_capp, succ(m)))
 
-// TODO: Rename `a` and `b` to `m` and `n`.
-// This is not essential.
-// However, it would be nice for the params
-// to be consistent with the params
-// in `add_n_zero` and `add_n_succ_m`.
-afun add_commutative(-a: Nat, b: Nat): Eq(Nat, add(a, b))(add(b, a))
-    match a
+afun add_commutative(-n: Nat, m: Nat): Eq(Nat, add(n, m))(add(m, n))
+    match n
     case zero:
-        match add_n_zero(b)
+        match add_n_zero(m)
         case refl:
-            refl(Nat, b)
-        use [in_b_out_add_b_zero]
-        return Eq(Nat, b)(in_b_out_add_b_zero)
-    case succ(a_pred):
-        // Goal: Eq(Nat, succ(add(a_pred, b)))(add(b, succ(a_pred)))
-        match add_n_succ_m(b, a_pred)
+            refl(Nat, m)
+        use [in_m_out_add_m_zero]
+        return Eq(Nat, m)(in_m_out_add_m_zero)
+    case succ(n_pred):
+        // Goal: Eq(Nat, succ(add(n_pred, m)))(add(m, succ(n_pred)))
+        match add_n_succ_m(m, n_pred)
         case refl:
-            // Goal: Eq(Nat, succ(add(a_pred, b)))(succ(add(b, a_pred)))
-            match add_commutative(a_pred, b)
+            // Goal: Eq(Nat, succ(add(n_pred, m)))(succ(add(m, n_pred)))
+            match add_commutative(n_pred, m)
             case refl:
-                refl(Nat, succ(add(a_pred, b)))
-            use [in_apred_b_out_b_apred]
-            return Eq(Nat, succ(add(a_pred, b)))(succ(in_apred_b_out_b_apred))
+                refl(Nat, succ(add(n_pred, m)))
+            use [in_npred_m_out_m_apred]
+            return Eq(Nat, succ(add(n_pred, m)))(succ(in_npred_m_out_m_apred))
         use [in_succ_add_out_add_succ]
-        return Eq(Nat, succ(add(a_pred, b)))(in_succ_add_out_add_succ)
-    use a_capp
-    return1 Eq(Nat, add(a_capp, b))(add(b, a_capp))
+        return Eq(Nat, succ(add(n_pred, m)))(in_succ_add_out_add_succ)
+    use n_capp
+    return1 Eq(Nat, add(n_capp, m))(add(m, n_capp))
 "#;
     let cst = parse_or_panic(src);
     let zo = may_to_zo(&cst).unwrap();
