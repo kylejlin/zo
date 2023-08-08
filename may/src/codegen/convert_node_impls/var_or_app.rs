@@ -21,13 +21,6 @@ impl MayConverter {
             return Err(SemanticError::VarNotDefined(expr.clone()));
         };
         let val = entry.val.clone().replace_debs(&DebUpshifter(dist), 0);
-        {
-            //_! TODO: Delete this block.
-            use zoc::pretty_print::PrettyPrint;
-            if expr.value == "add_n_succ_m" {
-                println!("XXX.add_n_succ_m(dist={dist}):\n{}", PrettyPrint(&val));
-            }
-        }
         Ok(self.cache_expr(val))
     }
 
