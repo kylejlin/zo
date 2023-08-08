@@ -444,3 +444,28 @@ afun eq_implies_substitutable(
 
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
+
+#[test]
+fn substitutable_implies_eq() {
+    let src = r#"
+ind(T: Set0, left: T) Eq[_: T]
+    case refl: [left]
+    return Prop0
+
+afun substitutable_implies_eq(
+    T: Set0,
+    a: T,
+    b: T,
+    sub: For(P: For(_: T) -> Prop0, pa: P(a)) -> P(b),
+): Eq(T, a)(b)
+    fun eq_a(c: T): Prop0
+        Eq(T, a)(c)
+    sub(eq_a, refl(T, a))
+"#;
+    let cst = parse_or_panic(src);
+    let zo = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+
+    insta::assert_display_snapshot!(PrettyPrint(&zo));
+}
