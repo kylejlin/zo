@@ -184,6 +184,9 @@ fn fmt_match(m: RcHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) -> 
     fmt_expr(m.hashee.matchee.clone(), f, i1)?;
     write!(f, "\n")?;
 
+    let return_type_arity = m.hashee.return_type_arity;
+    write!(f, "{i1}{return_type_arity}\n")?;
+
     fmt_expr(m.hashee.return_type.clone(), f, i1)?;
     write!(f, "\n")?;
 

@@ -205,9 +205,11 @@ impl ReplaceDebs for RcHashed<Match> {
         let original = &self.hashee;
         Rc::new(Hashed::new(Match {
             matchee: original.matchee.clone().replace_debs(replacer, cutoff),
-            // TODO: Fix this.
-            // It should be `cutoff + return_arity`.
-            return_type: original.return_type.clone().replace_debs(replacer, cutoff),
+            return_type_arity: original.return_type_arity,
+            return_type: original
+                .return_type
+                .clone()
+                .replace_debs(replacer, cutoff + original.return_type_arity),
             cases: original
                 .cases
                 .clone()

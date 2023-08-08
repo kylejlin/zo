@@ -99,6 +99,7 @@ impl From<ost::Match> for ipist::Match {
         ipist::Match {
             lparen: cst.lparen,
             matchee: (*cst.matchee).into(),
+            return_type_arity: cst.return_type_arity,
             return_type: (*cst.return_type).into(),
             cases_lparen: cst.cases_lparen,
             cases: (*cst.cases).into(),

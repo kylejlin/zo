@@ -134,6 +134,7 @@ expression: PrettyPrint(type_.raw())
                                 (
                                     match
                                     2
+                                    1
                                     (
                                         ind
                                         Type0
@@ -309,6 +310,7 @@ expression: PrettyPrint(type_.raw())
                     (
                         match
                         2
+                        1
                         (
                             ind
                             Type0

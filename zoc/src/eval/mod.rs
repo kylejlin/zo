@@ -177,6 +177,7 @@ impl Evaluator {
         let match_digest = m.digest.clone();
         let normalized = Match {
             matchee: normalized_matchee,
+            return_type_arity: match_.return_type_arity,
             return_type: self.eval(match_.return_type.clone()).into_raw(),
             cases: self.eval_match_cases(match_.cases.clone()).into_raw(),
         }
