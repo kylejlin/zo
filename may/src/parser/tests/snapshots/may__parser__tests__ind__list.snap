@@ -35,6 +35,7 @@ Ind(
                             ),
                         },
                     ),
+                    trailing_comma: None,
                     rparen: ByteIndex(
                         12,
                     ),
@@ -126,6 +127,7 @@ Ind(
                                     ),
                                 },
                             ),
+                            trailing_comma: None,
                             rparen: ByteIndex(
                                 63,
                             ),
@@ -171,6 +173,7 @@ Ind(
                             ),
                         ),
                     ),
+                    trailing_comma: None,
                     rparen: ByteIndex(
                         90,
                     ),

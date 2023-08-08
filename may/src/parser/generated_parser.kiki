@@ -60,7 +60,14 @@ enum OptParenthesizedParamDefs {
 struct ParenthesizedCommaSeparatedParamDefs {
     lparen: $LParen
     params: CommaSeparatedParamDefs
+    trailing_comma: OptComma
     rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptComma {
+    None
+    Some($Comma)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -97,6 +104,7 @@ enum OptSquareBracketedParamDefs {
 struct SquareBracketedParamDefs {
     lsquare: $LSquare
     params: CommaSeparatedParamDefs
+    trailing_comma: OptComma
     rsquare: $RSquare
 }
 
@@ -124,6 +132,7 @@ enum OptColonSquareBracketedExprs {
         _: $Colon
         _: $LSquare
         CommaSeparatedExprs
+        _: OptComma
         _: $RSquare
     )
 }
@@ -193,6 +202,7 @@ enum ReturnArityClause {
 struct SquareBracketedCommaSeparatedIdentsOrUnderscores {
     lsquare: $LSquare
     idents: CommaSeparatedIdentsOrUnderscores
+    trailing_comma: OptComma
     rsquare: $RSquare
 }
 
@@ -234,6 +244,7 @@ enum OptParenthesizedCommaSeparatedIdentsOrUnderscores {
 struct ParenthesizedCommaSeparatedIdentsOrUnderscores {
     lparen: $LParen
     idents: CommaSeparatedIdentsOrUnderscores
+    trailing_comma: OptComma
     rparen: $RParen
 }
 
@@ -255,6 +266,7 @@ struct App {
     callee: VarOrApp
     lparen: $LParen
     args: CommaSeparatedExprs
+    trailing_comma: OptComma
     rparen: $RParen
 }
 

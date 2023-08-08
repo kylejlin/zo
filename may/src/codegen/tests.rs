@@ -232,7 +232,7 @@ afun(
     b: T,
     c: T,
     ab: Eq(T, a)(b),
-    bc: Eq(T, b)(c) // TODO: Support trailing commas.
+    bc: Eq(T, b)(c),
 ): Eq(T, a)(c)
     let f =
         match ab

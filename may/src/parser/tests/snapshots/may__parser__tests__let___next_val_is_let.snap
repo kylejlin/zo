@@ -39,6 +39,7 @@ Let(
                             ),
                         ),
                     ),
+                    trailing_comma: None,
                     rparen: ByteIndex(
                         21,
                     ),
@@ -94,6 +95,7 @@ Let(
                                     ),
                                 ),
                             ),
+                            trailing_comma: None,
                             rparen: ByteIndex(
                                 52,
                             ),
@@ -138,6 +140,7 @@ Let(
                                     ),
                                 ),
                             ),
+                            trailing_comma: None,
                             rparen: ByteIndex(
                                 70,
                             ),
