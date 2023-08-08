@@ -39,6 +39,12 @@ pub trait PrettyUnwrap {
     fn pretty_unwrap(self) -> Self::Output;
 }
 
+pub trait PrettyUnwrapErr {
+    type Output;
+
+    fn pretty_unwrap_err(self) -> Self::Output;
+}
+
 impl<T, E> PrettyUnwrap for Result<T, E>
 where
     for<'a> PrettyPrint<'a, E>: Display,
@@ -59,6 +65,25 @@ where
                     PrettyPrint(&e)
                 );
             }
+        }
+    }
+}
+
+impl<T, E> PrettyUnwrapErr for Result<T, E>
+where
+    for<'a> PrettyPrint<'a, T>: Display,
+{
+    type Output = E;
+
+    fn pretty_unwrap_err(self) -> E {
+        match self {
+            Ok(v) => {
+                panic!(
+                    "called `Result::unwrap_err()` on an `Ok` value:\n{:#}",
+                    PrettyPrint(&v)
+                );
+            }
+            Err(e) => e,
         }
     }
 }

@@ -2,7 +2,7 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     pretty_print::*,
     syntax_tree::{ast, ipist, ipist_to_ast::IpistToAstConverter, lexer::lex, parser::parse},
-    typecheck::{LazyTypeContext, TypeChecker},
+    typecheck::{LazyTypeContext, TypeChecker, TypeError},
 };
 
 pub fn substitute_with_compounding<'a>(
@@ -48,4 +48,13 @@ pub fn get_type_under_empty_tcon_or_panic(src: &str) -> NormalForm {
     TypeChecker::default()
         .get_type(cst, LazyTypeContext::Base(empty.as_ref().convert_ref()))
         .pretty_unwrap()
+}
+
+pub fn get_type_error_under_empty_tcon_or_panic(src: &str) -> TypeError {
+    let cst = parse_rch_cst_or_panic(src);
+    let empty = Normalized::<[_; 0]>::new();
+    TypeChecker::default()
+        .get_type(cst, LazyTypeContext::Base(empty.as_ref().convert_ref()))
+        .map(Normalized::into_raw)
+        .pretty_unwrap_err()
 }

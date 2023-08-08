@@ -119,7 +119,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .finish()
             }
 
-            TypeError::WrongReturnTypeArity {
+            TypeError::WrongMatchReturnTypeArity {
                 match_,
                 matchee_type_args,
             } => {
@@ -129,7 +129,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .iter()
                     .map(|arg| arg.raw().pretty_printed())
                     .collect();
-                f.debug_struct("TypeError::WrongReturnTypeArity")
+                f.debug_struct("TypeError::WrongMatchReturnTypeArity")
                     .field(
                         "match_",
                         &match_ast

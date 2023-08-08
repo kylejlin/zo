@@ -29,7 +29,7 @@ pub enum TypeError {
         match_: cst::Match,
         matchee_type_ind: Normalized<ast::Ind>,
     },
-    WrongReturnTypeArity {
+    WrongMatchReturnTypeArity {
         match_: cst::Match,
         matchee_type_args: Vec<NormalForm>,
     },

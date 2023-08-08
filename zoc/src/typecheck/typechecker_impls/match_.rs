@@ -107,7 +107,7 @@ impl TypeChecker {
 
         if match_.hashee.return_type_arity.value != correct_return_type_arity {
             let matchee_type_args = matchee_type_args.to_hashee().into_vec();
-            return Err(TypeError::WrongReturnTypeArity {
+            return Err(TypeError::WrongMatchReturnTypeArity {
                 match_: match_.hashee.clone(),
                 matchee_type_args,
             });
