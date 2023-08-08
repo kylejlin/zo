@@ -1,0 +1,108 @@
+// ================================================================
+// Unit
+// ================================================================
+
+ind Unit
+    case unit
+    return Set0
+
+// ================================================================
+// Bool
+// ================================================================
+
+ind Bool
+    case true
+    case false
+    return Set0
+
+fun not(b: Bool): Bool
+    match b
+    case true:
+        false
+    case false:
+        true
+    return1 Bool
+
+fun and(a: Bool, b: Bool): Bool
+    match a
+    case true:
+        b
+    case false:
+        false
+    return1 Bool
+
+fun or(a: Bool, b: Bool): Bool
+    match a
+    case true:
+        true
+    case false:
+        b
+    return1 Bool
+
+// ================================================================
+// Nat
+// ================================================================
+
+ind Nat
+    case zero
+    case succ(_: Nat)
+    return Set0
+
+fun add(a: Nat, b: Nat): Nat
+    match a
+    case zero:
+        b
+    case succ(pred):
+        succ(add(pred, b))
+    return1 Nat
+
+fun mul(a: Nat, b: Nat): Nat
+    match a
+    case zero:
+        zero
+    case succ(pred):
+        add(b, mul(pred, b))
+    return1 Nat
+
+// We define zero to the zeroth power to equal one.
+fun pow(base: Nat, exp: Nat): Nat
+    match exp
+    case zero:
+        succ(zero)
+    case succ(exp_pred):
+        mul(base, pow(base, exp_pred))
+    return1 Nat
+
+// ================================================================
+// Exists
+// ================================================================
+
+ind(T: Set0, P: For(_: T) -> Prop0) Exists
+    case exists(witness: T, proof: P(witness))
+    return Prop0
+
+// ================================================================
+// Dummy tail
+//
+// - If you want to use the above library,
+//   delete this `Dummy tail` section,
+//   and add your code below.
+// ================================================================
+
+ind Precise(T: Set0, t: T)
+    case precise
+    return Set0
+
+aind DummyTail
+    case dummy_tail(
+        _: Unit,
+        _: Precise(Unit, unit),
+
+        _: Bool,
+        _: Precise(Bool, true),
+        _: Precise(Bool, false),
+        _: Precise(For(_: Bool) -> Bool, not),
+        _: Precise(For(_: Bool, _: Bool) -> Bool, and),
+        _: Precise(For(_: Bool, _: Bool) -> Bool, or),
+    )
+    return Prop0
