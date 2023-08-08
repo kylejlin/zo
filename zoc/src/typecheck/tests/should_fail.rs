@@ -55,3 +55,5 @@ fn wrong_match_return_type_arity() {
     let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
     insta::assert_display_snapshot!(pretty_printed_err);
 }
+
+// TODO: Add more tests.
