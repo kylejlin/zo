@@ -12,7 +12,7 @@ use zoc::{
     },
 };
 
-use std::rc::Rc;
+use std::{collections::HashSet, rc::Rc};
 
 mod cache_expr;
 
@@ -40,6 +40,7 @@ pub fn may_to_zo(expr: &mnode::Expr) -> Result<znode::Expr, SemanticError> {
 struct MayConverter {
     znode_cache: NoHashHashMap<Digest, znode::Expr>,
     znode_vec_cache: NoHashHashMap<Digest, RcHashedVec<znode::Expr>>,
+    str_val_cache: HashSet<Rc<StringValue>>,
 
     zo_typechecker: zoc::typecheck::TypeChecker,
 }

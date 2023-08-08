@@ -133,7 +133,13 @@ impl MayConverter {
 
 impl MayConverter {
     pub(crate) fn cache_string_value(&mut self, val: StringValue) -> Rc<StringValue> {
-        // TODO: Properly cache this.
-        Rc::new(val)
+        let val = Rc::new(val);
+
+        if let Some(existing) = self.str_val_cache.get(&val) {
+            return existing.clone();
+        }
+
+        self.str_val_cache.insert(val.clone());
+        val
     }
 }
