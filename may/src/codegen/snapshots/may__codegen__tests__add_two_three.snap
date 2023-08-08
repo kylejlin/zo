@@ -9,7 +9,7 @@ expression: PrettyPrint(&zo)
         (
             (
                 ind
-                Type0
+                Set0
                 "Nat"
                 ()
                 (
@@ -27,7 +27,7 @@ expression: PrettyPrint(&zo)
             )
             (
                 ind
-                Type0
+                Set0
                 "Nat"
                 ()
                 (
@@ -46,7 +46,7 @@ expression: PrettyPrint(&zo)
         )
         (
             ind
-            Type0
+            Set0
             "Nat"
             ()
             (
@@ -68,7 +68,7 @@ expression: PrettyPrint(&zo)
             1
             (
                 ind
-                Type0
+                Set0
                 "Nat"
                 ()
                 (
@@ -92,7 +92,7 @@ expression: PrettyPrint(&zo)
                             vcon
                             (
                                 ind
-                                Type0
+                                Set0
                                 "Nat"
                                 ()
                                 (
@@ -129,7 +129,7 @@ expression: PrettyPrint(&zo)
             vcon
             (
                 ind
-                Type0
+                Set0
                 "Nat"
                 ()
                 (
@@ -152,7 +152,7 @@ expression: PrettyPrint(&zo)
                 vcon
                 (
                     ind
-                    Type0
+                    Set0
                     "Nat"
                     ()
                     (
@@ -174,7 +174,7 @@ expression: PrettyPrint(&zo)
                 vcon
                 (
                     ind
-                    Type0
+                    Set0
                     "Nat"
                     ()
                     (
@@ -199,7 +199,7 @@ expression: PrettyPrint(&zo)
             vcon
             (
                 ind
-                Type0
+                Set0
                 "Nat"
                 ()
                 (
@@ -222,7 +222,7 @@ expression: PrettyPrint(&zo)
                 vcon
                 (
                     ind
-                    Type0
+                    Set0
                     "Nat"
                     ()
                     (
@@ -245,7 +245,7 @@ expression: PrettyPrint(&zo)
                     vcon
                     (
                         ind
-                        Type0
+                        Set0
                         "Nat"
                         ()
                         (
@@ -267,7 +267,7 @@ expression: PrettyPrint(&zo)
                     vcon
                     (
                         ind
-                        Type0
+                        Set0
                         "Nat"
                         ()
                         (

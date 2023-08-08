@@ -39,7 +39,10 @@ impl MayConverter {
         expr: &mnode::IndCommonInnards,
         context: Context,
     ) -> Result<znode::Ind, SemanticError> {
-        let universe_level = UniverseLevel(expr.universe.level);
+        let universe_level = Universe {
+            level: UniverseLevel(expr.universe.level),
+            erasable: expr.universe.erasable,
+        };
 
         let name = match &*expr.custom_zo_name {
             mnode::OptString::None => StringValue(expr.name.value.clone()),
@@ -61,7 +64,7 @@ impl MayConverter {
         let vcon_defs = self.convert_ordered_ind_cases(&cases, context_with_recursive_ind)?;
 
         Ok(znode::Ind {
-            universe_level,
+            universe: universe_level,
             name,
             index_types,
             vcon_defs,
@@ -122,7 +125,7 @@ impl MayConverter {
         let ind_type_cfor = znode::For {
             param_types: return_type_ind.index_types.clone(),
             return_type: znode::UniverseNode {
-                level: return_type_ind.universe_level,
+                universe: return_type_ind.universe,
             }
             .into(),
         }

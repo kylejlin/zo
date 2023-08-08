@@ -6,12 +6,12 @@ expression: PrettyPrint(&zo)
     fun
     nonrec
     (
-        Type0
+        Set0
     )
-    Type0
+    Set0
     (
         ind
-        Type0
+        Set0
         "List"
         ()
         (

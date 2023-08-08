@@ -156,7 +156,7 @@ impl ReplaceDebs for RcHashed<Ind> {
         let original = &self.hashee;
         Rc::new(Hashed::new(Ind {
             name: original.name.clone(),
-            universe_level: original.universe_level,
+            universe: original.universe,
             index_types: original
                 .index_types
                 .clone()

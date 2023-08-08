@@ -19,7 +19,7 @@ impl Hash for Ind {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_IND.hash(state);
         self.name.hash(state);
-        self.universe_level.hash(state);
+        self.universe.hash(state);
         self.index_types.digest.hash(state);
         self.vcon_defs.digest.hash(state);
         delimiters::END.hash(state);
@@ -103,7 +103,7 @@ impl Hash for DebNode {
 impl Hash for UniverseNode {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_UNIVERSE.hash(state);
-        self.level.hash(state);
+        self.universe.hash(state);
         delimiters::END.hash(state);
     }
 }

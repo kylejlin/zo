@@ -1,7 +1,7 @@
 use crate::{
     hash::*,
     syntax_tree::{
-        ast::{self, rc_hashed, Deb, RcHashed, RcHashedVec, UniverseLevel},
+        ast::{self, rc_hashed, Deb, RcHashed, RcHashedVec, Universe, UniverseLevel},
         ipist,
     },
 };
@@ -38,7 +38,10 @@ impl IpistToAstConverter {
             }
             .into(),
             ipist::Expr::Universe(e) => ast::UniverseNode {
-                level: UniverseLevel(e.hashee.level),
+                universe: Universe {
+                    level: UniverseLevel(e.hashee.level),
+                    erasable: e.hashee.erasable,
+                },
             }
             .into(),
         }
@@ -62,7 +65,10 @@ impl IpistToAstConverter {
     fn convert_unseen_ind(&mut self, ist: RcHashed<ipist::Ind>) -> RcHashed<ast::Ind> {
         rc_hashed(ast::Ind {
             name: Rc::new(ast::StringValue(ist.hashee.name.value.to_owned())),
-            universe_level: UniverseLevel(ist.hashee.type_.level),
+            universe: Universe {
+                level: UniverseLevel(ist.hashee.type_.level),
+                erasable: ist.hashee.type_.erasable,
+            },
             index_types: self.convert_expressions(&ist.hashee.index_types),
             vcon_defs: self.convert_vcon_defs(ist.hashee.vcon_defs.clone()),
         })

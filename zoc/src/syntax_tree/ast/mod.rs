@@ -23,7 +23,7 @@ pub enum Expr {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Ind {
     pub name: Rc<StringValue>,
-    pub universe_level: UniverseLevel,
+    pub universe: Universe,
     pub index_types: RcHashedVec<Expr>,
     pub vcon_defs: RcHashedVec<VconDef>,
 }
@@ -84,11 +84,17 @@ pub struct DebNode {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct UniverseNode {
-    pub level: UniverseLevel,
+    pub universe: Universe,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct Deb(pub usize);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Universe {
+    pub level: UniverseLevel,
+    pub erasable: bool,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct UniverseLevel(pub usize);

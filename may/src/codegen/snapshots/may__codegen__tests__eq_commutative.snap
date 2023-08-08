@@ -6,7 +6,7 @@ expression: PrettyPrint(&zo)
     fun
     nonrec
     (
-        Type0
+        Set0
         0
         1
         (
@@ -15,7 +15,7 @@ expression: PrettyPrint(&zo)
                     fun
                     nonrec
                     (
-                        Type0
+                        Set0
                         0
                     )
                     (
@@ -23,11 +23,11 @@ expression: PrettyPrint(&zo)
                         (
                             1
                         )
-                        Type0
+                        Prop0
                     )
                     (
                         ind
-                        Type0
+                        Prop0
                         "Eq"
                         (
                             2
@@ -54,7 +54,7 @@ expression: PrettyPrint(&zo)
                 fun
                 nonrec
                 (
-                    Type0
+                    Set0
                     0
                 )
                 (
@@ -62,11 +62,11 @@ expression: PrettyPrint(&zo)
                     (
                         1
                     )
-                    Type0
+                    Prop0
                 )
                 (
                     ind
-                    Type0
+                    Prop0
                     "Eq"
                     (
                         2
@@ -96,7 +96,7 @@ expression: PrettyPrint(&zo)
                     fun
                     nonrec
                     (
-                        Type0
+                        Set0
                         0
                     )
                     (
@@ -104,11 +104,11 @@ expression: PrettyPrint(&zo)
                         (
                             1
                         )
-                        Type0
+                        Prop0
                     )
                     (
                         ind
-                        Type0
+                        Prop0
                         "Eq"
                         (
                             2
@@ -136,13 +136,13 @@ expression: PrettyPrint(&zo)
                         fun
                         nonrec
                         (
-                            Type0
+                            Set0
                             0
                         )
                         (
                             (
                                 ind
-                                Type0
+                                Prop0
                                 "Eq"
                                 (
                                     1
@@ -162,7 +162,7 @@ expression: PrettyPrint(&zo)
                             vcon
                             (
                                 ind
-                                Type0
+                                Prop0
                                 "Eq"
                                 (
                                     2

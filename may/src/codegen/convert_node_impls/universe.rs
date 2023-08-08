@@ -6,7 +6,10 @@ impl MayConverter {
         expr: &mnode::UniverseLiteral,
     ) -> Result<znode::Expr, SemanticError> {
         Ok(self.cache_universe(znode::UniverseNode {
-            level: UniverseLevel(expr.level),
+            universe: Universe {
+                level: UniverseLevel(expr.level),
+                erasable: expr.erasable,
+            },
         }))
     }
 }

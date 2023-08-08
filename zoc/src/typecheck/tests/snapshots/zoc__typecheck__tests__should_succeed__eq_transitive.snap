@@ -7,7 +7,7 @@ expression: PrettyPrint(type_.raw())
     (
         (
             ind
-            Type0
+            Set0
             "Bool"
             ()
             (
@@ -23,7 +23,7 @@ expression: PrettyPrint(type_.raw())
         )
         (
             ind
-            Type0
+            Set0
             "Bool"
             ()
             (
@@ -39,7 +39,7 @@ expression: PrettyPrint(type_.raw())
         )
         (
             ind
-            Type0
+            Set0
             "Bool"
             ()
             (
@@ -56,12 +56,12 @@ expression: PrettyPrint(type_.raw())
         (
             (
                 ind
-                Type0
+                Prop0
                 "Eq"
                 (
                     (
                         ind
-                        Type0
+                        Set0
                         "Bool"
                         ()
                         (
@@ -77,7 +77,7 @@ expression: PrettyPrint(type_.raw())
                     )
                     (
                         ind
-                        Type0
+                        Set0
                         "Bool"
                         ()
                         (
@@ -97,7 +97,7 @@ expression: PrettyPrint(type_.raw())
                         (
                             (
                                 ind
-                                Type0
+                                Set0
                                 "Bool"
                                 ()
                                 (
@@ -125,12 +125,12 @@ expression: PrettyPrint(type_.raw())
         (
             (
                 ind
-                Type0
+                Prop0
                 "Eq"
                 (
                     (
                         ind
-                        Type0
+                        Set0
                         "Bool"
                         ()
                         (
@@ -146,7 +146,7 @@ expression: PrettyPrint(type_.raw())
                     )
                     (
                         ind
-                        Type0
+                        Set0
                         "Bool"
                         ()
                         (
@@ -166,7 +166,7 @@ expression: PrettyPrint(type_.raw())
                         (
                             (
                                 ind
-                                Type0
+                                Set0
                                 "Bool"
                                 ()
                                 (
@@ -195,12 +195,12 @@ expression: PrettyPrint(type_.raw())
     (
         (
             ind
-            Type0
+            Prop0
             "Eq"
             (
                 (
                     ind
-                    Type0
+                    Set0
                     "Bool"
                     ()
                     (
@@ -216,7 +216,7 @@ expression: PrettyPrint(type_.raw())
                 )
                 (
                     ind
-                    Type0
+                    Set0
                     "Bool"
                     ()
                     (
@@ -236,7 +236,7 @@ expression: PrettyPrint(type_.raw())
                     (
                         (
                             ind
-                            Type0
+                            Set0
                             "Bool"
                             ()
                             (

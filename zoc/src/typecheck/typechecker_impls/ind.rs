@@ -23,7 +23,10 @@ impl TypeChecker {
             .into_rc_hashed();
 
         let universe_node = NormalForm::universe(ast::UniverseNode {
-            level: UniverseLevel(ind.hashee.type_.level),
+            universe: Universe {
+                level: UniverseLevel(ind.hashee.type_.level),
+                erasable: ind.hashee.type_.erasable,
+            },
         });
         let ind_type_g0 = Normalized::for_(normalized_index_types_g0.clone(), universe_node)
             .collapse_if_nullary();

@@ -70,13 +70,13 @@ impl Display for PrettyPrint<'_, RcHashed<For>> {
 
 impl Display for PrettyPrint<'_, RcHashed<DebNode>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_deb(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+        fmt_deb_node(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
 impl Display for PrettyPrint<'_, RcHashed<UniverseNode>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_universe(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+        fmt_universe_node(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
@@ -92,15 +92,17 @@ fn fmt_expr(expr: Expr, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult
         Expr::Fun(e) => fmt_fun(e, f, indent),
         Expr::App(e) => fmt_app(e, f, indent),
         Expr::For(e) => fmt_for(e, f, indent),
-        Expr::Deb(e) => fmt_deb(e, f, indent),
-        Expr::Universe(e) => fmt_universe(e, f, indent),
+        Expr::Deb(e) => fmt_deb_node(e, f, indent),
+        Expr::Universe(e) => fmt_universe_node(e, f, indent),
     }
 }
 
 fn fmt_ind(ind: RcHashed<Ind>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
-    let universe_level = ind.hashee.universe_level.0;
-    write!(f, "{indent}(\n{i1}ind\n{i1}Type{universe_level}\n")?;
+    write!(f, "{indent}(\n{i1}ind\n")?;
+    fmt_universe(ind.hashee.universe, f, i1)?;
+    write!(f, "\n")?;
+
     fmt_str_literal(ind.hashee.name.clone(), f, i1)?;
     write!(f, "\n")?;
 
@@ -111,6 +113,12 @@ fn fmt_ind(ind: RcHashed<Ind>, f: &mut Formatter<'_>, indent: Indentation) -> Fm
     write!(f, "\n{indent})")?;
 
     Ok(())
+}
+
+fn fmt_universe(universe: Universe, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+    let level = universe.level.0;
+    let set_or_prop = if universe.erasable { "Prop" } else { "Set" };
+    write!(f, "{indent}{set_or_prop}{level}")
 }
 
 fn fmt_str_literal(
@@ -289,18 +297,17 @@ fn fmt_for(for_: RcHashed<For>, f: &mut Formatter<'_>, indent: Indentation) -> F
     Ok(())
 }
 
-fn fmt_deb(deb: RcHashed<DebNode>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
-    let index = deb.hashee.deb.0;
+fn fmt_deb_node(node: RcHashed<DebNode>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+    let index = node.hashee.deb.0;
     write!(f, "{indent}{index}")
 }
 
-fn fmt_universe(
-    universe: RcHashed<UniverseNode>,
+fn fmt_universe_node(
+    node: RcHashed<UniverseNode>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
-    let level = universe.hashee.level.0;
-    write!(f, "{indent}Type{level}")
+    fmt_universe(node.hashee.universe, f, indent)
 }
 
 fn fmt_parenthesized_expressions(

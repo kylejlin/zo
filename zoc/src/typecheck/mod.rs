@@ -2,7 +2,7 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::*,
     syntax_tree::{
-        ast::{self, Deb, RcHashed, RcHashedVec, UniverseLevel},
+        ast::{self, Deb, RcHashed, RcHashedVec, Universe, UniverseLevel},
         ipist::{self as cst},
         ipist_to_ast::IpistToAstConverter,
         replace_debs::*,
@@ -55,7 +55,7 @@ fn get_max_universe_level<'a>(
     exprs
         .into_iter()
         .filter_map(|expr| match expr {
-            ast::Expr::Universe(universe) => Some(universe.hashee.level),
+            ast::Expr::Universe(universe) => Some(universe.hashee.universe.level),
             _ => None,
         })
         .max()

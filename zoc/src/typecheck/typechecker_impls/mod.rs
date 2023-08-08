@@ -75,7 +75,7 @@ impl TypeChecker {
         for i in 0..param_type_types.raw().len() {
             let param_type_type: Normalized<&ast::Expr> = param_type_types.index_ref(i);
             let param_type_type_ul = match param_type_type.into_raw() {
-                ast::Expr::Universe(universe) => universe.hashee.level,
+                ast::Expr::Universe(universe) => universe.hashee.universe,
                 _ => {
                     return Err(TypeError::UnexpectedNonTypeExpression {
                         expr: exprs[i].clone(),
@@ -126,7 +126,7 @@ impl TypeChecker {
 trait UniverseLimit {
     fn assert_ul_is_within_limit(
         &self,
-        param_type_type_ul: UniverseLevel,
+        param_type_type_universe: Universe,
         expr: cst::Expr,
     ) -> Result<(), TypeError>;
 }
@@ -136,14 +136,14 @@ struct LimitToIndUniverse(RcHashed<cst::Ind>);
 impl UniverseLimit for LimitToIndUniverse {
     fn assert_ul_is_within_limit(
         &self,
-        param_type_type_ul: UniverseLevel,
+        param_type_type_universe: Universe,
         expr: cst::Expr,
     ) -> Result<(), TypeError> {
         let inclusive_max = UniverseLevel(self.0.hashee.type_.level);
-        if param_type_type_ul > inclusive_max {
+        if param_type_type_universe.level > inclusive_max {
             return Err(TypeError::UniverseInconsistencyInIndDef {
                 index_or_param_type: expr.clone(),
-                level: param_type_type_ul,
+                universe: param_type_type_universe,
                 ind: self.0.hashee.clone(),
             });
         }
@@ -155,7 +155,7 @@ impl UniverseLimit for LimitToIndUniverse {
 struct NoLimit;
 
 impl UniverseLimit for NoLimit {
-    fn assert_ul_is_within_limit(&self, _: UniverseLevel, _: cst::Expr) -> Result<(), TypeError> {
+    fn assert_ul_is_within_limit(&self, _: Universe, _: cst::Expr) -> Result<(), TypeError> {
         Ok(())
     }
 }

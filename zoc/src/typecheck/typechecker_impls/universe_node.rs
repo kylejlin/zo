@@ -7,7 +7,10 @@ impl TypeChecker {
     ) -> Result<NormalForm, TypeError> {
         return Ok(self.evaluator.eval(ast::Expr::Universe(Rc::new(Hashed::new(
             ast::UniverseNode {
-                level: UniverseLevel(universe.hashee.level + 1),
+                universe: Universe {
+                    level: UniverseLevel(universe.hashee.level + 1),
+                    erasable: true,
+                },
             },
         )))));
     }

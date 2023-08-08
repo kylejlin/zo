@@ -5,8 +5,8 @@ expression: PrettyPrint(type_.raw())
 (
     for
     (
-        Type0
+        Set0
         0
     )
-    Type1
+    Set1
 )

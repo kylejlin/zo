@@ -10,12 +10,12 @@ TypeError::WrongMatchReturnTypeArity {
         (
             (
                 ind
-                Type0
+                Prop0
                 "Eq"
                 (
                     (
                         ind
-                        Type0
+                        Set0
                         "Bool"
                         ()
                         (
@@ -31,7 +31,7 @@ TypeError::WrongMatchReturnTypeArity {
                     )
                     (
                         ind
-                        Type0
+                        Set0
                         "Bool"
                         ()
                         (
@@ -51,7 +51,7 @@ TypeError::WrongMatchReturnTypeArity {
                         (
                             (
                                 ind
-                                Type0
+                                Set0
                                 "Bool"
                                 ()
                                 (
@@ -84,12 +84,12 @@ TypeError::WrongMatchReturnTypeArity {
                         vcon
                         (
                             ind
-                            Type0
+                            Prop0
                             "Eq"
                             (
                                 (
                                     ind
-                                    Type0
+                                    Set0
                                     "Bool"
                                     ()
                                     (
@@ -105,7 +105,7 @@ TypeError::WrongMatchReturnTypeArity {
                                 )
                                 (
                                     ind
-                                    Type0
+                                    Set0
                                     "Bool"
                                     ()
                                     (
@@ -125,7 +125,7 @@ TypeError::WrongMatchReturnTypeArity {
                                     (
                                         (
                                             ind
-                                            Type0
+                                            Set0
                                             "Bool"
                                             ()
                                             (

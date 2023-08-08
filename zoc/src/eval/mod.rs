@@ -46,7 +46,7 @@ impl Evaluator {
         let ind = &ind.hashee;
         let normalized = Ind {
             name: ind.name.clone(),
-            universe_level: ind.universe_level,
+            universe: ind.universe,
             index_types: self.eval_expressions(ind.index_types.clone()).into_raw(),
             vcon_defs: self.eval_vcon_defs(ind.vcon_defs.clone()).into_raw(),
         }

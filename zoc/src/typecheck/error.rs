@@ -13,7 +13,7 @@ pub enum TypeError {
     },
     UniverseInconsistencyInIndDef {
         index_or_param_type: cst::Expr,
-        level: UniverseLevel,
+        universe: Universe,
         ind: cst::Ind,
     },
     WrongNumberOfIndexArguments {

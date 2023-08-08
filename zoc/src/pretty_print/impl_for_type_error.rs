@@ -47,7 +47,7 @@ impl Display for PrettyPrint<'_, TypeError> {
 
             TypeError::UniverseInconsistencyInIndDef {
                 index_or_param_type,
-                level,
+                universe,
                 ind,
             } => {
                 let mut converter = IpistToAstConverter::default();
@@ -60,7 +60,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                             .pretty_printed()
                             .with_location_appended(index_or_param_type.span()),
                     )
-                    .field("level", &level)
+                    .field("universe", &universe)
                     .field(
                         "ind",
                         &ind_ast.pretty_printed().with_location_appended(ind.span()),

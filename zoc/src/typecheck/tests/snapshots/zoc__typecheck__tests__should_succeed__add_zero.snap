@@ -7,7 +7,7 @@ expression: PrettyPrint(type_.raw())
     (
         (
             ind
-            Type0
+            Set0
             "Nat"
             ()
             (
@@ -27,12 +27,12 @@ expression: PrettyPrint(type_.raw())
     (
         (
             ind
-            Type0
+            Prop0
             "Eq"
             (
                 (
                     ind
-                    Type0
+                    Set0
                     "Nat"
                     ()
                     (
@@ -65,7 +65,7 @@ expression: PrettyPrint(type_.raw())
                 (
                     (
                         ind
-                        Type0
+                        Set0
                         "Nat"
                         ()
                         (
@@ -83,7 +83,7 @@ expression: PrettyPrint(type_.raw())
                     )
                     (
                         ind
-                        Type0
+                        Set0
                         "Nat"
                         ()
                         (
@@ -102,7 +102,7 @@ expression: PrettyPrint(type_.raw())
                 )
                 (
                     ind
-                    Type0
+                    Set0
                     "Nat"
                     ()
                     (
@@ -124,7 +124,7 @@ expression: PrettyPrint(type_.raw())
                     1
                     (
                         ind
-                        Type0
+                        Set0
                         "Nat"
                         ()
                         (
@@ -152,7 +152,7 @@ expression: PrettyPrint(type_.raw())
                                     vcon
                                     (
                                         ind
-                                        Type0
+                                        Set0
                                         "Nat"
                                         ()
                                         (
@@ -185,7 +185,7 @@ expression: PrettyPrint(type_.raw())
                 vcon
                 (
                     ind
-                    Type0
+                    Set0
                     "Nat"
                     ()
                     (

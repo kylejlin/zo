@@ -4,7 +4,7 @@ expression: PrettyPrint(type_.raw())
 ---
 (
     ind
-    Type0
+    Set0
     "List"
     ()
     (
@@ -16,7 +16,7 @@ expression: PrettyPrint(type_.raw())
             (
                 (
                     ind
-                    Type0
+                    Set0
                     "Nat"
                     ()
                     (

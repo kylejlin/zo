@@ -7,18 +7,18 @@ expression: PrettyPrint(&zo)
         fun
         nonrec
         (
-            Type0
+            Set0
             (
                 (
                     fun
                     nonrec
                     (
-                        Type0
+                        Set0
                     )
-                    Type0
+                    Set0
                     (
                         ind
-                        Type0
+                        Set0
                         "List"
                         ()
                         (
@@ -44,12 +44,12 @@ expression: PrettyPrint(&zo)
                 fun
                 nonrec
                 (
-                    Type0
+                    Set0
                 )
-                Type0
+                Set0
                 (
                     ind
-                    Type0
+                    Set0
                     "List"
                     ()
                     (
@@ -79,12 +79,12 @@ expression: PrettyPrint(&zo)
                             fun
                             nonrec
                             (
-                                Type0
+                                Set0
                             )
-                            Type0
+                            Set0
                             (
                                 ind
-                                Type0
+                                Set0
                                 "List"
                                 ()
                                 (
@@ -109,12 +109,12 @@ expression: PrettyPrint(&zo)
                             fun
                             nonrec
                             (
-                                Type0
+                                Set0
                             )
-                            Type0
+                            Set0
                             (
                                 ind
-                                Type0
+                                Set0
                                 "List"
                                 ()
                                 (
@@ -140,12 +140,12 @@ expression: PrettyPrint(&zo)
                         fun
                         nonrec
                         (
-                            Type0
+                            Set0
                         )
-                        Type0
+                        Set0
                         (
                             ind
-                            Type0
+                            Set0
                             "List"
                             ()
                             (
@@ -174,12 +174,12 @@ expression: PrettyPrint(&zo)
                             fun
                             nonrec
                             (
-                                Type0
+                                Set0
                             )
-                            Type0
+                            Set0
                             (
                                 ind
-                                Type0
+                                Set0
                                 "List"
                                 ()
                                 (
@@ -211,7 +211,7 @@ expression: PrettyPrint(&zo)
                                             fun
                                             nonrec
                                             (
-                                                Type0
+                                                Set0
                                             )
                                             (
                                                 for
@@ -219,7 +219,7 @@ expression: PrettyPrint(&zo)
                                                     0
                                                     (
                                                         ind
-                                                        Type0
+                                                        Set0
                                                         "List"
                                                         ()
                                                         (
@@ -239,7 +239,7 @@ expression: PrettyPrint(&zo)
                                                 )
                                                 (
                                                     ind
-                                                    Type0
+                                                    Set0
                                                     "List"
                                                     ()
                                                     (
@@ -261,7 +261,7 @@ expression: PrettyPrint(&zo)
                                                 vcon
                                                 (
                                                     ind
-                                                    Type0
+                                                    Set0
                                                     "List"
                                                     ()
                                                     (
@@ -301,11 +301,11 @@ expression: PrettyPrint(&zo)
                     fun
                     nonrec
                     (
-                        Type0
+                        Set0
                     )
                     (
                         ind
-                        Type0
+                        Set0
                         "List"
                         ()
                         (
@@ -326,7 +326,7 @@ expression: PrettyPrint(&zo)
                         vcon
                         (
                             ind
-                            Type0
+                            Set0
                             "List"
                             ()
                             (
@@ -352,7 +352,7 @@ expression: PrettyPrint(&zo)
     )
     (
         ind
-        Type0
+        Set0
         "Abc"
         ()
         (
@@ -376,7 +376,7 @@ expression: PrettyPrint(&zo)
                 fun
                 nonrec
                 (
-                    Type0
+                    Set0
                 )
                 (
                     for
@@ -384,7 +384,7 @@ expression: PrettyPrint(&zo)
                         0
                         (
                             ind
-                            Type0
+                            Set0
                             "List"
                             ()
                             (
@@ -404,7 +404,7 @@ expression: PrettyPrint(&zo)
                     )
                     (
                         ind
-                        Type0
+                        Set0
                         "List"
                         ()
                         (
@@ -426,7 +426,7 @@ expression: PrettyPrint(&zo)
                     vcon
                     (
                         ind
-                        Type0
+                        Set0
                         "List"
                         ()
                         (
@@ -448,7 +448,7 @@ expression: PrettyPrint(&zo)
             )
             (
                 ind
-                Type0
+                Set0
                 "Abc"
                 ()
                 (
@@ -471,7 +471,7 @@ expression: PrettyPrint(&zo)
             vcon
             (
                 ind
-                Type0
+                Set0
                 "Abc"
                 ()
                 (
@@ -497,7 +497,7 @@ expression: PrettyPrint(&zo)
                     fun
                     nonrec
                     (
-                        Type0
+                        Set0
                     )
                     (
                         for
@@ -505,7 +505,7 @@ expression: PrettyPrint(&zo)
                             0
                             (
                                 ind
-                                Type0
+                                Set0
                                 "List"
                                 ()
                                 (
@@ -525,7 +525,7 @@ expression: PrettyPrint(&zo)
                         )
                         (
                             ind
-                            Type0
+                            Set0
                             "List"
                             ()
                             (
@@ -547,7 +547,7 @@ expression: PrettyPrint(&zo)
                         vcon
                         (
                             ind
-                            Type0
+                            Set0
                             "List"
                             ()
                             (
@@ -569,7 +569,7 @@ expression: PrettyPrint(&zo)
                 )
                 (
                     ind
-                    Type0
+                    Set0
                     "Abc"
                     ()
                     (
@@ -592,7 +592,7 @@ expression: PrettyPrint(&zo)
                 vcon
                 (
                     ind
-                    Type0
+                    Set0
                     "Abc"
                     ()
                     (
@@ -618,7 +618,7 @@ expression: PrettyPrint(&zo)
                         fun
                         nonrec
                         (
-                            Type0
+                            Set0
                         )
                         (
                             for
@@ -626,7 +626,7 @@ expression: PrettyPrint(&zo)
                                 0
                                 (
                                     ind
-                                    Type0
+                                    Set0
                                     "List"
                                     ()
                                     (
@@ -646,7 +646,7 @@ expression: PrettyPrint(&zo)
                             )
                             (
                                 ind
-                                Type0
+                                Set0
                                 "List"
                                 ()
                                 (
@@ -668,7 +668,7 @@ expression: PrettyPrint(&zo)
                             vcon
                             (
                                 ind
-                                Type0
+                                Set0
                                 "List"
                                 ()
                                 (
@@ -690,7 +690,7 @@ expression: PrettyPrint(&zo)
                     )
                     (
                         ind
-                        Type0
+                        Set0
                         "Abc"
                         ()
                         (
@@ -713,7 +713,7 @@ expression: PrettyPrint(&zo)
                     vcon
                     (
                         ind
-                        Type0
+                        Set0
                         "Abc"
                         ()
                         (
@@ -738,11 +738,11 @@ expression: PrettyPrint(&zo)
                         fun
                         nonrec
                         (
-                            Type0
+                            Set0
                         )
                         (
                             ind
-                            Type0
+                            Set0
                             "List"
                             ()
                             (
@@ -763,7 +763,7 @@ expression: PrettyPrint(&zo)
                             vcon
                             (
                                 ind
-                                Type0
+                                Set0
                                 "List"
                                 ()
                                 (
@@ -785,7 +785,7 @@ expression: PrettyPrint(&zo)
                     )
                     (
                         ind
-                        Type0
+                        Set0
                         "Abc"
                         ()
                         (
