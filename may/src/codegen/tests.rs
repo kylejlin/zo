@@ -415,3 +415,32 @@ afun add_commutative(-n: Nat, m: Nat): Eq(Nat, add(n, m))(add(m, n))
 
     insta::assert_display_snapshot!(PrettyPrint(&zo));
 }
+
+#[test]
+fn eq_implies_substitutable() {
+    let src = r#"
+ind(T: Set0, left: T) Eq[_: T]
+    case refl: [left]
+    return Prop0
+
+afun eq_implies_substitutable(
+    T: Set0,
+    a: T,
+    b: T,
+    eq: Eq(T, a)(b),
+    P: For(_: T) -> Prop0,
+    pa: P(a),
+): P(b)
+    match eq
+    case refl:
+        pa
+    use [in_a_out_b]
+    return P(in_a_out_b)
+"#;
+    let cst = parse_or_panic(src);
+    let zo = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+
+    insta::assert_display_snapshot!(PrettyPrint(&zo));
+}
