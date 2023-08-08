@@ -10,6 +10,7 @@ impl MayConverter {
 
         let extension =
             self.convert_return_arity_clause_to_context_extension(&expr.return_arity)?;
+        let return_type_arity = extension.len();
         let context_with_return_params = Context::Snoc(&context, &extension);
         let return_type = self.convert(&expr.return_type, context_with_return_params)?;
 
@@ -17,6 +18,7 @@ impl MayConverter {
 
         Ok(self.cache_match(znode::Match {
             matchee,
+            return_type_arity,
             return_type,
             cases,
         }))
