@@ -180,7 +180,13 @@ impl TypeChecker {
         for_: RcHashed<cst::For>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        todo!()
+        self.check_recursion_in_dependent_exprs(&for_.hashee.param_types, rcon)?;
+
+        let extension = vec![UnshiftedEntry::irrelevant(); for_.hashee.param_types.len()];
+        let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
+        self.check_recursion(for_.hashee.return_type.clone(), extended_rcon)?;
+
+        Ok(())
     }
 
     fn check_recursion_in_deb(
