@@ -2,8 +2,8 @@ use super::*;
 
 #[derive(Clone, Copy)]
 pub enum RecursionCheckingContext<'a> {
-    Base(&'a [UnshiftedEntry]),
-    Snoc(&'a RecursionCheckingContext<'a>, &'a [UnshiftedEntry]),
+    Base(&'a [UnshiftedEntry<'a>]),
+    Snoc(&'a RecursionCheckingContext<'a>, &'a [UnshiftedEntry<'a>]),
 }
 
 impl RecursionCheckingContext<'static> {
@@ -19,17 +19,23 @@ impl RecursionCheckingContext<'_> {
 }
 
 #[derive(Clone)]
-pub struct UnshiftedEntry(pub Entry);
+pub struct UnshiftedEntry<'a>(pub Entry<'a>);
 
-impl UnshiftedEntry {
+impl UnshiftedEntry<'static> {
     fn irrelevant() -> Self {
         Self(Entry::Irrelevant)
     }
 }
 
 #[derive(Clone)]
-pub enum Entry {
+pub enum Entry<'a> {
     Irrelevant,
+    RecursiveFun {
+        arg_index: usize,
+        definition_src: &'a cst::Fun,
+    },
+    DecreasingParam,
+    DecreasingParamSubstruct,
 }
 
 #[derive(Clone, Copy)]
