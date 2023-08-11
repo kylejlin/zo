@@ -100,7 +100,7 @@ impl TypeChecker {
         vcon: RcHashed<cst::Vcon>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        todo!()
+        self.check_recursion_in_ind(vcon.hashee.ind.clone(), rcon)
     }
 
     fn check_recursion_in_match(
