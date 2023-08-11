@@ -54,4 +54,10 @@ pub enum TypeError {
         expected: usize,
         actual: usize,
     },
+
+    IllegalRecursiveCall {
+        app: cst::App,
+        required_decreasing_arg_index: usize,
+        required_strict_superstruct: Deb,
+    },
 }

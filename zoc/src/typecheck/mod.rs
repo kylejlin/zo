@@ -12,6 +12,9 @@ use crate::{
 
 use std::rc::Rc;
 
+mod check_recursion;
+use check_recursion::*;
+
 mod equality_assertion;
 use equality_assertion::*;
 

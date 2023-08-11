@@ -216,6 +216,26 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .field("actual", actual)
                     .finish()
             }
+
+            TypeError::IllegalRecursiveCall {
+                app,
+                required_decreasing_arg_index,
+                required_strict_superstruct,
+            } => {
+                let mut converter = IpistToAstConverter::default();
+                let app_ast = converter.convert_app(rc_hashed(app.clone()));
+                f.debug_struct("TypeError::IllegalRecursiveCall")
+                    .field(
+                        "app",
+                        &app_ast.pretty_printed().with_location_appended(app.span()),
+                    )
+                    .field(
+                        "required_decreasing_arg_index",
+                        required_decreasing_arg_index,
+                    )
+                    .field("required_strict_superstruct", &required_strict_superstruct)
+                    .finish()
+            }
         }
     }
 }

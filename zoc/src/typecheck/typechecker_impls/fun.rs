@@ -6,6 +6,11 @@ impl TypeChecker {
         fun_g0: RcHashed<cst::Fun>,
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
+        self.check_recursion(
+            cst::Expr::Fun(fun_g0.clone()),
+            RecursionCheckingContext::empty(),
+        )?;
+
         let normalized_param_types_g0 = self.typecheck_and_normalize_param_types_with_limit(
             &fun_g0.hashee.param_types,
             NoLimit,
