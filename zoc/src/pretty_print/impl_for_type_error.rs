@@ -219,21 +219,47 @@ impl Display for PrettyPrint<'_, TypeError> {
 
             TypeError::IllegalRecursiveCall {
                 app,
+                callee_deb_definition_src,
                 required_decreasing_arg_index,
                 required_strict_superstruct,
             } => {
                 let mut converter = IpistToAstConverter::default();
                 let app_ast = converter.convert_app(rc_hashed(app.clone()));
+                let callee_deb_definition_src_ast =
+                    converter.convert(callee_deb_definition_src.clone().into());
                 f.debug_struct("TypeError::IllegalRecursiveCall")
                     .field(
                         "app",
                         &app_ast.pretty_printed().with_location_appended(app.span()),
                     )
                     .field(
+                        "callee_deb_definition_src",
+                        &callee_deb_definition_src_ast
+                            .pretty_printed()
+                            .with_location_appended(callee_deb_definition_src.span()),
+                    )
+                    .field(
                         "required_decreasing_arg_index",
                         required_decreasing_arg_index,
                     )
                     .field("required_strict_superstruct", &required_strict_superstruct)
+                    .finish()
+            }
+
+            TypeError::IllegalRecursiveReference {
+                deb,
+                definition_src,
+            } => {
+                let mut converter = IpistToAstConverter::default();
+                let definition_src_ast = converter.convert(definition_src.clone().into());
+                f.debug_struct("TypeError::IllegalRecursiveReference")
+                    .field("deb", &deb.value.with_location_appended(deb.span))
+                    .field(
+                        "definition_src",
+                        &definition_src_ast
+                            .pretty_printed()
+                            .with_location_appended(definition_src.span()),
+                    )
                     .finish()
             }
         }
