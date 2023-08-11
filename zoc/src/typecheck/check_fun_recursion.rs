@@ -52,7 +52,7 @@ impl TypeChecker {
             cst::Expr::App(e) => self.check_recursion_in_app(e, rcon),
             cst::Expr::For(e) => self.check_recursion_in_for(e, rcon),
             cst::Expr::Deb(e) => self.check_recursion_in_deb(e, rcon),
-            cst::Expr::Universe(e) => self.check_recursion_in_universe(e, rcon),
+            cst::Expr::Universe(_) => Ok(()),
         }
     }
 
@@ -192,14 +192,6 @@ impl TypeChecker {
     fn check_recursion_in_deb(
         &mut self,
         deb: RcHashed<cst::NumberLiteral>,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
-        todo!()
-    }
-
-    fn check_recursion_in_universe(
-        &mut self,
-        universe: RcHashed<cst::UniverseLiteral>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         todo!()
