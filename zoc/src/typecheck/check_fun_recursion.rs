@@ -52,27 +52,27 @@ impl TypeChecker {
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         match expr {
-            cst::Expr::Ind(e) => self.check_recursion_in_ind(e, rcon),
-            cst::Expr::Vcon(e) => self.check_recursion_in_vcon(e, rcon),
-            cst::Expr::Match(e) => self.check_recursion_in_match(e, rcon),
-            cst::Expr::Fun(e) => self.check_recursion_in_fun(e, rcon),
-            cst::Expr::App(e) => self.check_recursion_in_app(e, rcon),
-            cst::Expr::For(e) => self.check_recursion_in_for(e, rcon),
-            cst::Expr::Deb(e) => self.check_recursion_in_deb(e, rcon),
+            cst::Expr::Ind(e) => self.check_recursion_in_ind(&e.hashee, rcon),
+            cst::Expr::Vcon(e) => self.check_recursion_in_vcon(&e.hashee, rcon),
+            cst::Expr::Match(e) => self.check_recursion_in_match(&e.hashee, rcon),
+            cst::Expr::Fun(e) => self.check_recursion_in_fun(&e.hashee, rcon),
+            cst::Expr::App(e) => self.check_recursion_in_app(&e.hashee, rcon),
+            cst::Expr::For(e) => self.check_recursion_in_for(&e.hashee, rcon),
+            cst::Expr::Deb(e) => self.check_recursion_in_deb(&e.hashee, rcon),
             cst::Expr::Universe(_) => Ok(()),
         }
     }
 
     fn check_recursion_in_ind(
         &mut self,
-        ind: RcHashed<cst::Ind>,
+        ind: &cst::Ind,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        self.check_recursion_in_dependent_exprs(&ind.hashee.index_types, rcon)?;
+        self.check_recursion_in_dependent_exprs(&ind.index_types, rcon)?;
 
         let singleton = vec![UnshiftedEntry::irrelevant()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &singleton);
-        self.check_recursion_in_vcon_defs(&ind.hashee.vcon_defs, extended_rcon)?;
+        self.check_recursion_in_vcon_defs(&ind.vcon_defs, extended_rcon)?;
 
         Ok(())
     }
@@ -104,21 +104,21 @@ impl TypeChecker {
 
     fn check_recursion_in_vcon(
         &mut self,
-        vcon: RcHashed<cst::Vcon>,
+        vcon: &cst::Vcon,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        self.check_recursion_in_ind(vcon.hashee.ind.clone(), rcon)
+        self.check_recursion_in_ind(&vcon.ind.hashee, rcon)
     }
 
     fn check_recursion_in_match(
         &mut self,
-        match_: RcHashed<cst::Match>,
+        match_: &cst::Match,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        self.check_recursion(match_.hashee.matchee.clone(), rcon)?;
+        self.check_recursion(match_.matchee.clone(), rcon)?;
 
-        let param_deb = self.get_relevant_deb(match_.hashee.matchee.clone(), rcon);
-        self.check_recursion_in_match_cases(&match_.hashee.cases, param_deb, rcon)?;
+        let param_deb = self.get_relevant_deb(match_.matchee.clone(), rcon);
+        self.check_recursion_in_match_cases(&match_.cases, param_deb, rcon)?;
 
         Ok(())
     }
@@ -146,7 +146,7 @@ impl TypeChecker {
 
     fn check_recursion_in_fun(
         &mut self,
-        fun: RcHashed<cst::Fun>,
+        fun: &cst::Fun,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         todo!()
@@ -154,35 +154,35 @@ impl TypeChecker {
 
     fn check_recursion_in_app(
         &mut self,
-        app: RcHashed<cst::App>,
+        app: &cst::App,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        if let cst::Expr::Deb(callee) = &app.hashee.callee {
+        if let cst::Expr::Deb(callee) = &app.callee {
             let callee_deb = Deb(callee.hashee.value);
             if let Some(requirement) = rcon.get_call_requirement(callee_deb) {
-                self.assert_arg_satisfies_requirement(app.clone(), requirement, rcon)?;
+                self.assert_arg_satisfies_requirement(app, requirement, rcon)?;
 
                 // We don't check recursion in the callee because
                 // it would trigger a false positive.
                 // Since the callee is a deb, and we already checked
                 // the call requirement, we can safely skip this check.
-                self.check_recursion_in_independent_exprs(&app.hashee.args, rcon)?;
+                self.check_recursion_in_independent_exprs(&app.args, rcon)?;
                 return Ok(());
             }
         }
 
-        self.check_recursion(app.hashee.callee.clone(), rcon)?;
-        self.check_recursion_in_independent_exprs(&app.hashee.args, rcon)?;
+        self.check_recursion(app.callee.clone(), rcon)?;
+        self.check_recursion_in_independent_exprs(&app.args, rcon)?;
         Ok(())
     }
 
     fn assert_arg_satisfies_requirement(
         &mut self,
-        app: RcHashed<cst::App>,
+        app: &cst::App,
         requirement: CallRequirement,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        if requirement.arg_index >= app.hashee.args.len() {
+        if requirement.arg_index >= app.args.len() {
             // Do nothing.
             //
             // The user-provided decreasing index is either invalid
@@ -196,10 +196,10 @@ impl TypeChecker {
             return Ok(());
         }
 
-        let arg = &app.hashee.args[requirement.arg_index];
+        let arg = &app.args[requirement.arg_index];
         if !self.is_strict_substruct(arg, requirement.strict_superstruct, rcon) {
             return Err(TypeError::IllegalRecursiveCall {
-                app: app.hashee.clone(),
+                app: app.clone(),
                 callee_deb_definition_src: requirement.definition_src.clone(),
                 required_decreasing_arg_index: requirement.arg_index,
                 required_strict_superstruct: requirement.strict_superstruct,
@@ -211,26 +211,26 @@ impl TypeChecker {
 
     fn check_recursion_in_for(
         &mut self,
-        for_: RcHashed<cst::For>,
+        for_: &cst::For,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        self.check_recursion_in_dependent_exprs(&for_.hashee.param_types, rcon)?;
+        self.check_recursion_in_dependent_exprs(&for_.param_types, rcon)?;
 
-        let extension = vec![UnshiftedEntry::irrelevant(); for_.hashee.param_types.len()];
+        let extension = vec![UnshiftedEntry::irrelevant(); for_.param_types.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
-        self.check_recursion(for_.hashee.return_type.clone(), extended_rcon)?;
+        self.check_recursion(for_.return_type.clone(), extended_rcon)?;
 
         Ok(())
     }
 
     fn check_recursion_in_deb(
         &mut self,
-        deb: RcHashed<cst::NumberLiteral>,
+        deb: &cst::NumberLiteral,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        if let Some(requirement) = rcon.get_call_requirement(Deb(deb.hashee.value)) {
+        if let Some(requirement) = rcon.get_call_requirement(Deb(deb.value)) {
             return Err(TypeError::IllegalRecursiveReference {
-                deb: deb.hashee.clone(),
+                deb: deb.clone(),
                 definition_src: requirement.definition_src.clone(),
             });
         }
