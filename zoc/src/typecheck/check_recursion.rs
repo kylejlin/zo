@@ -18,9 +18,19 @@ impl RecursionCheckingContext<'_> {
     }
 }
 
+#[derive(Clone)]
 pub struct UnshiftedEntry(pub Entry);
 
-pub struct Entry {}
+impl UnshiftedEntry {
+    fn irrelevant() -> Self {
+        Self(Entry::Irrelevant)
+    }
+}
+
+#[derive(Clone)]
+pub enum Entry {
+    Irrelevant,
+}
 
 #[derive(Clone, Copy)]
 struct CallRequirement {
@@ -49,6 +59,20 @@ impl TypeChecker {
     fn check_recursion_in_ind(
         &mut self,
         ind: RcHashed<cst::Ind>,
+        rcon: RecursionCheckingContext,
+    ) -> Result<(), TypeError> {
+        self.check_recursion_in_dependent_exprs(&ind.hashee.index_types, rcon)?;
+
+        let singleton = vec![UnshiftedEntry::irrelevant()];
+        let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &singleton);
+        self.check_recursion_in_vcon_defs(&ind.hashee.vcon_defs, extended_rcon)?;
+
+        Ok(())
+    }
+
+    fn check_recursion_in_vcon_defs(
+        &mut self,
+        ind: &[cst::VconDef],
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         todo!()
@@ -92,13 +116,13 @@ impl TypeChecker {
                 // it would trigger a false positive.
                 // Since the callee is a deb, and we already checked
                 // the call requirement, we can safely skip this check.
-                self.check_recursion_in_exprs(&app.hashee.args, rcon)?;
+                self.check_recursion_in_independent_exprs(&app.hashee.args, rcon)?;
                 return Ok(());
             }
         }
 
         self.check_recursion(app.hashee.callee.clone(), rcon)?;
-        self.check_recursion_in_exprs(&app.hashee.args, rcon)?;
+        self.check_recursion_in_independent_exprs(&app.hashee.args, rcon)?;
         Ok(())
     }
 
@@ -157,8 +181,25 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         todo!()
     }
+}
 
-    fn check_recursion_in_exprs(
+impl TypeChecker {
+    fn check_recursion_in_dependent_exprs(
+        &mut self,
+        exprs: &[cst::Expr],
+        rcon: RecursionCheckingContext,
+    ) -> Result<(), TypeError> {
+        let rcon_extension = vec![UnshiftedEntry::irrelevant(); exprs.len()];
+
+        for (i, expr) in exprs.iter().cloned().enumerate() {
+            let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &rcon_extension[..i]);
+            self.check_recursion(expr, extended_rcon)?;
+        }
+
+        Ok(())
+    }
+
+    fn check_recursion_in_independent_exprs(
         &mut self,
         exprs: &[cst::Expr],
         rcon: RecursionCheckingContext,
