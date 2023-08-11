@@ -35,7 +35,7 @@ pub enum Entry<'a> {
         definition_src: &'a cst::Fun,
     },
     DecreasingParam,
-    DecreasingParamSubstruct,
+    DecreasingParamSubstruct(Deb),
 }
 
 #[derive(Clone, Copy)]
@@ -112,7 +112,33 @@ impl TypeChecker {
 
     fn check_recursion_in_match(
         &mut self,
-        m: RcHashed<cst::Match>,
+        match_: RcHashed<cst::Match>,
+        rcon: RecursionCheckingContext,
+    ) -> Result<(), TypeError> {
+        self.check_recursion(match_.hashee.matchee.clone(), rcon)?;
+
+        let param_deb = self.get_relevant_deb(match_.hashee.matchee.clone(), rcon);
+        self.check_recursion_in_match_cases(&match_.hashee.cases, param_deb, rcon)?;
+
+        Ok(())
+    }
+
+    fn check_recursion_in_match_cases(
+        &mut self,
+        cases: &[cst::MatchCase],
+        param_deb: Option<Deb>,
+        rcon: RecursionCheckingContext,
+    ) -> Result<(), TypeError> {
+        for case in cases {
+            self.check_recursion_in_match_case(case, param_deb, rcon)?;
+        }
+        Ok(())
+    }
+
+    fn check_recursion_in_match_case(
+        &mut self,
+        case: &cst::MatchCase,
+        param_deb: Option<Deb>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         todo!()
@@ -248,6 +274,13 @@ impl TypeChecker {
         strict_superstruct: Deb,
         rcon: RecursionCheckingContext,
     ) -> bool {
+        todo!()
+    }
+
+    /// If `expr` is some deb `d` that equals a param or param substruct entry,
+    /// `Some(d)` is returned.
+    /// Otherwise, `None` is returned.
+    fn get_relevant_deb(&mut self, expr: cst::Expr, rcon: RecursionCheckingContext) -> Option<Deb> {
         todo!()
     }
 }
