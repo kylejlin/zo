@@ -141,7 +141,13 @@ impl TypeChecker {
         param_deb: Option<Deb>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        todo!()
+        let extension = get_rcon_extension_of_irrelevant_entries_or_strict_substruct_entries(
+            param_deb,
+            case.arity.value,
+        );
+        let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
+        self.check_recursion(case.return_val.clone(), extended_rcon)?;
+        Ok(())
     }
 
     fn check_recursion_in_fun(
@@ -283,4 +289,17 @@ impl TypeChecker {
     fn get_relevant_deb(&mut self, expr: cst::Expr, rcon: RecursionCheckingContext) -> Option<Deb> {
         todo!()
     }
+}
+
+fn get_rcon_extension_of_irrelevant_entries_or_strict_substruct_entries(
+    deb: Option<Deb>,
+    len: usize,
+) -> Vec<UnshiftedEntry<'static>> {
+    let Some(deb) = deb else {
+        return vec![UnshiftedEntry::irrelevant(); len];
+    };
+
+    (0..len)
+        .map(|i| UnshiftedEntry(Entry::DecreasingParamStrictSubstruct(Deb(deb.0 + i))))
+        .collect()
 }
