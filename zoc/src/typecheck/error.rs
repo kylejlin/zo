@@ -57,7 +57,12 @@ pub enum TypeError {
 
     IllegalRecursiveCall {
         app: cst::App,
+        callee_deb_definition_src: cst::Fun,
         required_decreasing_arg_index: usize,
         required_strict_superstruct: Deb,
+    },
+    IllegalRecursiveReference {
+        deb: cst::NumberLiteral,
+        definition_src: cst::Fun,
     },
 }

@@ -33,9 +33,10 @@ pub enum Entry {
 }
 
 #[derive(Clone, Copy)]
-struct CallRequirement {
+struct CallRequirement<'a> {
     arg_index: usize,
     strict_superstruct: Deb,
+    definition_src: &'a cst::Fun,
 }
 
 impl TypeChecker {
@@ -167,6 +168,7 @@ impl TypeChecker {
         if !self.is_strict_substruct(arg, requirement.strict_superstruct, rcon) {
             return Err(TypeError::IllegalRecursiveCall {
                 app: app.hashee.clone(),
+                callee_deb_definition_src: requirement.definition_src.clone(),
                 required_decreasing_arg_index: requirement.arg_index,
                 required_strict_superstruct: requirement.strict_superstruct,
             });
@@ -194,7 +196,14 @@ impl TypeChecker {
         deb: RcHashed<cst::NumberLiteral>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        todo!()
+        if let Some(requirement) = rcon.get_call_requirement(Deb(deb.hashee.value)) {
+            return Err(TypeError::IllegalRecursiveReference {
+                deb: deb.hashee.clone(),
+                definition_src: requirement.definition_src.clone(),
+            });
+        }
+
+        Ok(())
     }
 }
 
