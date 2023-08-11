@@ -35,7 +35,7 @@ pub enum Entry<'a> {
         definition_src: &'a cst::Fun,
     },
     DecreasingParam,
-    DecreasingParamSubstruct(Deb),
+    DecreasingParamStrictSubstruct(Deb),
 }
 
 #[derive(Clone, Copy)]
