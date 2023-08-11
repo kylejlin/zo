@@ -283,8 +283,8 @@ impl TypeChecker {
         todo!()
     }
 
-    /// If `expr` is some deb `d` that equals a param or param substruct entry,
-    /// `Some(d)` is returned.
+    /// If `expr` is a nonstrict substruct of some param at deb `d`,
+    /// then `Some(d)` is returned.
     /// Otherwise, `None` is returned.
     fn get_relevant_deb(&mut self, expr: cst::Expr, rcon: RecursionCheckingContext) -> Option<Deb> {
         todo!()
