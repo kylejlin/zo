@@ -72,10 +72,27 @@ impl TypeChecker {
 
     fn check_recursion_in_vcon_defs(
         &mut self,
-        ind: &[cst::VconDef],
+        defs: &[cst::VconDef],
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        todo!()
+        for def in defs {
+            self.check_recursion_in_vcon_def(def, rcon)?;
+        }
+        Ok(())
+    }
+
+    fn check_recursion_in_vcon_def(
+        &mut self,
+        def: &cst::VconDef,
+        rcon: RecursionCheckingContext,
+    ) -> Result<(), TypeError> {
+        self.check_recursion_in_dependent_exprs(&def.param_types, rcon)?;
+
+        let extension = vec![UnshiftedEntry::irrelevant(); def.param_types.len()];
+        let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
+        self.check_recursion_in_independent_exprs(&def.index_args, extended_rcon)?;
+
+        Ok(())
     }
 
     fn check_recursion_in_vcon(
