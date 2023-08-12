@@ -712,5 +712,5 @@ fn get_lowest_common_ancestor_param(
         return Some((a.0, a.1 & (b.1 | b_strict_a)));
     }
 
-    todo!()
+    None
 }
