@@ -20,7 +20,25 @@ impl RecursionCheckingContext<'_> {
     }
 
     fn get(&self, deb: Deb) -> Option<Entry> {
-        todo!()
+        let unshifted = self.get_unshifted(deb)?;
+        Some(unshifted.0.upshift(deb.0 + 1))
+    }
+
+    fn get_unshifted(&self, deb: Deb) -> Option<UnshiftedEntry> {
+        match self {
+            RecursionCheckingContext::Base(entries) => {
+                let index = (entries.len()).checked_sub(1 + deb.0)?;
+                Some(entries.get(index)?.clone())
+            }
+
+            RecursionCheckingContext::Snoc(subcontext, types) => {
+                if let Some(index) = (types.len()).checked_sub(1 + deb.0) {
+                    Some(types.get(index)?.clone())
+                } else {
+                    subcontext.get_unshifted(Deb(deb.0 - types.len()))
+                }
+            }
+        }
     }
 
     /// If `deb` is a descendant of `possible_ancestor`,
@@ -72,13 +90,36 @@ pub enum Entry<'a> {
     NonrecursiveFun {
         definition_src: &'a cst::Fun,
     },
-    // TODO: Handle case non-recusrive fun.
+    // TODO: Handle case non-recursive fun.
     DecreasingParam {
         parent: Option<(Deb, Strict)>,
     },
     DecreasingParamStrictSubstruct {
         parent_param: Deb,
     },
+}
+
+impl Entry<'_> {
+    fn upshift(self, upshift_amount: usize) -> Self {
+        match self {
+            Entry::Irrelevant
+            | Entry::RecursiveFun {
+                decreasing_arg_index: _,
+                definition_src: _,
+            }
+            | Entry::NonrecursiveFun { definition_src: _ } => self,
+
+            Entry::DecreasingParam { parent } => Entry::DecreasingParam {
+                parent: parent
+                    .map(|(parent_param, strict)| (Deb(parent_param.0 + upshift_amount), strict)),
+            },
+            Entry::DecreasingParamStrictSubstruct { parent_param } => {
+                Entry::DecreasingParamStrictSubstruct {
+                    parent_param: Deb(parent_param.0 + upshift_amount),
+                }
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
