@@ -660,7 +660,20 @@ impl TypeChecker {
         matchee_superstruct: Option<(Deb, Strict)>,
         rcon: RecursionCheckingContext,
     ) -> Option<(Deb, Strict)> {
-        todo!()
+        let extension = if let Some((matchee_superstruct, _)) = matchee_superstruct {
+            (0..expr.arity.value)
+                .map(|param_index| {
+                    UnshiftedEntry(Entry::DecreasingParamStrictSubstruct {
+                        parent_param: Deb(matchee_superstruct.0 + param_index),
+                    })
+                })
+                .collect()
+        } else {
+            vec![UnshiftedEntry::irrelevant(); expr.arity.value]
+        };
+        let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
+
+        self.get_lowest_superstruct_param(expr.return_val.clone(), extended_rcon)
     }
 
     fn get_lowest_superstruct_param_of_deb(
