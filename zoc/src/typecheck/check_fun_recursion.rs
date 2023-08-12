@@ -600,6 +600,33 @@ impl TypeChecker {
         expr: cst::Expr,
         rcon: RecursionCheckingContext,
     ) -> Option<(Deb, Strict)> {
+        match expr {
+            cst::Expr::Ind(_)
+            | cst::Expr::Vcon(_)
+            | cst::Expr::Fun(_)
+            | cst::Expr::App(_)
+            | cst::Expr::For(_)
+            | cst::Expr::Universe(_) => None,
+
+            cst::Expr::Match(e) => self.get_lowest_superstruct_param_of_match(&e.hashee, rcon),
+
+            cst::Expr::Deb(e) => self.get_lowest_superstruct_param_of_deb(&e.hashee, rcon),
+        }
+    }
+
+    fn get_lowest_superstruct_param_of_match(
+        &mut self,
+        expr: &cst::Match,
+        rcon: RecursionCheckingContext,
+    ) -> Option<(Deb, Strict)> {
+        todo!()
+    }
+
+    fn get_lowest_superstruct_param_of_deb(
+        &mut self,
+        expr: &cst::NumberLiteral,
+        rcon: RecursionCheckingContext,
+    ) -> Option<(Deb, Strict)> {
         todo!()
     }
 }
