@@ -627,7 +627,17 @@ impl TypeChecker {
         expr: &cst::NumberLiteral,
         rcon: RecursionCheckingContext,
     ) -> Option<(Deb, Strict)> {
-        todo!()
+        let expr_deb = Deb(expr.value);
+        let entry = rcon.get(expr_deb)?;
+        match entry {
+            Entry::DecreasingParamStrictSubstruct { parent_param } => {
+                Some((parent_param, Strict(true)))
+            }
+
+            Entry::DecreasingParam { .. } => Some((expr_deb, Strict(false))),
+
+            Entry::Irrelevant | Entry::RecursiveFun { .. } | Entry::NonrecursiveFun { .. } => None,
+        }
     }
 }
 
