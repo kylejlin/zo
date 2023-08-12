@@ -283,7 +283,7 @@ impl TypeChecker {
         let extension = self.get_fun_rcon_extension(fun, app_arg_status)?;
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
 
-        self.check_recursion(fun.return_val.clone(), extended_rcon);
+        self.check_recursion(fun.return_val.clone(), extended_rcon)?;
 
         Ok(())
     }
