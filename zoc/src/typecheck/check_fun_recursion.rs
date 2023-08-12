@@ -209,36 +209,14 @@ impl TypeChecker {
     fn check_recursion_in_fun(
         &mut self,
         fun: &cst::Fun,
-        arg_status: Option<Vec<UnshiftedEntry>>,
+        app_arg_status: Option<Vec<UnshiftedEntry>>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         self.check_recursion_in_dependent_exprs(&fun.param_types, rcon)?;
         self.check_recursion_in_fun_return_type(fun, rcon)?;
 
         let fun_entry = self.get_fun_entry_and_assert_decreasing_index_is_valid(fun)?;
-        let param_entries = arg_status.unwrap_or_else(|| {
-            match &fun.decreasing_index {
-                cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
-                    (0..fun.param_types.len())
-                        .map(|param_index| {
-                            if param_index == decreasing_index_literal.value {
-                                UnshiftedEntry(Entry::DecreasingParam { parent: None })
-                            } else {
-                                UnshiftedEntry::irrelevant()
-                            }
-                        })
-                        .collect()
-                }
-
-                cst::NumberOrNonrecKw::NonrecKw(_) => {
-                    // If the function is non-recursive, then all params are vacuously decreasing.
-                    vec![
-                        UnshiftedEntry(Entry::DecreasingParam { parent: None });
-                        fun.param_types.len()
-                    ]
-                }
-            }
-        });
+        let param_entries = self.get_fun_param_entries(fun, app_arg_status);
         let extension = {
             let mut out = param_entries;
             out.push(fun_entry);
@@ -283,6 +261,36 @@ impl TypeChecker {
                 definition_src: fun,
             })),
         }
+    }
+
+    fn get_fun_param_entries<'a>(
+        &mut self,
+        fun: &'a cst::Fun,
+        app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
+    ) -> Vec<UnshiftedEntry<'a>> {
+        app_arg_status.unwrap_or_else(|| {
+            match &fun.decreasing_index {
+                cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
+                    (0..fun.param_types.len())
+                        .map(|param_index| {
+                            if param_index == decreasing_index_literal.value {
+                                UnshiftedEntry(Entry::DecreasingParam { parent: None })
+                            } else {
+                                UnshiftedEntry::irrelevant()
+                            }
+                        })
+                        .collect()
+                }
+
+                cst::NumberOrNonrecKw::NonrecKw(_) => {
+                    // If the function is non-recursive, then all params are vacuously decreasing.
+                    vec![
+                        UnshiftedEntry(Entry::DecreasingParam { parent: None });
+                        fun.param_types.len()
+                    ]
+                }
+            }
+        })
     }
 
     fn check_recursion_in_app(
