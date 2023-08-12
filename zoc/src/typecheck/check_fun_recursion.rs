@@ -21,15 +21,17 @@ impl RecursionCheckingContext<'_> {
             Entry::RecursiveFun {
                 valid_decreasing_arg_index: decreasing_arg_index,
                 definition_src,
-            } => Some(CallRequirement {
+            } => Some(CallRequirement::Recursive(RecursiveCallRequirement {
                 arg_index: decreasing_arg_index,
                 strict_superstruct: Deb(
                     deb.0 + definition_src.param_types.len() - decreasing_arg_index
                 ),
                 definition_src,
-            }),
+            })),
 
-            Entry::NonrecursiveFun { definition_src } => todo!(),
+            Entry::NonrecursiveFun { definition_src } => {
+                Some(CallRequirement::AccessForbidden(definition_src))
+            }
 
             Entry::Irrelevant
             | Entry::DecreasingParam { .. }
@@ -151,8 +153,13 @@ impl BitOr for Strict {
     }
 }
 
-#[derive(Clone, Copy)]
-struct CallRequirement<'a> {
+enum CallRequirement<'a> {
+    Recursive(RecursiveCallRequirement<'a>),
+    AccessForbidden(&'a cst::Fun),
+}
+
+#[derive(Clone)]
+struct RecursiveCallRequirement<'a> {
     arg_index: usize,
     strict_superstruct: Deb,
     definition_src: &'a cst::Fun,
@@ -368,7 +375,24 @@ impl TypeChecker {
             cst::Expr::Deb(callee) => {
                 let callee_deb = Deb(callee.hashee.value);
                 if let Some(requirement) = rcon.get_call_requirement(callee_deb) {
-                    self.assert_arg_satisfies_requirement(app, requirement, rcon)?;
+                    match requirement {
+                        CallRequirement::Recursive(requirement) => self
+                            .assert_arg_satisfies_recursive_call_requirement(
+                                app,
+                                requirement,
+                                rcon,
+                            )?,
+
+                        CallRequirement::AccessForbidden(definition_src) => {
+                            return Err(
+                                TypeError::DeclaredFunNonrecursiveButUsedRecursiveFunParam {
+                                    deb: callee.hashee.clone(),
+                                    definition_src: definition_src.clone(),
+                                },
+                            )
+                        }
+                    }
+
                     true
                 } else {
                     false
@@ -436,10 +460,10 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_arg_satisfies_requirement(
+    fn assert_arg_satisfies_recursive_call_requirement(
         &mut self,
         app: &cst::App,
-        requirement: CallRequirement,
+        requirement: RecursiveCallRequirement,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         if requirement.arg_index >= app.args.len() {
@@ -489,10 +513,22 @@ impl TypeChecker {
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         if let Some(requirement) = rcon.get_call_requirement(Deb(deb.value)) {
-            return Err(TypeError::IllegalRecursiveReference {
-                deb: deb.clone(),
-                definition_src: requirement.definition_src.clone(),
-            });
+            let err = match requirement {
+                CallRequirement::Recursive(requirement) => {
+                    TypeError::RecursiveFunParamInNonCalleePosition {
+                        deb: deb.clone(),
+                        definition_src: requirement.definition_src.clone(),
+                    }
+                }
+
+                CallRequirement::AccessForbidden(definition_src) => {
+                    TypeError::DeclaredFunNonrecursiveButUsedRecursiveFunParam {
+                        deb: deb.clone(),
+                        definition_src: definition_src.clone(),
+                    }
+                }
+            };
+            return Err(err);
         }
 
         Ok(())

@@ -246,14 +246,39 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .finish()
             }
 
-            TypeError::IllegalRecursiveReference {
+            TypeError::RecursiveFunParamInNonCalleePosition {
                 deb,
                 definition_src,
             } => {
                 let mut converter = IpistToAstConverter::default();
+                let deb_ast = converter.convert(deb.clone().into());
                 let definition_src_ast = converter.convert(definition_src.clone().into());
-                f.debug_struct("TypeError::IllegalRecursiveReference")
-                    .field("deb", &deb.value.with_location_appended(deb.span))
+                f.debug_struct("TypeError::RecursiveFunParamInNonCalleePosition")
+                    .field(
+                        "deb",
+                        &deb_ast.pretty_printed().with_location_appended(deb.span),
+                    )
+                    .field(
+                        "definition_src",
+                        &definition_src_ast
+                            .pretty_printed()
+                            .with_location_appended(definition_src.span()),
+                    )
+                    .finish()
+            }
+
+            TypeError::DeclaredFunNonrecursiveButUsedRecursiveFunParam {
+                deb,
+                definition_src,
+            } => {
+                let mut converter = IpistToAstConverter::default();
+                let deb_ast = converter.convert(deb.clone().into());
+                let definition_src_ast = converter.convert(definition_src.clone().into());
+                f.debug_struct("TypeError::DeclaredFunNonrecursiveButUsedRecursiveFunParam")
+                    .field(
+                        "deb",
+                        &deb_ast.pretty_printed().with_location_appended(deb.span),
+                    )
                     .field(
                         "definition_src",
                         &definition_src_ast

@@ -61,7 +61,11 @@ pub enum TypeError {
         required_decreasing_arg_index: usize,
         required_strict_superstruct: Deb,
     },
-    IllegalRecursiveReference {
+    RecursiveFunParamInNonCalleePosition {
+        deb: cst::NumberLiteral,
+        definition_src: cst::Fun,
+    },
+    DeclaredFunNonrecursiveButUsedRecursiveFunParam {
         deb: cst::NumberLiteral,
         definition_src: cst::Fun,
     },
