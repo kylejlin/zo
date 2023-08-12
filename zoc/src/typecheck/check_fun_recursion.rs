@@ -110,7 +110,6 @@ pub enum Entry<'a> {
     NonrecursiveFun {
         definition_src: &'a cst::Fun,
     },
-    // TODO: Handle case non-recursive fun.
     DecreasingParam {
         parent: Option<(Deb, Strict)>,
     },
