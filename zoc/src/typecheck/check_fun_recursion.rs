@@ -34,9 +34,17 @@ pub enum Entry<'a> {
         arg_index: usize,
         definition_src: &'a cst::Fun,
     },
-    DecreasingParam,
-    DecreasingParamStrictSubstruct(Deb),
+    // TODO: Handle case non-recusrive fun.
+    DecreasingParam {
+        parent: Option<(Deb, Strict)>,
+    },
+    DecreasingParamStrictSubstruct {
+        parent_param: Deb,
+    },
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+pub struct Strict(pub bool);
 
 #[derive(Clone, Copy)]
 struct CallRequirement<'a> {
@@ -55,7 +63,7 @@ impl TypeChecker {
             cst::Expr::Ind(e) => self.check_recursion_in_ind(&e.hashee, rcon),
             cst::Expr::Vcon(e) => self.check_recursion_in_vcon(&e.hashee, rcon),
             cst::Expr::Match(e) => self.check_recursion_in_match(&e.hashee, rcon),
-            cst::Expr::Fun(e) => self.check_recursion_in_fun(&e.hashee, rcon),
+            cst::Expr::Fun(e) => self.check_recursion_in_fun(&e.hashee, None, rcon),
             cst::Expr::App(e) => self.check_recursion_in_app(&e.hashee, rcon),
             cst::Expr::For(e) => self.check_recursion_in_for(&e.hashee, rcon),
             cst::Expr::Deb(e) => self.check_recursion_in_deb(&e.hashee, rcon),
@@ -117,7 +125,9 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         self.check_recursion(match_.matchee.clone(), rcon)?;
 
-        let param_deb = self.get_relevant_deb(match_.matchee.clone(), rcon);
+        let param_deb = self
+            .get_superstruct_param(match_.matchee.clone(), rcon)
+            .map(|(param_deb, _)| param_deb);
         self.check_recursion_in_match_cases(&match_.cases, param_deb, rcon)?;
 
         Ok(())
@@ -153,6 +163,7 @@ impl TypeChecker {
     fn check_recursion_in_fun(
         &mut self,
         fun: &cst::Fun,
+        arg_status: Option<&[UnshiftedEntry]>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         todo!()
@@ -163,22 +174,73 @@ impl TypeChecker {
         app: &cst::App,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        if let cst::Expr::Deb(callee) = &app.callee {
-            let callee_deb = Deb(callee.hashee.value);
-            if let Some(requirement) = rcon.get_call_requirement(callee_deb) {
-                self.assert_arg_satisfies_requirement(app, requirement, rcon)?;
-
-                // We don't check recursion in the callee because
-                // it would trigger a false positive.
-                // Since the callee is a deb, and we already checked
-                // the call requirement, we can safely skip this check.
-                self.check_recursion_in_independent_exprs(&app.args, rcon)?;
-                return Ok(());
+        let skip_callee_check = match &app.callee {
+            cst::Expr::Deb(callee) => {
+                let callee_deb = Deb(callee.hashee.value);
+                if let Some(requirement) = rcon.get_call_requirement(callee_deb) {
+                    self.assert_arg_satisfies_requirement(app, requirement, rcon)?;
+                    true
+                } else {
+                    false
+                }
             }
+
+            cst::Expr::Fun(callee) => {
+                let arg_status: Vec<UnshiftedEntry> = match &callee.hashee.decreasing_index {
+                    cst::NumberOrNonrecKw::NonrecKw(_) => app
+                        .args
+                        .iter()
+                        .enumerate()
+                        .map(|(arg_index, arg)| {
+                            // If the function is non-recursive,
+                            // then all params are vacuously decreasing
+                            // (i.e., they are decreasing in all zero recursive calls).
+                            if let Some((param_deb, strict)) =
+                                self.get_superstruct_param(arg.clone(), rcon)
+                            {
+                                UnshiftedEntry(Entry::DecreasingParam {
+                                    parent: Some((Deb(param_deb.0 + arg_index), strict)),
+                                })
+                            } else {
+                                // TODO: Consider if Entry::DecreasingParam.parent should be non-`Option`al.
+                                // In this case, `DecreasingParam { parent: None }` becomes `Irrelevant`.
+                                UnshiftedEntry(Entry::DecreasingParam { parent: None })
+                            }
+                        })
+                        .collect(),
+
+                    cst::NumberOrNonrecKw::Number(decreasing_index_literal) => app
+                        .args
+                        .iter()
+                        .enumerate()
+                        .map(|(arg_index, arg)| {
+                            if arg_index == decreasing_index_literal.value {
+                                let parent = self.get_superstruct_param(arg.clone(), rcon).map(
+                                    |(param_deb, strict)| (Deb(param_deb.0 + arg_index), strict),
+                                );
+
+                                UnshiftedEntry(Entry::DecreasingParam { parent })
+                            } else {
+                                UnshiftedEntry(Entry::Irrelevant)
+                            }
+                        })
+                        .collect(),
+                };
+
+                self.check_recursion_in_fun(&callee.hashee, Some(&arg_status), rcon)?;
+
+                true
+            }
+
+            _ => false,
+        };
+
+        if !skip_callee_check {
+            self.check_recursion(app.callee.clone(), rcon)?;
         }
 
-        self.check_recursion(app.callee.clone(), rcon)?;
         self.check_recursion_in_independent_exprs(&app.args, rcon)?;
+
         Ok(())
     }
 
@@ -283,10 +345,16 @@ impl TypeChecker {
         todo!()
     }
 
+    /// If `expr` is a strict substruct of some param at deb `d`,
+    /// then `Some((d, Strict(true)))` is returned.
     /// If `expr` is a nonstrict substruct of some param at deb `d`,
-    /// then `Some(d)` is returned.
+    /// then `Some((d, Strict(false)))` is returned.
     /// Otherwise, `None` is returned.
-    fn get_relevant_deb(&mut self, expr: cst::Expr, rcon: RecursionCheckingContext) -> Option<Deb> {
+    fn get_superstruct_param(
+        &mut self,
+        expr: cst::Expr,
+        rcon: RecursionCheckingContext,
+    ) -> Option<(Deb, Strict)> {
         todo!()
     }
 }
@@ -300,6 +368,10 @@ fn get_rcon_extension_of_irrelevant_entries_or_strict_substruct_entries(
     };
 
     (0..len)
-        .map(|i| UnshiftedEntry(Entry::DecreasingParamStrictSubstruct(Deb(deb.0 + i))))
+        .map(|i| {
+            UnshiftedEntry(Entry::DecreasingParamStrictSubstruct {
+                parent_param: Deb(deb.0 + i),
+            })
+        })
         .collect()
 }
