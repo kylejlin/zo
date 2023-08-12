@@ -65,4 +65,7 @@ pub enum TypeError {
         deb: cst::NumberLiteral,
         definition_src: cst::Fun,
     },
+    DecreasingArgIndexTooBig {
+        fun: cst::Fun,
+    },
 }

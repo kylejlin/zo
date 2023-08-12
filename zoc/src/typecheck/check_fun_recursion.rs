@@ -48,7 +48,7 @@ impl RecursionCheckingContext<'_> {
                 .is_descendant(parent_param, possible_ancestor)
                 .map(|_| Strict(true)),
 
-            Entry::Irrelevant | Entry::RecursiveFun { .. } => None,
+            Entry::Irrelevant | Entry::RecursiveFun { .. } | Entry::NonrecursiveFun { .. } => None,
         }
     }
 }
@@ -66,7 +66,10 @@ impl UnshiftedEntry<'static> {
 pub enum Entry<'a> {
     Irrelevant,
     RecursiveFun {
-        arg_index: usize,
+        decreasing_arg_index: usize,
+        definition_src: &'a cst::Fun,
+    },
+    NonrecursiveFun {
         definition_src: &'a cst::Fun,
     },
     // TODO: Handle case non-recusrive fun.
@@ -206,10 +209,72 @@ impl TypeChecker {
     fn check_recursion_in_fun(
         &mut self,
         fun: &cst::Fun,
-        arg_status: Option<&[UnshiftedEntry]>,
+        arg_status: Option<Vec<UnshiftedEntry>>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        todo!()
+        self.check_recursion_in_dependent_exprs(&fun.param_types, rcon)?;
+        self.check_recursion_in_fun_return_type(fun, rcon)?;
+
+        let (fun_entry, valid_decreasing_arg_index) = match &fun.decreasing_index {
+            cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
+                let decreasing_arg_index = decreasing_index_literal.value;
+                if decreasing_arg_index >= fun.param_types.len() {
+                    return Err(TypeError::DecreasingArgIndexTooBig { fun: fun.clone() });
+                }
+
+                (
+                    UnshiftedEntry(Entry::RecursiveFun {
+                        decreasing_arg_index,
+                        definition_src: fun,
+                    }),
+                    Some(decreasing_arg_index),
+                )
+            }
+
+            cst::NumberOrNonrecKw::NonrecKw(_) => (
+                UnshiftedEntry(Entry::NonrecursiveFun {
+                    definition_src: fun,
+                }),
+                None,
+            ),
+        };
+        let param_entries = arg_status.unwrap_or_else(|| {
+            if let Some(valid_decreasing_arg_index) = valid_decreasing_arg_index {
+                (0..fun.param_types.len())
+                    .map(|param_index| {
+                        if param_index == valid_decreasing_arg_index {
+                            UnshiftedEntry(Entry::DecreasingParam { parent: None })
+                        } else {
+                            UnshiftedEntry::irrelevant()
+                        }
+                    })
+                    .collect()
+            } else {
+                // If the function is non-recursive, then all params are vacuously decreasing.
+                vec![UnshiftedEntry(Entry::DecreasingParam { parent: None }); fun.param_types.len()]
+            }
+        });
+        let extension = {
+            let mut out = param_entries;
+            out.push(fun_entry);
+            out
+        };
+        let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
+
+        self.check_recursion(fun.return_val.clone(), extended_rcon);
+
+        Ok(())
+    }
+
+    fn check_recursion_in_fun_return_type(
+        &mut self,
+        fun: &cst::Fun,
+        rcon: RecursionCheckingContext,
+    ) -> Result<(), TypeError> {
+        let extension = vec![UnshiftedEntry::irrelevant(); fun.param_types.len()];
+        let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
+        self.check_recursion(fun.return_type.clone(), extended_rcon)?;
+        Ok(())
     }
 
     fn check_recursion_in_app(
@@ -272,7 +337,7 @@ impl TypeChecker {
                         .collect(),
                 };
 
-                self.check_recursion_in_fun(&callee.hashee, Some(&arg_status), rcon)?;
+                self.check_recursion_in_fun(&callee.hashee, Some(arg_status), rcon)?;
 
                 true
             }
