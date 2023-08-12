@@ -16,7 +16,25 @@ impl RecursionCheckingContext<'static> {
 
 impl RecursionCheckingContext<'_> {
     fn get_call_requirement(&self, deb: Deb) -> Option<CallRequirement> {
-        todo!()
+        let entry = self.get(deb)?;
+        match entry {
+            Entry::RecursiveFun {
+                valid_decreasing_arg_index: decreasing_arg_index,
+                definition_src,
+            } => Some(CallRequirement {
+                arg_index: decreasing_arg_index,
+                strict_superstruct: Deb(
+                    deb.0 + definition_src.param_types.len() - decreasing_arg_index
+                ),
+                definition_src,
+            }),
+
+            Entry::NonrecursiveFun { definition_src } => todo!(),
+
+            Entry::Irrelevant
+            | Entry::DecreasingParam { .. }
+            | Entry::DecreasingParamStrictSubstruct { .. } => None,
+        }
     }
 
     fn get(&self, deb: Deb) -> Option<Entry> {
@@ -84,7 +102,7 @@ impl UnshiftedEntry<'static> {
 pub enum Entry<'a> {
     Irrelevant,
     RecursiveFun {
-        decreasing_arg_index: usize,
+        valid_decreasing_arg_index: usize,
         definition_src: &'a cst::Fun,
     },
     NonrecursiveFun {
@@ -104,7 +122,7 @@ impl Entry<'_> {
         match self {
             Entry::Irrelevant
             | Entry::RecursiveFun {
-                decreasing_arg_index: _,
+                valid_decreasing_arg_index: _,
                 definition_src: _,
             }
             | Entry::NonrecursiveFun { definition_src: _ } => self,
@@ -300,7 +318,7 @@ impl TypeChecker {
                 }
 
                 Ok(UnshiftedEntry(Entry::RecursiveFun {
-                    decreasing_arg_index,
+                    valid_decreasing_arg_index: decreasing_arg_index,
                     definition_src: fun,
                 }))
             }
