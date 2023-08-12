@@ -16,6 +16,14 @@ impl RecursionCheckingContext<'_> {
     fn get_call_requirement(&self, deb: Deb) -> Option<CallRequirement> {
         todo!()
     }
+
+    fn get(&self, deb: Deb) -> Option<Entry> {
+        todo!()
+    }
+
+    fn is_descendant(&self, deb: Deb, possible_ancestor: Deb) -> Option<Strict> {
+        todo!()
+    }
 }
 
 #[derive(Clone)]
@@ -126,7 +134,7 @@ impl TypeChecker {
         self.check_recursion(match_.matchee.clone(), rcon)?;
 
         let param_deb = self
-            .get_superstruct_param(match_.matchee.clone(), rcon)
+            .get_lowest_superstruct_param(match_.matchee.clone(), rcon)
             .map(|(param_deb, _)| param_deb);
         self.check_recursion_in_match_cases(&match_.cases, param_deb, rcon)?;
 
@@ -196,7 +204,7 @@ impl TypeChecker {
                             // then all params are vacuously decreasing
                             // (i.e., they are decreasing in all zero recursive calls).
                             if let Some((param_deb, strict)) =
-                                self.get_superstruct_param(arg.clone(), rcon)
+                                self.get_lowest_superstruct_param(arg.clone(), rcon)
                             {
                                 UnshiftedEntry(Entry::DecreasingParam {
                                     parent: Some((Deb(param_deb.0 + arg_index), strict)),
@@ -215,9 +223,11 @@ impl TypeChecker {
                         .enumerate()
                         .map(|(arg_index, arg)| {
                             if arg_index == decreasing_index_literal.value {
-                                let parent = self.get_superstruct_param(arg.clone(), rcon).map(
-                                    |(param_deb, strict)| (Deb(param_deb.0 + arg_index), strict),
-                                );
+                                let parent = self
+                                    .get_lowest_superstruct_param(arg.clone(), rcon)
+                                    .map(|(param_deb, strict)| {
+                                        (Deb(param_deb.0 + arg_index), strict)
+                                    });
 
                                 UnshiftedEntry(Entry::DecreasingParam { parent })
                             } else {
@@ -265,7 +275,7 @@ impl TypeChecker {
         }
 
         let arg = &app.args[requirement.arg_index];
-        if !self.is_strict_substruct(arg, requirement.strict_superstruct, rcon) {
+        if !self.is_strict_substruct(arg.clone(), requirement.strict_superstruct, rcon) {
             return Err(TypeError::IllegalRecursiveCall {
                 app: app.clone(),
                 callee_deb_definition_src: requirement.definition_src.clone(),
@@ -338,19 +348,37 @@ impl TypeChecker {
 impl TypeChecker {
     fn is_strict_substruct(
         &mut self,
-        arg: &cst::Expr,
-        strict_superstruct: Deb,
+        expr: cst::Expr,
+        possible_superstruct: Deb,
         rcon: RecursionCheckingContext,
     ) -> bool {
-        todo!()
-    }
+        let Some((lowest_superstruct, strict)) = self.get_lowest_superstruct_param(expr, rcon) else {
+            return false;
+        };
 
+        if lowest_superstruct == possible_superstruct {
+            return strict.0;
+        }
+
+        if let Some(descendant_strict) =
+            rcon.is_descendant(lowest_superstruct, possible_superstruct)
+        {
+            return strict.0 || descendant_strict.0;
+        }
+
+        false
+    }
+}
+
+impl TypeChecker {
     /// If `expr` is a strict substruct of some param at deb `d`,
     /// then `Some((d, Strict(true)))` is returned.
     /// If `expr` is a nonstrict substruct of some param at deb `d`,
     /// then `Some((d, Strict(false)))` is returned.
+    /// If there are multiple possible values for `d`,
+    /// we choose return the lowest in the param tree.
     /// Otherwise, `None` is returned.
-    fn get_superstruct_param(
+    fn get_lowest_superstruct_param(
         &mut self,
         expr: cst::Expr,
         rcon: RecursionCheckingContext,
