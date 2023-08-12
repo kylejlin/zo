@@ -215,43 +215,28 @@ impl TypeChecker {
         self.check_recursion_in_dependent_exprs(&fun.param_types, rcon)?;
         self.check_recursion_in_fun_return_type(fun, rcon)?;
 
-        let (fun_entry, valid_decreasing_arg_index) = match &fun.decreasing_index {
-            cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
-                let decreasing_arg_index = decreasing_index_literal.value;
-                if decreasing_arg_index >= fun.param_types.len() {
-                    return Err(TypeError::DecreasingArgIndexTooBig { fun: fun.clone() });
+        let fun_entry = self.get_fun_entry_and_assert_decreasing_index_is_valid(fun)?;
+        let param_entries = arg_status.unwrap_or_else(|| {
+            match &fun.decreasing_index {
+                cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
+                    (0..fun.param_types.len())
+                        .map(|param_index| {
+                            if param_index == decreasing_index_literal.value {
+                                UnshiftedEntry(Entry::DecreasingParam { parent: None })
+                            } else {
+                                UnshiftedEntry::irrelevant()
+                            }
+                        })
+                        .collect()
                 }
 
-                (
-                    UnshiftedEntry(Entry::RecursiveFun {
-                        decreasing_arg_index,
-                        definition_src: fun,
-                    }),
-                    Some(decreasing_arg_index),
-                )
-            }
-
-            cst::NumberOrNonrecKw::NonrecKw(_) => (
-                UnshiftedEntry(Entry::NonrecursiveFun {
-                    definition_src: fun,
-                }),
-                None,
-            ),
-        };
-        let param_entries = arg_status.unwrap_or_else(|| {
-            if let Some(valid_decreasing_arg_index) = valid_decreasing_arg_index {
-                (0..fun.param_types.len())
-                    .map(|param_index| {
-                        if param_index == valid_decreasing_arg_index {
-                            UnshiftedEntry(Entry::DecreasingParam { parent: None })
-                        } else {
-                            UnshiftedEntry::irrelevant()
-                        }
-                    })
-                    .collect()
-            } else {
-                // If the function is non-recursive, then all params are vacuously decreasing.
-                vec![UnshiftedEntry(Entry::DecreasingParam { parent: None }); fun.param_types.len()]
+                cst::NumberOrNonrecKw::NonrecKw(_) => {
+                    // If the function is non-recursive, then all params are vacuously decreasing.
+                    vec![
+                        UnshiftedEntry(Entry::DecreasingParam { parent: None });
+                        fun.param_types.len()
+                    ]
+                }
             }
         });
         let extension = {
@@ -275,6 +260,29 @@ impl TypeChecker {
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(fun.return_type.clone(), extended_rcon)?;
         Ok(())
+    }
+
+    fn get_fun_entry_and_assert_decreasing_index_is_valid<'a>(
+        &mut self,
+        fun: &'a cst::Fun,
+    ) -> Result<UnshiftedEntry<'a>, TypeError> {
+        match &fun.decreasing_index {
+            cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
+                let decreasing_arg_index = decreasing_index_literal.value;
+                if decreasing_arg_index >= fun.param_types.len() {
+                    return Err(TypeError::DecreasingArgIndexTooBig { fun: fun.clone() });
+                }
+
+                Ok(UnshiftedEntry(Entry::RecursiveFun {
+                    decreasing_arg_index,
+                    definition_src: fun,
+                }))
+            }
+
+            cst::NumberOrNonrecKw::NonrecKw(_) => Ok(UnshiftedEntry(Entry::NonrecursiveFun {
+                definition_src: fun,
+            })),
+        }
     }
 
     fn check_recursion_in_app(
