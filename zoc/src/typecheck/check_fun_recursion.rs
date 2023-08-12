@@ -1,6 +1,6 @@
 use super::*;
 
-use std::ops::BitOr;
+use std::ops::{BitAnd, BitOr};
 
 #[derive(Clone, Copy)]
 pub enum RecursionCheckingContext<'a> {
@@ -149,6 +149,14 @@ impl BitOr for Strict {
 
     fn bitor(self, rhs: Self) -> Self::Output {
         Strict(self.0 | rhs.0)
+    }
+}
+
+impl BitAnd for Strict {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        Strict(self.0 & rhs.0)
     }
 }
 
@@ -619,6 +627,39 @@ impl TypeChecker {
         expr: &cst::Match,
         rcon: RecursionCheckingContext,
     ) -> Option<(Deb, Strict)> {
+        if expr.cases.is_empty() {
+            // TODO: This is blatantly WRONG.
+            // A zero-cased match vacuously is a strict substruct
+            // of _any_ param.
+            // We will need to redesign the whole system to handle this.
+            return None;
+        }
+
+        let matchee_superstruct = self.get_lowest_superstruct_param(expr.matchee.clone(), rcon);
+
+        let mut lowest_common = self.get_lowest_superstruct_param_of_match_case(
+            &expr.cases[0],
+            matchee_superstruct,
+            rcon,
+        )?;
+
+        for case in &expr.cases[1..] {
+            let case_superstruct =
+                self.get_lowest_superstruct_param_of_match_case(case, matchee_superstruct, rcon)?;
+
+            lowest_common =
+                get_lowest_common_ancestor_param(lowest_common, case_superstruct, rcon)?;
+        }
+
+        Some(lowest_common)
+    }
+
+    fn get_lowest_superstruct_param_of_match_case(
+        &mut self,
+        expr: &cst::MatchCase,
+        matchee_superstruct: Option<(Deb, Strict)>,
+        rcon: RecursionCheckingContext,
+    ) -> Option<(Deb, Strict)> {
         todo!()
     }
 
@@ -656,4 +697,20 @@ fn get_rcon_extension_of_irrelevant_entries_or_strict_substruct_entries(
             })
         })
         .collect()
+}
+
+fn get_lowest_common_ancestor_param(
+    a: (Deb, Strict),
+    b: (Deb, Strict),
+    rcon: RecursionCheckingContext,
+) -> Option<(Deb, Strict)> {
+    if let Some(a_strict_b) = rcon.is_descendant(a.0, b.0) {
+        return Some((b.0, b.1 & (a.1 | a_strict_b)));
+    }
+
+    if let Some(b_strict_a) = rcon.is_descendant(b.0, a.0) {
+        return Some((a.0, a.1 & (b.1 | b_strict_a)));
+    }
+
+    todo!()
 }
