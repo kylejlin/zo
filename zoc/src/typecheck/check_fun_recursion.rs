@@ -215,13 +215,7 @@ impl TypeChecker {
         self.check_recursion_in_dependent_exprs(&fun.param_types, rcon)?;
         self.check_recursion_in_fun_return_type(fun, rcon)?;
 
-        let fun_entry = self.get_fun_entry_and_assert_decreasing_index_is_valid(fun)?;
-        let param_entries = self.get_fun_param_entries(fun, app_arg_status);
-        let extension = {
-            let mut out = param_entries;
-            out.push(fun_entry);
-            out
-        };
+        let extension = self.get_fun_rcon_extension(fun, app_arg_status)?;
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
 
         self.check_recursion(fun.return_val.clone(), extended_rcon);
@@ -238,6 +232,19 @@ impl TypeChecker {
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(fun.return_type.clone(), extended_rcon)?;
         Ok(())
+    }
+
+    fn get_fun_rcon_extension<'a>(
+        &mut self,
+        fun: &'a cst::Fun,
+        app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
+    ) -> Result<Vec<UnshiftedEntry<'a>>, TypeError> {
+        let fun_entry = self.get_fun_entry_and_assert_decreasing_index_is_valid(fun)?;
+        let param_entries = self.get_fun_param_entries(fun, app_arg_status);
+
+        let mut out = param_entries;
+        out.push(fun_entry);
+        Ok(out)
     }
 
     fn get_fun_entry_and_assert_decreasing_index_is_valid<'a>(
