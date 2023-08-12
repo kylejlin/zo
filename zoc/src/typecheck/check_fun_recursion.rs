@@ -1,5 +1,7 @@
 use super::*;
 
+use std::ops::BitOr;
+
 #[derive(Clone, Copy)]
 pub enum RecursionCheckingContext<'a> {
     Base(&'a [UnshiftedEntry<'a>]),
@@ -21,8 +23,33 @@ impl RecursionCheckingContext<'_> {
         todo!()
     }
 
+    /// If `deb` is a descendant of `possible_ancestor`,
+    /// this function returns `Some(strictness)`.
+    /// Otherwise, it returns `None`.
     fn is_descendant(&self, deb: Deb, possible_ancestor: Deb) -> Option<Strict> {
-        todo!()
+        if deb == possible_ancestor {
+            return Some(Strict(false));
+        }
+
+        let Some(entry) = self.get(deb) else {
+            return None;
+        };
+
+        match entry {
+            Entry::DecreasingParam { parent: None } => None,
+
+            Entry::DecreasingParam {
+                parent: Some((parent, strict)),
+            } => self
+                .is_descendant(parent, possible_ancestor)
+                .map(|parent_strict| parent_strict | strict),
+
+            Entry::DecreasingParamStrictSubstruct { parent_param } => self
+                .is_descendant(parent_param, possible_ancestor)
+                .map(|_| Strict(true)),
+
+            Entry::Irrelevant | Entry::RecursiveFun { .. } => None,
+        }
     }
 }
 
@@ -53,6 +80,14 @@ pub enum Entry<'a> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct Strict(pub bool);
+
+impl BitOr for Strict {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Strict(self.0 | rhs.0)
+    }
+}
 
 #[derive(Clone, Copy)]
 struct CallRequirement<'a> {
