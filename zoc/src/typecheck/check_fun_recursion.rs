@@ -271,47 +271,73 @@ impl TypeChecker {
         callee: &cst::Fun,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let arg_status: Vec<UnshiftedEntry> = match &callee.decreasing_index {
-            cst::NumberOrNonrecKw::NonrecKw(_) => app
-                .args
-                .iter()
-                .enumerate()
-                .map(|(arg_index, arg)| {
-                    let bound = self.get_size_bound(arg.clone(), rcon);
-                    match bound {
-                        None => UnshiftedEntry(Entry::Top(None)),
-
-                        Some(SizeBound::CaselessMatch) => {
-                            UnshiftedEntry(Entry::Substruct(SizeBound::CaselessMatch, Strict(true)))
-                        }
-
-                        Some(SizeBound::Deb(superstruct)) => UnshiftedEntry(Entry::Substruct(
-                            SizeBound::Deb(Deb(superstruct.0 + arg_index)),
-                            Strict(false),
-                        )),
-                    }
-                })
-                .collect(),
-
-            cst::NumberOrNonrecKw::Number(decreasing_index_literal) => app
-                .args
-                .iter()
-                .enumerate()
-                .map(|(arg_index, arg)| {
-                    if arg_index == decreasing_index_literal.value {
-                        let bound = self.get_size_bound(arg.clone(), rcon);
-                        if let Some(bound) = bound {
-                            let bound = bound.upshift(arg_index);
-                            return UnshiftedEntry(Entry::Substruct(bound, Strict(false)));
-                        }
-                    }
-
-                    UnshiftedEntry(Entry::Top(None))
-                })
-                .collect(),
-        };
-
+        let arg_status = self.get_app_callee_fun_arg_status(app, callee, rcon);
         self.check_recursion_in_fun(&callee, Some(arg_status), rcon)
+    }
+
+    fn get_app_callee_fun_arg_status(
+        &mut self,
+        app: &cst::App,
+        callee: &cst::Fun,
+        rcon: RecursionCheckingContext,
+    ) -> Vec<UnshiftedEntry<'static>> {
+        match &callee.decreasing_index {
+            cst::NumberOrNonrecKw::NonrecKw(_) => {
+                self.get_app_callee_nonrecursive_fun_arg_status(app, rcon)
+            }
+
+            cst::NumberOrNonrecKw::Number(decreasing_index_literal) => self
+                .get_app_callee_recursive_fun_arg_status(app, decreasing_index_literal.value, rcon),
+        }
+    }
+
+    fn get_app_callee_nonrecursive_fun_arg_status(
+        &mut self,
+        app: &cst::App,
+        rcon: RecursionCheckingContext,
+    ) -> Vec<UnshiftedEntry<'static>> {
+        app.args
+            .iter()
+            .enumerate()
+            .map(|(arg_index, arg)| {
+                let bound = self.get_size_bound(arg.clone(), rcon);
+                match bound {
+                    None => UnshiftedEntry(Entry::Top(None)),
+
+                    Some(SizeBound::CaselessMatch) => {
+                        UnshiftedEntry(Entry::Substruct(SizeBound::CaselessMatch, Strict(true)))
+                    }
+
+                    Some(SizeBound::Deb(superstruct)) => UnshiftedEntry(Entry::Substruct(
+                        SizeBound::Deb(Deb(superstruct.0 + arg_index)),
+                        Strict(false),
+                    )),
+                }
+            })
+            .collect()
+    }
+
+    fn get_app_callee_recursive_fun_arg_status(
+        &mut self,
+        app: &cst::App,
+        decreasing_index: usize,
+        rcon: RecursionCheckingContext,
+    ) -> Vec<UnshiftedEntry<'static>> {
+        app.args
+            .iter()
+            .enumerate()
+            .map(|(arg_index, arg)| {
+                if arg_index == decreasing_index {
+                    let bound = self.get_size_bound(arg.clone(), rcon);
+                    if let Some(bound) = bound {
+                        let bound = bound.upshift(arg_index);
+                        return UnshiftedEntry(Entry::Substruct(bound, Strict(false)));
+                    }
+                }
+
+                UnshiftedEntry(Entry::Top(None))
+            })
+            .collect()
     }
 
     fn assert_arg_satisfies_recursive_call_requirement(
