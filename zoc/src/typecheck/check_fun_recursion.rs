@@ -527,30 +527,16 @@ fn get_min_size_bound(
     b: SizeBound,
     rcon: RecursionCheckingContext,
 ) -> Option<SizeBound> {
-    // TODO: This is wrong.
-    // if let Some(a_strict_b) = rcon.is_substruct(a.0, b.0) {
-    //     return Some((b.0, b.1 & (a.1 | a_strict_b)));
-    // }
+    match (a, b) {
+        (SizeBound::CaselessMatch, b) => Some(b),
 
-    // if let Some(b_strict_a) = rcon.is_substruct(b.0, a.0) {
-    //     return Some((a.0, a.1 & (b.1 | b_strict_a)));
-    // }
+        (a, SizeBound::CaselessMatch) => Some(a),
 
-    // None
+        (SizeBound::Deb(a), SizeBound::Deb(b)) => get_min_size_bound_of_debs(a, b, rcon),
+    }
+}
 
-    // Draft 2
-    // let (a, b) = match (a, b) {
-    //     (SizeBound::Unattached, _) | (_, SizeBound::Unattached) => return SizeBound::Unattached,
-
-    //     (SizeBound::CaselessMatch, b) => return b,
-    //     (a, SizeBound::CaselessMatch) => return a,
-
-    //     (
-    //         SizeBound::SubstructOf(a_superstruct, a_strict),
-    //         SizeBound::SubstructOf(b_superstruct, b_strict),
-    //     ) => ((a_superstruct, a_strict), (b_superstruct, b_strict)),
-    // };
-
+fn get_min_size_bound_of_debs(a: Deb, b: Deb, rcon: RecursionCheckingContext) -> Option<SizeBound> {
     todo!()
 }
 
