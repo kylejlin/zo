@@ -1,6 +1,6 @@
 use super::*;
 
-use std::ops::{BitAnd, BitOr};
+use std::ops::BitOr;
 
 #[derive(Clone, Copy)]
 pub enum RecursionCheckingContext<'a> {
@@ -247,26 +247,29 @@ impl TypeChecker {
 
             cst::Expr::Fun(callee) => {
                 let arg_status: Vec<UnshiftedEntry> = match &callee.hashee.decreasing_index {
-                    cst::NumberOrNonrecKw::NonrecKw(_) => app
-                        .args
-                        .iter()
-                        .enumerate()
-                        .map(|(arg_index, arg)| {
-                            let bound = self.get_size_bound(arg.clone(), rcon);
-                            match bound {
-                                None => UnshiftedEntry(Entry::Top),
+                    cst::NumberOrNonrecKw::NonrecKw(_) => {
+                        app.args
+                            .iter()
+                            .enumerate()
+                            .map(|(arg_index, arg)| {
+                                let bound = self.get_size_bound(arg.clone(), rcon);
+                                match bound {
+                                    None => UnshiftedEntry(Entry::Top),
 
-                                Some(SizeBound::CaselessMatch) => UnshiftedEntry(Entry::Substruct(
-                                    SizeBound::CaselessMatch,
-                                    Strict(true),
-                                )),
+                                    Some(SizeBound::CaselessMatch) => UnshiftedEntry(
+                                        Entry::Substruct(SizeBound::CaselessMatch, Strict(true)),
+                                    ),
 
-                                Some(SizeBound::Deb(superstruct)) => UnshiftedEntry(
-                                    Entry::Substruct(SizeBound::Deb(superstruct), Strict(false)),
-                                ),
-                            }
-                        })
-                        .collect(),
+                                    Some(SizeBound::Deb(superstruct)) => {
+                                        UnshiftedEntry(Entry::Substruct(
+                                            SizeBound::Deb(Deb(superstruct.0 + arg_index)),
+                                            Strict(false),
+                                        ))
+                                    }
+                                }
+                            })
+                            .collect()
+                    }
 
                     cst::NumberOrNonrecKw::Number(decreasing_index_literal) => app
                         .args
@@ -420,7 +423,7 @@ impl TypeChecker {
             Some(SizeBound::CaselessMatch) => true,
 
             Some(SizeBound::Deb(bound_deb)) => {
-                if let Some(strict) = rcon.is_substruct(bound_deb, possible_superstruct) {
+                if let Some(strict) = is_deb_substruct(bound_deb, possible_superstruct, rcon) {
                     strict.0
                 } else {
                     false
@@ -549,7 +552,7 @@ fn get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(
     let mut a_superstruct = a;
 
     let bounding_deb = loop {
-        if rcon.is_substruct(b, a_superstruct).is_some() {
+        if is_deb_substruct(b, a_superstruct, rcon).is_some() {
             break a_superstruct;
         }
 
@@ -566,6 +569,32 @@ fn get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(
     };
 
     Some(SizeBound::Deb(bounding_deb))
+}
+
+/// If `deb` is a substruct `possible_superstruct`,
+/// this function returns `Some(strictness)`.
+/// Otherwise, it returns `None`.
+fn is_deb_substruct(
+    deb: Deb,
+    possible_superstruct: Deb,
+    rcon: RecursionCheckingContext,
+) -> Option<Strict> {
+    if deb == possible_superstruct {
+        return Some(Strict(false));
+    }
+
+    let entry = rcon.get(deb)?;
+
+    match entry {
+        Entry::Top | Entry::FunWithValidDecreasingIndex(_) => None,
+
+        Entry::Substruct(SizeBound::CaselessMatch, _) => Some(Strict(true)),
+
+        Entry::Substruct(SizeBound::Deb(direct_superstruct), strict) => {
+            is_deb_substruct(direct_superstruct, possible_superstruct, rcon)
+                .map(|direct_strict| strict | direct_strict)
+        }
+    }
 }
 
 impl RecursionCheckingContext<'_> {
@@ -610,43 +639,6 @@ impl RecursionCheckingContext<'_> {
             }
         }
     }
-
-    // TODO: Move this an independent function.
-    /// If `deb` is a substruct `possible_superstruct`,
-    /// this function returns `Some(strictness)`.
-    /// Otherwise, it returns `None`.
-    fn is_substruct(&self, deb: Deb, possible_superstruct: Deb) -> Option<Strict> {
-        // if deb == possible_superstruct {
-        //     return Some(Strict(false));
-        // }
-
-        // let Some(entry) = self.get(deb) else {
-        //     return None;
-        // };
-
-        // match entry {
-        //     Entry::RelevantDecreasing {
-        //         lineage: SizeBound::CaselessMatch,
-        //         ..
-        //     } => Some(Strict(true)),
-
-        //     Entry::RelevantDecreasing {
-        //         lineage: SizeBound::Unattached,
-        //         ..
-        //     } => None,
-
-        //     Entry::RelevantDecreasing {
-        //         lineage: SizeBound::SubstructOf(direct_superstruct, strict),
-        //         ..
-        //     } => self
-        //         .is_substruct(direct_superstruct, possible_superstruct)
-        //         .map(|direct_strict| direct_strict | strict),
-
-        //     Entry::Top | Entry::FunWithValidDecreasingIndex(_) => None,
-        // }
-
-        todo!()
-    }
 }
 
 impl Entry<'_> {
@@ -676,13 +668,5 @@ impl BitOr for Strict {
 
     fn bitor(self, rhs: Self) -> Self::Output {
         Strict(self.0 | rhs.0)
-    }
-}
-
-impl BitAnd for Strict {
-    type Output = Self;
-
-    fn bitand(self, rhs: Self) -> Self::Output {
-        Strict(self.0 & rhs.0)
     }
 }
