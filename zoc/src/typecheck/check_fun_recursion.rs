@@ -508,26 +508,18 @@ fn get_rcon_extension_for_match_case_params(
     matchee_bound: Option<SizeBound>,
     case_arity: usize,
 ) -> Vec<UnshiftedEntry<'static>> {
-    // TODO: Refactor this to use `upshift` and `strict`.
-    match matchee_bound {
-        None => vec![UnshiftedEntry(Entry::Top); case_arity],
+    let Some(matchee_bound) = matchee_bound else {
+        return vec![UnshiftedEntry(Entry::Top); case_arity];
+    };
 
-        Some(SizeBound::CaselessMatch) => {
-            vec![
-                UnshiftedEntry(Entry::Substruct(SizeBound::CaselessMatch, Strict(true)));
-                case_arity
-            ]
-        }
-
-        Some(SizeBound::Deb(bound)) => (0..case_arity)
-            .map(|case_param_index| {
-                UnshiftedEntry(Entry::Substruct(
-                    SizeBound::Deb(Deb(bound.0 + case_param_index)),
-                    Strict(true),
-                ))
-            })
-            .collect(),
-    }
+    (0..case_arity)
+        .map(|case_param_index| {
+            UnshiftedEntry(Entry::Substruct(
+                matchee_bound.upshift(case_param_index),
+                Strict(true),
+            ))
+        })
+        .collect()
 }
 
 fn get_min_size_bound(
