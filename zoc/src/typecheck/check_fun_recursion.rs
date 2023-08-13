@@ -19,8 +19,7 @@ pub struct UnshiftedEntry<'a>(pub Entry<'a>);
 
 #[derive(Clone, Debug)]
 pub enum Entry<'a> {
-    Top,
-    FunWithValidDecreasingIndex(&'a cst::Fun),
+    Top(Option<&'a cst::Fun>),
     Substruct(SizeBound, Strict),
 }
 
@@ -70,7 +69,7 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         self.check_recursion_in_dependent_exprs(&ind.index_types, rcon)?;
 
-        let singleton = vec![UnshiftedEntry(Entry::Top)];
+        let singleton = vec![UnshiftedEntry(Entry::Top(None))];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &singleton);
         self.check_recursion_in_vcon_defs(&ind.vcon_defs, extended_rcon)?;
 
@@ -95,7 +94,7 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         self.check_recursion_in_dependent_exprs(&def.param_types, rcon)?;
 
-        let extension = vec![UnshiftedEntry(Entry::Top); def.param_types.len()];
+        let extension = vec![UnshiftedEntry(Entry::Top(None)); def.param_types.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion_in_independent_exprs(&def.index_args, extended_rcon)?;
 
@@ -169,7 +168,7 @@ impl TypeChecker {
         fun: &cst::Fun,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let extension = vec![UnshiftedEntry(Entry::Top); fun.param_types.len()];
+        let extension = vec![UnshiftedEntry(Entry::Top(None)); fun.param_types.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(fun.return_type.clone(), extended_rcon)?;
         Ok(())
@@ -181,7 +180,7 @@ impl TypeChecker {
         app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
     ) -> Result<Vec<UnshiftedEntry<'a>>, TypeError> {
         self.assert_decreasing_index_is_valid(fun)?;
-        let fun_entry = UnshiftedEntry(Entry::FunWithValidDecreasingIndex(fun));
+        let fun_entry = UnshiftedEntry(Entry::Top(Some(fun)));
         let param_entries = self.get_fun_param_entries(fun, app_arg_status);
 
         let mut out = param_entries;
@@ -209,7 +208,8 @@ impl TypeChecker {
         fun: &'a cst::Fun,
         app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
     ) -> Vec<UnshiftedEntry<'a>> {
-        app_arg_status.unwrap_or_else(|| vec![UnshiftedEntry(Entry::Top); fun.param_types.len()])
+        app_arg_status
+            .unwrap_or_else(|| vec![UnshiftedEntry(Entry::Top(None)); fun.param_types.len()])
     }
 
     fn check_recursion_in_app(
@@ -254,7 +254,7 @@ impl TypeChecker {
                             .map(|(arg_index, arg)| {
                                 let bound = self.get_size_bound(arg.clone(), rcon);
                                 match bound {
-                                    None => UnshiftedEntry(Entry::Top),
+                                    None => UnshiftedEntry(Entry::Top(None)),
 
                                     Some(SizeBound::CaselessMatch) => UnshiftedEntry(
                                         Entry::Substruct(SizeBound::CaselessMatch, Strict(true)),
@@ -284,7 +284,7 @@ impl TypeChecker {
                                 }
                             }
 
-                            UnshiftedEntry(Entry::Top)
+                            UnshiftedEntry(Entry::Top(None))
                         })
                         .collect(),
                 };
@@ -346,7 +346,7 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         self.check_recursion_in_dependent_exprs(&for_.param_types, rcon)?;
 
-        let extension = vec![UnshiftedEntry(Entry::Top); for_.param_types.len()];
+        let extension = vec![UnshiftedEntry(Entry::Top(None)); for_.param_types.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(for_.return_type.clone(), extended_rcon)?;
 
@@ -387,7 +387,7 @@ impl TypeChecker {
         exprs: &[cst::Expr],
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let rcon_extension = vec![UnshiftedEntry(Entry::Top); exprs.len()];
+        let rcon_extension = vec![UnshiftedEntry(Entry::Top(None)); exprs.len()];
 
         for (i, expr) in exprs.iter().cloned().enumerate() {
             let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &rcon_extension[..i]);
@@ -498,9 +498,9 @@ impl TypeChecker {
         match entry {
             Entry::Substruct(SizeBound::CaselessMatch, _) => Some(SizeBound::CaselessMatch),
 
-            Entry::Substruct(SizeBound::Deb(_), _)
-            | Entry::Top
-            | Entry::FunWithValidDecreasingIndex(_) => Some(SizeBound::Deb(expr_deb)),
+            Entry::Substruct(SizeBound::Deb(_), _) | Entry::Top(_) => {
+                Some(SizeBound::Deb(expr_deb))
+            }
         }
     }
 }
@@ -510,7 +510,7 @@ fn get_rcon_extension_for_match_case_params(
     case_arity: usize,
 ) -> Vec<UnshiftedEntry<'static>> {
     let Some(matchee_bound) = matchee_bound else {
-        return vec![UnshiftedEntry(Entry::Top); case_arity];
+        return vec![UnshiftedEntry(Entry::Top(None)); case_arity];
     };
 
     (0..case_arity)
@@ -556,7 +556,7 @@ fn get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(
 
         let entry = rcon.get(a_superstruct)?;
         match entry {
-            Entry::Top | Entry::FunWithValidDecreasingIndex(_) => return None,
+            Entry::Top(_) => return None,
 
             Entry::Substruct(SizeBound::CaselessMatch, _) => break b,
 
@@ -584,7 +584,7 @@ fn is_deb_substruct(
     let entry = rcon.get(deb)?;
 
     match entry {
-        Entry::Top | Entry::FunWithValidDecreasingIndex(_) => None,
+        Entry::Top(_) => None,
 
         Entry::Substruct(SizeBound::CaselessMatch, _) => Some(Strict(true)),
 
@@ -599,7 +599,7 @@ impl RecursionCheckingContext<'_> {
     fn get_call_requirement(&self, deb: Deb) -> Option<CallRequirement> {
         let entry = self.get(deb)?;
         match entry {
-            Entry::FunWithValidDecreasingIndex(fun) => match fun.decreasing_index {
+            Entry::Top(Some(fun)) => match fun.decreasing_index {
                 cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
                     let decreasing_index = decreasing_index_literal.value;
                     Some(CallRequirement::Recursive(RecursiveCallRequirement {
@@ -612,7 +612,7 @@ impl RecursionCheckingContext<'_> {
                 cst::NumberOrNonrecKw::NonrecKw(_) => Some(CallRequirement::AccessForbidden(fun)),
             },
 
-            Entry::Top | Entry::Substruct(_, _) => None,
+            Entry::Top(None) | Entry::Substruct(_, _) => None,
         }
     }
 
@@ -642,7 +642,7 @@ impl RecursionCheckingContext<'_> {
 impl Entry<'_> {
     fn upshift(self, upshift_amount: usize) -> Self {
         match self {
-            Entry::Top | Entry::FunWithValidDecreasingIndex(_) => self,
+            Entry::Top(_) => self,
 
             Entry::Substruct(bound, strict) => {
                 Entry::Substruct(bound.upshift(upshift_amount), strict)
