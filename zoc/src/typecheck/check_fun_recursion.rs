@@ -14,149 +14,23 @@ impl RecursionCheckingContext<'static> {
     }
 }
 
-impl RecursionCheckingContext<'_> {
-    fn get_call_requirement(&self, deb: Deb) -> Option<CallRequirement> {
-        let entry = self.get(deb)?;
-        match entry {
-            Entry::FunWithValidDecreasingIndex(fun) => match fun.decreasing_index {
-                cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
-                    let decreasing_index = decreasing_index_literal.value;
-                    Some(CallRequirement::Recursive(RecursiveCallRequirement {
-                        arg_index: decreasing_index,
-                        strict_superstruct: Deb(deb.0 + fun.param_types.len() - decreasing_index),
-                        definition_src: fun,
-                    }))
-                }
-
-                cst::NumberOrNonrecKw::NonrecKw(_) => Some(CallRequirement::AccessForbidden(fun)),
-            },
-
-            Entry::Irrelevant | Entry::RelevantDecreasing { .. } => None,
-        }
-    }
-
-    fn get(&self, deb: Deb) -> Option<Entry> {
-        let unshifted = self.get_unshifted(deb)?;
-        Some(unshifted.0.upshift(deb.0 + 1))
-    }
-
-    fn get_unshifted(&self, deb: Deb) -> Option<UnshiftedEntry> {
-        match self {
-            RecursionCheckingContext::Base(entries) => {
-                let index = (entries.len()).checked_sub(1 + deb.0)?;
-                Some(entries.get(index)?.clone())
-            }
-
-            RecursionCheckingContext::Snoc(subcontext, types) => {
-                if let Some(index) = (types.len()).checked_sub(1 + deb.0) {
-                    Some(types.get(index)?.clone())
-                } else {
-                    subcontext.get_unshifted(Deb(deb.0 - types.len()))
-                }
-            }
-        }
-    }
-
-    /// If `deb` is a substruct `possible_superstruct`,
-    /// this function returns `Some(strictness)`.
-    /// Otherwise, it returns `None`.
-    fn is_substruct(&self, deb: Deb, possible_superstruct: Deb) -> Option<Strict> {
-        if deb == possible_superstruct {
-            return Some(Strict(false));
-        }
-
-        let Some(entry) = self.get(deb) else {
-            return None;
-        };
-
-        match entry {
-            Entry::RelevantDecreasing {
-                lineage: Lineage::CaselessMatch,
-                ..
-            } => Some(Strict(true)),
-
-            Entry::RelevantDecreasing {
-                lineage: Lineage::Unattached,
-                ..
-            } => None,
-
-            Entry::RelevantDecreasing {
-                lineage: Lineage::SubstructOf(direct_superstruct, strict),
-                ..
-            } => self
-                .is_substruct(direct_superstruct, possible_superstruct)
-                .map(|direct_strict| direct_strict | strict),
-
-            Entry::Irrelevant | Entry::FunWithValidDecreasingIndex(_) => None,
-        }
-    }
-}
-
 #[derive(Clone)]
 pub struct UnshiftedEntry<'a>(pub Entry<'a>);
 
-impl UnshiftedEntry<'static> {
-    fn irrelevant() -> Self {
-        Self(Entry::Irrelevant)
-    }
-}
-
 #[derive(Clone)]
 pub enum Entry<'a> {
-    Irrelevant,
-    RelevantDecreasing { is_param: bool, lineage: Lineage },
+    Top,
     FunWithValidDecreasingIndex(&'a cst::Fun),
-}
-
-impl Entry<'_> {
-    fn upshift(self, upshift_amount: usize) -> Self {
-        match self {
-            Entry::Irrelevant | Entry::FunWithValidDecreasingIndex(_) => self,
-
-            Entry::RelevantDecreasing { is_param, lineage } => Entry::RelevantDecreasing {
-                is_param,
-                lineage: lineage.upshift(upshift_amount),
-            },
-        }
-    }
-}
-
-#[derive(Clone)]
-pub enum Lineage {
-    Unattached,
-    SubstructOf(Deb, Strict),
-    CaselessMatch,
-}
-
-impl Lineage {
-    fn upshift(self, upshift_amount: usize) -> Self {
-        match self {
-            Lineage::Unattached | Lineage::CaselessMatch => self,
-
-            Lineage::SubstructOf(superstruct, strict) => {
-                Lineage::SubstructOf(Deb(superstruct.0 + upshift_amount), strict)
-            }
-        }
-    }
+    Substruct(SizeBound, Strict),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct Strict(pub bool);
 
-impl BitOr for Strict {
-    type Output = Self;
-
-    fn bitor(self, rhs: Self) -> Self::Output {
-        Strict(self.0 | rhs.0)
-    }
-}
-
-impl BitAnd for Strict {
-    type Output = Self;
-
-    fn bitand(self, rhs: Self) -> Self::Output {
-        Strict(self.0 & rhs.0)
-    }
+#[derive(Clone, Copy)]
+pub enum SizeBound {
+    Deb(Deb),
+    CaselessMatch,
 }
 
 enum CallRequirement<'a> {
@@ -196,7 +70,7 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         self.check_recursion_in_dependent_exprs(&ind.index_types, rcon)?;
 
-        let singleton = vec![UnshiftedEntry::irrelevant()];
+        let singleton = vec![UnshiftedEntry(Entry::Top)];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &singleton);
         self.check_recursion_in_vcon_defs(&ind.vcon_defs, extended_rcon)?;
 
@@ -221,7 +95,7 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         self.check_recursion_in_dependent_exprs(&def.param_types, rcon)?;
 
-        let extension = vec![UnshiftedEntry::irrelevant(); def.param_types.len()];
+        let extension = vec![UnshiftedEntry(Entry::Top); def.param_types.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion_in_independent_exprs(&def.index_args, extended_rcon)?;
 
@@ -243,8 +117,8 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         self.check_recursion(match_.matchee.clone(), rcon)?;
 
-        let matchee_lineage = self.get_lineage(match_.matchee.clone(), rcon);
-        self.check_recursion_in_match_cases(&match_.cases, matchee_lineage, rcon)?;
+        let matchee_bound = self.get_size_bound(match_.matchee.clone(), rcon);
+        self.check_recursion_in_match_cases(&match_.cases, matchee_bound, rcon)?;
 
         Ok(())
     }
@@ -252,11 +126,11 @@ impl TypeChecker {
     fn check_recursion_in_match_cases(
         &mut self,
         cases: &[cst::MatchCase],
-        matchee_lineage: Lineage,
+        matchee_bound: Option<SizeBound>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         for case in cases {
-            self.check_recursion_in_match_case(case, matchee_lineage.clone(), rcon)?;
+            self.check_recursion_in_match_case(case, matchee_bound, rcon)?;
         }
         Ok(())
     }
@@ -264,10 +138,10 @@ impl TypeChecker {
     fn check_recursion_in_match_case(
         &mut self,
         case: &cst::MatchCase,
-        matchee_lineage: Lineage,
+        matchee_bound: Option<SizeBound>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let extension = get_rcon_extension_for_match_case_params(matchee_lineage, case.arity.value);
+        let extension = get_rcon_extension_for_match_case_params(matchee_bound, case.arity.value);
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(case.return_val.clone(), extended_rcon)?;
         Ok(())
@@ -295,7 +169,7 @@ impl TypeChecker {
         fun: &cst::Fun,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let extension = vec![UnshiftedEntry::irrelevant(); fun.param_types.len()];
+        let extension = vec![UnshiftedEntry(Entry::Top); fun.param_types.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(fun.return_type.clone(), extended_rcon)?;
         Ok(())
@@ -335,24 +209,7 @@ impl TypeChecker {
         fun: &'a cst::Fun,
         app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
     ) -> Vec<UnshiftedEntry<'a>> {
-        app_arg_status.unwrap_or_else(|| match &fun.decreasing_index {
-            cst::NumberOrNonrecKw::Number(decreasing_index_literal) => (0..fun.param_types.len())
-                .map(|param_index| {
-                    if param_index == decreasing_index_literal.value {
-                        UnshiftedEntry(Entry::RelevantDecreasing {
-                            is_param: true,
-                            lineage: Lineage::Unattached,
-                        })
-                    } else {
-                        UnshiftedEntry::irrelevant()
-                    }
-                })
-                .collect(),
-
-            cst::NumberOrNonrecKw::NonrecKw(_) => {
-                vec![UnshiftedEntry::irrelevant(); fun.param_types.len()]
-            }
-        })
+        app_arg_status.unwrap_or_else(|| vec![UnshiftedEntry(Entry::Top); fun.param_types.len()])
     }
 
     fn check_recursion_in_app(
@@ -395,26 +252,18 @@ impl TypeChecker {
                         .iter()
                         .enumerate()
                         .map(|(arg_index, arg)| {
-                            let lineage = self.get_lineage(arg.clone(), rcon);
-                            match lineage {
-                                Lineage::CaselessMatch => {
-                                    UnshiftedEntry(Entry::RelevantDecreasing {
-                                        is_param: true,
-                                        lineage: Lineage::CaselessMatch,
-                                    })
-                                }
+                            let bound = self.get_size_bound(arg.clone(), rcon);
+                            match bound {
+                                None => UnshiftedEntry(Entry::Top),
 
-                                Lineage::Unattached => UnshiftedEntry::irrelevant(),
+                                Some(SizeBound::CaselessMatch) => UnshiftedEntry(Entry::Substruct(
+                                    SizeBound::CaselessMatch,
+                                    Strict(true),
+                                )),
 
-                                Lineage::SubstructOf(superstruct, strict) => {
-                                    UnshiftedEntry(Entry::RelevantDecreasing {
-                                        is_param: true,
-                                        lineage: Lineage::SubstructOf(
-                                            Deb(superstruct.0 + arg_index),
-                                            strict,
-                                        ),
-                                    })
-                                }
+                                Some(SizeBound::Deb(superstruct)) => UnshiftedEntry(
+                                    Entry::Substruct(SizeBound::Deb(superstruct), Strict(false)),
+                                ),
                             }
                         })
                         .collect(),
@@ -425,15 +274,14 @@ impl TypeChecker {
                         .enumerate()
                         .map(|(arg_index, arg)| {
                             if arg_index == decreasing_index_literal.value {
-                                let lineage =
-                                    self.get_lineage(arg.clone(), rcon).upshift(arg_index);
-                                UnshiftedEntry(Entry::RelevantDecreasing {
-                                    is_param: true,
-                                    lineage,
-                                })
-                            } else {
-                                UnshiftedEntry::irrelevant()
+                                let bound = self.get_size_bound(arg.clone(), rcon);
+                                if let Some(bound) = bound {
+                                    let bound = bound.upshift(arg_index);
+                                    return UnshiftedEntry(Entry::Substruct(bound, Strict(false)));
+                                }
                             }
+
+                            UnshiftedEntry(Entry::Top)
                         })
                         .collect(),
                 };
@@ -495,7 +343,7 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         self.check_recursion_in_dependent_exprs(&for_.param_types, rcon)?;
 
-        let extension = vec![UnshiftedEntry::irrelevant(); for_.param_types.len()];
+        let extension = vec![UnshiftedEntry(Entry::Top); for_.param_types.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(for_.return_type.clone(), extended_rcon)?;
 
@@ -536,7 +384,7 @@ impl TypeChecker {
         exprs: &[cst::Expr],
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let rcon_extension = vec![UnshiftedEntry::irrelevant(); exprs.len()];
+        let rcon_extension = vec![UnshiftedEntry(Entry::Top); exprs.len()];
 
         for (i, expr) in exprs.iter().cloned().enumerate() {
             let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &rcon_extension[..i]);
@@ -565,19 +413,15 @@ impl TypeChecker {
         possible_superstruct: Deb,
         rcon: RecursionCheckingContext,
     ) -> bool {
-        let lineage = self.get_lineage(expr, rcon);
-        match lineage {
-            Lineage::Unattached => false,
+        let bound = self.get_size_bound(expr, rcon);
+        match bound {
+            None => false,
 
-            Lineage::CaselessMatch => true,
+            Some(SizeBound::CaselessMatch) => true,
 
-            Lineage::SubstructOf(direct_superstruct, strict) => {
-                if direct_superstruct == possible_superstruct {
+            Some(SizeBound::Deb(bound_deb)) => {
+                if let Some(strict) = rcon.is_substruct(bound_deb, possible_superstruct) {
                     strict.0
-                } else if let Some(direct_strict) =
-                    rcon.is_substruct(direct_superstruct, possible_superstruct)
-                {
-                    strict.0 || direct_strict.0
                 } else {
                     false
                 }
@@ -587,116 +431,110 @@ impl TypeChecker {
 }
 
 impl TypeChecker {
-    fn get_lineage(&mut self, expr: cst::Expr, rcon: RecursionCheckingContext) -> Lineage {
+    fn get_size_bound(
+        &mut self,
+        expr: cst::Expr,
+        rcon: RecursionCheckingContext,
+    ) -> Option<SizeBound> {
         match expr {
             cst::Expr::Ind(_)
             | cst::Expr::Vcon(_)
             | cst::Expr::Fun(_)
             | cst::Expr::App(_)
             | cst::Expr::For(_)
-            | cst::Expr::Universe(_) => Lineage::Unattached,
+            | cst::Expr::Universe(_) => None,
 
-            cst::Expr::Match(e) => self.get_lineage_of_match(&e.hashee, rcon),
+            cst::Expr::Match(e) => self.get_size_bound_of_match(&e.hashee, rcon),
 
-            cst::Expr::Deb(e) => self.get_lineage_of_deb(&e.hashee, rcon),
+            cst::Expr::Deb(e) => self.get_size_bound_of_deb(&e.hashee, rcon),
         }
     }
 
-    fn get_lineage_of_match(
+    fn get_size_bound_of_match(
         &mut self,
         expr: &cst::Match,
         rcon: RecursionCheckingContext,
-    ) -> Lineage {
+    ) -> Option<SizeBound> {
         if expr.cases.is_empty() {
-            return Lineage::CaselessMatch;
+            return Some(SizeBound::CaselessMatch);
         }
 
-        let matchee_lineage = self.get_lineage(expr.matchee.clone(), rcon);
+        let matchee_bound = self.get_size_bound(expr.matchee.clone(), rcon);
 
-        let mut lowest_common =
-            self.get_lineage_of_match_case(&expr.cases[0], matchee_lineage.clone(), rcon);
+        let mut lowest_common_bound =
+            self.get_size_bound_of_match_case(&expr.cases[0], matchee_bound, rcon)?;
 
         for case in &expr.cases[1..] {
-            let case_superstruct =
-                self.get_lineage_of_match_case(case, matchee_lineage.clone(), rcon);
+            let case_bound =
+                self.get_size_bound_of_match_case(case, matchee_bound.clone(), rcon)?;
 
-            lowest_common = get_common_lineage(lowest_common, case_superstruct, rcon);
+            lowest_common_bound = get_min_size_bound(case_bound, lowest_common_bound, rcon)?;
         }
 
-        lowest_common
+        Some(lowest_common_bound)
     }
 
-    fn get_lineage_of_match_case(
+    fn get_size_bound_of_match_case(
         &mut self,
         expr: &cst::MatchCase,
-        matchee_lineage: Lineage,
+        matchee_bound: Option<SizeBound>,
         rcon: RecursionCheckingContext,
-    ) -> Lineage {
-        let extension = get_rcon_extension_for_match_case_params(matchee_lineage, expr.arity.value);
+    ) -> Option<SizeBound> {
+        let extension = get_rcon_extension_for_match_case_params(matchee_bound, expr.arity.value);
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
-        self.get_lineage(expr.return_val.clone(), extended_rcon)
+        self.get_size_bound(expr.return_val.clone(), extended_rcon)
     }
 
-    fn get_lineage_of_deb(
+    fn get_size_bound_of_deb(
         &mut self,
         expr: &cst::NumberLiteral,
         rcon: RecursionCheckingContext,
-    ) -> Lineage {
+    ) -> Option<SizeBound> {
         let expr_deb = Deb(expr.value);
         let Some(entry) = rcon.get(expr_deb) else {
-            return Lineage::Unattached;
+            return None;
         };
         match entry {
-            Entry::RelevantDecreasing {
-                is_param: false,
-                lineage,
-            } => lineage,
+            Entry::Substruct(SizeBound::CaselessMatch, _) => Some(SizeBound::CaselessMatch),
 
-            Entry::RelevantDecreasing {
-                is_param: true,
-                lineage: Lineage::CaselessMatch,
-            } => Lineage::CaselessMatch,
+            Entry::Substruct(SizeBound::Deb(_), _) => Some(SizeBound::Deb(expr_deb)),
 
-            Entry::RelevantDecreasing {
-                is_param: true,
-                lineage: Lineage::SubstructOf(_, _) | Lineage::Unattached,
-            } => Lineage::SubstructOf(expr_deb, Strict(false)),
-
-            Entry::Irrelevant | Entry::FunWithValidDecreasingIndex(_) => Lineage::Unattached,
+            Entry::Top | Entry::FunWithValidDecreasingIndex(_) => None,
         }
     }
 }
 
 fn get_rcon_extension_for_match_case_params(
-    matchee_lineage: Lineage,
+    matchee_bound: Option<SizeBound>,
     case_arity: usize,
 ) -> Vec<UnshiftedEntry<'static>> {
-    match matchee_lineage {
-        Lineage::Unattached => vec![UnshiftedEntry::irrelevant(); case_arity],
+    // TODO: Refactor this to use `upshift` and `strict`.
+    match matchee_bound {
+        None => vec![UnshiftedEntry(Entry::Top); case_arity],
 
-        Lineage::CaselessMatch => vec![
-            UnshiftedEntry(Entry::RelevantDecreasing {
-                is_param: false,
-                lineage: Lineage::CaselessMatch,
-            });
-            case_arity
-        ],
+        Some(SizeBound::CaselessMatch) => {
+            vec![
+                UnshiftedEntry(Entry::Substruct(SizeBound::CaselessMatch, Strict(true)));
+                case_arity
+            ]
+        }
 
-        Lineage::SubstructOf(matchee_superstruct, _) => (0..case_arity)
+        Some(SizeBound::Deb(bound)) => (0..case_arity)
             .map(|case_param_index| {
-                UnshiftedEntry(Entry::RelevantDecreasing {
-                    is_param: false,
-                    lineage: Lineage::SubstructOf(
-                        Deb(matchee_superstruct.0 + case_param_index),
-                        Strict(true),
-                    ),
-                })
+                UnshiftedEntry(Entry::Substruct(
+                    SizeBound::Deb(Deb(bound.0 + case_param_index)),
+                    Strict(true),
+                ))
             })
             .collect(),
     }
 }
 
-fn get_common_lineage(a: Lineage, b: Lineage, rcon: RecursionCheckingContext) -> Lineage {
+fn get_min_size_bound(
+    a: SizeBound,
+    b: SizeBound,
+    rcon: RecursionCheckingContext,
+) -> Option<SizeBound> {
     // TODO: This is wrong.
     // if let Some(a_strict_b) = rcon.is_substruct(a.0, b.0) {
     //     return Some((b.0, b.1 & (a.1 | a_strict_b)));
@@ -708,17 +546,137 @@ fn get_common_lineage(a: Lineage, b: Lineage, rcon: RecursionCheckingContext) ->
 
     // None
 
-    let (a, b) = match (a, b) {
-        (Lineage::Unattached, _) | (_, Lineage::Unattached) => return Lineage::Unattached,
+    // Draft 2
+    // let (a, b) = match (a, b) {
+    //     (SizeBound::Unattached, _) | (_, SizeBound::Unattached) => return SizeBound::Unattached,
 
-        (Lineage::CaselessMatch, b) => return b,
-        (a, Lineage::CaselessMatch) => return a,
+    //     (SizeBound::CaselessMatch, b) => return b,
+    //     (a, SizeBound::CaselessMatch) => return a,
 
-        (
-            Lineage::SubstructOf(a_superstruct, a_strict),
-            Lineage::SubstructOf(b_superstruct, b_strict),
-        ) => ((a_superstruct, a_strict), (b_superstruct, b_strict)),
-    };
+    //     (
+    //         SizeBound::SubstructOf(a_superstruct, a_strict),
+    //         SizeBound::SubstructOf(b_superstruct, b_strict),
+    //     ) => ((a_superstruct, a_strict), (b_superstruct, b_strict)),
+    // };
 
     todo!()
+}
+
+impl RecursionCheckingContext<'_> {
+    fn get_call_requirement(&self, deb: Deb) -> Option<CallRequirement> {
+        let entry = self.get(deb)?;
+        match entry {
+            Entry::FunWithValidDecreasingIndex(fun) => match fun.decreasing_index {
+                cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
+                    let decreasing_index = decreasing_index_literal.value;
+                    Some(CallRequirement::Recursive(RecursiveCallRequirement {
+                        arg_index: decreasing_index,
+                        strict_superstruct: Deb(deb.0 + fun.param_types.len() - decreasing_index),
+                        definition_src: fun,
+                    }))
+                }
+
+                cst::NumberOrNonrecKw::NonrecKw(_) => Some(CallRequirement::AccessForbidden(fun)),
+            },
+
+            Entry::Top | Entry::Substruct(_, _) => None,
+        }
+    }
+
+    fn get(&self, deb: Deb) -> Option<Entry> {
+        let unshifted = self.get_unshifted(deb)?;
+        Some(unshifted.0.upshift(deb.0 + 1))
+    }
+
+    fn get_unshifted(&self, deb: Deb) -> Option<UnshiftedEntry> {
+        match self {
+            RecursionCheckingContext::Base(entries) => {
+                let index = (entries.len()).checked_sub(1 + deb.0)?;
+                Some(entries.get(index)?.clone())
+            }
+
+            RecursionCheckingContext::Snoc(subcontext, types) => {
+                if let Some(index) = (types.len()).checked_sub(1 + deb.0) {
+                    Some(types.get(index)?.clone())
+                } else {
+                    subcontext.get_unshifted(Deb(deb.0 - types.len()))
+                }
+            }
+        }
+    }
+
+    // TODO: Move this an independent function.
+    /// If `deb` is a substruct `possible_superstruct`,
+    /// this function returns `Some(strictness)`.
+    /// Otherwise, it returns `None`.
+    fn is_substruct(&self, deb: Deb, possible_superstruct: Deb) -> Option<Strict> {
+        // if deb == possible_superstruct {
+        //     return Some(Strict(false));
+        // }
+
+        // let Some(entry) = self.get(deb) else {
+        //     return None;
+        // };
+
+        // match entry {
+        //     Entry::RelevantDecreasing {
+        //         lineage: SizeBound::CaselessMatch,
+        //         ..
+        //     } => Some(Strict(true)),
+
+        //     Entry::RelevantDecreasing {
+        //         lineage: SizeBound::Unattached,
+        //         ..
+        //     } => None,
+
+        //     Entry::RelevantDecreasing {
+        //         lineage: SizeBound::SubstructOf(direct_superstruct, strict),
+        //         ..
+        //     } => self
+        //         .is_substruct(direct_superstruct, possible_superstruct)
+        //         .map(|direct_strict| direct_strict | strict),
+
+        //     Entry::Top | Entry::FunWithValidDecreasingIndex(_) => None,
+        // }
+
+        todo!()
+    }
+}
+
+impl Entry<'_> {
+    fn upshift(self, upshift_amount: usize) -> Self {
+        match self {
+            Entry::Top | Entry::FunWithValidDecreasingIndex(_) => self,
+
+            Entry::Substruct(bound, strict) => {
+                Entry::Substruct(bound.upshift(upshift_amount), strict)
+            }
+        }
+    }
+}
+
+impl SizeBound {
+    fn upshift(self, upshift_amount: usize) -> Self {
+        match self {
+            SizeBound::CaselessMatch => SizeBound::CaselessMatch,
+
+            SizeBound::Deb(deb) => SizeBound::Deb(Deb(deb.0 + upshift_amount)),
+        }
+    }
+}
+
+impl BitOr for Strict {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Strict(self.0 | rhs.0)
+    }
+}
+
+impl BitAnd for Strict {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        Strict(self.0 & rhs.0)
+    }
 }
