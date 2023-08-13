@@ -537,7 +537,35 @@ fn get_min_size_bound(
 }
 
 fn get_min_size_bound_of_debs(a: Deb, b: Deb, rcon: RecursionCheckingContext) -> Option<SizeBound> {
-    todo!()
+    get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(a, b, rcon)
+        .or_else(|| get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(b, a, rcon))
+}
+
+fn get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(
+    a: Deb,
+    b: Deb,
+    rcon: RecursionCheckingContext,
+) -> Option<SizeBound> {
+    let mut a_superstruct = a;
+
+    let bounding_deb = loop {
+        if rcon.is_substruct(b, a_superstruct).is_some() {
+            break a_superstruct;
+        }
+
+        let entry = rcon.get(a_superstruct)?;
+        match entry {
+            Entry::Top | Entry::FunWithValidDecreasingIndex(_) => return None,
+
+            Entry::Substruct(SizeBound::CaselessMatch, _) => break b,
+
+            Entry::Substruct(SizeBound::Deb(a_superstruct_superstruct), _) => {
+                a_superstruct = a_superstruct_superstruct;
+            }
+        }
+    };
+
+    Some(SizeBound::Deb(bounding_deb))
 }
 
 impl RecursionCheckingContext<'_> {
