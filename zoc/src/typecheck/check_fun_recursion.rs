@@ -217,7 +217,17 @@ impl TypeChecker {
         app: &cst::App,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let skip_callee_check = match &app.callee {
+        self.check_recursion_in_app_callee(app, rcon)?;
+        self.check_recursion_in_independent_exprs(&app.args, rcon)?;
+        Ok(())
+    }
+
+    fn check_recursion_in_app_callee(
+        &mut self,
+        app: &cst::App,
+        rcon: RecursionCheckingContext,
+    ) -> Result<(), TypeError> {
+        match &app.callee {
             cst::Expr::Deb(callee) => {
                 let callee_deb = Deb(callee.hashee.value);
                 if let Some(requirement) = rcon.get_call_requirement(callee_deb) {
@@ -227,21 +237,17 @@ impl TypeChecker {
                                 app,
                                 requirement,
                                 rcon,
-                            )?,
+                            ),
 
                         CallRequirement::AccessForbidden(definition_src) => {
-                            return Err(
-                                TypeError::DeclaredFunNonrecursiveButUsedRecursiveFunParam {
-                                    deb: callee.hashee.clone(),
-                                    definition_src: definition_src.clone(),
-                                },
-                            )
+                            Err(TypeError::DeclaredFunNonrecursiveButUsedRecursiveFunParam {
+                                deb: callee.hashee.clone(),
+                                definition_src: definition_src.clone(),
+                            })
                         }
                     }
-
-                    true
                 } else {
-                    false
+                    self.check_recursion(app.callee.clone(), rcon)
                 }
             }
 
@@ -289,21 +295,11 @@ impl TypeChecker {
                         .collect(),
                 };
 
-                self.check_recursion_in_fun(&callee.hashee, Some(arg_status), rcon)?;
-
-                true
+                self.check_recursion_in_fun(&callee.hashee, Some(arg_status), rcon)
             }
 
-            _ => false,
-        };
-
-        if !skip_callee_check {
-            self.check_recursion(app.callee.clone(), rcon)?;
+            _ => self.check_recursion(app.callee.clone(), rcon),
         }
-
-        self.check_recursion_in_independent_exprs(&app.args, rcon)?;
-
-        Ok(())
     }
 
     fn assert_arg_satisfies_recursive_call_requirement(
