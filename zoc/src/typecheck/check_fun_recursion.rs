@@ -18,20 +18,18 @@ impl RecursionCheckingContext<'_> {
     fn get_call_requirement(&self, deb: Deb) -> Option<CallRequirement> {
         let entry = self.get(deb)?;
         match entry {
-            Entry::RecursiveFun {
-                valid_decreasing_arg_index: decreasing_arg_index,
-                definition_src,
-            } => Some(CallRequirement::Recursive(RecursiveCallRequirement {
-                arg_index: decreasing_arg_index,
-                strict_superstruct: Deb(
-                    deb.0 + definition_src.param_types.len() - decreasing_arg_index
-                ),
-                definition_src,
-            })),
+            Entry::FunWithValidDecreasingIndex(fun) => match fun.decreasing_index {
+                cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
+                    let decreasing_index = decreasing_index_literal.value;
+                    Some(CallRequirement::Recursive(RecursiveCallRequirement {
+                        arg_index: decreasing_index,
+                        strict_superstruct: Deb(deb.0 + fun.param_types.len() - decreasing_index),
+                        definition_src: fun,
+                    }))
+                }
 
-            Entry::NonrecursiveFun { definition_src } => {
-                Some(CallRequirement::AccessForbidden(definition_src))
-            }
+                cst::NumberOrNonrecKw::NonrecKw(_) => Some(CallRequirement::AccessForbidden(fun)),
+            },
 
             Entry::Irrelevant
             | Entry::DecreasingParam { .. }
@@ -86,7 +84,7 @@ impl RecursionCheckingContext<'_> {
                 .is_descendant(parent_param, possible_ancestor)
                 .map(|_| Strict(true)),
 
-            Entry::Irrelevant | Entry::RecursiveFun { .. } | Entry::NonrecursiveFun { .. } => None,
+            Entry::Irrelevant | Entry::FunWithValidDecreasingIndex(_) => None,
         }
     }
 }
@@ -103,30 +101,15 @@ impl UnshiftedEntry<'static> {
 #[derive(Clone)]
 pub enum Entry<'a> {
     Irrelevant,
-    RecursiveFun {
-        valid_decreasing_arg_index: usize,
-        definition_src: &'a cst::Fun,
-    },
-    NonrecursiveFun {
-        definition_src: &'a cst::Fun,
-    },
-    DecreasingParam {
-        parent: Option<(Deb, Strict)>,
-    },
-    DecreasingParamStrictSubstruct {
-        parent_param: Deb,
-    },
+    FunWithValidDecreasingIndex(&'a cst::Fun),
+    DecreasingParam { parent: Option<(Deb, Strict)> },
+    DecreasingParamStrictSubstruct { parent_param: Deb },
 }
 
 impl Entry<'_> {
     fn upshift(self, upshift_amount: usize) -> Self {
         match self {
-            Entry::Irrelevant
-            | Entry::RecursiveFun {
-                valid_decreasing_arg_index: _,
-                definition_src: _,
-            }
-            | Entry::NonrecursiveFun { definition_src: _ } => self,
+            Entry::Irrelevant | Entry::FunWithValidDecreasingIndex(_) => self,
 
             Entry::DecreasingParam { parent } => Entry::DecreasingParam {
                 parent: parent
@@ -312,7 +295,8 @@ impl TypeChecker {
         fun: &'a cst::Fun,
         app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
     ) -> Result<Vec<UnshiftedEntry<'a>>, TypeError> {
-        let fun_entry = self.get_fun_entry_and_assert_decreasing_index_is_valid(fun)?;
+        self.assert_decreasing_index_is_valid(fun)?;
+        let fun_entry = UnshiftedEntry(Entry::FunWithValidDecreasingIndex(fun));
         let param_entries = self.get_fun_param_entries(fun, app_arg_status);
 
         let mut out = param_entries;
@@ -320,10 +304,7 @@ impl TypeChecker {
         Ok(out)
     }
 
-    fn get_fun_entry_and_assert_decreasing_index_is_valid<'a>(
-        &mut self,
-        fun: &'a cst::Fun,
-    ) -> Result<UnshiftedEntry<'a>, TypeError> {
+    fn assert_decreasing_index_is_valid(&mut self, fun: &cst::Fun) -> Result<(), TypeError> {
         match &fun.decreasing_index {
             cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
                 let decreasing_arg_index = decreasing_index_literal.value;
@@ -331,15 +312,10 @@ impl TypeChecker {
                     return Err(TypeError::DecreasingArgIndexTooBig { fun: fun.clone() });
                 }
 
-                Ok(UnshiftedEntry(Entry::RecursiveFun {
-                    valid_decreasing_arg_index: decreasing_arg_index,
-                    definition_src: fun,
-                }))
+                Ok(())
             }
 
-            cst::NumberOrNonrecKw::NonrecKw(_) => Ok(UnshiftedEntry(Entry::NonrecursiveFun {
-                definition_src: fun,
-            })),
+            cst::NumberOrNonrecKw::NonrecKw(_) => Ok(()),
         }
     }
 
@@ -690,7 +666,7 @@ impl TypeChecker {
 
             Entry::DecreasingParam { .. } => Some((expr_deb, Strict(false))),
 
-            Entry::Irrelevant | Entry::RecursiveFun { .. } | Entry::NonrecursiveFun { .. } => None,
+            Entry::Irrelevant | Entry::FunWithValidDecreasingIndex(_) => None,
         }
     }
 }
