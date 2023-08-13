@@ -25,16 +25,16 @@ pub fn substitute_without_compounding(replacements: &[(&str, String)], original:
     result
 }
 
-pub fn parse_rch_cst_or_panic(src: &str) -> ipist::Expr {
+pub fn parse_ipist_or_panic(src: &str) -> ipist::Expr {
     let tokens = lex(src).unwrap();
     let nh_cst = parse(tokens).unwrap();
     nh_cst.into()
 }
 
 pub fn parse_ast_or_panic(src: &str) -> ast::Expr {
-    let rch_cst: ipist::Expr = parse_rch_cst_or_panic(src);
+    let ipist: ipist::Expr = parse_ipist_or_panic(src);
     let mut converter = IpistToAstConverter::default();
-    converter.convert(rch_cst)
+    converter.convert(ipist)
 }
 
 pub fn eval_or_panic(src: &str) -> NormalForm {
@@ -43,7 +43,7 @@ pub fn eval_or_panic(src: &str) -> NormalForm {
 }
 
 pub fn get_type_under_empty_tcon_or_panic(src: &str) -> NormalForm {
-    let cst = parse_rch_cst_or_panic(src);
+    let cst = parse_ipist_or_panic(src);
     let empty = Normalized::<[_; 0]>::new();
     TypeChecker::default()
         .get_type(cst, LazyTypeContext::Base(empty.as_ref().convert_ref()))
@@ -51,7 +51,7 @@ pub fn get_type_under_empty_tcon_or_panic(src: &str) -> NormalForm {
 }
 
 pub fn get_type_error_under_empty_tcon_or_panic(src: &str) -> TypeError {
-    let cst = parse_rch_cst_or_panic(src);
+    let cst = parse_ipist_or_panic(src);
     let empty = Normalized::<[_; 0]>::new();
     TypeChecker::default()
         .get_type(cst, LazyTypeContext::Base(empty.as_ref().convert_ref()))
