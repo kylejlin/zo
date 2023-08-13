@@ -2,7 +2,7 @@ use super::*;
 
 use std::ops::BitOr;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum RecursionCheckingContext<'a> {
     Base(&'a [UnshiftedEntry<'a>]),
     Snoc(&'a RecursionCheckingContext<'a>, &'a [UnshiftedEntry<'a>]),
@@ -14,10 +14,10 @@ impl RecursionCheckingContext<'static> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UnshiftedEntry<'a>(pub Entry<'a>);
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Entry<'a> {
     Top,
     FunWithValidDecreasingIndex(&'a cst::Fun),
@@ -27,7 +27,7 @@ pub enum Entry<'a> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct Strict(pub bool);
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum SizeBound {
     Deb(Deb),
     CaselessMatch,
@@ -494,15 +494,13 @@ impl TypeChecker {
         rcon: RecursionCheckingContext,
     ) -> Option<SizeBound> {
         let expr_deb = Deb(expr.value);
-        let Some(entry) = rcon.get(expr_deb) else {
-            return None;
-        };
+        let entry = rcon.get(expr_deb)?;
         match entry {
             Entry::Substruct(SizeBound::CaselessMatch, _) => Some(SizeBound::CaselessMatch),
 
-            Entry::Substruct(SizeBound::Deb(_), _) => Some(SizeBound::Deb(expr_deb)),
-
-            Entry::Top | Entry::FunWithValidDecreasingIndex(_) => None,
+            Entry::Substruct(SizeBound::Deb(_), _)
+            | Entry::Top
+            | Entry::FunWithValidDecreasingIndex(_) => Some(SizeBound::Deb(expr_deb)),
         }
     }
 }
