@@ -31,9 +31,7 @@ impl RecursionCheckingContext<'_> {
                 cst::NumberOrNonrecKw::NonrecKw(_) => Some(CallRequirement::AccessForbidden(fun)),
             },
 
-            Entry::Irrelevant
-            | Entry::DecreasingParam { .. }
-            | Entry::DecreasingParamStrictSubstruct { .. } => None,
+            Entry::Irrelevant | Entry::RelevantDecreasing { .. } => None,
         }
     }
 
@@ -59,11 +57,11 @@ impl RecursionCheckingContext<'_> {
         }
     }
 
-    /// If `deb` is a descendant of `possible_ancestor`,
+    /// If `deb` is a substruct `possible_superstruct`,
     /// this function returns `Some(strictness)`.
     /// Otherwise, it returns `None`.
-    fn is_descendant(&self, deb: Deb, possible_ancestor: Deb) -> Option<Strict> {
-        if deb == possible_ancestor {
+    fn is_substruct(&self, deb: Deb, possible_superstruct: Deb) -> Option<Strict> {
+        if deb == possible_superstruct {
             return Some(Strict(false));
         }
 
@@ -72,17 +70,22 @@ impl RecursionCheckingContext<'_> {
         };
 
         match entry {
-            Entry::DecreasingParam { parent: None } => None,
+            Entry::RelevantDecreasing {
+                lineage: Lineage::CaselessMatch,
+                ..
+            } => Some(Strict(true)),
 
-            Entry::DecreasingParam {
-                parent: Some((parent, strict)),
+            Entry::RelevantDecreasing {
+                lineage: Lineage::Unattached,
+                ..
+            } => None,
+
+            Entry::RelevantDecreasing {
+                lineage: Lineage::SubstructOf(direct_superstruct, strict),
+                ..
             } => self
-                .is_descendant(parent, possible_ancestor)
-                .map(|parent_strict| parent_strict | strict),
-
-            Entry::DecreasingParamStrictSubstruct { parent_param } => self
-                .is_descendant(parent_param, possible_ancestor)
-                .map(|_| Strict(true)),
+                .is_substruct(direct_superstruct, possible_superstruct)
+                .map(|direct_strict| direct_strict | strict),
 
             Entry::Irrelevant | Entry::FunWithValidDecreasingIndex(_) => None,
         }
@@ -101,9 +104,8 @@ impl UnshiftedEntry<'static> {
 #[derive(Clone)]
 pub enum Entry<'a> {
     Irrelevant,
+    RelevantDecreasing { is_param: bool, lineage: Lineage },
     FunWithValidDecreasingIndex(&'a cst::Fun),
-    DecreasingParam { parent: Option<(Deb, Strict)> },
-    DecreasingParamStrictSubstruct { parent_param: Deb },
 }
 
 impl Entry<'_> {
@@ -111,14 +113,28 @@ impl Entry<'_> {
         match self {
             Entry::Irrelevant | Entry::FunWithValidDecreasingIndex(_) => self,
 
-            Entry::DecreasingParam { parent } => Entry::DecreasingParam {
-                parent: parent
-                    .map(|(parent_param, strict)| (Deb(parent_param.0 + upshift_amount), strict)),
+            Entry::RelevantDecreasing { is_param, lineage } => Entry::RelevantDecreasing {
+                is_param,
+                lineage: lineage.upshift(upshift_amount),
             },
-            Entry::DecreasingParamStrictSubstruct { parent_param } => {
-                Entry::DecreasingParamStrictSubstruct {
-                    parent_param: Deb(parent_param.0 + upshift_amount),
-                }
+        }
+    }
+}
+
+#[derive(Clone)]
+pub enum Lineage {
+    Unattached,
+    SubstructOf(Deb, Strict),
+    CaselessMatch,
+}
+
+impl Lineage {
+    fn upshift(self, upshift_amount: usize) -> Self {
+        match self {
+            Lineage::Unattached | Lineage::CaselessMatch => self,
+
+            Lineage::SubstructOf(superstruct, strict) => {
+                Lineage::SubstructOf(Deb(superstruct.0 + upshift_amount), strict)
             }
         }
     }
@@ -227,10 +243,8 @@ impl TypeChecker {
     ) -> Result<(), TypeError> {
         self.check_recursion(match_.matchee.clone(), rcon)?;
 
-        let param_deb = self
-            .get_lowest_superstruct_param(match_.matchee.clone(), rcon)
-            .map(|(param_deb, _)| param_deb);
-        self.check_recursion_in_match_cases(&match_.cases, param_deb, rcon)?;
+        let matchee_lineage = self.get_lineage(match_.matchee.clone(), rcon);
+        self.check_recursion_in_match_cases(&match_.cases, matchee_lineage, rcon)?;
 
         Ok(())
     }
@@ -238,11 +252,11 @@ impl TypeChecker {
     fn check_recursion_in_match_cases(
         &mut self,
         cases: &[cst::MatchCase],
-        param_deb: Option<Deb>,
+        matchee_lineage: Lineage,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         for case in cases {
-            self.check_recursion_in_match_case(case, param_deb, rcon)?;
+            self.check_recursion_in_match_case(case, matchee_lineage.clone(), rcon)?;
         }
         Ok(())
     }
@@ -250,13 +264,10 @@ impl TypeChecker {
     fn check_recursion_in_match_case(
         &mut self,
         case: &cst::MatchCase,
-        param_deb: Option<Deb>,
+        matchee_lineage: Lineage,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let extension = get_rcon_extension_of_irrelevant_entries_or_strict_substruct_entries(
-            param_deb,
-            case.arity.value,
-        );
+        let extension = get_rcon_extension_for_match_case_params(matchee_lineage, case.arity.value);
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(case.return_val.clone(), extended_rcon)?;
         Ok(())
@@ -324,27 +335,22 @@ impl TypeChecker {
         fun: &'a cst::Fun,
         app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
     ) -> Vec<UnshiftedEntry<'a>> {
-        app_arg_status.unwrap_or_else(|| {
-            match &fun.decreasing_index {
-                cst::NumberOrNonrecKw::Number(decreasing_index_literal) => {
-                    (0..fun.param_types.len())
-                        .map(|param_index| {
-                            if param_index == decreasing_index_literal.value {
-                                UnshiftedEntry(Entry::DecreasingParam { parent: None })
-                            } else {
-                                UnshiftedEntry::irrelevant()
-                            }
+        app_arg_status.unwrap_or_else(|| match &fun.decreasing_index {
+            cst::NumberOrNonrecKw::Number(decreasing_index_literal) => (0..fun.param_types.len())
+                .map(|param_index| {
+                    if param_index == decreasing_index_literal.value {
+                        UnshiftedEntry(Entry::RelevantDecreasing {
+                            is_param: true,
+                            lineage: Lineage::Unattached,
                         })
-                        .collect()
-                }
+                    } else {
+                        UnshiftedEntry::irrelevant()
+                    }
+                })
+                .collect(),
 
-                cst::NumberOrNonrecKw::NonrecKw(_) => {
-                    // If the function is non-recursive, then all params are vacuously decreasing.
-                    vec![
-                        UnshiftedEntry(Entry::DecreasingParam { parent: None });
-                        fun.param_types.len()
-                    ]
-                }
+            cst::NumberOrNonrecKw::NonrecKw(_) => {
+                vec![UnshiftedEntry::irrelevant(); fun.param_types.len()]
             }
         })
     }
@@ -389,19 +395,26 @@ impl TypeChecker {
                         .iter()
                         .enumerate()
                         .map(|(arg_index, arg)| {
-                            // If the function is non-recursive,
-                            // then all params are vacuously decreasing
-                            // (i.e., they are decreasing in all zero recursive calls).
-                            if let Some((param_deb, strict)) =
-                                self.get_lowest_superstruct_param(arg.clone(), rcon)
-                            {
-                                UnshiftedEntry(Entry::DecreasingParam {
-                                    parent: Some((Deb(param_deb.0 + arg_index), strict)),
-                                })
-                            } else {
-                                // TODO: Consider if Entry::DecreasingParam.parent should be non-`Option`al.
-                                // In this case, `DecreasingParam { parent: None }` becomes `Irrelevant`.
-                                UnshiftedEntry(Entry::DecreasingParam { parent: None })
+                            let lineage = self.get_lineage(arg.clone(), rcon);
+                            match lineage {
+                                Lineage::CaselessMatch => {
+                                    UnshiftedEntry(Entry::RelevantDecreasing {
+                                        is_param: true,
+                                        lineage: Lineage::CaselessMatch,
+                                    })
+                                }
+
+                                Lineage::Unattached => UnshiftedEntry::irrelevant(),
+
+                                Lineage::SubstructOf(superstruct, strict) => {
+                                    UnshiftedEntry(Entry::RelevantDecreasing {
+                                        is_param: true,
+                                        lineage: Lineage::SubstructOf(
+                                            Deb(superstruct.0 + arg_index),
+                                            strict,
+                                        ),
+                                    })
+                                }
                             }
                         })
                         .collect(),
@@ -412,15 +425,14 @@ impl TypeChecker {
                         .enumerate()
                         .map(|(arg_index, arg)| {
                             if arg_index == decreasing_index_literal.value {
-                                let parent = self
-                                    .get_lowest_superstruct_param(arg.clone(), rcon)
-                                    .map(|(param_deb, strict)| {
-                                        (Deb(param_deb.0 + arg_index), strict)
-                                    });
-
-                                UnshiftedEntry(Entry::DecreasingParam { parent })
+                                let lineage =
+                                    self.get_lineage(arg.clone(), rcon).upshift(arg_index);
+                                UnshiftedEntry(Entry::RelevantDecreasing {
+                                    is_param: true,
+                                    lineage,
+                                })
                             } else {
-                                UnshiftedEntry(Entry::Irrelevant)
+                                UnshiftedEntry::irrelevant()
                             }
                         })
                         .collect(),
@@ -553,153 +565,160 @@ impl TypeChecker {
         possible_superstruct: Deb,
         rcon: RecursionCheckingContext,
     ) -> bool {
-        let Some((lowest_superstruct, strict)) = self.get_lowest_superstruct_param(expr, rcon) else {
-            return false;
-        };
+        let lineage = self.get_lineage(expr, rcon);
+        match lineage {
+            Lineage::Unattached => false,
 
-        if lowest_superstruct == possible_superstruct {
-            return strict.0;
+            Lineage::CaselessMatch => true,
+
+            Lineage::SubstructOf(direct_superstruct, strict) => {
+                if direct_superstruct == possible_superstruct {
+                    strict.0
+                } else if let Some(direct_strict) =
+                    rcon.is_substruct(direct_superstruct, possible_superstruct)
+                {
+                    strict.0 || direct_strict.0
+                } else {
+                    false
+                }
+            }
         }
-
-        if let Some(descendant_strict) =
-            rcon.is_descendant(lowest_superstruct, possible_superstruct)
-        {
-            return strict.0 || descendant_strict.0;
-        }
-
-        false
     }
 }
 
 impl TypeChecker {
-    /// If `expr` is a strict substruct of some param at deb `d`,
-    /// then `Some((d, Strict(true)))` is returned.
-    /// If `expr` is a nonstrict substruct of some param at deb `d`,
-    /// then `Some((d, Strict(false)))` is returned.
-    /// If there are multiple possible values for `d`,
-    /// we choose return the lowest in the param tree.
-    /// Otherwise, `None` is returned.
-    fn get_lowest_superstruct_param(
-        &mut self,
-        expr: cst::Expr,
-        rcon: RecursionCheckingContext,
-    ) -> Option<(Deb, Strict)> {
+    fn get_lineage(&mut self, expr: cst::Expr, rcon: RecursionCheckingContext) -> Lineage {
         match expr {
             cst::Expr::Ind(_)
             | cst::Expr::Vcon(_)
             | cst::Expr::Fun(_)
             | cst::Expr::App(_)
             | cst::Expr::For(_)
-            | cst::Expr::Universe(_) => None,
+            | cst::Expr::Universe(_) => Lineage::Unattached,
 
-            cst::Expr::Match(e) => self.get_lowest_superstruct_param_of_match(&e.hashee, rcon),
+            cst::Expr::Match(e) => self.get_lineage_of_match(&e.hashee, rcon),
 
-            cst::Expr::Deb(e) => self.get_lowest_superstruct_param_of_deb(&e.hashee, rcon),
+            cst::Expr::Deb(e) => self.get_lineage_of_deb(&e.hashee, rcon),
         }
     }
 
-    fn get_lowest_superstruct_param_of_match(
+    fn get_lineage_of_match(
         &mut self,
         expr: &cst::Match,
         rcon: RecursionCheckingContext,
-    ) -> Option<(Deb, Strict)> {
+    ) -> Lineage {
         if expr.cases.is_empty() {
-            // TODO: This is blatantly WRONG.
-            // A zero-cased match vacuously is a strict substruct
-            // of _any_ param.
-            // We will need to redesign the whole system to handle this.
-            return None;
+            return Lineage::CaselessMatch;
         }
 
-        let matchee_superstruct = self.get_lowest_superstruct_param(expr.matchee.clone(), rcon);
+        let matchee_lineage = self.get_lineage(expr.matchee.clone(), rcon);
 
-        let mut lowest_common = self.get_lowest_superstruct_param_of_match_case(
-            &expr.cases[0],
-            matchee_superstruct,
-            rcon,
-        )?;
+        let mut lowest_common =
+            self.get_lineage_of_match_case(&expr.cases[0], matchee_lineage.clone(), rcon);
 
         for case in &expr.cases[1..] {
             let case_superstruct =
-                self.get_lowest_superstruct_param_of_match_case(case, matchee_superstruct, rcon)?;
+                self.get_lineage_of_match_case(case, matchee_lineage.clone(), rcon);
 
-            lowest_common =
-                get_lowest_common_ancestor_param(lowest_common, case_superstruct, rcon)?;
+            lowest_common = get_common_lineage(lowest_common, case_superstruct, rcon);
         }
 
-        Some(lowest_common)
+        lowest_common
     }
 
-    fn get_lowest_superstruct_param_of_match_case(
+    fn get_lineage_of_match_case(
         &mut self,
         expr: &cst::MatchCase,
-        matchee_superstruct: Option<(Deb, Strict)>,
+        matchee_lineage: Lineage,
         rcon: RecursionCheckingContext,
-    ) -> Option<(Deb, Strict)> {
-        let extension = if let Some((matchee_superstruct, _)) = matchee_superstruct {
-            (0..expr.arity.value)
-                .map(|param_index| {
-                    UnshiftedEntry(Entry::DecreasingParamStrictSubstruct {
-                        parent_param: Deb(matchee_superstruct.0 + param_index),
-                    })
-                })
-                .collect()
-        } else {
-            vec![UnshiftedEntry::irrelevant(); expr.arity.value]
-        };
+    ) -> Lineage {
+        let extension = get_rcon_extension_for_match_case_params(matchee_lineage, expr.arity.value);
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
-
-        self.get_lowest_superstruct_param(expr.return_val.clone(), extended_rcon)
+        self.get_lineage(expr.return_val.clone(), extended_rcon)
     }
 
-    fn get_lowest_superstruct_param_of_deb(
+    fn get_lineage_of_deb(
         &mut self,
         expr: &cst::NumberLiteral,
         rcon: RecursionCheckingContext,
-    ) -> Option<(Deb, Strict)> {
+    ) -> Lineage {
         let expr_deb = Deb(expr.value);
-        let entry = rcon.get(expr_deb)?;
+        let Some(entry) = rcon.get(expr_deb) else {
+            return Lineage::Unattached;
+        };
         match entry {
-            Entry::DecreasingParamStrictSubstruct { parent_param } => {
-                Some((parent_param, Strict(true)))
-            }
+            Entry::RelevantDecreasing {
+                is_param: false,
+                lineage,
+            } => lineage,
 
-            Entry::DecreasingParam { .. } => Some((expr_deb, Strict(false))),
+            Entry::RelevantDecreasing {
+                is_param: true,
+                lineage: Lineage::CaselessMatch,
+            } => Lineage::CaselessMatch,
 
-            Entry::Irrelevant | Entry::FunWithValidDecreasingIndex(_) => None,
+            Entry::RelevantDecreasing {
+                is_param: true,
+                lineage: Lineage::SubstructOf(_, _) | Lineage::Unattached,
+            } => Lineage::SubstructOf(expr_deb, Strict(false)),
+
+            Entry::Irrelevant | Entry::FunWithValidDecreasingIndex(_) => Lineage::Unattached,
         }
     }
 }
 
-fn get_rcon_extension_of_irrelevant_entries_or_strict_substruct_entries(
-    deb: Option<Deb>,
-    len: usize,
+fn get_rcon_extension_for_match_case_params(
+    matchee_lineage: Lineage,
+    case_arity: usize,
 ) -> Vec<UnshiftedEntry<'static>> {
-    let Some(deb) = deb else {
-        return vec![UnshiftedEntry::irrelevant(); len];
-    };
+    match matchee_lineage {
+        Lineage::Unattached => vec![UnshiftedEntry::irrelevant(); case_arity],
 
-    (0..len)
-        .map(|i| {
-            UnshiftedEntry(Entry::DecreasingParamStrictSubstruct {
-                parent_param: Deb(deb.0 + i),
+        Lineage::CaselessMatch => vec![
+            UnshiftedEntry(Entry::RelevantDecreasing {
+                is_param: false,
+                lineage: Lineage::CaselessMatch,
+            });
+            case_arity
+        ],
+
+        Lineage::SubstructOf(matchee_superstruct, _) => (0..case_arity)
+            .map(|case_param_index| {
+                UnshiftedEntry(Entry::RelevantDecreasing {
+                    is_param: false,
+                    lineage: Lineage::SubstructOf(
+                        Deb(matchee_superstruct.0 + case_param_index),
+                        Strict(true),
+                    ),
+                })
             })
-        })
-        .collect()
+            .collect(),
+    }
 }
 
-fn get_lowest_common_ancestor_param(
-    a: (Deb, Strict),
-    b: (Deb, Strict),
-    rcon: RecursionCheckingContext,
-) -> Option<(Deb, Strict)> {
-    if let Some(a_strict_b) = rcon.is_descendant(a.0, b.0) {
-        return Some((b.0, b.1 & (a.1 | a_strict_b)));
-    }
+fn get_common_lineage(a: Lineage, b: Lineage, rcon: RecursionCheckingContext) -> Lineage {
+    // TODO: This is wrong.
+    // if let Some(a_strict_b) = rcon.is_substruct(a.0, b.0) {
+    //     return Some((b.0, b.1 & (a.1 | a_strict_b)));
+    // }
 
-    if let Some(b_strict_a) = rcon.is_descendant(b.0, a.0) {
-        return Some((a.0, a.1 & (b.1 | b_strict_a)));
-    }
+    // if let Some(b_strict_a) = rcon.is_substruct(b.0, a.0) {
+    //     return Some((a.0, a.1 & (b.1 | b_strict_a)));
+    // }
 
-    None
+    // None
+
+    let (a, b) = match (a, b) {
+        (Lineage::Unattached, _) | (_, Lineage::Unattached) => return Lineage::Unattached,
+
+        (Lineage::CaselessMatch, b) => return b,
+        (a, Lineage::CaselessMatch) => return a,
+
+        (
+            Lineage::SubstructOf(a_superstruct, a_strict),
+            Lineage::SubstructOf(b_superstruct, b_strict),
+        ) => ((a_superstruct, a_strict), (b_superstruct, b_strict)),
+    };
+
+    todo!()
 }
