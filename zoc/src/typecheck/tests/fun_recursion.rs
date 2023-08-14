@@ -164,3 +164,5 @@ fn decreasing_equal() {
     let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
     insta::assert_display_snapshot!(pretty_printed_err);
 }
+
+// TODO: Add more tests.
