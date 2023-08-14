@@ -4,7 +4,33 @@ use crate::test_utils::*;
 
 use pretty_assertions::assert_eq;
 
-// TODO: Compare pretty print results instead of digests.
+/// We could use `assert_eq!` directly,
+/// but that would be unnecessarily slow.
+/// The ASTs would first be pretty printed,
+/// and then those strings would be compared.
+///
+/// In contrast, if we compare the digests of
+/// the ASTs, it is much faster.
+/// The downside is that in the event of a failure
+/// (i.e., `left != right`),
+/// we don't get useful debug information.
+///
+/// To get the best of both worlds,
+/// we first compare the digests.
+/// If the digests are equal, then the assertion succeeds,
+/// and no further action is needed.
+/// If the digests differ,
+/// then we fall back to `pretty_assertions::assert_eq!`,
+/// which will panic with a diff of the two
+/// pretty printed ASTs.
+macro_rules! assert_exprs_eq {
+    ($left:expr, $right:expr) => {
+        if $left.digest() != $right.digest() {
+            // This will definitely panic.
+            assert_eq!($left, $right);
+        }
+    };
+}
 
 #[test]
 fn add_2_3() {
@@ -48,7 +74,7 @@ fn add_2_3() {
     let actual = eval_or_panic(&add_two_three_src).into_raw();
     let expected = parse_ast_or_panic(&five_src);
 
-    assert_eq!(expected.digest(), actual.digest());
+    assert_exprs_eq!(expected, actual);
 }
 
 #[test]
@@ -77,7 +103,7 @@ fn nullary_match_case() {
     let actual = eval_or_panic(&match_src).into_raw();
     let expected = parse_ast_or_panic(&expected_src);
 
-    assert_eq!(expected.digest(), actual.digest());
+    assert_exprs_eq!(expected, actual);
 }
 
 #[test]
@@ -106,7 +132,7 @@ fn match_case_param_substitution() {
     let actual = eval_or_panic(&match_src).into_raw();
     let expected = parse_ast_or_panic(&expected_src);
 
-    assert_eq!(expected.digest(), actual.digest());
+    assert_exprs_eq!(expected, actual);
 }
 
 #[test]
@@ -298,7 +324,7 @@ fn rev_1_2_3() {
     let actual = eval_or_panic(&rev_one_two_three_src).into_raw();
     let expected = parse_ast_or_panic(&three_two_one_src);
 
-    assert_eq!(expected.digest(), actual.digest());
+    assert_exprs_eq!(expected, actual);
 }
 
 #[test]
@@ -493,7 +519,7 @@ fn polymorphic_rev_1_2_3() {
     let actual = eval_or_panic(&rev_one_two_three_src).into_raw();
     let expected = parse_ast_or_panic(&three_two_one_src);
 
-    assert_eq!(expected.digest(), actual.digest());
+    assert_exprs_eq!(expected, actual);
 }
 
 #[test]
@@ -536,7 +562,7 @@ fn recursive_fun_app_stops_unfolding_when_decreasing_arg_not_vconlike() {
     let actual = eval_or_panic(&ident_succ_deb_123_src).into_raw();
     let expected = parse_ast_or_panic(&succ_ident_deb_123_src);
 
-    assert_eq!(expected.digest(), actual.digest());
+    assert_exprs_eq!(expected, actual);
 }
 
 #[test]
@@ -585,5 +611,5 @@ fn substitution_upshifts_new_expr_debs() {
     let actual = eval_or_panic(&match_src).into_raw();
     let expected = parse_ast_or_panic(&deb_5_src);
 
-    assert_eq!(expected.digest(), actual.digest());
+    assert_exprs_eq!(expected, actual);
 }
