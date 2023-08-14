@@ -1,6 +1,10 @@
 use super::*;
 
-#[derive(Debug, Clone)]
+use crate::pretty_print::PrettyPrinted;
+
+use std::fmt::{Debug, Result as FmtResult};
+
+#[derive(Clone)]
 pub enum TypeError {
     InvalidDeb {
         deb: NumberLiteral,
@@ -72,4 +76,11 @@ pub enum TypeError {
     DecreasingArgIndexTooBig {
         fun: cst::Fun,
     },
+}
+
+impl Debug for TypeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> FmtResult {
+        let pretty = self.pretty_printed();
+        write!(f, "{pretty:#}")
+    }
 }

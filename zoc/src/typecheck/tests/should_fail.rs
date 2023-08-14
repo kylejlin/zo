@@ -52,8 +52,7 @@ fn wrong_match_return_type_arity() {
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
     let err = get_type_error_under_empty_tcon_or_panic(&src);
 
-    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
-    insta::assert_display_snapshot!(pretty_printed_err);
+    insta::assert_debug_snapshot!(err);
 }
 
 // TODO: Add more tests.
