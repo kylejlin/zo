@@ -1,5 +1,5 @@
 ---
-source: zoc/src/typecheck/tests/should_succeed.rs
+source: zoc/src/typecheck/tests/fun_recursion.rs
 expression: PrettyPrint(type_.raw())
 ---
 (
