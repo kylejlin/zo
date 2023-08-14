@@ -4,6 +4,8 @@ use crate::test_utils::*;
 
 use pretty_assertions::assert_eq;
 
+// TODO: Compare pretty print results instead of digests.
+
 #[test]
 fn add_2_3() {
     let nat_def = (

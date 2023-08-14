@@ -5,10 +5,11 @@ pub use crate::hash::*;
 pub use crate::syntax_tree::ipist::{rc_hashed, RcHashed, RcHashedVec};
 
 mod conversion;
+mod debug;
 mod get_digest;
 mod hash;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum Expr {
     Ind(RcHashed<Ind>),
     Vcon(RcHashed<Vcon>),
@@ -20,7 +21,7 @@ pub enum Expr {
     Universe(RcHashed<UniverseNode>),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Ind {
     pub name: Rc<StringValue>,
     pub universe: Universe,
@@ -31,19 +32,19 @@ pub struct Ind {
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct StringValue(pub String);
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct VconDef {
     pub param_types: RcHashedVec<Expr>,
     pub index_args: RcHashedVec<Expr>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Vcon {
     pub ind: RcHashed<Ind>,
     pub vcon_index: usize,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Match {
     pub matchee: Expr,
     pub return_type_arity: usize,
@@ -51,13 +52,13 @@ pub struct Match {
     pub cases: RcHashedVec<MatchCase>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct MatchCase {
     pub arity: usize,
     pub return_val: Expr,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Fun {
     pub decreasing_index: Option<usize>,
     pub param_types: RcHashedVec<Expr>,
@@ -65,24 +66,24 @@ pub struct Fun {
     pub return_val: Expr,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct App {
     pub callee: Expr,
     pub args: RcHashedVec<Expr>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct For {
     pub param_types: RcHashedVec<Expr>,
     pub return_type: Expr,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct DebNode {
     pub deb: Deb,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct UniverseNode {
     pub universe: Universe,
 }
