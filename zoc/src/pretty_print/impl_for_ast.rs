@@ -8,13 +8,13 @@ impl Display for PrettyPrint<'_, Expr> {
     }
 }
 
-impl Display for PrettyPrint<'_, RcHashed<Ind>> {
+impl Display for PrettyPrint<'_, Ind> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_ind(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+        fmt_ind(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcHashedVec<VconDef>> {
+impl Display for PrettyPrint<'_, [VconDef]> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_parenthesized_vcon_defs(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
@@ -26,19 +26,19 @@ impl Display for PrettyPrint<'_, VconDef> {
     }
 }
 
-impl Display for PrettyPrint<'_, RcHashed<Vcon>> {
+impl Display for PrettyPrint<'_, Vcon> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_vcon(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+        fmt_vcon(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcHashed<Match>> {
+impl Display for PrettyPrint<'_, Match> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_match(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+        fmt_match(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcHashedVec<MatchCase>> {
+impl Display for PrettyPrint<'_, [MatchCase]> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_parenthesized_match_cases(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
@@ -50,33 +50,33 @@ impl Display for PrettyPrint<'_, MatchCase> {
     }
 }
 
-impl Display for PrettyPrint<'_, RcHashed<Fun>> {
+impl Display for PrettyPrint<'_, Fun> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_fun(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+        fmt_fun(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcHashed<App>> {
+impl Display for PrettyPrint<'_, App> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_app(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+        fmt_app(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcHashed<For>> {
+impl Display for PrettyPrint<'_, For> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_for(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+        fmt_for(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcHashed<DebNode>> {
+impl Display for PrettyPrint<'_, DebNode> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_deb_node(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+        fmt_deb_node(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, RcHashed<UniverseNode>> {
+impl Display for PrettyPrint<'_, UniverseNode> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        fmt_universe_node(self.0.clone(), f, Indentation { soft_tab_count: 0 })
+        fmt_universe_node(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
@@ -86,30 +86,30 @@ impl Display for PrettyPrint<'_, RcHashed<UniverseNode>> {
 
 fn fmt_expr(expr: Expr, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     match expr {
-        Expr::Ind(e) => fmt_ind(e, f, indent),
-        Expr::Vcon(e) => fmt_vcon(e, f, indent),
-        Expr::Match(e) => fmt_match(e, f, indent),
-        Expr::Fun(e) => fmt_fun(e, f, indent),
-        Expr::App(e) => fmt_app(e, f, indent),
-        Expr::For(e) => fmt_for(e, f, indent),
-        Expr::Deb(e) => fmt_deb_node(e, f, indent),
-        Expr::Universe(e) => fmt_universe_node(e, f, indent),
+        Expr::Ind(e) => fmt_ind(&e.hashee, f, indent),
+        Expr::Vcon(e) => fmt_vcon(&e.hashee, f, indent),
+        Expr::Match(e) => fmt_match(&e.hashee, f, indent),
+        Expr::Fun(e) => fmt_fun(&e.hashee, f, indent),
+        Expr::App(e) => fmt_app(&e.hashee, f, indent),
+        Expr::For(e) => fmt_for(&e.hashee, f, indent),
+        Expr::Deb(e) => fmt_deb_node(&e.hashee, f, indent),
+        Expr::Universe(e) => fmt_universe_node(&e.hashee, f, indent),
     }
 }
 
-fn fmt_ind(ind: RcHashed<Ind>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_ind(ind: &Ind, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}ind\n")?;
-    fmt_universe(ind.hashee.universe, f, i1)?;
+    fmt_universe(ind.universe, f, i1)?;
     write!(f, "\n")?;
 
-    fmt_str_literal(ind.hashee.name.clone(), f, i1)?;
+    fmt_str_literal(&ind.name, f, i1)?;
     write!(f, "\n")?;
 
-    fmt_parenthesized_expressions(ind.hashee.index_types.clone(), f, i1)?;
+    fmt_parenthesized_expressions(ind.index_types.clone(), f, i1)?;
     write!(f, "\n")?;
 
-    fmt_parenthesized_vcon_defs(ind.hashee.vcon_defs.clone(), f, i1)?;
+    fmt_parenthesized_vcon_defs(&ind.vcon_defs.hashee, f, i1)?;
     write!(f, "\n{indent})")?;
 
     Ok(())
@@ -122,7 +122,7 @@ fn fmt_universe(universe: Universe, f: &mut Formatter<'_>, indent: Indentation) 
 }
 
 fn fmt_str_literal(
-    str_literal: Rc<StringValue>,
+    str_literal: &StringValue,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -141,18 +141,18 @@ fn fmt_str_literal(
 }
 
 fn fmt_parenthesized_vcon_defs(
-    defs: RcHashedVec<VconDef>,
+    defs: &[VconDef],
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
-    if defs.hashee.is_empty() {
+    if defs.is_empty() {
         return write!(f, "{indent}()");
     }
 
     write!(f, "{indent}(")?;
     let i1 = indent.incremented();
 
-    for def in defs.hashee.iter() {
+    for def in defs.iter() {
         write!(f, "\n")?;
         fmt_vcon_def(def, f, i1)?;
     }
@@ -174,48 +174,48 @@ fn fmt_vcon_def(def: &VconDef, f: &mut Formatter<'_>, indent: Indentation) -> Fm
     Ok(())
 }
 
-fn fmt_vcon(vcon: RcHashed<Vcon>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_vcon(vcon: &Vcon, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}vcon\n")?;
 
-    fmt_ind(vcon.hashee.ind.clone(), f, i1)?;
+    fmt_ind(&vcon.ind.hashee, f, i1)?;
 
-    let vcon_index = vcon.hashee.vcon_index;
+    let vcon_index = vcon.vcon_index;
     write!(f, "\n{i1}{vcon_index}\n{indent})")?;
     Ok(())
 }
 
-fn fmt_match(m: RcHashed<Match>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_match(m: &Match, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}match\n")?;
 
-    fmt_expr(m.hashee.matchee.clone(), f, i1)?;
+    fmt_expr(m.matchee.clone(), f, i1)?;
     write!(f, "\n")?;
 
-    let return_type_arity = m.hashee.return_type_arity;
+    let return_type_arity = m.return_type_arity;
     write!(f, "{i1}{return_type_arity}\n")?;
 
-    fmt_expr(m.hashee.return_type.clone(), f, i1)?;
+    fmt_expr(m.return_type.clone(), f, i1)?;
     write!(f, "\n")?;
 
-    fmt_parenthesized_match_cases(m.hashee.cases.clone(), f, i1)?;
+    fmt_parenthesized_match_cases(&m.cases.hashee, f, i1)?;
     write!(f, "\n{indent})")?;
     Ok(())
 }
 
 fn fmt_parenthesized_match_cases(
-    cases: RcHashedVec<MatchCase>,
+    cases: &[MatchCase],
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
-    if cases.hashee.is_empty() {
+    if cases.is_empty() {
         return write!(f, "{indent}()");
     }
 
     write!(f, "{indent}(")?;
     let i1 = indent.incremented();
 
-    for case in cases.hashee.iter() {
+    for case in cases.iter() {
         write!(f, "\n")?;
         fmt_match_case(case, f, i1)?;
     }
@@ -234,20 +234,20 @@ fn fmt_match_case(case: &MatchCase, f: &mut Formatter<'_>, indent: Indentation) 
     Ok(())
 }
 
-fn fmt_fun(fun: RcHashed<Fun>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_fun(fun: &Fun, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}fun\n")?;
 
-    fmt_decreasing_index(fun.hashee.decreasing_index, f, i1)?;
+    fmt_decreasing_index(fun.decreasing_index, f, i1)?;
     write!(f, "\n")?;
 
-    fmt_parenthesized_expressions(fun.hashee.param_types.clone(), f, i1)?;
+    fmt_parenthesized_expressions(fun.param_types.clone(), f, i1)?;
     write!(f, "\n")?;
 
-    fmt_expr(fun.hashee.return_type.clone(), f, i1)?;
+    fmt_expr(fun.return_type.clone(), f, i1)?;
     write!(f, "\n")?;
 
-    fmt_expr(fun.hashee.return_val.clone(), f, i1)?;
+    fmt_expr(fun.return_val.clone(), f, i1)?;
     write!(f, "\n{indent})")?;
     Ok(())
 }
@@ -263,10 +263,10 @@ fn fmt_decreasing_index(
     }
 }
 
-fn fmt_app(app: RcHashed<App>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
-    if app.hashee.args.hashee.is_empty() {
+fn fmt_app(app: &App, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+    if app.args.hashee.is_empty() {
         write!(f, "{indent}(")?;
-        fmt_expr(app.hashee.callee.clone(), f, indent)?;
+        fmt_expr(app.callee.clone(), f, indent)?;
         write!(f, ")")?;
         return Ok(());
     }
@@ -274,9 +274,9 @@ fn fmt_app(app: RcHashed<App>, f: &mut Formatter<'_>, indent: Indentation) -> Fm
     write!(f, "{indent}(\n")?;
 
     let i1 = indent.incremented();
-    fmt_expr(app.hashee.callee.clone(), f, i1)?;
+    fmt_expr(app.callee.clone(), f, i1)?;
 
-    for arg in app.hashee.args.hashee.iter() {
+    for arg in app.args.hashee.iter() {
         write!(f, "\n")?;
         fmt_expr(arg.clone(), f, i1)?;
     }
@@ -285,29 +285,25 @@ fn fmt_app(app: RcHashed<App>, f: &mut Formatter<'_>, indent: Indentation) -> Fm
     Ok(())
 }
 
-fn fmt_for(for_: RcHashed<For>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_for(for_: &For, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}for\n")?;
 
-    fmt_parenthesized_expressions(for_.hashee.param_types.clone(), f, i1)?;
+    fmt_parenthesized_expressions(for_.param_types.clone(), f, i1)?;
     write!(f, "\n")?;
 
-    fmt_expr(for_.hashee.return_type.clone(), f, i1)?;
+    fmt_expr(for_.return_type.clone(), f, i1)?;
     write!(f, "\n{indent})")?;
     Ok(())
 }
 
-fn fmt_deb_node(node: RcHashed<DebNode>, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
-    let index = node.hashee.deb.0;
+fn fmt_deb_node(node: &DebNode, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+    let index = node.deb.0;
     write!(f, "{indent}{index}")
 }
 
-fn fmt_universe_node(
-    node: RcHashed<UniverseNode>,
-    f: &mut Formatter<'_>,
-    indent: Indentation,
-) -> FmtResult {
-    fmt_universe(node.hashee.universe, f, indent)
+fn fmt_universe_node(node: &UniverseNode, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+    fmt_universe(node.universe, f, indent)
 }
 
 fn fmt_parenthesized_expressions(

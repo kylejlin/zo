@@ -25,6 +25,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .field(
                         "vcon",
                         &vcon_ast
+                            .hashee
                             .pretty_printed()
                             .with_location_appended(vcon.span()),
                     )
@@ -63,7 +64,10 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .field("universe", &universe)
                     .field(
                         "ind",
-                        &ind_ast.pretty_printed().with_location_appended(ind.span()),
+                        &ind_ast
+                            .hashee
+                            .pretty_printed()
+                            .with_location_appended(ind.span()),
                     )
                     .finish()
             }
@@ -109,13 +113,11 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .field(
                         "match_",
                         &match_ast
+                            .hashee
                             .pretty_printed()
                             .with_location_appended(match_.span()),
                     )
-                    .field(
-                        "matchee_type_ind",
-                        &rc_hashed(matchee_type_ind.raw().clone()).pretty_printed(),
-                    )
+                    .field("matchee_type_ind", &matchee_type_ind.raw().pretty_printed())
                     .finish()
             }
 
@@ -133,6 +135,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .field(
                         "match_",
                         &match_ast
+                            .hashee
                             .pretty_printed()
                             .with_location_appended(match_.span()),
                     )
@@ -157,6 +160,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .field(
                         "match_",
                         &match_ast
+                            .hashee
                             .pretty_printed()
                             .with_location_appended(match_.span()),
                     )
@@ -189,7 +193,10 @@ impl Display for PrettyPrint<'_, TypeError> {
                 f.debug_struct("TypeError::CalleeTypeIsNotAForExpression")
                     .field(
                         "app",
-                        &app_ast.pretty_printed().with_location_appended(app.span()),
+                        &app_ast
+                            .hashee
+                            .pretty_printed()
+                            .with_location_appended(app.span()),
                     )
                     .field("callee_type", &callee_type.raw().pretty_printed())
                     .finish()
@@ -206,12 +213,12 @@ impl Display for PrettyPrint<'_, TypeError> {
                 f.debug_struct("TypeError::WrongNumberOfAppArguments")
                     .field(
                         "app",
-                        &app_ast.pretty_printed().with_location_appended(app.span()),
+                        &app_ast
+                            .hashee
+                            .pretty_printed()
+                            .with_location_appended(app.span()),
                     )
-                    .field(
-                        "callee_type",
-                        &rc_hashed(callee_type.raw().clone()).pretty_printed(),
-                    )
+                    .field("callee_type", &callee_type.raw().pretty_printed())
                     .field("expected", expected)
                     .field("actual", actual)
                     .finish()
@@ -230,7 +237,10 @@ impl Display for PrettyPrint<'_, TypeError> {
                 f.debug_struct("TypeError::IllegalRecursiveCall")
                     .field(
                         "app",
-                        &app_ast.pretty_printed().with_location_appended(app.span()),
+                        &app_ast
+                            .hashee
+                            .pretty_printed()
+                            .with_location_appended(app.span()),
                     )
                     .field(
                         "callee_deb_definition_src",

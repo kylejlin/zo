@@ -1,10 +1,7 @@
-use std::{
-    fmt::{Debug, Display, Formatter, Result as FmtResult},
-    rc::Rc,
-};
+use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct PrettyPrint<'a, T>(pub &'a T);
+pub struct PrettyPrint<'a, T: ?Sized>(pub &'a T);
 
 impl<'a, T> Debug for PrettyPrint<'a, T>
 where
