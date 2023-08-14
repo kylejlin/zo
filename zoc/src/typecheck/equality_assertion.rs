@@ -1,7 +1,5 @@
 use super::*;
 
-// TODO: Reconsider if we really need this module.
-
 #[derive(Clone, Debug)]
 pub struct ExpectedTypeEquality {
     pub expr: cst::Expr,
