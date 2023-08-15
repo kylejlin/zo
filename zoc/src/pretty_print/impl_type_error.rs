@@ -224,6 +224,20 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .finish()
             }
 
+            TypeError::AppHasZeroArgs { app } => {
+                let mut converter = IpistToAstConverter::default();
+                let app_ast = converter.convert_app(rc_hashed(app.clone()));
+                f.debug_struct("TypeError::AppHasZeroArgs")
+                    .field(
+                        "app",
+                        &app_ast
+                            .hashee
+                            .pretty_printed()
+                            .with_location_appended(app.span()),
+                    )
+                    .finish()
+            }
+
             TypeError::IllegalRecursiveCall {
                 app,
                 callee_deb_definition_src,

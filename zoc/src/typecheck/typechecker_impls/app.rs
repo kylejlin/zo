@@ -6,6 +6,8 @@ impl TypeChecker {
         app: RcHashed<cst::App>,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
+        self.assert_app_has_at_least_one_arg(app.clone())?;
+
         let callee_type = self.get_type(app.hashee.callee.clone(), tcon)?;
         let callee_type = self.assert_callee_type_is_a_for_expression(callee_type, app.clone())?;
 
@@ -33,6 +35,19 @@ impl TypeChecker {
         let substituted_callee_type_return_type =
             self.substitute_callee_type_return_type(callee_type_return_type_g0f, normalized_args);
         Ok(substituted_callee_type_return_type)
+    }
+
+    fn assert_app_has_at_least_one_arg(
+        &mut self,
+        app: RcHashed<cst::App>,
+    ) -> Result<(), TypeError> {
+        if app.hashee.args.is_empty() {
+            return Err(TypeError::AppHasZeroArgs {
+                app: app.hashee.clone(),
+            });
+        }
+
+        Ok(())
     }
 
     fn assert_callee_type_is_a_for_expression(

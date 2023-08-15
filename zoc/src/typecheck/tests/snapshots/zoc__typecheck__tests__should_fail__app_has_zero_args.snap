@@ -1,0 +1,7 @@
+---
+source: zoc/src/typecheck/tests/should_fail.rs
+expression: err
+---
+TypeError::AppHasZeroArgs {
+    app: (0)@(ByteIndex(0)..ByteIndex(2)),
+}

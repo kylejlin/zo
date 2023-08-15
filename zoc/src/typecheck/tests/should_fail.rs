@@ -55,4 +55,24 @@ fn wrong_match_return_type_arity() {
     insta::assert_debug_snapshot!(err);
 }
 
+#[test]
+fn app_has_zero_args() {
+    let tcon_entry_src = r#"
+(for
+    ()
+    
+    (ind Set0 "Unit" () (
+        (() ())
+    ))
+)"#;
+    let tcon_entry = eval_or_panic(tcon_entry_src);
+    let tcon_entries: Normalized<Vec<_>> = std::iter::once(tcon_entry).collect();
+    let tcon = LazyTypeContext::Base(tcon_entries.to_derefed());
+
+    let src = "(0)";
+    let err = get_type_error_or_panic(&src, tcon);
+
+    insta::assert_debug_snapshot!(err);
+}
+
 // TODO: Add more tests.

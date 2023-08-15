@@ -51,10 +51,15 @@ pub fn get_type_under_empty_tcon_or_panic(src: &str) -> NormalForm {
 }
 
 pub fn get_type_error_under_empty_tcon_or_panic(src: &str) -> TypeError {
-    let cst = parse_ipist_or_panic(src);
     let empty = Normalized::<[_; 0]>::new();
+    let tcon = LazyTypeContext::Base(empty.as_ref().convert_ref());
+    get_type_error_or_panic(src, tcon)
+}
+
+pub fn get_type_error_or_panic(src: &str, tcon: LazyTypeContext) -> TypeError {
+    let cst = parse_ipist_or_panic(src);
     TypeChecker::default()
-        .get_type(cst, LazyTypeContext::Base(empty.as_ref().convert_ref()))
+        .get_type(cst, tcon)
         .map(Normalized::into_raw)
         .pretty_unwrap_err()
 }

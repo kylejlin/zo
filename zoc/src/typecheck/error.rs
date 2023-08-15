@@ -58,6 +58,9 @@ pub enum TypeError {
         expected: usize,
         actual: usize,
     },
+    AppHasZeroArgs {
+        app: cst::App,
+    },
 
     IllegalRecursiveCall {
         app: cst::App,
