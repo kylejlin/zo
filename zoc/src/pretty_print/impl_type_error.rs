@@ -238,6 +238,17 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .finish()
             }
 
+            TypeError::FunHasZeroParams { fun } => {
+                let mut converter = IpistToAstConverter::default();
+                let fun_ast = converter.convert(fun.clone().into());
+                f.debug_struct("TypeError::FunHasZeroParams")
+                    .field(
+                        "fun",
+                        &fun_ast.pretty_printed().with_location_appended(fun.span()),
+                    )
+                    .finish()
+            }
+
             TypeError::IllegalRecursiveCall {
                 app,
                 callee_deb_definition_src,

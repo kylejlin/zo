@@ -61,6 +61,9 @@ pub enum TypeError {
     AppHasZeroArgs {
         app: cst::App,
     },
+    FunHasZeroParams {
+        fun: cst::Fun,
+    },
 
     IllegalRecursiveCall {
         app: cst::App,

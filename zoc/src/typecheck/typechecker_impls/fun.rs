@@ -6,6 +6,8 @@ impl TypeChecker {
         fun_g0: RcHashed<cst::Fun>,
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
+        self.assert_fun_has_at_least_one_param(fun_g0.clone())?;
+
         self.check_recursion(fun_g0.clone().into(), RecursionCheckingContext::empty())?;
 
         let normalized_param_types_g0 = self.typecheck_and_normalize_param_types_with_limit(
@@ -61,5 +63,15 @@ impl TypeChecker {
             normalized_return_type_g1,
         )
         .into())
+    }
+
+    fn assert_fun_has_at_least_one_param(&self, fun: RcHashed<cst::Fun>) -> Result<(), TypeError> {
+        if fun.hashee.param_types.is_empty() {
+            return Err(TypeError::FunHasZeroParams {
+                fun: fun.hashee.clone(),
+            });
+        }
+
+        Ok(())
     }
 }

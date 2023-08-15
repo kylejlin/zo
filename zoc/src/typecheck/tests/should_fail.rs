@@ -75,4 +75,27 @@ fn app_has_zero_args() {
     insta::assert_debug_snapshot!(err);
 }
 
+#[test]
+fn fun_has_zero_args() {
+    let bool_def = (
+        "<BOOL>",
+        r#"
+(ind Set0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let true_def = ("<TRUE>", "(vcon <BOOL> 0)");
+    let unsubstituted_src = r#"
+(fun nonrec () <BOOL>
+    <TRUE>
+)"#;
+
+    let src_defs = [bool_def, true_def];
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+
+    insta::assert_debug_snapshot!(err);
+}
+
 // TODO: Add more tests.

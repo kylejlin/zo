@@ -1,0 +1,47 @@
+---
+source: zoc/src/typecheck/tests/should_fail.rs
+expression: err
+---
+TypeError::FunHasZeroParams {
+    fun: (
+        fun
+        nonrec
+        ()
+        (
+            ind
+            Set0
+            "Bool"
+            ()
+            (
+                (
+                    ()
+                    ()
+                )
+                (
+                    ()
+                    ()
+                )
+            )
+        )
+        (
+            vcon
+            (
+                ind
+                Set0
+                "Bool"
+                ()
+                (
+                    (
+                        ()
+                        ()
+                    )
+                    (
+                        ()
+                        ()
+                    )
+                )
+            )
+            0
+        )
+    )@(ByteIndex(1)..ByteIndex(129)),
+}
