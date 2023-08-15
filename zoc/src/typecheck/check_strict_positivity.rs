@@ -14,9 +14,12 @@ pub struct PositivityChecker<'a> {
 
 #[derive(Clone, Copy, Debug)]
 enum PositivityContext<'a> {
-    Base(&'a [bool]),
-    Snoc(&'a PositivityContext<'a>, &'a [bool]),
+    Base(&'a [IsInd]),
+    Snoc(&'a PositivityContext<'a>, &'a [IsInd]),
 }
+
+#[derive(Clone, Copy, Debug)]
+struct IsInd(pub bool);
 
 impl PositivityContext<'static> {
     pub fn empty() -> Self {
