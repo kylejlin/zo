@@ -1,0 +1,26 @@
+---
+source: zoc/src/typecheck/tests/should_fail.rs
+expression: err
+---
+TypeError::ForHasZeroParams {
+    for_: (
+        for
+        ()
+        (
+            ind
+            Set0
+            "Bool"
+            ()
+            (
+                (
+                    ()
+                    ()
+                )
+                (
+                    ()
+                    ()
+                )
+            )
+        )
+    )@(ByteIndex(0)..ByteIndex(57)),
+}

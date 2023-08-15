@@ -224,6 +224,17 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .finish()
             }
 
+            TypeError::FunHasZeroParams { fun } => {
+                let mut converter = IpistToAstConverter::default();
+                let fun_ast = converter.convert(fun.clone().into());
+                f.debug_struct("TypeError::FunHasZeroParams")
+                    .field(
+                        "fun",
+                        &fun_ast.pretty_printed().with_location_appended(fun.span()),
+                    )
+                    .finish()
+            }
+
             TypeError::AppHasZeroArgs { app } => {
                 let mut converter = IpistToAstConverter::default();
                 let app_ast = converter.convert_app(rc_hashed(app.clone()));
@@ -238,13 +249,13 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .finish()
             }
 
-            TypeError::FunHasZeroParams { fun } => {
+            TypeError::ForHasZeroParams { for_ } => {
                 let mut converter = IpistToAstConverter::default();
-                let fun_ast = converter.convert(fun.clone().into());
-                f.debug_struct("TypeError::FunHasZeroParams")
+                let for_ast = converter.convert(for_.clone().into());
+                f.debug_struct("TypeError::ForHasZeroParams")
                     .field(
-                        "fun",
-                        &fun_ast.pretty_printed().with_location_appended(fun.span()),
+                        "for_",
+                        &for_ast.pretty_printed().with_location_appended(for_.span()),
                     )
                     .finish()
             }

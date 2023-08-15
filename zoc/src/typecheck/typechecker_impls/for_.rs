@@ -6,6 +6,8 @@ impl TypeChecker {
         for_g0: RcHashed<cst::For>,
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
+        self.assert_for_has_at_least_one_param(for_g0.clone())?;
+
         let param_type_types_g0 =
             self.get_types_of_dependent_expressions(&for_g0.hashee.param_types, tcon_g0)?;
 
@@ -44,6 +46,19 @@ impl TypeChecker {
                 erasable: return_type_type_g1_universe_level.erasable,
             },
         }))
+    }
+
+    fn assert_for_has_at_least_one_param(
+        &mut self,
+        for_: RcHashed<cst::For>,
+    ) -> Result<(), TypeError> {
+        if for_.hashee.param_types.is_empty() {
+            return Err(TypeError::ForHasZeroParams {
+                for_: for_.hashee.clone(),
+            });
+        }
+
+        Ok(())
     }
 
     fn assert_every_type_is_universe(

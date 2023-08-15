@@ -58,11 +58,14 @@ pub enum TypeError {
         expected: usize,
         actual: usize,
     },
+    FunHasZeroParams {
+        fun: cst::Fun,
+    },
     AppHasZeroArgs {
         app: cst::App,
     },
-    FunHasZeroParams {
-        fun: cst::Fun,
+    ForHasZeroParams {
+        for_: cst::For,
     },
 
     IllegalRecursiveCall {

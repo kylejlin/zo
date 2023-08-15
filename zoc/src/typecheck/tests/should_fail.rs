@@ -56,6 +56,29 @@ fn wrong_match_return_type_arity() {
 }
 
 #[test]
+fn fun_has_zero_params() {
+    let bool_def = (
+        "<BOOL>",
+        r#"
+(ind Set0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let true_def = ("<TRUE>", "(vcon <BOOL> 0)");
+    let unsubstituted_src = r#"
+(fun nonrec () <BOOL>
+    <TRUE>
+)"#;
+
+    let src_defs = [bool_def, true_def];
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+
+    insta::assert_debug_snapshot!(err);
+}
+
+#[test]
 fn app_has_zero_args() {
     let tcon_entry_src = r#"
 (for
@@ -76,7 +99,7 @@ fn app_has_zero_args() {
 }
 
 #[test]
-fn fun_has_zero_args() {
+fn for_has_zero_params() {
     let bool_def = (
         "<BOOL>",
         r#"
@@ -86,10 +109,7 @@ fn fun_has_zero_args() {
 ))"#,
     );
     let true_def = ("<TRUE>", "(vcon <BOOL> 0)");
-    let unsubstituted_src = r#"
-(fun nonrec () <BOOL>
-    <TRUE>
-)"#;
+    let unsubstituted_src = r#"(for () <BOOL>)"#;
 
     let src_defs = [bool_def, true_def];
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
