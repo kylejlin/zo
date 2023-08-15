@@ -41,6 +41,8 @@ impl TypeChecker {
             tcon_with_ind_type_g1,
         )?;
 
+        check_ind_positivity_assuming_it_is_otherwise_well_typed(ind.clone())?;
+
         Ok(ind_type_g0)
     }
 

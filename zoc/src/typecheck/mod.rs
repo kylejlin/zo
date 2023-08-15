@@ -15,6 +15,9 @@ use std::rc::Rc;
 mod check_fun_recursion;
 use check_fun_recursion::*;
 
+mod check_strict_positivity;
+use check_strict_positivity::*;
+
 mod equality_assertion;
 use equality_assertion::*;
 
