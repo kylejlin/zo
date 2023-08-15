@@ -421,7 +421,11 @@ impl TypeChecker {
         exprs: &[cst::Expr],
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let rcon_extension = vec![UnshiftedEntry(Entry::Top(None)); exprs.len()];
+        if exprs.is_empty() {
+            return Ok(());
+        }
+
+        let rcon_extension = vec![UnshiftedEntry(Entry::Top(None)); exprs.len() - 1];
 
         for (i, expr) in exprs.iter().cloned().enumerate() {
             let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &rcon_extension[..i]);
