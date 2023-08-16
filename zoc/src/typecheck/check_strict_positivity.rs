@@ -4,6 +4,14 @@
 //! If you pass in a term that is ill-typed
 //! (for reasons other than failing the positivity condition),
 //! it may loop forever or panic.
+//!
+//! Zo's positivity rules are based on those of Coq.
+//! You can learn more from
+//! The Coq Proof Assistant Reference Manual
+//! (specifically, Version 8.4pl2, published 2013 April 4).
+//! A copy can be found at
+//! https://flint.cs.yale.edu/cs430/coq/pdf/Reference-Manual.pdf
+//! Pages 122 and 123 are relevant.
 
 use super::*;
 
@@ -12,21 +20,48 @@ pub struct PositivityChecker<'a> {
     pub typechecker: &'a mut TypeChecker,
 }
 
-/// This is just a namespace.
-#[derive(Debug)]
-struct VconPositivityChecker<'a>(PositivityChecker<'a>);
+/// We need to create the methods
+/// - `check_strict_positivity`, `check_strict_positivity_in_ind`,
+///   `check_strict_positivity_in_vcon`, etc.
+/// - `check_nested_positivity`, `check_nested_positivity_in_ind`,
+///   `check_nested_positivity_in_vcon`, etc.
+/// - `check_absence`, `check_absence_in_ind`, `check_absence_in_vcon`, etc.
+///
+/// These method names are very verbose.
+/// It would be much more readable if we simply name them
+/// `check`, `check_ind`, `check_vcon`, etc.
+/// However, Rust forbids use from defining multiple `check` methods
+/// on `PositivityChecker` (for good reason--it would be ambiguous).
+///
+/// So, we create the "namespace structs" `StrictPositivityChecker`,
+/// `NestedPositivityChecker`, `AbsenceChecker`, and `VconPositivityChecker`.
+/// These structs are wrappers around `PositivityChecker`.
+/// Their sole purpose is to let us organize our methods and use shorter names.
+///
+/// For example, instead of `PositivityChecker::check_strict_positivity_in_ind`,
+/// we have `StrictPositivityChecker::check_ind`.
+mod namespace_structs {
+    use super::*;
 
-/// This is just a namespace.
-#[derive(Debug)]
-struct StrictPositivityChecker<'a>(PositivityChecker<'a>);
+    #[derive(Debug)]
+    pub struct VconPositivityChecker<'a>(pub PositivityChecker<'a>);
 
-/// This is just a namespace.
-#[derive(Debug)]
-struct NestedPositivityChecker<'a>(PositivityChecker<'a>);
+    /// `StrictPositivityChecker`'s methods assert that every recursive ind entry
+    /// in the context appears strictly positively in the given expression.
+    #[derive(Debug)]
+    pub struct StrictPositivityChecker<'a>(pub PositivityChecker<'a>);
 
-/// This is just a namespace.
-#[derive(Debug)]
-struct AbsenceChecker<'a>(PositivityChecker<'a>);
+    // TODO: Add explanation comment.
+    #[derive(Debug)]
+    pub struct NestedPositivityChecker<'a>(pub PositivityChecker<'a>);
+
+    /// `AbsenceChecker`'s methods assert that every recursive ind entry
+    /// in the context does **not** appear (i.e., is absent)
+    /// from the given expression.
+    #[derive(Debug)]
+    pub struct AbsenceChecker<'a>(pub PositivityChecker<'a>);
+}
+use namespace_structs::*;
 
 #[derive(Clone, Copy, Debug)]
 enum Context<'a> {
