@@ -12,6 +12,22 @@ pub struct PositivityChecker<'a> {
     pub typechecker: &'a mut TypeChecker,
 }
 
+/// This is just a namespace.
+#[derive(Debug)]
+struct VconPositivityChecker<'a>(PositivityChecker<'a>);
+
+/// This is just a namespace.
+#[derive(Debug)]
+struct StrictPositivityChecker<'a>(PositivityChecker<'a>);
+
+/// This is just a namespace.
+#[derive(Debug)]
+struct NestedPositivityChecker<'a>(PositivityChecker<'a>);
+
+/// This is just a namespace.
+#[derive(Debug)]
+struct AbsenceChecker<'a>(PositivityChecker<'a>);
+
 #[derive(Clone, Copy, Debug)]
 enum Context<'a> {
     Base(&'a [IsRecursiveIndEntry]),
@@ -78,7 +94,8 @@ impl PositivityChecker<'_> {
         let extended_context = Context::Snoc(&context, &extension);
         self.check_independent_exprs(&def.index_args, extended_context)?;
 
-        // TODO: Get internal vcon type and check positivity.
+        VconPositivityChecker(self.clone_mut())
+            .assert_vcon_type_satisfies_positivity_condition(def, context)?;
 
         Ok(())
     }
@@ -151,6 +168,55 @@ impl PositivityChecker<'_> {
         for expr in exprs.iter().cloned() {
             self.check(expr, context)?;
         }
+        Ok(())
+    }
+}
+
+impl PositivityChecker<'_> {
+    fn clone_mut<'a>(&'a mut self) -> PositivityChecker<'a> {
+        PositivityChecker {
+            typechecker: &mut self.typechecker,
+        }
+    }
+}
+
+impl VconPositivityChecker<'_> {
+    fn assert_vcon_type_satisfies_positivity_condition(
+        &mut self,
+        def: &cst::VconDef,
+        context: Context,
+    ) -> Result<(), TypeError> {
+        let mut checker = StrictPositivityChecker(self.0.clone_mut());
+        checker.check_dependent_exprs(&def.param_types, context)?;
+
+        let extension = vec![IsRecursiveIndEntry(false); def.param_types.len()];
+        let extended_context = Context::Snoc(&context, &extension);
+
+        let mut checker = AbsenceChecker(self.0.clone_mut());
+        checker.check_independent_exprs(&def.index_args, extended_context)?;
+
+        Ok(())
+    }
+}
+
+impl StrictPositivityChecker<'_> {
+    fn check_dependent_exprs(
+        &mut self,
+        exprs: &[cst::Expr],
+        context: Context,
+    ) -> Result<(), TypeError> {
+        // TODO
+        Ok(())
+    }
+}
+
+impl AbsenceChecker<'_> {
+    fn check_independent_exprs(
+        &mut self,
+        exprs: &[cst::Expr],
+        context: Context,
+    ) -> Result<(), TypeError> {
+        // TODO
         Ok(())
     }
 }
