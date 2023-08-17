@@ -221,14 +221,14 @@ impl VconPositivityChecker<'_> {
         def: &cst::VconDef,
         context: Context,
     ) -> Result<(), TypeError> {
-        let mut checker = StrictPositivityChecker(self.0.clone_mut());
-        checker.check_dependent_exprs(&def.param_types, context)?;
+        let mut strict = StrictPositivityChecker(self.0.clone_mut());
+        strict.check_dependent_exprs(&def.param_types, context)?;
 
         let extension = vec![IsRecursiveIndEntry(false); def.param_types.len()];
         let extended_context = Context::Snoc(&context, &extension);
 
-        let mut checker = AbsenceChecker(self.0.clone_mut());
-        checker.check_independent_exprs(&def.index_args, extended_context)?;
+        let mut absence = AbsenceChecker(self.0.clone_mut());
+        absence.check_independent_exprs(&def.index_args, extended_context)?;
 
         Ok(())
     }
