@@ -85,6 +85,19 @@ pub enum TypeError {
     DecreasingArgIndexTooBig {
         fun: cst::Fun,
     },
+
+    VconDefParamTypeFailsStrictPositivityCondition {
+        def: cst::VconDef,
+        param_type_index: usize,
+        normalized_param_type: NormalForm,
+        problematic_deb: Deb,
+    },
+    RecursiveIndParamAppearsInVconDefIndexArg {
+        def: cst::VconDef,
+        index_arg_index: usize,
+        normalized_index_arg: NormalForm,
+        problematic_deb: Deb,
+    },
 }
 
 impl Debug for TypeError {

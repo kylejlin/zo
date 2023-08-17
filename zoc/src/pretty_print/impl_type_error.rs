@@ -2,6 +2,7 @@ use super::*;
 
 use crate::{
     syntax_tree::{
+        ast,
         ipist::rc_hashed,
         ipist_to_ast::*,
         token::{ByteIndex, Span},
@@ -341,6 +342,62 @@ impl Display for PrettyPrint<'_, TypeError> {
                     .field(
                         "fun",
                         &fun_ast.pretty_printed().with_location_appended(fun.span()),
+                    )
+                    .finish()
+            }
+
+            TypeError::VconDefParamTypeFailsStrictPositivityCondition {
+                def,
+                param_type_index,
+                normalized_param_type,
+                problematic_deb,
+            } => {
+                let mut converter = IpistToAstConverter::default();
+                let def_ast = converter.convert_vcon_def(def.clone());
+                f.debug_struct("TypeError::VconDefParamTypeFailsStrictPositivityCondition")
+                    .field(
+                        "def",
+                        &def_ast.pretty_printed().with_location_appended(def.span()),
+                    )
+                    .field("param_type_index", param_type_index)
+                    .field(
+                        "normalized_param_type",
+                        &normalized_param_type.raw().pretty_printed(),
+                    )
+                    .field(
+                        "problematic_deb",
+                        &ast::DebNode {
+                            deb: *problematic_deb,
+                        }
+                        .pretty_printed(),
+                    )
+                    .finish()
+            }
+
+            TypeError::RecursiveIndParamAppearsInVconDefIndexArg {
+                def,
+                index_arg_index,
+                normalized_index_arg,
+                problematic_deb,
+            } => {
+                let mut converter = IpistToAstConverter::default();
+                let def_ast = converter.convert_vcon_def(def.clone());
+                f.debug_struct("TypeError::RecursiveIndParamAppearsInVconDefIndexArg")
+                    .field(
+                        "def",
+                        &def_ast.pretty_printed().with_location_appended(def.span()),
+                    )
+                    .field("index_arg_index", index_arg_index)
+                    .field(
+                        "normalized_index_arg",
+                        &normalized_index_arg.raw().pretty_printed(),
+                    )
+                    .field(
+                        "problematic_deb",
+                        &ast::DebNode {
+                            deb: *problematic_deb,
+                        }
+                        .pretty_printed(),
                     )
                     .finish()
             }
