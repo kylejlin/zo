@@ -173,9 +173,7 @@ impl PositivityChecker<'_> {
         // TODO
         Ok(())
     }
-}
 
-impl PositivityChecker<'_> {
     fn check_dependent_exprs(
         &mut self,
         exprs: &[cst::Expr],
@@ -235,17 +233,57 @@ impl VconPositivityChecker<'_> {
 }
 
 impl StrictPositivityChecker<'_> {
+    fn check(&mut self, expr: cst::Expr, context: Context) -> Result<(), TypeError> {
+        // TODO: How do we handle evaluation?
+
+        match expr {
+            // TODO
+            cst::Expr::Ind(e) => Ok(()),
+
+            // TODO
+            cst::Expr::Deb(e) => Ok(()),
+
+            // TODO
+            cst::Expr::App(e) => Ok(()),
+
+            // TODO
+            cst::Expr::Match(e) => Ok(()),
+
+            cst::Expr::Universe(_) => Ok(()),
+
+            cst::Expr::Vcon(_) | cst::Expr::Fun(_) | cst::Expr::For(_) => {
+                let mut absent = AbsenceChecker(self.0.clone_mut());
+                absent.check(expr, context)
+            }
+        }
+    }
+
     fn check_dependent_exprs(
         &mut self,
         exprs: &[cst::Expr],
         context: Context,
     ) -> Result<(), TypeError> {
-        // TODO
+        if exprs.is_empty() {
+            return Ok(());
+        }
+
+        let extension = vec![IsRecursiveIndEntry(false); exprs.len() - 1];
+
+        for (i, expr) in exprs.iter().cloned().enumerate() {
+            let extended_context = Context::Snoc(&context, &extension[..i]);
+            self.check(expr, extended_context)?;
+        }
+
         Ok(())
     }
 }
 
 impl AbsenceChecker<'_> {
+    fn check(&mut self, expr: cst::Expr, context: Context) -> Result<(), TypeError> {
+        // TODO
+        Ok(())
+    }
+
     fn check_independent_exprs(
         &mut self,
         exprs: &[cst::Expr],
