@@ -15,7 +15,7 @@
 
 use super::*;
 
-use crate::syntax_tree::ast::node_path::{self, NodeEdge, NodePath};
+use crate::syntax_tree::ast::node_path::{NodeEdge, NodePath};
 
 #[derive(Debug)]
 pub struct PositivityChecker<'a> {
