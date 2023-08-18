@@ -332,6 +332,42 @@ fn nonstrictly_positive_recursive_ind_in_second_param_type_is_ng() {
 }
 
 #[test]
+fn for_with_return_type_with_nonstrictly_positive_recursive_ind_in_second_param_type_is_ng() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "NonstrictlyPositive" () (
+    (
+        // vcon param types
+        (
+            <FALSE>
+
+            (
+                for
+
+                (<FALSE>)
+
+                (for ((for (2) <FALSE>)) <FALSE>)
+            )
+        )
+        
+        // index types
+        ()
+    )
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
+
+#[test]
 fn tree() {
     let tree_def = (
         "<TREE>",
