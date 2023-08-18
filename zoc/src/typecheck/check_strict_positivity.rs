@@ -221,56 +221,86 @@ impl VconPositivityChecker<'_> {
         def: &cst::VconDef,
         context: Context,
     ) -> Result<(), TypeError> {
-        let mut strict = StrictPositivityChecker(self.0.clone_mut());
-        strict
-            .check_dependent_exprs(
-                &def.param_types,
-                context,
-                NodePath::singleton(node_path::VCON_DEF_PARAM_TYPES),
-            )
-            .map_err(|path_from_vcon_def_to_deb| {
-                let param_type_index = path_from_vcon_def_to_deb[1].0;
-                let param_type = &def.param_types[param_type_index];
-                let param_type_ast = self.0.typechecker.cst_converter.convert(param_type.clone());
-                let normalized_param_type = self.0.typechecker.evaluator.eval(param_type_ast);
-                let path_from_param_type_to_problematic_deb = {
-                    let mut p = path_from_vcon_def_to_deb;
-                    p.split_off(2)
-                };
-                TypeError::VconDefParamTypeFailsStrictPositivityCondition {
-                    def: def.clone(),
-                    param_type_index,
-                    normalized_param_type,
-                    path_from_param_type_to_problematic_deb,
-                }
-            })?;
+        {
+            let param_count = def.param_types.len();
+            let param_types_ast = self
+                .0
+                .typechecker
+                .cst_converter
+                .convert_expressions(&def.param_types);
+            let normalized_param_types = self
+                .0
+                .typechecker
+                .evaluator
+                .eval_expressions(param_types_ast);
+
+            let extension = vec![IsRecursiveIndEntry(false); param_count.saturating_sub(1)];
+
+            let mut strict = StrictPositivityChecker(self.0.clone_mut());
+
+            for (i, param_type) in normalized_param_types
+                .raw()
+                .hashee
+                .iter()
+                .cloned()
+                .enumerate()
+            {
+                let extended_context = Context::Snoc(&context, &extension[..i]);
+                strict
+                    .check(param_type, extended_context, NodePath::Nil)
+                    .map_err(|path_from_param_type_to_problematic_deb| {
+                        TypeError::VconDefParamTypeFailsStrictPositivityCondition {
+                            def: def.clone(),
+                            param_type_index: i,
+                            normalized_param_type: normalized_param_types
+                                .to_hashee()
+                                .index(i)
+                                .cloned(),
+                            path_from_param_type_to_problematic_deb,
+                        }
+                    })?;
+            }
+        }
 
         let extension = vec![IsRecursiveIndEntry(false); def.param_types.len()];
         let extended_context = Context::Snoc(&context, &extension);
 
-        let mut absence = AbsenceChecker(self.0.clone_mut());
-        absence
-            .check_independent_exprs(
-                &def.index_args,
-                extended_context,
-                NodePath::singleton(node_path::VCON_DEF_INDEX_ARGS),
-            )
-            .map_err(|path_from_vcon_def_to_deb| {
-                let index_arg_index = path_from_vcon_def_to_deb[1].0;
-                let index_arg = &def.index_args[index_arg_index];
-                let index_arg_ast = self.0.typechecker.cst_converter.convert(index_arg.clone());
-                let normalized_index_arg = self.0.typechecker.evaluator.eval(index_arg_ast);
-                let path_from_index_arg_to_problematic_deb = {
-                    let mut p = path_from_vcon_def_to_deb;
-                    p.split_off(2)
-                };
-                TypeError::RecursiveIndParamAppearsInVconDefIndexArg {
-                    def: def.clone(),
-                    index_arg_index,
-                    normalized_index_arg,
-                    path_from_index_arg_to_problematic_deb,
-                }
-            })?;
+        {
+            let index_args_ast = self
+                .0
+                .typechecker
+                .cst_converter
+                .convert_expressions(&def.index_args);
+            let normalized_index_args = self
+                .0
+                .typechecker
+                .evaluator
+                .eval_expressions(index_args_ast);
+
+            let mut absence = AbsenceChecker(self.0.clone_mut());
+
+            for (i, index_arg) in normalized_index_args
+                .raw()
+                .hashee
+                .iter()
+                .cloned()
+                .enumerate()
+            {
+                absence
+                    .check(index_arg, extended_context, NodePath::Nil)
+                    .map_err(|path_from_index_arg_to_problematic_deb| {
+                        TypeError::RecursiveIndParamAppearsInVconDefIndexArg {
+                            def: def.clone(),
+                            index_arg_index: i,
+                            normalized_index_arg: normalized_index_args
+                                .to_hashee()
+                                .index(i)
+                                .cloned(),
+                            path_from_index_arg_to_problematic_deb,
+                        }
+                    })?;
+            }
+        }
 
         Ok(())
     }
@@ -279,7 +309,7 @@ impl VconPositivityChecker<'_> {
 impl StrictPositivityChecker<'_> {
     fn check(
         &mut self,
-        expr: cst::Expr,
+        expr: ast::Expr,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -287,20 +317,20 @@ impl StrictPositivityChecker<'_> {
 
         match expr {
             // TODO
-            cst::Expr::Ind(e) => Ok(()),
+            ast::Expr::Ind(e) => Ok(()),
 
             // TODO
-            cst::Expr::Deb(e) => Ok(()),
+            ast::Expr::Deb(e) => Ok(()),
 
             // TODO
-            cst::Expr::App(e) => Ok(()),
+            ast::Expr::App(e) => Ok(()),
 
             // TODO
-            cst::Expr::Match(e) => Ok(()),
+            ast::Expr::Match(e) => Ok(()),
 
-            cst::Expr::Universe(_) => Ok(()),
+            ast::Expr::Universe(_) => Ok(()),
 
-            cst::Expr::Vcon(_) | cst::Expr::Fun(_) | cst::Expr::For(_) => {
+            ast::Expr::Vcon(_) | ast::Expr::Fun(_) | ast::Expr::For(_) => {
                 let mut absent = AbsenceChecker(self.0.clone_mut());
                 absent.check(expr, context, path)
             }
@@ -309,7 +339,7 @@ impl StrictPositivityChecker<'_> {
 
     fn check_dependent_exprs(
         &mut self,
-        exprs: &[cst::Expr],
+        exprs: &[ast::Expr],
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -332,7 +362,7 @@ impl StrictPositivityChecker<'_> {
 impl AbsenceChecker<'_> {
     fn check(
         &mut self,
-        expr: cst::Expr,
+        expr: ast::Expr,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -342,7 +372,7 @@ impl AbsenceChecker<'_> {
 
     fn check_independent_exprs(
         &mut self,
-        exprs: &[cst::Expr],
+        exprs: &[ast::Expr],
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
