@@ -169,7 +169,20 @@ impl PositivityChecker<'_> {
     }
 
     fn check_fun(&mut self, fun: &cst::Fun, context: Context) -> Result<(), TypeError> {
-        // TODO
+        self.check_dependent_exprs(&fun.param_types, context)?;
+
+        let return_type_extension =
+            vec![IsRestrictedRecursiveIndEntry(false); fun.param_types.len()];
+        let context_with_params = Context::Snoc(&context, &return_type_extension);
+        self.check(fun.return_type.clone(), context_with_params)?;
+
+        let singleton = [IsRestrictedRecursiveIndEntry(false)];
+        let context_with_params_and_recursive_fun = Context::Snoc(&context_with_params, &singleton);
+        self.check(
+            fun.return_val.clone(),
+            context_with_params_and_recursive_fun,
+        )?;
+
         Ok(())
     }
 
