@@ -189,6 +189,35 @@ fn recursive_ind_app_with_recursive_ind_in_arg_as_second_param_type_is_ng() {
 }
 
 #[test]
+fn strictly_positive_fors_in_param_types_are_ok() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "Negative" () (
+    (
+        // vcon param types
+        (
+            (for (<FALSE>) 1)
+
+            (for (<FALSE> <FALSE>) (for (<FALSE>) 4))
+        )
+        
+        // index args
+        ()
+    )
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
+
+#[test]
 fn negative_appearance_in_first_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
