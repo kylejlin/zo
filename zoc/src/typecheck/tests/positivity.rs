@@ -31,7 +31,7 @@ fn rec_ind_in_index_arg_is_illegal() {
 }
 
 #[test]
-fn nonrecursive_param_types_are_ok() {
+fn nonrecursive_param_types_are_legal() {
     let nat_def = (
         "<NAT>",
         r#"
