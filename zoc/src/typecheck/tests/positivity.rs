@@ -102,6 +102,7 @@ fn recursive_ind_app_with_nonrecursive_arg_as_param_types_are_ok() {
         // vcon param types
         (
             (0 <FALSE>)
+            (1 <FALSE>)
         )
 
         // index args
