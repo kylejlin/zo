@@ -368,10 +368,44 @@ fn for_with_return_type_with_nonstrictly_positive_recursive_ind_in_second_param_
 }
 
 #[test]
-fn tree() {
-    let tree_def = (
-        "<TREE>",
-        r#"
+fn positivity_condition_satisfying_ind_expr_as_param_types_are_ok() {
+    let src = r#"
+(ind Set0 "Tree" () (
+    // `leaf`
+    (() ())
+
+    // `internal`
+    (
+        // vcon param types
+        (
+            (ind Set0 "List" () (
+                // nil
+                (() ())
+            
+                // cons
+                ((1 1) ())
+            ))
+
+            (ind Set0 "List" () (
+                // nil
+                (() ())
+            
+                // cons
+                ((2 1) ())
+            ))
+        )
+        
+        // index args
+        ()
+    )
+))"#;
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
+
+#[test]
+fn tree_inline() {
+    let src = r#"
 (ind Set0 "Tree" () (
     // `leaf`
     (() ())
@@ -386,19 +420,13 @@ fn tree() {
             ((1 1) ())
         ))
     ) ())
-))"#,
-    );
-    let src_defs = [tree_def];
-
-    let unsubstituted_src = r#"<TREE>"#;
-
-    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+))"#;
     let type_ = get_type_under_empty_tcon_or_panic(&src);
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
 #[test]
-fn inline_list_tree() {
+fn list_tree_inline() {
     let tree_def = (
         "<TREE>",
         r#"
@@ -449,7 +477,7 @@ fn inline_list_tree() {
 }
 
 #[test]
-fn noninline_tree() {
+fn tree_noninline() {
     let list_0_def = (
         "<LIST_0>",
         r#"
@@ -523,7 +551,7 @@ fn noninline_tree() {
 }
 
 #[test]
-fn noninline_list_tree() {
+fn list_tree_noninline() {
     let list_0_def = (
         "<LIST_0>",
         r#"
