@@ -340,7 +340,8 @@ impl StrictPositivityChecker<'_> {
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        self.check_app_callee(app, context, path)?;
+        let path_to_callee = NodePath::Snoc(&path, node_path::APP_CALLEE);
+        self.check_app_callee(app.callee.clone(), context, path_to_callee)?;
 
         let path_to_args = NodePath::Snoc(&path, node_path::APP_ARGS);
         let mut absent = AbsenceChecker(self.0.clone_mut());
@@ -351,12 +352,12 @@ impl StrictPositivityChecker<'_> {
 
     fn check_app_callee(
         &mut self,
-        app: &ast::App,
+        callee: ast::Expr,
         context: Context,
-        path_to_app: NodePath,
+        path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        match &app.callee {
-            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path_to_app),
+        match callee {
+            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
 
             ast::Expr::Deb(_) => Ok(()),
 
@@ -367,8 +368,7 @@ impl StrictPositivityChecker<'_> {
             | ast::Expr::For(_)
             | ast::Expr::Universe(_) => {
                 let mut absent = AbsenceChecker(self.0.clone_mut());
-                let path_to_callee = NodePath::Snoc(&path_to_app, node_path::APP_CALLEE);
-                absent.check(app.callee.clone(), context, path_to_callee)
+                absent.check(callee, context, path)
             }
         }
     }
@@ -400,11 +400,17 @@ impl StrictPositivityChecker<'_> {
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
         let mut absent = AbsenceChecker(self.0.clone_mut());
-        absent.check_dependent_exprs(&for_.param_types.hashee, context, path)?;
+        let path_to_param_types = NodePath::Snoc(&path, node_path::FOR_PARAM_TYPES);
+        absent.check_dependent_exprs(&for_.param_types.hashee, context, path_to_param_types)?;
 
         let extension = vec![IsRecursiveIndEntry(false); for_.param_types.hashee.len()];
         let extended_context = Context::Snoc(&context, &extension);
-        self.check(for_.return_type.clone(), extended_context, path)?;
+        let path_to_return_type = NodePath::Snoc(&path, node_path::FOR_RETURN_TYPE);
+        self.check(
+            for_.return_type.clone(),
+            extended_context,
+            path_to_return_type,
+        )?;
 
         Ok(())
     }
