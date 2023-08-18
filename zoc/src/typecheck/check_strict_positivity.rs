@@ -379,17 +379,50 @@ impl StrictPositivityChecker<'_> {
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        // let path_to_index_types = NodePath::Snoc(&path, node_path::IND_INDEX_TYPES);
-        // let mut nested = NestedPositivityChecker(self.0.clone_mut());
-        // nested.check_dependent_exprs(&ind.index_types.hashee, context, path_to_index_types)?;
+        let path_to_index_types = NodePath::Snoc(&path, node_path::IND_INDEX_TYPES);
+        let mut absence = AbsenceChecker(self.0.clone_mut());
+        absence.check_dependent_exprs(&ind.index_types.hashee, context, path_to_index_types)?;
 
-        // let extension = vec![IsRecursiveIndEntry(true); ind.index_types.hashee.len()];
-        // let extended_context = Context::Snoc(&context, &extension);
-        // self.check_vcon_defs(&ind.vcon_defs.hashee, extended_context, path)?;
+        let extension = [IsRecursiveIndEntry(true)];
+        let extended_context = Context::Snoc(&context, &extension);
+        let path_to_vcon_defs = NodePath::Snoc(&path, node_path::IND_VCON_DEFS);
+        self.check_vcon_defs(&ind.vcon_defs.hashee, extended_context, path_to_vcon_defs)?;
 
-        // Ok(())
+        Ok(())
+    }
 
-        // TODO
+    fn check_vcon_defs(
+        &mut self,
+        defs: &[ast::VconDef],
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        for (i, def) in defs.iter().cloned().enumerate() {
+            let extended_path = NodePath::Snoc(&path, NodeEdge(i));
+            self.check_vcon_def(def, context, extended_path)?;
+        }
+        Ok(())
+    }
+
+    fn check_vcon_def(
+        &mut self,
+        def: ast::VconDef,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        let path_to_param_types = NodePath::Snoc(&path, node_path::VCON_DEF_PARAM_TYPES);
+        self.check_dependent_exprs(&def.param_types.hashee, context, path_to_param_types)?;
+
+        let extension = vec![IsRecursiveIndEntry(false); def.param_types.hashee.len()];
+        let extended_context = Context::Snoc(&context, &extension);
+        let path_to_index_args = NodePath::Snoc(&path, node_path::VCON_DEF_INDEX_ARGS);
+        let mut absence = AbsenceChecker(self.0.clone_mut());
+        absence.check_independent_exprs(
+            &def.index_args.hashee,
+            extended_context,
+            path_to_index_args,
+        )?;
+
         Ok(())
     }
 
