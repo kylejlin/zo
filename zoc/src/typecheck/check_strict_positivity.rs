@@ -132,8 +132,39 @@ impl PositivityChecker<'_> {
         self.check_ind(&vcon.ind.hashee, context)
     }
 
-    fn check_match(&mut self, m: &cst::Match, context: Context) -> Result<(), TypeError> {
-        // TODO
+    fn check_match(&mut self, match_: &cst::Match, context: Context) -> Result<(), TypeError> {
+        self.check(match_.matchee.clone(), context)?;
+
+        let return_type_extension =
+            vec![IsRestrictedRecursiveIndEntry(false); match_.return_type_arity.value];
+        let return_type_context = Context::Snoc(&context, &return_type_extension);
+        self.check(match_.return_type.clone(), return_type_context)?;
+
+        self.check_match_cases(&match_.cases, context)?;
+
+        Ok(())
+    }
+
+    fn check_match_cases(
+        &mut self,
+        cases: &[cst::MatchCase],
+        context: Context,
+    ) -> Result<(), TypeError> {
+        for case in cases {
+            self.check_match_case(case, context)?;
+        }
+        Ok(())
+    }
+
+    fn check_match_case(
+        &mut self,
+        case: &cst::MatchCase,
+        context: Context,
+    ) -> Result<(), TypeError> {
+        let return_val_extension = vec![IsRestrictedRecursiveIndEntry(false); case.arity.value];
+        let return_val_context = Context::Snoc(&context, &return_val_extension);
+        self.check(case.return_val.clone(), return_val_context)?;
+
         Ok(())
     }
 
