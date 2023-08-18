@@ -249,4 +249,32 @@ fn nonstrictly_positive() {
     insta::assert_display_snapshot!(pretty_printed_err);
 }
 
+/// This test will currently fail
+/// because of the predicativity requirement.
+/// In that sense, it's not really a positivity test,
+/// since an error will be raised before the positivity check.
+/// However, if we support impredicativity in the future,
+/// this test will become relevant.
+/// It is a cheap safeguard against forgetting this
+/// positivity rule.
+#[test]
+fn rec_ind_in_index_arg() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "Bad" (Set0) (
+    (() (0 <FALSE>))
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
+
 // TODO: Add more tests.
