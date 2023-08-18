@@ -90,8 +90,7 @@ impl PositivityChecker<'_> {
             cst::Expr::Fun(e) => self.check_fun(&e.hashee, context),
             cst::Expr::App(e) => self.check_app(&e.hashee, context),
             cst::Expr::For(e) => self.check_for(&e.hashee, context),
-            cst::Expr::Deb(e) => self.check_deb(&e.hashee, context),
-            cst::Expr::Universe(_) => Ok(()),
+            cst::Expr::Deb(_) | cst::Expr::Universe(_) => Ok(()),
         }
     }
 
@@ -149,11 +148,6 @@ impl PositivityChecker<'_> {
     }
 
     fn check_for(&mut self, for_: &cst::For, context: Context) -> Result<(), TypeError> {
-        // TODO
-        Ok(())
-    }
-
-    fn check_deb(&mut self, deb: &cst::NumberLiteral, context: Context) -> Result<(), TypeError> {
         // TODO
         Ok(())
     }
