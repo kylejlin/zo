@@ -53,7 +53,7 @@ fn nonrecursive_param_types_are_ok() {
 }
 
 #[test]
-fn strictly_positive_params_are_legal() {
+fn recursive_ind_param_types_are_legal() {
     let src = r#"
 (ind Set0 "Tree" () (
     // `leaf`
