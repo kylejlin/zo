@@ -515,7 +515,27 @@ impl AbsenceChecker<'_> {
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        // TODO
+        let path_to_param_types = NodePath::Snoc(&path, node_path::FUN_PARAM_TYPES);
+        self.check_dependent_exprs(&fun.param_types.hashee, context, path_to_param_types)?;
+
+        let param_extension = vec![IsRecursiveIndEntry(false); fun.param_types.hashee.len()];
+        let context_with_params = Context::Snoc(&context, &param_extension);
+        let path_to_return_type = NodePath::Snoc(&path, node_path::FUN_RETURN_TYPE);
+        self.check(
+            fun.return_type.clone(),
+            context_with_params,
+            path_to_return_type,
+        )?;
+
+        let singleton = [IsRecursiveIndEntry(false)];
+        let context_with_params_and_recursive_fun = Context::Snoc(&context_with_params, &singleton);
+        let path_to_return_val = NodePath::Snoc(&path, node_path::FUN_RETURN_VAL);
+        self.check(
+            fun.return_val.clone(),
+            context_with_params_and_recursive_fun,
+            path_to_return_val,
+        )?;
+
         Ok(())
     }
 
