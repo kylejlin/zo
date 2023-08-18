@@ -218,7 +218,7 @@ fn strictly_positive_fors_in_param_types_are_ok() {
 }
 
 #[test]
-fn negative_appearance_in_first_param_type_is_ng() {
+fn negative_recursive_ind_in_first_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -238,7 +238,7 @@ fn negative_appearance_in_first_param_type_is_ng() {
 }
 
 #[test]
-fn nonstrictly_positive_in_first_param_type_is_ng() {
+fn nonstrictly_positive_recursive_ind_in_first_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -258,7 +258,7 @@ fn nonstrictly_positive_in_first_param_type_is_ng() {
 }
 
 #[test]
-fn negative_appearance_in_second_param_type_is_ng() {
+fn negative_recursive_ind_in_second_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -278,7 +278,7 @@ fn negative_appearance_in_second_param_type_is_ng() {
 }
 
 #[test]
-fn nonstrictly_positive_in_second_param_type_is_ng() {
+fn nonstrictly_positive_recursive_ind_in_second_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
         r#"
