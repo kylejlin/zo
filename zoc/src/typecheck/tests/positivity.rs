@@ -10,7 +10,7 @@ fn rec_ind_in_index_arg_is_illegal() {
     let src_defs = [false_def];
 
     let unsubstituted_src = r#"
-(fun nonrec ((for (Set1) Set0)) Set0
+(fun nonrec ((for (Set1) Set0)) (for (Set0) Set1)
     (ind Set1 "Foo" (Set0) (
         (
             // vcon param types
@@ -116,7 +116,7 @@ fn recursive_ind_app_with_recursive_ind_in_arg_as_first_param_type_is_illegal() 
     let src_defs = [false_def];
 
     let unsubstituted_src = r#"
-(fun nonrec ((for (Set1) Set0)) Set0
+(fun nonrec ((for (Set1) Set0)) (for (Set0) Set1)
     (ind Set1 "Foo" (Set0) (
         (
             // vcon param types

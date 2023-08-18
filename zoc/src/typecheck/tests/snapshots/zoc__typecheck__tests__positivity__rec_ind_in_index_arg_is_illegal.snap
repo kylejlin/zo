@@ -20,7 +20,7 @@ TypeError::RecursiveIndParamAppearsInVconDefIndexArg {
                 )
             )
         )
-    )@(ByteIndex(75)..ByteIndex(237)),
+    )@(ByteIndex(88)..ByteIndex(250)),
     index_arg_index: 0,
     normalized_index_arg: (
         2
