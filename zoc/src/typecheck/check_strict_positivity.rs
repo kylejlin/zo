@@ -61,6 +61,10 @@ mod namespace_structs {
 }
 use namespace_structs::*;
 
+// TODO: We can design Context to use a `usize` representing
+// repetitions of `IsRestrictedRecursiveIndEntry(false)`,
+// since that will be the bulk of entries.
+
 #[derive(Clone, Copy, Debug)]
 enum Context<'a> {
     Base(&'a [IsRestrictedRecursiveIndEntry]),
