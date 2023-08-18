@@ -501,11 +501,41 @@ impl AbsenceChecker<'_> {
 
     fn check_match(
         &mut self,
-        m: &ast::Match,
+        match_: &ast::Match,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        // TODO
+        let path_to_matchee = NodePath::Snoc(&path, node_path::MATCH_MATCHEE);
+        self.check(match_.matchee.clone(), context, path_to_matchee)?;
+
+        let return_type_extension = vec![IsRecursiveIndEntry(false); match_.return_type_arity];
+        let context_with_return_type_extension = Context::Snoc(&context, &return_type_extension);
+        let path_to_return_type = NodePath::Snoc(&path, node_path::MATCH_RETURN_TYPE);
+        self.check(
+            match_.return_type.clone(),
+            context_with_return_type_extension,
+            path_to_return_type,
+        )?;
+
+        let path_to_cases = NodePath::Snoc(&path, node_path::MATCH_CASES);
+        self.check_match_cases(&match_.cases.hashee, context, path_to_cases)?;
+
+        Ok(())
+    }
+
+    fn check_match_cases(
+        &mut self,
+        cases: &[ast::MatchCase],
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        for (i, case) in cases.iter().enumerate() {
+            let extension = vec![IsRecursiveIndEntry(false); case.arity];
+            let extended_context = Context::Snoc(&context, &extension);
+            let extended_path = NodePath::Snoc(&path, NodeEdge(i));
+            self.check(case.return_val.clone(), extended_context, extended_path)?;
+        }
+
         Ok(())
     }
 
