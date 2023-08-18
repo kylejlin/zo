@@ -325,10 +325,12 @@ impl StrictPositivityChecker<'_> {
             // TODO
             ast::Expr::App(e) => self.check_app(&e.hashee, context, path),
 
+            // TODO
+            ast::Expr::For(e) => Ok(()),
+
             ast::Expr::Vcon(_)
             | ast::Expr::Match(_)
             | ast::Expr::Fun(_)
-            | ast::Expr::For(_)
             | ast::Expr::Universe(_) => {
                 let mut absent = AbsenceChecker(self.0.clone_mut());
                 absent.check(expr, context, path)
