@@ -229,31 +229,24 @@ fn noninline_list_tree() {
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
-// TODO: Delete
-// #[test]
-// fn decreasing_equal() {
-//     let nat_def = (
-//         "<NAT>",
-//         r#"
-// (ind Set0 "Nat" () (
-//     (() ())
-//     ((0) ())
-// ))"#,
-//     );
-//     let src_defs = [nat_def];
+#[test]
+fn negative() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
 
-//     let unsubstituted_src = r#"
-// (fun 0 (<NAT>) <NAT>
-//     (match 2 1 <NAT> (
-//         (0 1)
-//         (1 (1 2))
-//     ))
-// )"#;
+    let unsubstituted_src = r#"
+(ind Set0 "Negative" () (
+    (((for (0) <FALSE>)) ())
+))"#;
 
-//     let src = substitute_with_compounding(src_defs, unsubstituted_src);
-//     let err = get_type_error_under_empty_tcon_or_panic(&src);
-//     let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
-//     insta::assert_display_snapshot!(pretty_printed_err);
-// }
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
 
 // TODO: Add more tests.
