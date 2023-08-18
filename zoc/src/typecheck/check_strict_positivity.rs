@@ -313,8 +313,6 @@ impl StrictPositivityChecker<'_> {
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        // TODO: How do we handle evaluation?
-
         match expr {
             // TODO
             ast::Expr::Ind(e) => Ok(()),
