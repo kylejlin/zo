@@ -525,7 +525,12 @@ impl AbsenceChecker<'_> {
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        // TODO
+        let path_to_callee = NodePath::Snoc(&path, node_path::APP_CALLEE);
+        self.check(app.callee.clone(), context, path_to_callee)?;
+
+        let path_to_args = NodePath::Snoc(&path, node_path::APP_ARGS);
+        self.check_independent_exprs(&app.args.hashee, context, path_to_args)?;
+
         Ok(())
     }
 
