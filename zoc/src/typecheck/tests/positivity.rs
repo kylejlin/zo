@@ -230,7 +230,7 @@ fn noninline_list_tree() {
 }
 
 #[test]
-fn negative() {
+fn nonstrictly_positive() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -240,7 +240,7 @@ fn negative() {
 
     let unsubstituted_src = r#"
 (ind Set0 "Negative" () (
-    (((for (0) <FALSE>)) ())
+    (((for ((for (0) <FALSE>)) <FALSE>)) ())
 ))"#;
 
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
