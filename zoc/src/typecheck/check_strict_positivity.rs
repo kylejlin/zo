@@ -63,12 +63,12 @@ use namespace_structs::*;
 
 #[derive(Clone, Copy, Debug)]
 enum Context<'a> {
-    Base(&'a [IsRecursiveIndEntry]),
-    Snoc(&'a Context<'a>, &'a [IsRecursiveIndEntry]),
+    Base(&'a [IsRestrictedRecursiveIndEntry]),
+    Snoc(&'a Context<'a>, &'a [IsRestrictedRecursiveIndEntry]),
 }
 
 #[derive(Clone, Copy, Debug)]
-struct IsRecursiveIndEntry(pub bool);
+struct IsRestrictedRecursiveIndEntry(pub bool);
 
 impl PositivityChecker<'_> {
     pub fn check_ind_positivity_assuming_it_is_otherwise_well_typed(
@@ -76,7 +76,7 @@ impl PositivityChecker<'_> {
         ind: RcHashed<cst::Ind>,
         tcon_len: usize,
     ) -> Result<(), TypeError> {
-        let base = vec![IsRecursiveIndEntry(false); tcon_len];
+        let base = vec![IsRestrictedRecursiveIndEntry(false); tcon_len];
         self.check_ind(&ind.hashee, Context::Base(&base))
     }
 }
@@ -98,7 +98,7 @@ impl PositivityChecker<'_> {
     fn check_ind(&mut self, ind: &cst::Ind, context: Context) -> Result<(), TypeError> {
         self.check_dependent_exprs(&ind.index_types, context)?;
 
-        let singleton = [IsRecursiveIndEntry(true)];
+        let singleton = [IsRestrictedRecursiveIndEntry(true)];
         let extended_context = Context::Snoc(&context, &singleton);
         self.check_vcon_defs(&ind.vcon_defs, extended_context)?;
 
@@ -119,7 +119,7 @@ impl PositivityChecker<'_> {
     fn check_vcon_def(&mut self, def: &cst::VconDef, context: Context) -> Result<(), TypeError> {
         self.check_dependent_exprs(&def.param_types, context)?;
 
-        let extension = vec![IsRecursiveIndEntry(false); def.param_types.len()];
+        let extension = vec![IsRestrictedRecursiveIndEntry(false); def.param_types.len()];
         let extended_context = Context::Snoc(&context, &extension);
         self.check_independent_exprs(&def.index_args, extended_context)?;
 
@@ -177,7 +177,7 @@ impl PositivityChecker<'_> {
             return Ok(());
         }
 
-        let extension = vec![IsRecursiveIndEntry(false); exprs.len() - 1];
+        let extension = vec![IsRestrictedRecursiveIndEntry(false); exprs.len() - 1];
 
         for (i, expr) in exprs.iter().cloned().enumerate() {
             let extended_context = Context::Snoc(&context, &extension[..i]);
@@ -226,7 +226,8 @@ impl VconPositivityChecker<'_> {
                 .evaluator
                 .eval_expressions(param_types_ast);
 
-            let extension = vec![IsRecursiveIndEntry(false); param_count.saturating_sub(1)];
+            let extension =
+                vec![IsRestrictedRecursiveIndEntry(false); param_count.saturating_sub(1)];
 
             let mut strict = StrictPositivityChecker(self.0.clone_mut());
 
@@ -254,7 +255,7 @@ impl VconPositivityChecker<'_> {
             }
         }
 
-        let extension = vec![IsRecursiveIndEntry(false); def.param_types.len()];
+        let extension = vec![IsRestrictedRecursiveIndEntry(false); def.param_types.len()];
         let extended_context = Context::Snoc(&context, &extension);
 
         {
@@ -373,7 +374,7 @@ impl StrictPositivityChecker<'_> {
         let mut absence = AbsenceChecker(self.0.clone_mut());
         absence.check_dependent_exprs(&ind.index_types.hashee, context, path_to_index_types)?;
 
-        let extension = [IsRecursiveIndEntry(true)];
+        let extension = [IsRestrictedRecursiveIndEntry(true)];
         let extended_context = Context::Snoc(&context, &extension);
         let path_to_vcon_defs = NodePath::Snoc(&path, node_path::IND_VCON_DEFS);
         self.check_vcon_defs(&ind.vcon_defs.hashee, extended_context, path_to_vcon_defs)?;
@@ -403,7 +404,7 @@ impl StrictPositivityChecker<'_> {
         let path_to_param_types = NodePath::Snoc(&path, node_path::VCON_DEF_PARAM_TYPES);
         self.check_dependent_exprs(&def.param_types.hashee, context, path_to_param_types)?;
 
-        let extension = vec![IsRecursiveIndEntry(false); def.param_types.hashee.len()];
+        let extension = vec![IsRestrictedRecursiveIndEntry(false); def.param_types.hashee.len()];
         let extended_context = Context::Snoc(&context, &extension);
         let path_to_index_args = NodePath::Snoc(&path, node_path::VCON_DEF_INDEX_ARGS);
         let mut absence = AbsenceChecker(self.0.clone_mut());
@@ -426,7 +427,7 @@ impl StrictPositivityChecker<'_> {
         let path_to_param_types = NodePath::Snoc(&path, node_path::FOR_PARAM_TYPES);
         absent.check_dependent_exprs(&for_.param_types.hashee, context, path_to_param_types)?;
 
-        let extension = vec![IsRecursiveIndEntry(false); for_.param_types.hashee.len()];
+        let extension = vec![IsRestrictedRecursiveIndEntry(false); for_.param_types.hashee.len()];
         let extended_context = Context::Snoc(&context, &extension);
         let path_to_return_type = NodePath::Snoc(&path, node_path::FOR_RETURN_TYPE);
         self.check(
@@ -448,7 +449,7 @@ impl StrictPositivityChecker<'_> {
             return Ok(());
         }
 
-        let extension = vec![IsRecursiveIndEntry(false); exprs.len() - 1];
+        let extension = vec![IsRestrictedRecursiveIndEntry(false); exprs.len() - 1];
 
         for (i, expr) in exprs.iter().cloned().enumerate() {
             let extended_context = Context::Snoc(&context, &extension[..i]);
@@ -459,6 +460,11 @@ impl StrictPositivityChecker<'_> {
         Ok(())
     }
 }
+
+// TODO: For `AbsenceChecker`, we can replace `context: Context`
+// with `context: ContextExtendedWithUnrestrictedEntries = (usize, Context)`.
+// This is because we never add `IsRestrictedRecursiveIndEntry(true)` to the context
+// within the absence-checking process.
 
 impl AbsenceChecker<'_> {
     fn check(
@@ -485,7 +491,45 @@ impl AbsenceChecker<'_> {
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        // TODO
+        let path_to_index_types = NodePath::Snoc(&path, node_path::IND_INDEX_TYPES);
+        self.check_dependent_exprs(&ind.index_types.hashee, context, path_to_index_types)?;
+
+        let singleton = [IsRestrictedRecursiveIndEntry(false)];
+        let extended_context = Context::Snoc(&context, &singleton);
+        let path_to_vcon_defs = NodePath::Snoc(&path, node_path::IND_VCON_DEFS);
+        self.check_vcon_defs(&ind.vcon_defs.hashee, extended_context, path_to_vcon_defs)?;
+
+        Ok(())
+    }
+
+    fn check_vcon_defs(
+        &mut self,
+        defs: &[ast::VconDef],
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        for (i, def) in defs.iter().cloned().enumerate() {
+            let extended_path = NodePath::Snoc(&path, NodeEdge(i));
+            self.check_vcon_def(def, context, extended_path)?;
+        }
+
+        Ok(())
+    }
+
+    fn check_vcon_def(
+        &mut self,
+        def: ast::VconDef,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        let path_to_param_types = NodePath::Snoc(&path, node_path::VCON_DEF_PARAM_TYPES);
+        self.check_dependent_exprs(&def.param_types.hashee, context, path_to_param_types)?;
+
+        let extension = vec![IsRestrictedRecursiveIndEntry(false); def.param_types.hashee.len()];
+        let extended_context = Context::Snoc(&context, &extension);
+        let path_to_index_args = NodePath::Snoc(&path, node_path::VCON_DEF_INDEX_ARGS);
+        self.check_independent_exprs(&def.index_args.hashee, extended_context, path_to_index_args)?;
+
         Ok(())
     }
 
@@ -508,7 +552,8 @@ impl AbsenceChecker<'_> {
         let path_to_matchee = NodePath::Snoc(&path, node_path::MATCH_MATCHEE);
         self.check(match_.matchee.clone(), context, path_to_matchee)?;
 
-        let return_type_extension = vec![IsRecursiveIndEntry(false); match_.return_type_arity];
+        let return_type_extension =
+            vec![IsRestrictedRecursiveIndEntry(false); match_.return_type_arity];
         let context_with_return_type_extension = Context::Snoc(&context, &return_type_extension);
         let path_to_return_type = NodePath::Snoc(&path, node_path::MATCH_RETURN_TYPE);
         self.check(
@@ -530,7 +575,7 @@ impl AbsenceChecker<'_> {
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
         for (i, case) in cases.iter().enumerate() {
-            let extension = vec![IsRecursiveIndEntry(false); case.arity];
+            let extension = vec![IsRestrictedRecursiveIndEntry(false); case.arity];
             let extended_context = Context::Snoc(&context, &extension);
             let extended_path = NodePath::Snoc(&path, NodeEdge(i));
             self.check(case.return_val.clone(), extended_context, extended_path)?;
@@ -548,7 +593,8 @@ impl AbsenceChecker<'_> {
         let path_to_param_types = NodePath::Snoc(&path, node_path::FUN_PARAM_TYPES);
         self.check_dependent_exprs(&fun.param_types.hashee, context, path_to_param_types)?;
 
-        let param_extension = vec![IsRecursiveIndEntry(false); fun.param_types.hashee.len()];
+        let param_extension =
+            vec![IsRestrictedRecursiveIndEntry(false); fun.param_types.hashee.len()];
         let context_with_params = Context::Snoc(&context, &param_extension);
         let path_to_return_type = NodePath::Snoc(&path, node_path::FUN_RETURN_TYPE);
         self.check(
@@ -557,7 +603,7 @@ impl AbsenceChecker<'_> {
             path_to_return_type,
         )?;
 
-        let singleton = [IsRecursiveIndEntry(false)];
+        let singleton = [IsRestrictedRecursiveIndEntry(false)];
         let context_with_params_and_recursive_fun = Context::Snoc(&context_with_params, &singleton);
         let path_to_return_val = NodePath::Snoc(&path, node_path::FUN_RETURN_VAL);
         self.check(
@@ -593,7 +639,7 @@ impl AbsenceChecker<'_> {
         let path_to_param_types = NodePath::Snoc(&path, node_path::FOR_PARAM_TYPES);
         self.check_dependent_exprs(&for_.param_types.hashee, context, path_to_param_types)?;
 
-        let extension = vec![IsRecursiveIndEntry(false); for_.param_types.hashee.len()];
+        let extension = vec![IsRestrictedRecursiveIndEntry(false); for_.param_types.hashee.len()];
         let extended_context = Context::Snoc(&context, &extension);
         let path_to_return_type = NodePath::Snoc(&path, node_path::FOR_RETURN_TYPE);
         self.check(
@@ -628,7 +674,7 @@ impl AbsenceChecker<'_> {
             return Ok(());
         }
 
-        let extension = vec![IsRecursiveIndEntry(false); exprs.len() - 1];
+        let extension = vec![IsRestrictedRecursiveIndEntry(false); exprs.len() - 1];
 
         for (i, expr) in exprs.iter().cloned().enumerate() {
             let extended_context = Context::Snoc(&context, &extension[..i]);
@@ -655,7 +701,7 @@ impl AbsenceChecker<'_> {
 }
 
 impl Context<'_> {
-    pub fn get(&self, deb: Deb) -> Option<IsRecursiveIndEntry> {
+    pub fn get(&self, deb: Deb) -> Option<IsRestrictedRecursiveIndEntry> {
         match self {
             Context::Base(entries) => {
                 let index = (entries.len()).checked_sub(1 + deb.0)?;
