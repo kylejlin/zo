@@ -549,7 +549,10 @@ impl AbsenceChecker<'_> {
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        // TODO
+        if context.get(deb.deb).expect("if an expression is well-typed apart from positivity, its debs should all be valid").0 {
+            return Err(path.to_vec());
+        }
+
         Ok(())
     }
 
@@ -571,5 +574,55 @@ impl AbsenceChecker<'_> {
     ) -> Result<(), Vec<NodeEdge>> {
         // TODO
         Ok(())
+    }
+}
+
+// impl LazyTypeContext<'_> {
+//     pub fn len(&self) -> usize {
+//         match self {
+//             LazyTypeContext::Base(types) => types.raw().len(),
+//             LazyTypeContext::Snoc(subcontext, types) => subcontext.len() + types.raw().len(),
+//         }
+//     }
+
+//     pub fn get(&self, deb: Deb) -> Option<NormalForm> {
+//         let unshifted = self.get_unshifted(deb)?;
+//         Some(unshifted.upshift(deb.0 + 1, 0))
+//     }
+
+//     fn get_unshifted(&self, deb: Deb) -> Option<NormalForm> {
+//         match self {
+//             LazyTypeContext::Base(types) => {
+//                 let index = (types.raw().len()).checked_sub(1 + deb.0)?;
+//                 Some(types.get_ref(index)?.cloned())
+//             }
+
+//             LazyTypeContext::Snoc(subcontext, types) => {
+//                 if let Some(index) = (types.raw().len()).checked_sub(1 + deb.0) {
+//                     Some(types.get_ref(index)?.cloned())
+//                 } else {
+//                     subcontext.get_unshifted(Deb(deb.0 - types.raw().len()))
+//                 }
+//             }
+//         }
+//     }
+// }
+
+impl Context<'_> {
+    pub fn get(&self, deb: Deb) -> Option<IsRecursiveIndEntry> {
+        match self {
+            Context::Base(entries) => {
+                let index = (entries.len()).checked_sub(1 + deb.0)?;
+                entries.get(index).copied()
+            }
+
+            Context::Snoc(subcontext, entries) => {
+                if let Some(index) = (entries.len()).checked_sub(1 + deb.0) {
+                    entries.get(index).copied()
+                } else {
+                    subcontext.get(Deb(deb.0 - entries.len()))
+                }
+            }
+        }
     }
 }
