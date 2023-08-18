@@ -78,6 +78,43 @@ fn recursive_ind_param_types_are_legal() {
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
+// TODO: Add recursive_ind_app_with_nonrecursive_arg_as_param_types_are_legal
+
+#[test]
+fn recursive_ind_app_with_recursive_ind_in_arg_as_first_param_type_is_illegal() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
+
+    let unsubstituted_src = r#"
+(fun nonrec ((for (Set1) Set0)) Set0
+    (ind Set1 "Foo" (Set0) (
+        (
+            // vcon param types
+            (
+                (
+                    0
+                    (2 (0 <FALSE>))
+                )
+            )
+
+            // index args
+            (
+                <FALSE>
+            )
+        )
+    ))
+)"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
+
 #[test]
 fn negative_appearance_in_first_param_type_is_illegal() {
     let false_def = (
