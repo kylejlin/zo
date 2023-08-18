@@ -32,7 +32,7 @@ TypeError::VconDefParamTypeFailsStrictPositivityCondition {
             )
         )
         ()
-    )@(ByteIndex(31)..ByteIndex(106)),
+    )@(ByteIndex(42)..ByteIndex(117)),
     param_type_index: 0,
     normalized_param_type: (
         for

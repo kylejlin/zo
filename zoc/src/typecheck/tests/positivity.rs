@@ -58,7 +58,7 @@ fn nonstrictly_positive() {
     let src_defs = [false_def];
 
     let unsubstituted_src = r#"
-(ind Set0 "Negative" () (
+(ind Set0 "NonstrictlyPositive" () (
     (((for ((for (0) <FALSE>)) <FALSE>)) ())
 ))"#;
 
