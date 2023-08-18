@@ -130,8 +130,7 @@ impl PositivityChecker<'_> {
     }
 
     fn check_vcon(&mut self, vcon: &cst::Vcon, context: Context) -> Result<(), TypeError> {
-        // TODO
-        Ok(())
+        self.check_ind(&vcon.ind.hashee, context)
     }
 
     fn check_match(&mut self, m: &cst::Match, context: Context) -> Result<(), TypeError> {
