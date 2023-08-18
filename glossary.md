@@ -26,6 +26,10 @@ with the ordinary definitions.
   This implies that you can _always_
   reconstruct an OST from an IPIST.
 
+- NG: no good - unacceptable. This is the opposite of OK.
+
+- OK: okay - acceptable. This is the opposite of NG.
+
 - OST: original syntax tree.
   The parser constructors this tree.
   The tree is later converted into an IPIST,

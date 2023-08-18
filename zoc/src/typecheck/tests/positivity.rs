@@ -1,7 +1,16 @@
 use super::*;
 
+// The word "legal" and "illegal" look too similar.
+// When I'm skimming the (usually long) test names, I want to
+// be able to distinguish legal tests
+// from illegal tests in a split-second.
+// The similarity between the two words makes this hard.
+//
+// So, I use "ok" instead of "legal",
+// and "ng" (short for "no good") instead of "illegal".
+
 #[test]
-fn rec_ind_in_index_arg_is_illegal() {
+fn rec_ind_in_index_arg_is_ng() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -31,7 +40,7 @@ fn rec_ind_in_index_arg_is_illegal() {
 }
 
 #[test]
-fn nonrecursive_param_types_are_legal() {
+fn nonrecursive_param_types_are_ok() {
     let nat_def = (
         "<NAT>",
         r#"
@@ -53,7 +62,7 @@ fn nonrecursive_param_types_are_legal() {
 }
 
 #[test]
-fn recursive_ind_param_types_are_legal() {
+fn recursive_ind_param_types_are_ng() {
     let src = r#"
 (ind Set0 "Tree" () (
     // `leaf`
@@ -79,7 +88,7 @@ fn recursive_ind_param_types_are_legal() {
 }
 
 #[test]
-fn recursive_ind_app_with_nonrecursive_arg_as_param_types_are_legal() {
+fn recursive_ind_app_with_nonrecursive_arg_as_param_types_are_ok() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -107,7 +116,7 @@ fn recursive_ind_app_with_nonrecursive_arg_as_param_types_are_legal() {
 }
 
 #[test]
-fn recursive_ind_app_with_recursive_ind_in_arg_as_first_param_type_is_illegal() {
+fn recursive_ind_app_with_recursive_ind_in_arg_as_first_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -142,7 +151,7 @@ fn recursive_ind_app_with_recursive_ind_in_arg_as_first_param_type_is_illegal() 
 }
 
 #[test]
-fn negative_appearance_in_first_param_type_is_illegal() {
+fn negative_appearance_in_first_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -162,7 +171,7 @@ fn negative_appearance_in_first_param_type_is_illegal() {
 }
 
 #[test]
-fn nonstrictly_positive_in_first_param_type_is_illegal() {
+fn nonstrictly_positive_in_first_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -182,7 +191,7 @@ fn nonstrictly_positive_in_first_param_type_is_illegal() {
 }
 
 #[test]
-fn negative_appearance_in_second_param_type_is_illegal() {
+fn negative_appearance_in_second_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -202,7 +211,7 @@ fn negative_appearance_in_second_param_type_is_illegal() {
 }
 
 #[test]
-fn nonstrictly_positive_in_second_param_type_is_illegal() {
+fn nonstrictly_positive_in_second_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
         r#"
