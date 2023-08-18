@@ -319,8 +319,7 @@ impl StrictPositivityChecker<'_> {
             // TODO
             ast::Expr::Ind(e) => Ok(()),
 
-            // TODO
-            ast::Expr::Deb(e) => Ok(()),
+            ast::Expr::Deb(_) => Ok(()),
 
             // TODO
             ast::Expr::App(e) => self.check_app(&e.hashee, context, path),
@@ -363,8 +362,7 @@ impl StrictPositivityChecker<'_> {
             // TODO
             ast::Expr::Ind(e) => Ok(()),
 
-            // TODO
-            ast::Expr::Deb(e) => Ok(()),
+            ast::Expr::Deb(_) => Ok(()),
 
             ast::Expr::Vcon(_)
             | ast::Expr::Match(_)
