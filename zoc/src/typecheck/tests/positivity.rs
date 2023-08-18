@@ -53,6 +53,32 @@ fn nonrecursive_param_types_are_ok() {
 }
 
 #[test]
+fn strictly_positive_params_are_legal() {
+    let src = r#"
+(ind Set0 "Tree" () (
+    // `leaf`
+    (
+        // param types
+        ()
+
+        // index args
+        ()
+    )
+
+    // `pair`
+    (
+        // param types
+        (0 1)
+
+        // index args
+        ()
+    )
+))"#;
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
+
+#[test]
 fn negative_appearance_in_first_param_type_is_illegal() {
     let false_def = (
         "<FALSE>",
