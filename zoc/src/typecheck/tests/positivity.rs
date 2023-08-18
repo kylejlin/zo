@@ -31,7 +31,7 @@ fn rec_ind_in_index_arg_is_illegal() {
 }
 
 #[test]
-fn negative_appearance_in_param_type_is_illegal() {
+fn negative_appearance_in_first_param_type_is_illegal() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -51,7 +51,7 @@ fn negative_appearance_in_param_type_is_illegal() {
 }
 
 #[test]
-fn nonstrictly_positive_in_param_type_is_illegal() {
+fn nonstrictly_positive_in_first_param_type_is_illegal() {
     let false_def = (
         "<FALSE>",
         r#"
