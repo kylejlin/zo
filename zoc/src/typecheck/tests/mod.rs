@@ -3,6 +3,7 @@ use crate::{
 };
 
 mod fun_recursion;
+mod positivity;
 
 // General tests
 mod should_fail;

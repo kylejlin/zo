@@ -1,0 +1,5 @@
+---
+source: zoc/src/typecheck/tests/positivity.rs
+expression: PrettyPrint(type_.raw())
+---
+Set0
