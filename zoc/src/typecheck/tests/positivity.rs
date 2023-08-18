@@ -31,6 +31,28 @@ fn rec_ind_in_index_arg_is_illegal() {
 }
 
 #[test]
+fn nonrecursive_param_types_are_ok() {
+    let nat_def = (
+        "<NAT>",
+        r#"
+(ind Set0 "Nat" () (
+    (() ())
+    ((0) ())
+))"#,
+    );
+    let src_defs = [nat_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "NatPair" () (
+    ((<NAT> <NAT>) ())
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
+
+#[test]
 fn negative_appearance_in_first_param_type_is_illegal() {
     let false_def = (
         "<FALSE>",
