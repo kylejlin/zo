@@ -187,7 +187,8 @@ impl PositivityChecker<'_> {
     }
 
     fn check_app(&mut self, app: &cst::App, context: Context) -> Result<(), TypeError> {
-        // TODO
+        self.check(app.callee.clone(), context)?;
+        self.check_independent_exprs(&app.args, context)?;
         Ok(())
     }
 
