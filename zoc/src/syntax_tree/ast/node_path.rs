@@ -19,8 +19,6 @@ pub const MATCH_MATCHEE: NodeEdge = NodeEdge(0);
 pub const MATCH_RETURN_TYPE: NodeEdge = NodeEdge(1);
 pub const MATCH_CASES: NodeEdge = NodeEdge(2);
 
-pub const MATCH_CASE_RETURN_VAL: NodeEdge = NodeEdge(0);
-
 pub const FUN_PARAM_TYPES: NodeEdge = NodeEdge(0);
 pub const FUN_RETURN_TYPE: NodeEdge = NodeEdge(1);
 pub const FUN_RETURN_VAL: NodeEdge = NodeEdge(2);

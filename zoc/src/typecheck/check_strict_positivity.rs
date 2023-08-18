@@ -495,8 +495,8 @@ impl AbsenceChecker<'_> {
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        // TODO
-        Ok(())
+        let path_to_ind = NodePath::Snoc(&path, node_path::VCON_IND);
+        self.check_ind(&vcon.ind.hashee, context, path_to_ind)
     }
 
     fn check_match(
