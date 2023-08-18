@@ -42,7 +42,7 @@ impl TypeChecker {
         )?;
 
         self.get_positivity_checker()
-            .check_ind_positivity_assuming_it_is_otherwise_well_typed(ind.clone())?;
+            .check_ind_positivity_assuming_it_is_otherwise_well_typed(ind.clone(), tcon_g0.len())?;
 
         Ok(ind_type_g0)
     }

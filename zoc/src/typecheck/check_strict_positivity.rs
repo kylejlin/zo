@@ -70,18 +70,14 @@ enum Context<'a> {
 #[derive(Clone, Copy, Debug)]
 struct IsRecursiveIndEntry(pub bool);
 
-impl Context<'static> {
-    pub fn empty() -> Self {
-        Self::Base(&[])
-    }
-}
-
 impl PositivityChecker<'_> {
     pub fn check_ind_positivity_assuming_it_is_otherwise_well_typed(
         &mut self,
         ind: RcHashed<cst::Ind>,
+        tcon_len: usize,
     ) -> Result<(), TypeError> {
-        self.check_ind(&ind.hashee, Context::empty())
+        let base = vec![IsRecursiveIndEntry(false); tcon_len];
+        self.check_ind(&ind.hashee, Context::Base(&base))
     }
 }
 
