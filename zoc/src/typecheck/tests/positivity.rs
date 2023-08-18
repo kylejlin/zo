@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn rec_ind_in_index_arg() {
+fn rec_ind_in_index_arg_is_illegal() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -31,7 +31,7 @@ fn rec_ind_in_index_arg() {
 }
 
 #[test]
-fn negative() {
+fn negative_appearance_in_param_type_is_illegal() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -51,7 +51,7 @@ fn negative() {
 }
 
 #[test]
-fn nonstrictly_positive() {
+fn nonstrictly_positive_in_param_type_is_illegal() {
     let false_def = (
         "<FALSE>",
         r#"
