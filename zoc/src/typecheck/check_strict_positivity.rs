@@ -321,7 +321,6 @@ impl StrictPositivityChecker<'_> {
 
             ast::Expr::Deb(_) => Ok(()),
 
-            // TODO
             ast::Expr::App(e) => self.check_app(&e.hashee, context, path),
 
             // TODO
