@@ -71,6 +71,46 @@ fn nonstrictly_positive_in_first_param_type_is_illegal() {
 }
 
 #[test]
+fn negative_appearance_in_second_param_type_is_illegal() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "Negative" () (
+    ((<FALSE> (for (1) <FALSE>)) ())
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
+
+#[test]
+fn nonstrictly_positive_in_second_param_type_is_illegal() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "NonstrictlyPositive" () (
+    ((<FALSE> (for ((for (1) <FALSE>)) <FALSE>)) ())
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
+
+#[test]
 fn tree() {
     let tree_def = (
         "<TREE>",
