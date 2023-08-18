@@ -193,7 +193,12 @@ impl PositivityChecker<'_> {
     }
 
     fn check_for(&mut self, for_: &cst::For, context: Context) -> Result<(), TypeError> {
-        // TODO
+        self.check_dependent_exprs(&for_.param_types, context)?;
+
+        let extension = vec![IsRestrictedRecursiveIndEntry(false); for_.param_types.len()];
+        let extended_context = Context::Snoc(&context, &extension);
+        self.check(for_.return_type.clone(), extended_context)?;
+
         Ok(())
     }
 
