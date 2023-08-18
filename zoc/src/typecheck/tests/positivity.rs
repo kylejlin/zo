@@ -13,7 +13,7 @@ fn rec_ind_in_index_arg_is_illegal() {
 (fun nonrec ((for (Set1) Set0)) Set0
     (ind Set1 "Foo" (Set0) (
         (
-            // vcon params
+            // vcon param types
             ()
 
             // index args
@@ -58,7 +58,7 @@ fn recursive_ind_param_types_are_legal() {
 (ind Set0 "Tree" () (
     // `leaf`
     (
-        // param types
+        // vcon param types
         ()
 
         // index args
@@ -67,7 +67,7 @@ fn recursive_ind_param_types_are_legal() {
 
     // `pair`
     (
-        // param types
+        // vcon param types
         (0 1)
 
         // index args
