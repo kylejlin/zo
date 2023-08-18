@@ -324,7 +324,7 @@ impl StrictPositivityChecker<'_> {
             ast::Expr::App(e) => self.check_app(&e.hashee, context, path),
 
             // TODO
-            ast::Expr::For(e) => Ok(()),
+            ast::Expr::For(e) => self.check_for(&e.hashee, context, path),
 
             ast::Expr::Vcon(_)
             | ast::Expr::Match(_)
@@ -374,6 +374,22 @@ impl StrictPositivityChecker<'_> {
                 absent.check(app.callee.clone(), context, path_to_callee)
             }
         }
+    }
+
+    fn check_for(
+        &mut self,
+        for_: &ast::For,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        let mut absent = AbsenceChecker(self.0.clone_mut());
+        absent.check_dependent_exprs(&for_.param_types.hashee, context, path)?;
+
+        let extension = vec![IsRecursiveIndEntry(false); for_.param_types.hashee.len()];
+        let extended_context = Context::Snoc(&context, &extension);
+        self.check(for_.return_type.clone(), extended_context, path)?;
+
+        Ok(())
     }
 
     fn check_dependent_exprs(
@@ -498,6 +514,16 @@ impl AbsenceChecker<'_> {
     fn check_deb(
         &mut self,
         deb: &ast::DebNode,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        // TODO
+        Ok(())
+    }
+
+    fn check_dependent_exprs(
+        &mut self,
+        exprs: &[ast::Expr],
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
