@@ -90,13 +90,13 @@ pub enum TypeError {
         def: cst::VconDef,
         param_type_index: usize,
         normalized_param_type: NormalForm,
-        problematic_deb: Deb,
+        path_from_param_type_to_problematic_deb: Vec<ast::NodeEdge>,
     },
     RecursiveIndParamAppearsInVconDefIndexArg {
         def: cst::VconDef,
         index_arg_index: usize,
         normalized_index_arg: NormalForm,
-        problematic_deb: Deb,
+        path_from_index_arg_to_problematic_deb: Vec<ast::NodeEdge>,
     },
 }
 

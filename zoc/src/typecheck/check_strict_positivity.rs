@@ -15,6 +15,8 @@
 
 use super::*;
 
+use crate::syntax_tree::ast::node_path::{self, NodeEdge, NodePath};
+
 #[derive(Debug)]
 pub struct PositivityChecker<'a> {
     pub typechecker: &'a mut TypeChecker,
@@ -220,20 +222,67 @@ impl VconPositivityChecker<'_> {
         context: Context,
     ) -> Result<(), TypeError> {
         let mut strict = StrictPositivityChecker(self.0.clone_mut());
-        strict.check_dependent_exprs(&def.param_types, context)?;
+        strict
+            .check_dependent_exprs(
+                &def.param_types,
+                context,
+                NodePath::singleton(node_path::VCON_DEF_PARAM_TYPES),
+            )
+            .map_err(|path_from_vcon_def_to_deb| {
+                let param_type_index = path_from_vcon_def_to_deb[1].0;
+                let param_type = &def.param_types[param_type_index];
+                let param_type_ast = self.0.typechecker.cst_converter.convert(param_type.clone());
+                let normalized_param_type = self.0.typechecker.evaluator.eval(param_type_ast);
+                let path_from_param_type_to_problematic_deb = {
+                    let mut p = path_from_vcon_def_to_deb;
+                    p.split_off(2)
+                };
+                TypeError::VconDefParamTypeFailsStrictPositivityCondition {
+                    def: def.clone(),
+                    param_type_index,
+                    normalized_param_type,
+                    path_from_param_type_to_problematic_deb,
+                }
+            })?;
 
         let extension = vec![IsRecursiveIndEntry(false); def.param_types.len()];
         let extended_context = Context::Snoc(&context, &extension);
 
         let mut absence = AbsenceChecker(self.0.clone_mut());
-        absence.check_independent_exprs(&def.index_args, extended_context)?;
+        absence
+            .check_independent_exprs(
+                &def.index_args,
+                extended_context,
+                NodePath::singleton(node_path::VCON_DEF_INDEX_ARGS),
+            )
+            .map_err(|path_from_vcon_def_to_deb| {
+                let index_arg_index = path_from_vcon_def_to_deb[1].0;
+                let index_arg = &def.index_args[index_arg_index];
+                let index_arg_ast = self.0.typechecker.cst_converter.convert(index_arg.clone());
+                let normalized_index_arg = self.0.typechecker.evaluator.eval(index_arg_ast);
+                let path_from_index_arg_to_problematic_deb = {
+                    let mut p = path_from_vcon_def_to_deb;
+                    p.split_off(2)
+                };
+                TypeError::RecursiveIndParamAppearsInVconDefIndexArg {
+                    def: def.clone(),
+                    index_arg_index,
+                    normalized_index_arg,
+                    path_from_index_arg_to_problematic_deb,
+                }
+            })?;
 
         Ok(())
     }
 }
 
 impl StrictPositivityChecker<'_> {
-    fn check(&mut self, expr: cst::Expr, context: Context) -> Result<(), TypeError> {
+    fn check(
+        &mut self,
+        expr: cst::Expr,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
         // TODO: How do we handle evaluation?
 
         match expr {
@@ -253,7 +302,7 @@ impl StrictPositivityChecker<'_> {
 
             cst::Expr::Vcon(_) | cst::Expr::Fun(_) | cst::Expr::For(_) => {
                 let mut absent = AbsenceChecker(self.0.clone_mut());
-                absent.check(expr, context)
+                absent.check(expr, context, path)
             }
         }
     }
@@ -262,7 +311,8 @@ impl StrictPositivityChecker<'_> {
         &mut self,
         exprs: &[cst::Expr],
         context: Context,
-    ) -> Result<(), TypeError> {
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
         if exprs.is_empty() {
             return Ok(());
         }
@@ -271,7 +321,8 @@ impl StrictPositivityChecker<'_> {
 
         for (i, expr) in exprs.iter().cloned().enumerate() {
             let extended_context = Context::Snoc(&context, &extension[..i]);
-            self.check(expr, extended_context)?;
+            let extended_path = NodePath::Snoc(&path, NodeEdge(i));
+            self.check(expr, extended_context, extended_path)?;
         }
 
         Ok(())
@@ -279,7 +330,12 @@ impl StrictPositivityChecker<'_> {
 }
 
 impl AbsenceChecker<'_> {
-    fn check(&mut self, expr: cst::Expr, context: Context) -> Result<(), TypeError> {
+    fn check(
+        &mut self,
+        expr: cst::Expr,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
         // TODO
         Ok(())
     }
@@ -288,7 +344,8 @@ impl AbsenceChecker<'_> {
         &mut self,
         exprs: &[cst::Expr],
         context: Context,
-    ) -> Result<(), TypeError> {
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
         // TODO
         Ok(())
     }

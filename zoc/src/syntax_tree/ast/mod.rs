@@ -9,6 +9,9 @@ mod debug;
 mod get_digest;
 mod hash;
 
+pub mod node_path;
+pub use node_path::{NodeEdge, NodePath};
+
 #[derive(Clone, PartialEq, Eq)]
 pub enum Expr {
     Ind(RcHashed<Ind>),

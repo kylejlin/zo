@@ -2,7 +2,6 @@ use super::*;
 
 use crate::{
     syntax_tree::{
-        ast,
         ipist::rc_hashed,
         ipist_to_ast::*,
         token::{ByteIndex, Span},
@@ -350,7 +349,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 def,
                 param_type_index,
                 normalized_param_type,
-                problematic_deb,
+                path_from_param_type_to_problematic_deb,
             } => {
                 let mut converter = IpistToAstConverter::default();
                 let def_ast = converter.convert_vcon_def(def.clone());
@@ -365,11 +364,8 @@ impl Display for PrettyPrint<'_, TypeError> {
                         &normalized_param_type.raw().pretty_printed(),
                     )
                     .field(
-                        "problematic_deb",
-                        &ast::DebNode {
-                            deb: *problematic_deb,
-                        }
-                        .pretty_printed(),
+                        "path_from_param_type_to_problematic_deb",
+                        path_from_param_type_to_problematic_deb,
                     )
                     .finish()
             }
@@ -378,7 +374,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 def,
                 index_arg_index,
                 normalized_index_arg,
-                problematic_deb,
+                path_from_index_arg_to_problematic_deb,
             } => {
                 let mut converter = IpistToAstConverter::default();
                 let def_ast = converter.convert_vcon_def(def.clone());
@@ -393,11 +389,8 @@ impl Display for PrettyPrint<'_, TypeError> {
                         &normalized_index_arg.raw().pretty_printed(),
                     )
                     .field(
-                        "problematic_deb",
-                        &ast::DebNode {
-                            deb: *problematic_deb,
-                        }
-                        .pretty_printed(),
+                        "path_from_index_arg_to_problematic_deb",
+                        path_from_index_arg_to_problematic_deb,
                     )
                     .finish()
             }
