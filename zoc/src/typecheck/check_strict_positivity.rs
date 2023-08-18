@@ -316,8 +316,7 @@ impl StrictPositivityChecker<'_> {
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
         match expr {
-            // TODO
-            ast::Expr::Ind(e) => Ok(()),
+            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
 
             ast::Expr::Deb(_) => Ok(()),
 
@@ -357,8 +356,7 @@ impl StrictPositivityChecker<'_> {
         path_to_app: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
         match &app.callee {
-            // TODO
-            ast::Expr::Ind(e) => Ok(()),
+            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path_to_app),
 
             ast::Expr::Deb(_) => Ok(()),
 
@@ -373,6 +371,26 @@ impl StrictPositivityChecker<'_> {
                 absent.check(app.callee.clone(), context, path_to_callee)
             }
         }
+    }
+
+    fn check_ind(
+        &mut self,
+        ind: &ast::Ind,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        // let path_to_index_types = NodePath::Snoc(&path, node_path::IND_INDEX_TYPES);
+        // let mut nested = NestedPositivityChecker(self.0.clone_mut());
+        // nested.check_dependent_exprs(&ind.index_types.hashee, context, path_to_index_types)?;
+
+        // let extension = vec![IsRecursiveIndEntry(true); ind.index_types.hashee.len()];
+        // let extended_context = Context::Snoc(&context, &extension);
+        // self.check_vcon_defs(&ind.vcon_defs.hashee, extended_context, path)?;
+
+        // Ok(())
+
+        // TODO
+        Ok(())
     }
 
     fn check_for(
