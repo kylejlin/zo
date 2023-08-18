@@ -13,9 +13,11 @@
 //! https://flint.cs.yale.edu/cs430/coq/pdf/Reference-Manual.pdf
 //! Pages 122 and 123 are relevant.
 
+use std::path::Path;
+
 use super::*;
 
-use crate::syntax_tree::ast::node_path::{NodeEdge, NodePath};
+use crate::syntax_tree::ast::node_path::{self, NodeEdge, NodePath};
 
 #[derive(Debug)]
 pub struct PositivityChecker<'a> {
@@ -321,7 +323,7 @@ impl StrictPositivityChecker<'_> {
             ast::Expr::Deb(e) => Ok(()),
 
             // TODO
-            ast::Expr::App(e) => Ok(()),
+            ast::Expr::App(e) => self.check_app(&e.hashee, context, path),
 
             ast::Expr::Vcon(_)
             | ast::Expr::Match(_)
@@ -330,6 +332,47 @@ impl StrictPositivityChecker<'_> {
             | ast::Expr::Universe(_) => {
                 let mut absent = AbsenceChecker(self.0.clone_mut());
                 absent.check(expr, context, path)
+            }
+        }
+    }
+
+    fn check_app(
+        &mut self,
+        app: &ast::App,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        self.check_app_callee(app, context, path)?;
+
+        let path_to_args = NodePath::Snoc(&path, node_path::APP_ARGS);
+        let mut absent = AbsenceChecker(self.0.clone_mut());
+        absent.check_independent_exprs(&app.args.hashee, context, path_to_args)?;
+
+        Ok(())
+    }
+
+    fn check_app_callee(
+        &mut self,
+        app: &ast::App,
+        context: Context,
+        path_to_app: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        match &app.callee {
+            // TODO
+            ast::Expr::Ind(e) => Ok(()),
+
+            // TODO
+            ast::Expr::Deb(e) => Ok(()),
+
+            ast::Expr::Vcon(_)
+            | ast::Expr::Match(_)
+            | ast::Expr::Fun(_)
+            | ast::Expr::App(_)
+            | ast::Expr::For(_)
+            | ast::Expr::Universe(_) => {
+                let mut absent = AbsenceChecker(self.0.clone_mut());
+                let path_to_callee = NodePath::Snoc(&path_to_app, node_path::APP_CALLEE);
+                absent.check(app.callee.clone(), context, path_to_callee)
             }
         }
     }
@@ -354,12 +397,108 @@ impl StrictPositivityChecker<'_> {
 
         Ok(())
     }
+
+    fn check_independent_exprs(
+        &mut self,
+        exprs: &[ast::Expr],
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        if exprs.is_empty() {
+            return Ok(());
+        }
+
+        for (i, expr) in exprs.iter().cloned().enumerate() {
+            let extended_path = NodePath::Snoc(&path, NodeEdge(i));
+            self.check(expr, context, extended_path)?;
+        }
+
+        Ok(())
+    }
 }
 
 impl AbsenceChecker<'_> {
     fn check(
         &mut self,
         expr: ast::Expr,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        match expr {
+            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
+            ast::Expr::Vcon(e) => self.check_vcon(&e.hashee, context, path),
+            ast::Expr::Match(e) => self.check_match(&e.hashee, context, path),
+            ast::Expr::Fun(e) => self.check_fun(&e.hashee, context, path),
+            ast::Expr::App(e) => self.check_app(&e.hashee, context, path),
+            ast::Expr::For(e) => self.check_for(&e.hashee, context, path),
+            ast::Expr::Deb(e) => self.check_deb(&e.hashee, context, path),
+            ast::Expr::Universe(_) => Ok(()),
+        }
+    }
+
+    fn check_ind(
+        &mut self,
+        ind: &ast::Ind,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        // TODO
+        Ok(())
+    }
+
+    fn check_vcon(
+        &mut self,
+        vcon: &ast::Vcon,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        // TODO
+        Ok(())
+    }
+
+    fn check_match(
+        &mut self,
+        m: &ast::Match,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        // TODO
+        Ok(())
+    }
+
+    fn check_fun(
+        &mut self,
+        fun: &ast::Fun,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        // TODO
+        Ok(())
+    }
+
+    fn check_app(
+        &mut self,
+        app: &ast::App,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        // TODO
+        Ok(())
+    }
+
+    fn check_for(
+        &mut self,
+        for_: &ast::For,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        // TODO
+        Ok(())
+    }
+
+    fn check_deb(
+        &mut self,
+        deb: &ast::DebNode,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
