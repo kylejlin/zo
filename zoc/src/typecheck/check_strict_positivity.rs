@@ -13,8 +13,6 @@
 //! https://flint.cs.yale.edu/cs430/coq/pdf/Reference-Manual.pdf
 //! Pages 122 and 123 are relevant.
 
-use std::path::Path;
-
 use super::*;
 
 use crate::syntax_tree::ast::node_path::{self, NodeEdge, NodePath};
@@ -54,10 +52,6 @@ mod namespace_structs {
     /// in the context appears strictly positively in the given expression.
     #[derive(Debug)]
     pub struct StrictPositivityChecker<'a>(pub PositivityChecker<'a>);
-
-    // TODO: Add explanation comment.
-    #[derive(Debug)]
-    pub struct NestedPositivityChecker<'a>(pub PositivityChecker<'a>);
 
     /// `AbsenceChecker`'s methods assert that every recursive ind entry
     /// in the context does **not** appear (i.e., is absent)
@@ -464,24 +458,6 @@ impl StrictPositivityChecker<'_> {
             let extended_context = Context::Snoc(&context, &extension[..i]);
             let extended_path = NodePath::Snoc(&path, NodeEdge(i));
             self.check(expr, extended_context, extended_path)?;
-        }
-
-        Ok(())
-    }
-
-    fn check_independent_exprs(
-        &mut self,
-        exprs: &[ast::Expr],
-        context: Context,
-        path: NodePath,
-    ) -> Result<(), Vec<NodeEdge>> {
-        if exprs.is_empty() {
-            return Ok(());
-        }
-
-        for (i, expr) in exprs.iter().cloned().enumerate() {
-            let extended_path = NodePath::Snoc(&path, NodeEdge(i));
-            self.check(expr, context, extended_path)?;
         }
 
         Ok(())
