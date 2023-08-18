@@ -11,21 +11,16 @@ fn rec_ind_in_index_arg() {
 
     let unsubstituted_src = r#"
 (fun nonrec ((for (Set1) Set0)) Set0
-    (ind Set0 "Foo" () (
-        ((
-            // param type 0
-            (
-                2
+    (ind Set1 "Foo" (Set0) (
+        (
+            // vcon params
+            ()
 
-                (
-                    (ind Set1 "Bar" (Set0) (
-                        (() (1))
-                    ))
-    
-                    <FALSE>
-                )
+            // index args
+            (
+                (2 (0 <FALSE>))
             )
-        ) ())
+        )
     ))
 )"#;
 

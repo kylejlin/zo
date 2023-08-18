@@ -6,10 +6,44 @@ TypeError::RecursiveIndParamAppearsInVconDefIndexArg {
     def: (
         ()
         (
-            1
+            (
+                2
+                (
+                    0
+                    (
+                        ind
+                        Set0
+                        "False"
+                        ()
+                        ()
+                    )
+                )
+            )
         )
-    )@(ByteIndex(222)..ByteIndex(229)),
+    )@(ByteIndex(75)..ByteIndex(232)),
     index_arg_index: 0,
-    normalized_index_arg: 1,
-    path_from_index_arg_to_problematic_deb: [],
+    normalized_index_arg: (
+        2
+        (
+            0
+            (
+                ind
+                Set0
+                "False"
+                ()
+                ()
+            )
+        )
+    ),
+    path_from_index_arg_to_problematic_deb: [
+        NodeEdge(
+            1,
+        ),
+        NodeEdge(
+            0,
+        ),
+        NodeEdge(
+            0,
+        ),
+    ],
 }
