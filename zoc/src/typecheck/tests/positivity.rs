@@ -1,13 +1,5 @@
 use super::*;
 
-/// This test will currently fail
-/// because of the predicativity requirement.
-/// In that sense, it's not really a positivity test,
-/// since an error will be raised before the positivity check.
-/// However, if we support impredicativity in the future,
-/// this test will become relevant.
-/// It is a cheap safeguard against forgetting this
-/// positivity rule.
 #[test]
 fn rec_ind_in_index_arg() {
     let false_def = (
@@ -18,9 +10,24 @@ fn rec_ind_in_index_arg() {
     let src_defs = [false_def];
 
     let unsubstituted_src = r#"
-(ind Set0 "Bad" (Set0) (
-    (() (0 <FALSE>))
-))"#;
+(fun nonrec ((for (Set1) Set0)) Set0
+    (ind Set0 "Foo" () (
+        ((
+            // param type 0
+            (
+                2
+
+                (
+                    (ind Set1 "Bar" (Set0) (
+                        (() (1))
+                    ))
+    
+                    <FALSE>
+                )
+            )
+        ) ())
+    ))
+)"#;
 
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
     let err = get_type_error_under_empty_tcon_or_panic(&src);
