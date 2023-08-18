@@ -562,7 +562,18 @@ impl AbsenceChecker<'_> {
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        // TODO
+        if exprs.is_empty() {
+            return Ok(());
+        }
+
+        let extension = vec![IsRecursiveIndEntry(false); exprs.len() - 1];
+
+        for (i, expr) in exprs.iter().cloned().enumerate() {
+            let extended_context = Context::Snoc(&context, &extension[..i]);
+            let extended_path = NodePath::Snoc(&path, NodeEdge(i));
+            self.check(expr, extended_context, extended_path)?;
+        }
+
         Ok(())
     }
 
@@ -572,7 +583,11 @@ impl AbsenceChecker<'_> {
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
-        // TODO
+        for (i, expr) in exprs.iter().cloned().enumerate() {
+            let extended_path = NodePath::Snoc(&path, NodeEdge(i));
+            self.check(expr, context, extended_path)?;
+        }
+
         Ok(())
     }
 }
