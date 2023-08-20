@@ -363,45 +363,6 @@ impl StrictPositivityChecker<'_> {
         }
     }
 
-    fn check_app(
-        &mut self,
-        app: &ast::App,
-        context: Context,
-        path: NodePath,
-    ) -> Result<(), Vec<NodeEdge>> {
-        let path_to_callee = NodePath::Snoc(&path, node_path::APP_CALLEE);
-        self.check_app_callee(app.callee.clone(), context, path_to_callee)?;
-
-        let path_to_args = NodePath::Snoc(&path, node_path::APP_ARGS);
-        let mut absent = AbsenceChecker(self.0.clone_mut());
-        absent.check_independent_exprs(&app.args.hashee, context, path_to_args)?;
-
-        Ok(())
-    }
-
-    fn check_app_callee(
-        &mut self,
-        callee: ast::Expr,
-        context: Context,
-        path: NodePath,
-    ) -> Result<(), Vec<NodeEdge>> {
-        match callee {
-            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
-
-            ast::Expr::Deb(_) => Ok(()),
-
-            ast::Expr::Vcon(_)
-            | ast::Expr::Match(_)
-            | ast::Expr::Fun(_)
-            | ast::Expr::App(_)
-            | ast::Expr::For(_)
-            | ast::Expr::Universe(_) => {
-                let mut absent = AbsenceChecker(self.0.clone_mut());
-                absent.check(callee, context, path)
-            }
-        }
-    }
-
     fn check_ind(
         &mut self,
         ind: &ast::Ind,
@@ -453,6 +414,45 @@ impl StrictPositivityChecker<'_> {
         )?;
 
         Ok(())
+    }
+
+    fn check_app(
+        &mut self,
+        app: &ast::App,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        let path_to_callee = NodePath::Snoc(&path, node_path::APP_CALLEE);
+        self.check_app_callee(app.callee.clone(), context, path_to_callee)?;
+
+        let path_to_args = NodePath::Snoc(&path, node_path::APP_ARGS);
+        let mut absent = AbsenceChecker(self.0.clone_mut());
+        absent.check_independent_exprs(&app.args.hashee, context, path_to_args)?;
+
+        Ok(())
+    }
+
+    fn check_app_callee(
+        &mut self,
+        callee: ast::Expr,
+        context: Context,
+        path: NodePath,
+    ) -> Result<(), Vec<NodeEdge>> {
+        match callee {
+            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
+
+            ast::Expr::Deb(_) => Ok(()),
+
+            ast::Expr::Vcon(_)
+            | ast::Expr::Match(_)
+            | ast::Expr::Fun(_)
+            | ast::Expr::App(_)
+            | ast::Expr::For(_)
+            | ast::Expr::Universe(_) => {
+                let mut absent = AbsenceChecker(self.0.clone_mut());
+                absent.check(callee, context, path)
+            }
+        }
     }
 
     fn check_for(
