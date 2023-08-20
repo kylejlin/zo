@@ -238,6 +238,26 @@ fn negative_recursive_ind_in_first_param_type_is_ng() {
 }
 
 #[test]
+fn negative_recursive_ind_in_second_param_type_is_ng() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "Negative" () (
+    ((<FALSE> (for (1) <FALSE>)) ())
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
+
+#[test]
 fn nonstrictly_positive_recursive_ind_in_first_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
@@ -249,6 +269,26 @@ fn nonstrictly_positive_recursive_ind_in_first_param_type_is_ng() {
     let unsubstituted_src = r#"
 (ind Set0 "NonstrictlyPositive" () (
     (((for ((for (0) <FALSE>)) <FALSE>)) ())
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
+
+#[test]
+fn nonstrictly_positive_recursive_ind_in_second_param_type_is_ng() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "NonstrictlyPositive" () (
+    ((<FALSE> (for ((for (1) <FALSE>)) <FALSE>)) ())
 ))"#;
 
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
@@ -283,46 +323,6 @@ fn for_with_return_type_with_nonstrictly_positive_recursive_ind_in_first_param_t
         // index types
         ()
     )
-))"#;
-
-    let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let err = get_type_error_under_empty_tcon_or_panic(&src);
-    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
-    insta::assert_display_snapshot!(pretty_printed_err);
-}
-
-#[test]
-fn negative_recursive_ind_in_second_param_type_is_ng() {
-    let false_def = (
-        "<FALSE>",
-        r#"
-(ind Set0 "False" () ())"#,
-    );
-    let src_defs = [false_def];
-
-    let unsubstituted_src = r#"
-(ind Set0 "Negative" () (
-    ((<FALSE> (for (1) <FALSE>)) ())
-))"#;
-
-    let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let err = get_type_error_under_empty_tcon_or_panic(&src);
-    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
-    insta::assert_display_snapshot!(pretty_printed_err);
-}
-
-#[test]
-fn nonstrictly_positive_recursive_ind_in_second_param_type_is_ng() {
-    let false_def = (
-        "<FALSE>",
-        r#"
-(ind Set0 "False" () ())"#,
-    );
-    let src_defs = [false_def];
-
-    let unsubstituted_src = r#"
-(ind Set0 "NonstrictlyPositive" () (
-    ((<FALSE> (for ((for (1) <FALSE>)) <FALSE>)) ())
 ))"#;
 
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
@@ -534,6 +534,8 @@ fn ind_app_with_recursive_ind_in_arg_as_second_param_type_is_ng() {
     let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
     insta::assert_display_snapshot!(pretty_printed_err);
 }
+
+// Misc tests
 
 #[test]
 fn tree_inline() {
