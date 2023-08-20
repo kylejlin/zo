@@ -404,6 +404,42 @@ fn positivity_condition_satisfying_ind_expr_as_param_types_are_ok() {
 }
 
 #[test]
+fn ind_app_with_recursive_ind_in_arg_as_first_param_type_is_ng() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
+
+    let unsubstituted_src = r#"
+(fun nonrec ((for (Set1) Set0)) (for (Set0) Set1)
+    (ind Set1 "Foo" (Set0) (
+        (
+            // vcon param types
+            (
+                (
+                    (ind Set1 "Bar" (Set0) (
+                        (() (<FALSE>))
+                    ))
+
+                    (2 (0 <FALSE>))
+                )
+            )
+
+            // index args
+            (<FALSE>)
+        )
+    ))
+)"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
+
+#[test]
 fn tree_inline() {
     let src = r#"
 (ind Set0 "Tree" () (
