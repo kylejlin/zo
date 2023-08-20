@@ -404,6 +404,64 @@ fn positivity_condition_satisfying_ind_expr_as_param_types_are_ok() {
 }
 
 #[test]
+fn app_with_positivity_condition_satisfying_ind_callee_and_nonrec_args_as_param_types_are_ok() {
+    let true_def = (
+        "<TRUE>",
+        r#"
+(ind Set0 "True" () (
+    (() ())
+))"#,
+    );
+    let truec_def = ("<TRUEC>", r#"(vcon <TRUE> 0)"#);
+    let src_defs = [true_def, truec_def];
+
+    let unsubstituted_src = r#"
+    (ind Set0 "Tree" () (
+        // `leaf`
+        (() ())
+    
+        // `internal`
+        (
+            // vcon param types
+            (
+                // first vcon param type 
+                (
+                    (ind Set0 "List" (<TRUE>) (
+                        // nil
+                        (() (<TRUEC>))
+                    
+                        // cons
+                        ((1 (1 <TRUEC>)) (<TRUEC>))
+                    ))
+
+                    <TRUEC>
+                )
+    
+                // second vcon param type 
+                (
+                    (ind Set0 "List" (<TRUE>) (
+                        // nil
+                        (() (<TRUEC>))
+                    
+                        // cons
+                        ((2 (1 <TRUEC>)) (<TRUEC>))
+                    ))
+
+                    <TRUEC>
+                )
+            )
+            
+            // index args
+            ()
+        )
+    ))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
+
+#[test]
 fn ind_app_with_recursive_ind_in_arg_as_first_param_type_is_ng() {
     let false_def = (
         "<FALSE>",
