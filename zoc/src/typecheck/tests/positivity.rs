@@ -8,9 +8,23 @@ use super::*;
 //
 // So, I use "ok" instead of "legal",
 // and "ng" (short for "no good") instead of "illegal".
+// Every test name begins with either "ok" or "ng".
+//
+// If a test name begins with "ok", then that test
+// tests that the typechecker accepts
+// the behavior described in the rest of the test name.
+// For example, the `ok_nonrecursive_param_types` test
+// tests that the typechecker accepts nonrecursive param types.
+//
+// If a test name begins with "ng", then that test
+// tests that the typechecker rejects
+// the behavior described in the rest of the test name.
+// For example, the `ng_recursive_ind_in_index_arg` test
+// tests that the typechecker rejects
+// an ind expression with a recursive ind appearing in an index arg.
 
 #[test]
-fn rec_ind_in_index_arg_is_ng() {
+fn ng_index_arg_contains_recursive_ind() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -40,7 +54,7 @@ fn rec_ind_in_index_arg_is_ng() {
 }
 
 #[test]
-fn nonrecursive_param_types_are_ok() {
+fn ok_param_types_are_nonrecursive() {
     let nat_def = (
         "<NAT>",
         r#"
@@ -62,7 +76,7 @@ fn nonrecursive_param_types_are_ok() {
 }
 
 #[test]
-fn recursive_ind_param_types_are_ng() {
+fn ok_param_types_are_recursive_inds() {
     let src = r#"
 (ind Set0 "Tree" () (
     // `leaf`
@@ -88,7 +102,7 @@ fn recursive_ind_param_types_are_ng() {
 }
 
 #[test]
-fn recursive_ind_app_with_nonrecursive_arg_as_param_types_are_ok() {
+fn ok_param_types_are_apps_with_recursive_ind_callee_and_nonrecursive_args() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -116,8 +130,11 @@ fn recursive_ind_app_with_nonrecursive_arg_as_param_types_are_ok() {
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
+// TODO: Delete and move
+// ng_first_param_type_is_app_where_arg_is_recursive
+// here.
 #[test]
-fn recursive_ind_app_with_recursive_ind_in_arg_as_first_param_type_is_ng() {
+fn ng_first_param_type_is_app_with_recursive_ind_callee_and_recursive_arg() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -152,7 +169,7 @@ fn recursive_ind_app_with_recursive_ind_in_arg_as_first_param_type_is_ng() {
 }
 
 #[test]
-fn recursive_ind_app_with_recursive_ind_in_arg_as_second_param_type_is_ng() {
+fn ng_second_param_type_is_app_with_recursive_ind_callee_and_recursive_arg() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -189,7 +206,7 @@ fn recursive_ind_app_with_recursive_ind_in_arg_as_second_param_type_is_ng() {
 }
 
 #[test]
-fn strictly_positive_fors_in_param_types_are_ok() {
+fn ok_param_types_are_strictly_positive_fors() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -218,7 +235,7 @@ fn strictly_positive_fors_in_param_types_are_ok() {
 }
 
 #[test]
-fn negative_recursive_ind_in_first_param_type_is_ng() {
+fn ng_first_param_type_contains_negative_recursive_ind() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -238,7 +255,7 @@ fn negative_recursive_ind_in_first_param_type_is_ng() {
 }
 
 #[test]
-fn negative_recursive_ind_in_second_param_type_is_ng() {
+fn ng_second_param_type_contains_negative_recursive_ind() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -258,7 +275,7 @@ fn negative_recursive_ind_in_second_param_type_is_ng() {
 }
 
 #[test]
-fn nonstrictly_positive_recursive_ind_in_first_param_type_is_ng() {
+fn ng_first_param_type_contains_nonstrictly_positive_recursive_ind() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -278,7 +295,7 @@ fn nonstrictly_positive_recursive_ind_in_first_param_type_is_ng() {
 }
 
 #[test]
-fn nonstrictly_positive_recursive_ind_in_second_param_type_is_ng() {
+fn ng_second_param_type_contains_nonstrictly_positive_recursive_ind() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -298,7 +315,7 @@ fn nonstrictly_positive_recursive_ind_in_second_param_type_is_ng() {
 }
 
 #[test]
-fn for_with_return_type_with_nonstrictly_positive_recursive_ind_in_first_param_type_is_ng() {
+fn ng_first_param_type_is_for_where_return_type_contains_nonstrictly_positive_recursive_ind() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -332,7 +349,7 @@ fn for_with_return_type_with_nonstrictly_positive_recursive_ind_in_first_param_t
 }
 
 #[test]
-fn for_with_return_type_with_nonstrictly_positive_recursive_ind_in_second_param_type_is_ng() {
+fn ng_second_param_type_is_for_where_return_type_contains_nonstrictly_positive_recursive_ind() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -368,7 +385,7 @@ fn for_with_return_type_with_nonstrictly_positive_recursive_ind_in_second_param_
 }
 
 #[test]
-fn positivity_condition_satisfying_ind_expr_as_param_types_are_ok() {
+fn ok_param_types_are_strictly_positive_inds() {
     let src = r#"
 (ind Set0 "Tree" () (
     // `leaf`
@@ -404,7 +421,7 @@ fn positivity_condition_satisfying_ind_expr_as_param_types_are_ok() {
 }
 
 #[test]
-fn app_with_positivity_condition_satisfying_ind_callee_and_nonrec_args_as_param_types_are_ok() {
+fn ok_param_types_are_apps_where_callees_are_strictly_positive_inds_and_args_are_nonrecursive() {
     let true_def = (
         "<TRUE>",
         r#"
@@ -462,7 +479,7 @@ fn app_with_positivity_condition_satisfying_ind_callee_and_nonrec_args_as_param_
 }
 
 #[test]
-fn ind_app_with_recursive_ind_in_arg_as_first_param_type_is_ng() {
+fn ng_first_param_type_is_app_where_arg_is_recursive() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -498,7 +515,7 @@ fn ind_app_with_recursive_ind_in_arg_as_first_param_type_is_ng() {
 }
 
 #[test]
-fn ind_app_with_recursive_ind_in_arg_as_second_param_type_is_ng() {
+fn ng_second_param_type_is_app_where_arg_is_recursive() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -536,7 +553,7 @@ fn ind_app_with_recursive_ind_in_arg_as_second_param_type_is_ng() {
 }
 
 #[test]
-fn positivity_condition_nonsatisfying_ind_as_first_param_type_is_ng() {
+fn ng_first_param_type_is_bad_ind() {
     let false_def = (
         "<FALSE>",
         r#"
