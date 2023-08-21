@@ -721,6 +721,49 @@ fn ng_first_param_type_is_normal_form_recursive_match_expr() {
     insta::assert_display_snapshot!(pretty_printed_err);
 }
 
+#[test]
+fn ng_second_param_type_is_normal_form_recursive_match_expr() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let bool_def = (
+        "<BOOL>",
+        r#"
+(ind Set0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let src_defs = [false_def, bool_def];
+
+    let unsubstituted_src = r#"
+(fun nonrec (<BOOL>) Set0
+    (ind Set0 "Foo" () (
+        (
+            // vcon param types
+            (
+                <FALSE>
+
+                (match 3 1 Set0 (
+                    (0 1)
+                    (0 1)
+                ))
+            )
+
+            // index args
+            ()
+        )
+    ))
+)"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
+
 // Misc tests
 
 #[test]

@@ -1,0 +1,59 @@
+---
+source: zoc/src/typecheck/tests/positivity.rs
+expression: pretty_printed_err
+---
+TypeError::VconDefParamTypeFailsStrictPositivityCondition {
+    def: (
+        (
+            (
+                ind
+                Set0
+                "False"
+                ()
+                ()
+            )
+            (
+                match
+                3
+                1
+                Set0
+                (
+                    (
+                        0
+                        1
+                    )
+                    (
+                        0
+                        1
+                    )
+                )
+            )
+        )
+        ()
+    )@(ByteIndex(103)..ByteIndex(363)),
+    param_type_index: 1,
+    normalized_param_type: (
+        match
+        3
+        1
+        Set0
+        (
+            (
+                0
+                1
+            )
+            (
+                0
+                1
+            )
+        )
+    ),
+    path_from_param_type_to_problematic_deb: [
+        NodeEdge(
+            2,
+        ),
+        NodeEdge(
+            0,
+        ),
+    ],
+}
