@@ -79,9 +79,21 @@ enum Context<'a> {
     Snoc(&'a Context<'a>, RestrictionStatusVec),
 }
 
+type RestrictionStatusVec = RepeatVec<IsRestrictedRecursiveIndEntry>;
+
+/// A repeat vec is a vec where all the elements are the same.
+/// For example, `vec![]`, `vec![true]`, `vec![true, true]`,
+/// and `vec![true; 3]` are all repeat vecs.
+///
+/// While we _could_ represent a repeat vec with a normal `Vec`,
+/// it would waste memory.
+///
+/// Since all the elements are the same,
+/// we can save memory by only storing one copy of the element.
+/// This is exactly what `RepeatVec` does.
 #[derive(Clone, Copy, Debug)]
-struct RestrictionStatusVec {
-    restricted: IsRestrictedRecursiveIndEntry,
+struct RepeatVec<T> {
+    val: T,
     len: usize,
 }
 
@@ -778,17 +790,15 @@ impl Context<'_> {
         }
 
         match self {
-            Context::Base(rac) if rac.restricted == extension.restricted => {
-                Context::Base(RestrictionStatusVec {
-                    restricted: extension.restricted,
-                    len: rac.len + extension.len,
-                })
-            }
+            Context::Base(rac) if rac.val == extension.val => Context::Base(RestrictionStatusVec {
+                val: extension.val,
+                len: rac.len + extension.len,
+            }),
 
-            Context::Snoc(rdc, rac) if rac.restricted == extension.restricted => Context::Snoc(
+            Context::Snoc(rdc, rac) if rac.val == extension.val => Context::Snoc(
                 rdc,
                 RestrictionStatusVec {
-                    restricted: extension.restricted,
+                    val: extension.val,
                     len: rac.len + extension.len,
                 },
             ),
@@ -820,20 +830,20 @@ impl Context<'_> {
 impl RestrictionStatusVec {
     pub fn restricted_singleton() -> Self {
         Self {
-            restricted: IsRestrictedRecursiveIndEntry(true),
+            val: IsRestrictedRecursiveIndEntry(true),
             len: 1,
         }
     }
 
     pub fn unrestricted(len: usize) -> Self {
         Self {
-            restricted: IsRestrictedRecursiveIndEntry(false),
+            val: IsRestrictedRecursiveIndEntry(false),
             len,
         }
     }
 }
 
-impl RestrictionStatusVec {
+impl<T> RepeatVec<T> {
     pub fn len(&self) -> usize {
         self.len
     }
@@ -844,9 +854,12 @@ impl RestrictionStatusVec {
 
     /// We name this method `get_copied` instead of `get` because
     /// `get` conventionally returns `Option<&T>` instead of `Option<T>`.
-    pub fn get_copied(&self, index: usize) -> Option<IsRestrictedRecursiveIndEntry> {
+    pub fn get_copied(&self, index: usize) -> Option<T>
+    where
+        T: Copy,
+    {
         if index < self.len {
-            Some(self.restricted)
+            Some(self.val)
         } else {
             None
         }
