@@ -478,7 +478,7 @@ fn ok_param_types_are_apps_where_callees_are_strictly_positive_inds_and_args_are
 }
 
 #[test]
-fn ng_first_param_type_is_bad_ind() {
+fn ng_first_param_type_is_ind_where_first_vcon_def_first_param_type_is_problematic() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -515,7 +515,44 @@ fn ng_first_param_type_is_bad_ind() {
     insta::assert_display_snapshot!(pretty_printed_err);
 }
 
-// TODO Test case where Bar vcon def's second param type is problematic.
+#[test]
+fn ng_first_param_type_is_ind_where_first_vcon_def_second_param_type_is_problematic() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let src_defs = [false_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "Foo" () (
+    (
+        // vcon param types
+        (
+            (ind Set0 "Bar" () (
+                (
+                    // vcon param types
+                    (
+                        <FALSE>
+                        (for (2) <FALSE>)
+                    )
+
+                    // index args
+                    ()
+                )
+            ))
+        )
+
+        // index args
+        ()
+    )
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
+    insta::assert_display_snapshot!(pretty_printed_err);
+}
 
 // Misc tests
 
