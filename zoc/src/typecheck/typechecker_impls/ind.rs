@@ -6,14 +6,6 @@ impl TypeChecker {
         ind: RcHashed<cst::Ind>,
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
-        // TODO: Check for strict positivity.
-        // We can and should check this before
-        // we perform the rest of the checks,
-        // in order to prevent the chance of infinite recursion.
-        //
-        // Page 7 of https://inria.hal.science/hal-01094195/document
-        // may possibly be of some use.
-
         let normalized_index_types_g0 = self
             .typecheck_and_normalize_param_types_with_limit(
                 &ind.hashee.index_types,

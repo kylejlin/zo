@@ -6,12 +6,21 @@
 //! it may loop forever or panic.
 //!
 //! Zo's positivity rules are based on those of Coq.
+//!
 //! You can learn more from
 //! The Coq Proof Assistant Reference Manual
 //! (specifically, Version 8.4pl2, published 2013 April 4).
-//! A copy can be found at
+//! You can find a copy at
 //! https://flint.cs.yale.edu/cs430/coq/pdf/Reference-Manual.pdf
 //! Pages 122 and 123 are relevant.
+//!
+//! You can find a more concise (but less detailed) explanation at
+//! > Christine Paulin-Mohring. Introduction to the Calculus of Inductive Constructions.
+//! > Bruno Woltzenlogel Paleo; David Delahaye.
+//! > All about Proofs, Proofs for All, 55, College Publications, 2015, Studies
+//! > in Logic (Mathematical logic and foundations), 978-1-84890-166-7. ffhal-01094195f
+//! You can find a copy at https://inria.hal.science/hal-01094195/document
+//! Page 7 is relevant.
 
 use super::*;
 
