@@ -635,6 +635,45 @@ fn ng_second_param_type_is_ind_where_first_vcon_def_second_param_type_is_problem
     insta::assert_display_snapshot!(pretty_printed_err);
 }
 
+#[test]
+fn ok_first_param_type_is_recursive_match_that_normalizes_to_nonrecursive_expr() {
+    let false_def = (
+        "<FALSE>",
+        r#"
+(ind Set0 "False" () ())"#,
+    );
+    let bool_def = (
+        "<BOOL>",
+        r#"
+(ind Set0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let bool_true_def = ("<BOOL_TRUE>", "(vcon <BOOL> 0)");
+    let src_defs = [false_def, bool_def, bool_true_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "Foo" () (
+    (
+        // vcon param types
+        (
+            (match <BOOL_TRUE> 1 Set0 (
+                (0 <FALSE>)
+                (0 (for (0) <FALSE>))
+            ))
+        )
+
+        // index args
+        ()
+    )
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
+
 // Misc tests
 
 #[test]
