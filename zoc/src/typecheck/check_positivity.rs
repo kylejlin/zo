@@ -268,79 +268,88 @@ impl VconPositivityChecker<'_> {
         def: &cst::VconDef,
         context: Context,
     ) -> Result<(), TypeError> {
-        {
-            let param_types_ast = self
-                .0
-                .typechecker
-                .cst_converter
-                .convert_expressions(&def.param_types);
-            let normalized_param_types = self
-                .0
-                .typechecker
-                .evaluator
-                .eval_expressions(param_types_ast);
-
-            for (i, param_type) in normalized_param_types
-                .raw()
-                .hashee
-                .iter()
-                .cloned()
-                .enumerate()
-            {
-                let extension = RestrictionStatusVec::unrestricted(i);
-                let extended_context = context.collapsing_snoc(extension);
-                self.strict_positivity_checker()
-                    .check(param_type, extended_context, NodePath::Nil)
-                    .map_err(|path_from_param_type_to_problematic_deb| {
-                        TypeError::VconDefParamTypeFailsStrictPositivityCondition {
-                            def: def.clone(),
-                            param_type_index: i,
-                            normalized_param_type: normalized_param_types
-                                .to_hashee()
-                                .index(i)
-                                .cloned(),
-                            path_from_param_type_to_problematic_deb,
-                        }
-                    })?;
-            }
-        }
+        self.check_vcon_def_param_types(def, context)?;
 
         let extension = RestrictionStatusVec::unrestricted(def.param_types.len());
         let extended_context = context.collapsing_snoc(extension);
+        self.check_vcon_def_index_args(def, extended_context)?;
 
+        Ok(())
+    }
+
+    fn check_vcon_def_param_types(
+        &mut self,
+        def: &cst::VconDef,
+        context: Context,
+    ) -> Result<(), TypeError> {
+        let param_types_ast = self
+            .0
+            .typechecker
+            .cst_converter
+            .convert_expressions(&def.param_types);
+        let normalized_param_types = self
+            .0
+            .typechecker
+            .evaluator
+            .eval_expressions(param_types_ast);
+
+        for (i, param_type) in normalized_param_types
+            .raw()
+            .hashee
+            .iter()
+            .cloned()
+            .enumerate()
         {
-            let index_args_ast = self
-                .0
-                .typechecker
-                .cst_converter
-                .convert_expressions(&def.index_args);
-            let normalized_index_args = self
-                .0
-                .typechecker
-                .evaluator
-                .eval_expressions(index_args_ast);
+            let extension = RestrictionStatusVec::unrestricted(i);
+            let extended_context = context.collapsing_snoc(extension);
+            self.strict_positivity_checker()
+                .check(param_type, extended_context, NodePath::Nil)
+                .map_err(|path_from_param_type_to_problematic_deb| {
+                    TypeError::VconDefParamTypeFailsStrictPositivityCondition {
+                        def: def.clone(),
+                        param_type_index: i,
+                        normalized_param_type: normalized_param_types.to_hashee().index(i).cloned(),
+                        path_from_param_type_to_problematic_deb,
+                    }
+                })?;
+        }
 
-            for (i, index_arg) in normalized_index_args
-                .raw()
-                .hashee
-                .iter()
-                .cloned()
-                .enumerate()
-            {
-                self.absence_checker()
-                    .check(index_arg, extended_context, NodePath::Nil)
-                    .map_err(|path_from_index_arg_to_problematic_deb| {
-                        TypeError::RecursiveIndParamAppearsInVconDefIndexArg {
-                            def: def.clone(),
-                            index_arg_index: i,
-                            normalized_index_arg: normalized_index_args
-                                .to_hashee()
-                                .index(i)
-                                .cloned(),
-                            path_from_index_arg_to_problematic_deb,
-                        }
-                    })?;
-            }
+        Ok(())
+    }
+
+    fn check_vcon_def_index_args(
+        &mut self,
+        def: &cst::VconDef,
+        context: Context,
+    ) -> Result<(), TypeError> {
+        let index_args_ast = self
+            .0
+            .typechecker
+            .cst_converter
+            .convert_expressions(&def.index_args);
+        let normalized_index_args = self
+            .0
+            .typechecker
+            .evaluator
+            .eval_expressions(index_args_ast);
+
+        for (i, index_arg) in normalized_index_args
+            .raw()
+            .hashee
+            .iter()
+            .cloned()
+            .enumerate()
+        {
+            self.absence_checker()
+                .check(index_arg, context, NodePath::Nil)
+                .map_err(|path_from_index_arg_to_problematic_deb| {
+                    TypeError::RecursiveIndParamAppearsInVconDefIndexArg {
+                        def: def.clone(),
+                        index_arg_index: i,
+                        normalized_index_arg: normalized_index_args.to_hashee().index(i).cloned(),
+                        path_from_index_arg_to_problematic_deb,
+                    }
+                })?;
         }
 
         Ok(())
