@@ -573,6 +573,8 @@ fn positivity_condition_nonsatisfying_ind_as_first_param_type_is_ng() {
     insta::assert_display_snapshot!(pretty_printed_err);
 }
 
+// TODO Test case where Bar vcon def's second param type is problematic.
+
 // Misc tests
 
 #[test]
