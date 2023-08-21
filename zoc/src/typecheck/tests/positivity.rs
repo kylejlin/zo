@@ -764,6 +764,37 @@ fn ng_second_param_type_is_normal_form_recursive_match_expr() {
     insta::assert_display_snapshot!(pretty_printed_err);
 }
 
+#[test]
+fn ok_param_types_are_fors_where_param_types_are_nonmutual_ind() {
+    let nat_def = (
+        "<NAT>",
+        r#"
+(ind Set0 "Nat" () (
+    (() ())
+    ((0) ())
+))"#,
+    );
+    let src_defs = [nat_def];
+
+    let unsubstituted_src = r#"
+(ind Set0 "Foo" () (
+    (
+        // vcon param types
+        (
+            (for (<NAT>) <NAT>)
+            (for (<NAT>) <NAT>)
+        )
+        
+        // index args
+        ()
+    )
+))"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    let type_ = get_type_under_empty_tcon_or_panic(&src);
+    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+}
+
 mod not_feature_oriented {
     use super::*;
 
