@@ -636,7 +636,7 @@ fn ng_second_param_type_is_ind_where_first_vcon_def_second_param_type_is_problem
 }
 
 #[test]
-fn ok_first_param_type_is_recursive_match_that_normalizes_to_nonrecursive_expr() {
+fn ok_param_types_are_recursive_match_exprs_that_normalize_to_nonrecursive_exprs() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -651,7 +651,8 @@ fn ok_first_param_type_is_recursive_match_that_normalizes_to_nonrecursive_expr()
 ))"#,
     );
     let bool_true_def = ("<BOOL_TRUE>", "(vcon <BOOL> 0)");
-    let src_defs = [false_def, bool_def, bool_true_def];
+    let bool_false_def = ("<BOOL_FALSE>", "(vcon <BOOL> 1)");
+    let src_defs = [false_def, bool_def, bool_true_def, bool_false_def];
 
     let unsubstituted_src = r#"
 (ind Set0 "Foo" () (
@@ -661,6 +662,11 @@ fn ok_first_param_type_is_recursive_match_that_normalizes_to_nonrecursive_expr()
             (match <BOOL_TRUE> 1 Set0 (
                 (0 <FALSE>)
                 (0 (for (0) <FALSE>))
+            ))
+
+            (match <BOOL_FALSE> 1 Set0 (
+                (0 (for (1) <FALSE>))
+                (0 <FALSE>)
             ))
         )
 
