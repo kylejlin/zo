@@ -764,11 +764,12 @@ fn ng_second_param_type_is_normal_form_recursive_match_expr() {
     insta::assert_display_snapshot!(pretty_printed_err);
 }
 
-// Misc tests
+mod not_feature_oriented {
+    use super::*;
 
-#[test]
-fn tree_inline() {
-    let src = r#"
+    #[test]
+    fn tree_inline() {
+        let src = r#"
 (ind Set0 "Tree" () (
     // `leaf`
     (() ())
@@ -784,15 +785,15 @@ fn tree_inline() {
         ))
     ) ())
 ))"#;
-    let type_ = get_type_under_empty_tcon_or_panic(&src);
-    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
-}
+        let type_ = get_type_under_empty_tcon_or_panic(&src);
+        insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+    }
 
-#[test]
-fn list_tree_inline() {
-    let tree_def = (
-        "<TREE>",
-        r#"
+    #[test]
+    fn list_tree_inline() {
+        let tree_def = (
+            "<TREE>",
+            r#"
 (ind Set0 "Tree" () (
     // `leaf`
     (() ())
@@ -808,10 +809,10 @@ fn list_tree_inline() {
         ))
     ) ())
 ))"#,
-    );
-    let src_defs = [tree_def];
+        );
+        let src_defs = [tree_def];
 
-    let unsubstituted_src = r#"
+        let unsubstituted_src = r#"
     (ind Set0 "List" () (
         // DB index stack is
         // 0 =>  List(T)
@@ -834,16 +835,16 @@ fn list_tree_inline() {
         ) ())
     ))"#;
 
-    let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let type_ = get_type_under_empty_tcon_or_panic(&src);
-    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
-}
+        let src = substitute_with_compounding(src_defs, unsubstituted_src);
+        let type_ = get_type_under_empty_tcon_or_panic(&src);
+        insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+    }
 
-#[test]
-fn tree_noninline() {
-    let list_0_def = (
-        "<LIST_0>",
-        r#"
+    #[test]
+    fn tree_noninline() {
+        let list_0_def = (
+            "<LIST_0>",
+            r#"
 (ind Set0 "List" () (
     // DB index stack is
     // 0 =>  List(T)
@@ -865,31 +866,31 @@ fn tree_noninline() {
         1
     ) ())
 ))"#,
-    );
-    let polymorphic_list_def = (
-        "<POLYMORPHIC_LIST>",
-        r#"
+        );
+        let polymorphic_list_def = (
+            "<POLYMORPHIC_LIST>",
+            r#"
 (fun nonrec (Set0) Set0
     <LIST_0>
 )"#,
-    );
-    let polymorphic_nil_def = (
-        "<POLYMORPHIC_NIL>",
-        r#"
+        );
+        let polymorphic_nil_def = (
+            "<POLYMORPHIC_NIL>",
+            r#"
 (fun nonrec (Set0) (<POLYMORPHIC_LIST> 0)
     (vcon <LIST_0> 0)
 )"#,
-    );
-    let polymorphic_cons_def = (
-        "<POLYMORPHIC_CONS>",
-        r#"
+        );
+        let polymorphic_cons_def = (
+            "<POLYMORPHIC_CONS>",
+            r#"
 (fun nonrec (Set0) (for (0 (<POLYMORPHIC_LIST> 1)) (<POLYMORPHIC_LIST> 2))
     (vcon <LIST_0> 1)
 )"#,
-    );
-    let tree_def = (
-        "<TREE>",
-        r#"
+        );
+        let tree_def = (
+            "<TREE>",
+            r#"
 (ind Set0 "Tree" () (
     // `leaf`
     (() ())
@@ -897,27 +898,27 @@ fn tree_noninline() {
     // `internal`
     (((<POLYMORPHIC_LIST> 0) 1) ())
 ))"#,
-    );
-    let src_defs = [
-        list_0_def,
-        polymorphic_list_def,
-        polymorphic_nil_def,
-        polymorphic_cons_def,
-        tree_def,
-    ];
+        );
+        let src_defs = [
+            list_0_def,
+            polymorphic_list_def,
+            polymorphic_nil_def,
+            polymorphic_cons_def,
+            tree_def,
+        ];
 
-    let unsubstituted_src = r#"<TREE>"#;
+        let unsubstituted_src = r#"<TREE>"#;
 
-    let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let type_ = get_type_under_empty_tcon_or_panic(&src);
-    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
-}
+        let src = substitute_with_compounding(src_defs, unsubstituted_src);
+        let type_ = get_type_under_empty_tcon_or_panic(&src);
+        insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+    }
 
-#[test]
-fn list_tree_noninline() {
-    let list_0_def = (
-        "<LIST_0>",
-        r#"
+    #[test]
+    fn list_tree_noninline() {
+        let list_0_def = (
+            "<LIST_0>",
+            r#"
 (ind Set0 "List" () (
     // DB index stack is
     // 0 =>  List(T)
@@ -939,31 +940,31 @@ fn list_tree_noninline() {
         1
     ) ())
 ))"#,
-    );
-    let polymorphic_list_def = (
-        "<POLYMORPHIC_LIST>",
-        r#"
+        );
+        let polymorphic_list_def = (
+            "<POLYMORPHIC_LIST>",
+            r#"
 (fun nonrec (Set0) Set0
     <LIST_0>
 )"#,
-    );
-    let polymorphic_nil_def = (
-        "<POLYMORPHIC_NIL>",
-        r#"
+        );
+        let polymorphic_nil_def = (
+            "<POLYMORPHIC_NIL>",
+            r#"
 (fun nonrec (Set0) (<POLYMORPHIC_LIST> 0)
     (vcon <LIST_0> 0)
 )"#,
-    );
-    let polymorphic_cons_def = (
-        "<POLYMORPHIC_CONS>",
-        r#"
+        );
+        let polymorphic_cons_def = (
+            "<POLYMORPHIC_CONS>",
+            r#"
 (fun nonrec (Set0) (for (0 (<POLYMORPHIC_LIST> 1)) (<POLYMORPHIC_LIST> 2))
     (vcon <LIST_0> 1)
 )"#,
-    );
-    let tree_def = (
-        "<TREE>",
-        r#"
+        );
+        let tree_def = (
+            "<TREE>",
+            r#"
 (ind Set0 "Tree" () (
     // `leaf`
     (() ())
@@ -971,20 +972,19 @@ fn list_tree_noninline() {
     // `internal`
     (((<POLYMORPHIC_LIST> 0) 1) ())
 ))"#,
-    );
-    let src_defs = [
-        list_0_def,
-        polymorphic_list_def,
-        polymorphic_nil_def,
-        polymorphic_cons_def,
-        tree_def,
-    ];
+        );
+        let src_defs = [
+            list_0_def,
+            polymorphic_list_def,
+            polymorphic_nil_def,
+            polymorphic_cons_def,
+            tree_def,
+        ];
 
-    let unsubstituted_src = r#"(<POLYMORPHIC_LIST> <TREE>)"#;
+        let unsubstituted_src = r#"(<POLYMORPHIC_LIST> <TREE>)"#;
 
-    let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let type_ = get_type_under_empty_tcon_or_panic(&src);
-    insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+        let src = substitute_with_compounding(src_defs, unsubstituted_src);
+        let type_ = get_type_under_empty_tcon_or_panic(&src);
+        insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
+    }
 }
-
-// TODO: Add more tests.
