@@ -10,7 +10,8 @@
 //! You can learn more from
 //! The Coq Proof Assistant Reference Manual
 //! (specifically, Version 8.4pl2, published 2013 April 4).
-//! You can find a copy at
+//! This repository contains a copy in the `papers` directory.
+//! Alternatively, you can also find a copy at
 //! https://flint.cs.yale.edu/cs430/coq/pdf/Reference-Manual.pdf
 //! Pages 122 and 123 are relevant.
 //!
@@ -19,7 +20,9 @@
 //! > Bruno Woltzenlogel Paleo; David Delahaye.
 //! > All about Proofs, Proofs for All, 55, College Publications, 2015, Studies
 //! > in Logic (Mathematical logic and foundations), 978-1-84890-166-7. ffhal-01094195f
-//! You can find a copy at https://inria.hal.science/hal-01094195/document
+//! This repository contains a copy in the `papers` directory.
+//! Alternatively, you can also find a copy at
+//! https://inria.hal.science/hal-01094195/document
 //! Page 7 is relevant.
 
 use super::*;
