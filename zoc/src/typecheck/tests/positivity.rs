@@ -130,11 +130,8 @@ fn ok_param_types_are_apps_with_recursive_ind_callee_and_nonrecursive_args() {
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
 }
 
-// TODO: Delete and move
-// ng_first_param_type_is_app_where_arg_is_recursive
-// here.
 #[test]
-fn ng_first_param_type_is_app_with_recursive_ind_callee_and_recursive_arg() {
+fn ng_first_param_type_is_app_where_arg_is_recursive() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -149,15 +146,16 @@ fn ng_first_param_type_is_app_with_recursive_ind_callee_and_recursive_arg() {
             // vcon param types
             (
                 (
-                    0
+                    (ind Set1 "Bar" (Set0) (
+                        (() (<FALSE>))
+                    ))
+
                     (2 (0 <FALSE>))
                 )
             )
 
             // index args
-            (
-                <FALSE>
-            )
+            (<FALSE>)
         )
     ))
 )"#;
@@ -169,7 +167,7 @@ fn ng_first_param_type_is_app_with_recursive_ind_callee_and_recursive_arg() {
 }
 
 #[test]
-fn ng_second_param_type_is_app_with_recursive_ind_callee_and_recursive_arg() {
+fn ng_second_param_type_is_app_where_arg_is_recursive() {
     let false_def = (
         "<FALSE>",
         r#"
@@ -184,17 +182,18 @@ fn ng_second_param_type_is_app_with_recursive_ind_callee_and_recursive_arg() {
             // vcon param types
             (
                 <FALSE>
-                
+
                 (
-                    1
+                    (ind Set1 "Bar" (Set0) (
+                        (() (<FALSE>))
+                    ))
+
                     (3 (1 <FALSE>))
                 )
             )
 
             // index args
-            (
-                <FALSE>
-            )
+            (<FALSE>)
         )
     ))
 )"#;
@@ -476,80 +475,6 @@ fn ok_param_types_are_apps_where_callees_are_strictly_positive_inds_and_args_are
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
     let type_ = get_type_under_empty_tcon_or_panic(&src);
     insta::assert_display_snapshot!(PrettyPrint(type_.raw()));
-}
-
-#[test]
-fn ng_first_param_type_is_app_where_arg_is_recursive() {
-    let false_def = (
-        "<FALSE>",
-        r#"
-(ind Set0 "False" () ())"#,
-    );
-    let src_defs = [false_def];
-
-    let unsubstituted_src = r#"
-(fun nonrec ((for (Set1) Set0)) (for (Set0) Set1)
-    (ind Set1 "Foo" (Set0) (
-        (
-            // vcon param types
-            (
-                (
-                    (ind Set1 "Bar" (Set0) (
-                        (() (<FALSE>))
-                    ))
-
-                    (2 (0 <FALSE>))
-                )
-            )
-
-            // index args
-            (<FALSE>)
-        )
-    ))
-)"#;
-
-    let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let err = get_type_error_under_empty_tcon_or_panic(&src);
-    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
-    insta::assert_display_snapshot!(pretty_printed_err);
-}
-
-#[test]
-fn ng_second_param_type_is_app_where_arg_is_recursive() {
-    let false_def = (
-        "<FALSE>",
-        r#"
-(ind Set0 "False" () ())"#,
-    );
-    let src_defs = [false_def];
-
-    let unsubstituted_src = r#"
-(fun nonrec ((for (Set1) Set0)) (for (Set0) Set1)
-    (ind Set1 "Foo" (Set0) (
-        (
-            // vcon param types
-            (
-                <FALSE>
-
-                (
-                    (ind Set1 "Bar" (Set0) (
-                        (() (<FALSE>))
-                    ))
-
-                    (3 (1 <FALSE>))
-                )
-            )
-
-            // index args
-            (<FALSE>)
-        )
-    ))
-)"#;
-
-    let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let err = get_type_error_under_empty_tcon_or_panic(&src);
-    let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
-    insta::assert_display_snapshot!(pretty_printed_err);
 }
 
 #[test]
