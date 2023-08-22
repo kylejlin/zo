@@ -19,7 +19,7 @@ pub struct UnshiftedEntry<'a>(pub Entry<'a>);
 
 #[derive(Clone, Debug)]
 pub enum Entry<'a> {
-    Top(Option<&'a ipist::Fun>),
+    Top(Option<&'a spanned_ast::Fun>),
     Substruct(SizeBound, Strict),
 }
 
@@ -34,51 +34,51 @@ pub enum SizeBound {
 
 enum CallRequirement<'a> {
     Recursive(RecursiveCallRequirement<'a>),
-    AccessForbidden(&'a ipist::Fun),
+    AccessForbidden(&'a spanned_ast::Fun),
 }
 
 #[derive(Clone)]
 struct RecursiveCallRequirement<'a> {
     arg_index: usize,
     strict_superstruct: Deb,
-    definition_src: &'a ipist::Fun,
+    definition_src: &'a spanned_ast::Fun,
 }
 
 impl TypeChecker {
     pub(crate) fn check_recursion(
         &mut self,
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         match expr {
-            ipist::Expr::Ind(e) => self.check_recursion_in_ind(&e.hashee, rcon),
-            ipist::Expr::Vcon(e) => self.check_recursion_in_vcon(&e.hashee, rcon),
-            ipist::Expr::Match(e) => self.check_recursion_in_match(&e.hashee, rcon),
-            ipist::Expr::Fun(e) => self.check_recursion_in_fun(&e.hashee, None, rcon),
-            ipist::Expr::App(e) => self.check_recursion_in_app(&e.hashee, rcon),
-            ipist::Expr::For(e) => self.check_recursion_in_for(&e.hashee, rcon),
-            ipist::Expr::Deb(e) => self.check_recursion_in_deb(&e.hashee, rcon),
-            ipist::Expr::Universe(_) => Ok(()),
+            spanned_ast::Expr::Ind(e) => self.check_recursion_in_ind(&e.hashee, rcon),
+            spanned_ast::Expr::Vcon(e) => self.check_recursion_in_vcon(&e.hashee, rcon),
+            spanned_ast::Expr::Match(e) => self.check_recursion_in_match(&e.hashee, rcon),
+            spanned_ast::Expr::Fun(e) => self.check_recursion_in_fun(&e.hashee, None, rcon),
+            spanned_ast::Expr::App(e) => self.check_recursion_in_app(&e.hashee, rcon),
+            spanned_ast::Expr::For(e) => self.check_recursion_in_for(&e.hashee, rcon),
+            spanned_ast::Expr::Deb(e) => self.check_recursion_in_deb(&e.hashee, rcon),
+            spanned_ast::Expr::Universe(_) => Ok(()),
         }
     }
 
     fn check_recursion_in_ind(
         &mut self,
-        ind: &ipist::Ind,
+        ind: &spanned_ast::Ind,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        self.check_recursion_in_dependent_exprs(&ind.index_types, rcon)?;
+        self.check_recursion_in_dependent_exprs(&ind.index_types.hashee, rcon)?;
 
         let singleton = vec![UnshiftedEntry(Entry::Top(None))];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &singleton);
-        self.check_recursion_in_vcon_defs(&ind.vcon_defs, extended_rcon)?;
+        self.check_recursion_in_vcon_defs(&ind.vcon_defs.hashee, extended_rcon)?;
 
         Ok(())
     }
 
     fn check_recursion_in_vcon_defs(
         &mut self,
-        defs: &[ipist::VconDef],
+        defs: &[spanned_ast::VconDef],
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         for def in defs {
@@ -89,21 +89,21 @@ impl TypeChecker {
 
     fn check_recursion_in_vcon_def(
         &mut self,
-        def: &ipist::VconDef,
+        def: &spanned_ast::VconDef,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        self.check_recursion_in_dependent_exprs(&def.param_types, rcon)?;
+        self.check_recursion_in_dependent_exprs(&def.param_types.hashee, rcon)?;
 
-        let extension = vec![UnshiftedEntry(Entry::Top(None)); def.param_types.len()];
+        let extension = vec![UnshiftedEntry(Entry::Top(None)); def.param_types.hashee.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
-        self.check_recursion_in_independent_exprs(&def.index_args, extended_rcon)?;
+        self.check_recursion_in_independent_exprs(&def.index_args.hashee, extended_rcon)?;
 
         Ok(())
     }
 
     fn check_recursion_in_vcon(
         &mut self,
-        vcon: &ipist::Vcon,
+        vcon: &spanned_ast::Vcon,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         self.check_recursion_in_ind(&vcon.ind.hashee, rcon)
@@ -111,20 +111,20 @@ impl TypeChecker {
 
     fn check_recursion_in_match(
         &mut self,
-        match_: &ipist::Match,
+        match_: &spanned_ast::Match,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         self.check_recursion(match_.matchee.clone(), rcon)?;
 
         let matchee_bound = self.get_size_bound(match_.matchee.clone(), rcon);
-        self.check_recursion_in_match_cases(&match_.cases, matchee_bound, rcon)?;
+        self.check_recursion_in_match_cases(&match_.cases.hashee, matchee_bound, rcon)?;
 
         Ok(())
     }
 
     fn check_recursion_in_match_cases(
         &mut self,
-        cases: &[ipist::MatchCase],
+        cases: &[spanned_ast::MatchCase],
         matchee_bound: Option<SizeBound>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
@@ -136,11 +136,11 @@ impl TypeChecker {
 
     fn check_recursion_in_match_case(
         &mut self,
-        case: &ipist::MatchCase,
+        case: &spanned_ast::MatchCase,
         matchee_bound: Option<SizeBound>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let extension = get_rcon_extension_for_match_case_params(matchee_bound, case.arity.value);
+        let extension = get_rcon_extension_for_match_case_params(matchee_bound, case.arity);
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(case.return_val.clone(), extended_rcon)?;
         Ok(())
@@ -148,11 +148,11 @@ impl TypeChecker {
 
     fn check_recursion_in_fun(
         &mut self,
-        fun: &ipist::Fun,
+        fun: &spanned_ast::Fun,
         app_arg_status: Option<Vec<UnshiftedEntry>>,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        self.check_recursion_in_dependent_exprs(&fun.param_types, rcon)?;
+        self.check_recursion_in_dependent_exprs(&fun.param_types.hashee, rcon)?;
         self.check_recursion_in_fun_return_type(fun, rcon)?;
 
         let extension = self.get_fun_rcon_extension(fun, app_arg_status)?;
@@ -165,10 +165,10 @@ impl TypeChecker {
 
     fn check_recursion_in_fun_return_type(
         &mut self,
-        fun: &ipist::Fun,
+        fun: &spanned_ast::Fun,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let extension = vec![UnshiftedEntry(Entry::Top(None)); fun.param_types.len()];
+        let extension = vec![UnshiftedEntry(Entry::Top(None)); fun.param_types.hashee.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(fun.return_type.clone(), extended_rcon)?;
         Ok(())
@@ -176,7 +176,7 @@ impl TypeChecker {
 
     fn get_fun_rcon_extension<'a>(
         &mut self,
-        fun: &'a ipist::Fun,
+        fun: &'a spanned_ast::Fun,
         app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
     ) -> Result<Vec<UnshiftedEntry<'a>>, TypeError> {
         self.assert_decreasing_index_is_valid(fun)?;
@@ -188,51 +188,53 @@ impl TypeChecker {
         Ok(out)
     }
 
-    fn assert_decreasing_index_is_valid(&mut self, fun: &ipist::Fun) -> Result<(), TypeError> {
+    fn assert_decreasing_index_is_valid(
+        &mut self,
+        fun: &spanned_ast::Fun,
+    ) -> Result<(), TypeError> {
         match &fun.decreasing_index {
-            ipist::NumberOrNonrecKw::Number(decreasing_index_literal) => {
-                let decreasing_arg_index = decreasing_index_literal.value;
-                if decreasing_arg_index >= fun.param_types.len() {
+            Some(decreasing_arg_index) => {
+                if *decreasing_arg_index >= fun.param_types.hashee.len() {
                     return Err(TypeError::DecreasingArgIndexTooBig { fun: fun.clone() });
                 }
 
                 Ok(())
             }
 
-            ipist::NumberOrNonrecKw::NonrecKw(_) => Ok(()),
+            None => Ok(()),
         }
     }
 
     fn get_fun_param_entries<'a>(
         &mut self,
-        fun: &'a ipist::Fun,
+        fun: &'a spanned_ast::Fun,
         app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
     ) -> Vec<UnshiftedEntry<'a>> {
         app_arg_status
-            .unwrap_or_else(|| vec![UnshiftedEntry(Entry::Top(None)); fun.param_types.len()])
+            .unwrap_or_else(|| vec![UnshiftedEntry(Entry::Top(None)); fun.param_types.hashee.len()])
     }
 
     fn check_recursion_in_app(
         &mut self,
-        app: &ipist::App,
+        app: &spanned_ast::App,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         self.check_recursion_in_app_callee(app, rcon)?;
-        self.check_recursion_in_independent_exprs(&app.args, rcon)?;
+        self.check_recursion_in_independent_exprs(&app.args.hashee, rcon)?;
         Ok(())
     }
 
     fn check_recursion_in_app_callee(
         &mut self,
-        app: &ipist::App,
+        app: &spanned_ast::App,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         match &app.callee {
-            ipist::Expr::Deb(callee) => {
+            spanned_ast::Expr::Deb(callee) => {
                 self.check_recursion_in_app_callee_deb(app, &callee.hashee, rcon)
             }
 
-            ipist::Expr::Fun(callee) => {
+            spanned_ast::Expr::Fun(callee) => {
                 self.check_recursion_in_app_callee_fun(app, &callee.hashee, rcon)
             }
 
@@ -242,12 +244,11 @@ impl TypeChecker {
 
     fn check_recursion_in_app_callee_deb(
         &mut self,
-        app: &ipist::App,
-        callee: &ipist::NumberLiteral,
+        app: &spanned_ast::App,
+        callee: &spanned_ast::DebNode,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        let callee_deb = Deb(callee.value);
-        let requirement = rcon.get_call_requirement(callee_deb);
+        let requirement = rcon.get_call_requirement(callee.deb);
 
         match requirement {
             Some(CallRequirement::Recursive(requirement)) => {
@@ -267,8 +268,8 @@ impl TypeChecker {
 
     fn check_recursion_in_app_callee_fun(
         &mut self,
-        app: &ipist::App,
-        callee: &ipist::Fun,
+        app: &spanned_ast::App,
+        callee: &spanned_ast::Fun,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         let arg_status = self.get_app_callee_fun_arg_status(app, callee, rcon);
@@ -277,26 +278,26 @@ impl TypeChecker {
 
     fn get_app_callee_fun_arg_status(
         &mut self,
-        app: &ipist::App,
-        callee: &ipist::Fun,
+        app: &spanned_ast::App,
+        callee: &spanned_ast::Fun,
         rcon: RecursionCheckingContext,
     ) -> Vec<UnshiftedEntry<'static>> {
         match &callee.decreasing_index {
-            ipist::NumberOrNonrecKw::NonrecKw(_) => {
-                self.get_app_callee_nonrecursive_fun_arg_status(app, rcon)
-            }
+            None => self.get_app_callee_nonrecursive_fun_arg_status(app, rcon),
 
-            ipist::NumberOrNonrecKw::Number(decreasing_index_literal) => self
-                .get_app_callee_recursive_fun_arg_status(app, decreasing_index_literal.value, rcon),
+            Some(decreasing_index) => {
+                self.get_app_callee_recursive_fun_arg_status(app, *decreasing_index, rcon)
+            }
         }
     }
 
     fn get_app_callee_nonrecursive_fun_arg_status(
         &mut self,
-        app: &ipist::App,
+        app: &spanned_ast::App,
         rcon: RecursionCheckingContext,
     ) -> Vec<UnshiftedEntry<'static>> {
         app.args
+            .hashee
             .iter()
             .enumerate()
             .map(|(arg_index, arg)| {
@@ -319,11 +320,12 @@ impl TypeChecker {
 
     fn get_app_callee_recursive_fun_arg_status(
         &mut self,
-        app: &ipist::App,
+        app: &spanned_ast::App,
         decreasing_index: usize,
         rcon: RecursionCheckingContext,
     ) -> Vec<UnshiftedEntry<'static>> {
         app.args
+            .hashee
             .iter()
             .enumerate()
             .map(|(arg_index, arg)| {
@@ -342,11 +344,11 @@ impl TypeChecker {
 
     fn assert_arg_satisfies_recursive_call_requirement(
         &mut self,
-        app: &ipist::App,
+        app: &spanned_ast::App,
         requirement: RecursiveCallRequirement,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        if requirement.arg_index >= app.args.len() {
+        if requirement.arg_index >= app.args.hashee.len() {
             // Do nothing.
             //
             // The user-provided decreasing index is either invalid
@@ -360,7 +362,7 @@ impl TypeChecker {
             return Ok(());
         }
 
-        let arg = &app.args[requirement.arg_index];
+        let arg = &app.args.hashee[requirement.arg_index];
         if !self.is_strict_substruct(arg.clone(), requirement.strict_superstruct, rcon) {
             return Err(TypeError::IllegalRecursiveCall {
                 app: app.clone(),
@@ -375,12 +377,12 @@ impl TypeChecker {
 
     fn check_recursion_in_for(
         &mut self,
-        for_: &ipist::For,
+        for_: &spanned_ast::For,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        self.check_recursion_in_dependent_exprs(&for_.param_types, rcon)?;
+        self.check_recursion_in_dependent_exprs(&for_.param_types.hashee, rcon)?;
 
-        let extension = vec![UnshiftedEntry(Entry::Top(None)); for_.param_types.len()];
+        let extension = vec![UnshiftedEntry(Entry::Top(None)); for_.param_types.hashee.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(for_.return_type.clone(), extended_rcon)?;
 
@@ -389,10 +391,10 @@ impl TypeChecker {
 
     fn check_recursion_in_deb(
         &mut self,
-        deb: &ipist::NumberLiteral,
+        deb: &spanned_ast::DebNode,
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
-        if let Some(requirement) = rcon.get_call_requirement(Deb(deb.value)) {
+        if let Some(requirement) = rcon.get_call_requirement(deb.deb) {
             let err = match requirement {
                 CallRequirement::Recursive(requirement) => {
                     TypeError::RecursiveFunParamInNonCalleePosition {
@@ -418,7 +420,7 @@ impl TypeChecker {
 impl TypeChecker {
     fn check_recursion_in_dependent_exprs(
         &mut self,
-        exprs: &[ipist::Expr],
+        exprs: &[spanned_ast::Expr],
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         if exprs.is_empty() {
@@ -437,7 +439,7 @@ impl TypeChecker {
 
     fn check_recursion_in_independent_exprs(
         &mut self,
-        exprs: &[ipist::Expr],
+        exprs: &[spanned_ast::Expr],
         rcon: RecursionCheckingContext,
     ) -> Result<(), TypeError> {
         for expr in exprs {
@@ -450,7 +452,7 @@ impl TypeChecker {
 impl TypeChecker {
     fn is_strict_substruct(
         &mut self,
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
         possible_superstruct: Deb,
         rcon: RecursionCheckingContext,
     ) -> bool {
@@ -474,38 +476,38 @@ impl TypeChecker {
 impl TypeChecker {
     fn get_size_bound(
         &mut self,
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
         rcon: RecursionCheckingContext,
     ) -> Option<SizeBound> {
         match expr {
-            ipist::Expr::Ind(_)
-            | ipist::Expr::Vcon(_)
-            | ipist::Expr::Fun(_)
-            | ipist::Expr::App(_)
-            | ipist::Expr::For(_)
-            | ipist::Expr::Universe(_) => None,
+            spanned_ast::Expr::Ind(_)
+            | spanned_ast::Expr::Vcon(_)
+            | spanned_ast::Expr::Fun(_)
+            | spanned_ast::Expr::App(_)
+            | spanned_ast::Expr::For(_)
+            | spanned_ast::Expr::Universe(_) => None,
 
-            ipist::Expr::Match(e) => self.get_size_bound_of_match(&e.hashee, rcon),
+            spanned_ast::Expr::Match(e) => self.get_size_bound_of_match(&e.hashee, rcon),
 
-            ipist::Expr::Deb(e) => self.get_size_bound_of_deb(&e.hashee, rcon),
+            spanned_ast::Expr::Deb(e) => self.get_size_bound_of_deb(&e.hashee, rcon),
         }
     }
 
     fn get_size_bound_of_match(
         &mut self,
-        expr: &ipist::Match,
+        expr: &spanned_ast::Match,
         rcon: RecursionCheckingContext,
     ) -> Option<SizeBound> {
-        if expr.cases.is_empty() {
+        if expr.cases.hashee.is_empty() {
             return Some(SizeBound::CaselessMatch);
         }
 
         let matchee_bound = self.get_size_bound(expr.matchee.clone(), rcon);
 
         let mut lowest_common_bound =
-            self.get_size_bound_of_match_case(&expr.cases[0], matchee_bound, rcon)?;
+            self.get_size_bound_of_match_case(&expr.cases.hashee[0], matchee_bound, rcon)?;
 
-        for case in &expr.cases[1..] {
+        for case in &expr.cases.hashee[1..] {
             let case_bound =
                 self.get_size_bound_of_match_case(case, matchee_bound.clone(), rcon)?;
 
@@ -517,27 +519,26 @@ impl TypeChecker {
 
     fn get_size_bound_of_match_case(
         &mut self,
-        expr: &ipist::MatchCase,
+        expr: &spanned_ast::MatchCase,
         matchee_bound: Option<SizeBound>,
         rcon: RecursionCheckingContext,
     ) -> Option<SizeBound> {
-        let extension = get_rcon_extension_for_match_case_params(matchee_bound, expr.arity.value);
+        let extension = get_rcon_extension_for_match_case_params(matchee_bound, expr.arity);
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.get_size_bound(expr.return_val.clone(), extended_rcon)
     }
 
     fn get_size_bound_of_deb(
         &mut self,
-        expr: &ipist::NumberLiteral,
+        expr: &spanned_ast::DebNode,
         rcon: RecursionCheckingContext,
     ) -> Option<SizeBound> {
-        let expr_deb = Deb(expr.value);
-        let entry = rcon.get(expr_deb)?;
+        let entry = rcon.get(expr.deb)?;
         match entry {
             Entry::Substruct(SizeBound::CaselessMatch, _) => Some(SizeBound::CaselessMatch),
 
             Entry::Substruct(SizeBound::Deb(_), _) | Entry::Top(_) => {
-                Some(SizeBound::Deb(expr_deb))
+                Some(SizeBound::Deb(expr.deb))
             }
         }
     }
@@ -638,16 +639,17 @@ impl RecursionCheckingContext<'_> {
         let entry = self.get(deb)?;
         match entry {
             Entry::Top(Some(fun)) => match fun.decreasing_index {
-                ipist::NumberOrNonrecKw::Number(decreasing_index_literal) => {
-                    let decreasing_index = decreasing_index_literal.value;
+                Some(decreasing_index) => {
                     Some(CallRequirement::Recursive(RecursiveCallRequirement {
                         arg_index: decreasing_index,
-                        strict_superstruct: Deb(deb.0 + fun.param_types.len() - decreasing_index),
+                        strict_superstruct: Deb(
+                            deb.0 + fun.param_types.hashee.len() - decreasing_index
+                        ),
                         definition_src: fun,
                     }))
                 }
 
-                ipist::NumberOrNonrecKw::NonrecKw(_) => Some(CallRequirement::AccessForbidden(fun)),
+                None => Some(CallRequirement::AccessForbidden(fun)),
             },
 
             Entry::Top(None) | Entry::Substruct(_, _) => None,

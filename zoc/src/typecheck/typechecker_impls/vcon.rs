@@ -3,14 +3,14 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_vcon(
         &mut self,
-        vcon: RcHashed<ipist::Vcon>,
+        vcon: RcHashed<spanned_ast::Vcon>,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         self.assert_vcon_index_is_valid(vcon.clone())?;
 
         let normalized_ind = self.typecheck_and_normalize_ind(vcon.hashee.ind.clone(), tcon)?;
 
-        let vcon_index = vcon.hashee.vcon_index.value;
+        let vcon_index = vcon.hashee.vcon_index;
         Ok(
             self.get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
                 normalized_ind.clone(),
@@ -19,10 +19,13 @@ impl TypeChecker {
         )
     }
 
-    fn assert_vcon_index_is_valid(&mut self, vcon: RcHashed<ipist::Vcon>) -> Result<(), TypeError> {
-        let vcon_index = vcon.hashee.vcon_index.value;
+    fn assert_vcon_index_is_valid(
+        &mut self,
+        vcon: RcHashed<spanned_ast::Vcon>,
+    ) -> Result<(), TypeError> {
+        let vcon_index = vcon.hashee.vcon_index;
         let defs = &vcon.hashee.ind.hashee.vcon_defs;
-        if vcon_index >= defs.len() {
+        if vcon_index >= defs.hashee.len() {
             return Err(TypeError::InvalidVconIndex(vcon.hashee.clone()));
         }
         Ok(())
@@ -30,7 +33,7 @@ impl TypeChecker {
 
     fn typecheck_and_normalize_ind(
         &mut self,
-        ind: RcHashed<ipist::Ind>,
+        ind: RcHashed<spanned_ast::Ind>,
         tcon: LazyTypeContext,
     ) -> Result<Normalized<RcHashed<minimal_ast::Ind>>, TypeError> {
         self.get_type_of_ind(ind.clone(), tcon)?;

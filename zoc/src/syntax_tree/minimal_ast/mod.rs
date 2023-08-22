@@ -1,12 +1,4 @@
-use crate::syntax_tree::ast;
-
-pub use crate::{
-    hash::*,
-    syntax_tree::ast::{
-        node_path, rc_hashed, AuxDataFamily, Deb, NodeEdge, NodePath, RcHashed, RcHashedVec,
-        StringValue, Universe, UniverseLevel,
-    },
-};
+pub use crate::syntax_tree::ast::prelude::*;
 
 mod debug;
 

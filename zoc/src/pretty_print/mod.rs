@@ -1,5 +1,7 @@
 use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 
+use crate::syntax_tree::token::Span;
+
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct PrettyPrint<'a, T: ?Sized>(pub &'a T);
 
@@ -106,5 +108,41 @@ impl Display for Indentation {
             f.write_str(SOFT_TAB)?;
         }
         Ok(())
+    }
+}
+
+pub struct AppendLocation<T> {
+    pub val: T,
+    pub span: Span,
+}
+
+impl<T> Debug for AppendLocation<T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        Display::fmt(self, f)
+    }
+}
+
+impl<T> Display for AppendLocation<T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        let val = &self.val;
+        let start = self.span.0;
+        let end = self.span.1;
+        write!(f, "{val:?}@({start:?}..{end:?})")
+    }
+}
+
+pub trait WithLocationAppended: Sized {
+    fn with_location_appended(self, span: Span) -> AppendLocation<Self>;
+}
+
+impl<T> WithLocationAppended for T {
+    fn with_location_appended(self, span: Span) -> AppendLocation<Self> {
+        AppendLocation { val: self, span }
     }
 }

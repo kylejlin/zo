@@ -2,11 +2,10 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::*,
     syntax_tree::{
-        ipist,
-        ipist_to_ast::IpistToAstConverter,
         minimal_ast::{self, Deb, RcHashed, RcHashedVec, Universe, UniverseLevel},
         replace_debs::*,
-        token::*,
+        spanned_ast,
+        spanned_ast_to_minimal::SpannedAstToMinimalAstConverter,
     },
 };
 
@@ -35,7 +34,7 @@ mod tests;
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
-    pub ipist_converter: IpistToAstConverter,
+    pub ipist_converter: SpannedAstToMinimalAstConverter,
 }
 
 impl TypeChecker {

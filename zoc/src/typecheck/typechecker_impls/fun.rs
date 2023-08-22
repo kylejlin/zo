@@ -3,7 +3,7 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_fun(
         &mut self,
-        fun_g0: RcHashed<ipist::Fun>,
+        fun_g0: RcHashed<spanned_ast::Fun>,
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         self.assert_fun_has_at_least_one_param(fun_g0.clone())?;
@@ -11,7 +11,7 @@ impl TypeChecker {
         self.check_recursion(fun_g0.clone().into(), RecursionCheckingContext::empty())?;
 
         let normalized_param_types_g0 = self.typecheck_and_normalize_param_types_with_limit(
-            &fun_g0.hashee.param_types,
+            &fun_g0.hashee.param_types.hashee,
             NoLimit,
             tcon_g0,
         )?;
@@ -67,9 +67,9 @@ impl TypeChecker {
 
     fn assert_fun_has_at_least_one_param(
         &self,
-        fun: RcHashed<ipist::Fun>,
+        fun: RcHashed<spanned_ast::Fun>,
     ) -> Result<(), TypeError> {
-        if fun.hashee.param_types.is_empty() {
+        if fun.hashee.param_types.hashee.is_empty() {
             return Err(TypeError::FunHasZeroParams {
                 fun: fun.hashee.clone(),
             });

@@ -12,24 +12,24 @@ mod vcon;
 impl TypeChecker {
     pub fn get_type(
         &mut self,
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         match expr {
-            ipist::Expr::Ind(e) => self.get_type_of_ind(e, tcon),
-            ipist::Expr::Vcon(e) => self.get_type_of_vcon(e, tcon),
-            ipist::Expr::Match(e) => self.get_type_of_match(e, tcon),
-            ipist::Expr::Fun(e) => self.get_type_of_fun(e, tcon),
-            ipist::Expr::App(e) => self.get_type_of_app(e, tcon),
-            ipist::Expr::For(e) => self.get_type_of_for(e, tcon),
-            ipist::Expr::Deb(e) => self.get_type_of_deb(e, tcon),
-            ipist::Expr::Universe(e) => self.get_type_of_universe(e),
+            spanned_ast::Expr::Ind(e) => self.get_type_of_ind(e, tcon),
+            spanned_ast::Expr::Vcon(e) => self.get_type_of_vcon(e, tcon),
+            spanned_ast::Expr::Match(e) => self.get_type_of_match(e, tcon),
+            spanned_ast::Expr::Fun(e) => self.get_type_of_fun(e, tcon),
+            spanned_ast::Expr::App(e) => self.get_type_of_app(e, tcon),
+            spanned_ast::Expr::For(e) => self.get_type_of_for(e, tcon),
+            spanned_ast::Expr::Deb(e) => self.get_type_of_deb(e, tcon),
+            spanned_ast::Expr::Universe(e) => self.get_type_of_universe(e),
         }
     }
 
     fn get_types_of_dependent_expressions(
         &mut self,
-        exprs: &[ipist::Expr],
+        exprs: &[spanned_ast::Expr],
         tcon: LazyTypeContext,
     ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
         let mut out: Normalized<Vec<minimal_ast::Expr>> = Normalized::with_capacity(exprs.len());
@@ -51,7 +51,7 @@ impl TypeChecker {
 
     fn get_types_of_independent_expressions(
         &mut self,
-        exprs: &[ipist::Expr],
+        exprs: &[spanned_ast::Expr],
         tcon: LazyTypeContext,
     ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
         let mut out: Normalized<Vec<minimal_ast::Expr>> = Normalized::with_capacity(exprs.len());
@@ -66,7 +66,7 @@ impl TypeChecker {
 
     fn typecheck_and_normalize_param_types_with_limit(
         &mut self,
-        exprs: &[ipist::Expr],
+        exprs: &[spanned_ast::Expr],
         limiter: impl UniverseLimit,
         tcon: LazyTypeContext,
     ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
@@ -94,7 +94,7 @@ impl TypeChecker {
 
     fn assert_expr_type_is_universe(
         &mut self,
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
         tcon: LazyTypeContext,
     ) -> Result<(), TypeError> {
         let type_ = self.get_type(expr.clone(), tcon)?;
@@ -108,7 +108,7 @@ impl TypeChecker {
 
     fn assert_expr_type_is_universe_and_then_eval(
         &mut self,
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         let type_ = self.get_type(expr.clone(), tcon)?;
@@ -127,19 +127,19 @@ trait UniverseLimit {
     fn assert_ul_is_within_limit(
         &self,
         param_type_type_universe: Universe,
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
     ) -> Result<(), TypeError>;
 }
 
-struct LimitToIndUniverse(RcHashed<ipist::Ind>);
+struct LimitToIndUniverse(RcHashed<spanned_ast::Ind>);
 
 impl UniverseLimit for LimitToIndUniverse {
     fn assert_ul_is_within_limit(
         &self,
         param_type_type_universe: Universe,
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
     ) -> Result<(), TypeError> {
-        let inclusive_max = UniverseLevel(self.0.hashee.type_.level);
+        let inclusive_max = self.0.hashee.universe.level;
         if param_type_type_universe.level > inclusive_max {
             return Err(TypeError::UniverseInconsistencyInIndDef {
                 index_or_param_type: expr.clone(),
@@ -155,7 +155,11 @@ impl UniverseLimit for LimitToIndUniverse {
 struct NoLimit;
 
 impl UniverseLimit for NoLimit {
-    fn assert_ul_is_within_limit(&self, _: Universe, _: ipist::Expr) -> Result<(), TypeError> {
+    fn assert_ul_is_within_limit(
+        &self,
+        _: Universe,
+        _: spanned_ast::Expr,
+    ) -> Result<(), TypeError> {
         Ok(())
     }
 }

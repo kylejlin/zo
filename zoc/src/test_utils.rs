@@ -2,7 +2,8 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     pretty_print::*,
     syntax_tree::{
-        ipist, ipist_to_ast::IpistToAstConverter, lexer::lex, minimal_ast, parser::parse,
+        lexer::lex, minimal_ast, parser::parse, spanned_ast,
+        spanned_ast_to_minimal::SpannedAstToMinimalAstConverter,
     },
     typecheck::{LazyTypeContext, TypeChecker, TypeError},
 };
@@ -27,15 +28,15 @@ pub fn substitute_without_compounding(replacements: &[(&str, String)], original:
     result
 }
 
-pub fn parse_ipist_or_panic(src: &str) -> ipist::Expr {
+pub fn parse_ipist_or_panic(src: &str) -> spanned_ast::Expr {
     let tokens = lex(src).unwrap();
     let ost = parse(tokens).unwrap();
     ost.into()
 }
 
 pub fn parse_ast_or_panic(src: &str) -> minimal_ast::Expr {
-    let ipist: ipist::Expr = parse_ipist_or_panic(src);
-    let mut converter = IpistToAstConverter::default();
+    let ipist: spanned_ast::Expr = parse_ipist_or_panic(src);
+    let mut converter = SpannedAstToMinimalAstConverter::default();
     converter.convert(ipist)
 }
 

@@ -3,22 +3,22 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_for(
         &mut self,
-        for_g0: RcHashed<ipist::For>,
+        for_g0: RcHashed<spanned_ast::For>,
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         self.assert_for_has_at_least_one_param(for_g0.clone())?;
 
         let param_type_types_g0 =
-            self.get_types_of_dependent_expressions(&for_g0.hashee.param_types, tcon_g0)?;
+            self.get_types_of_dependent_expressions(&for_g0.hashee.param_types.hashee, tcon_g0)?;
 
         self.assert_every_type_is_universe(
             param_type_types_g0.to_derefed(),
-            &for_g0.hashee.param_types,
+            &for_g0.hashee.param_types.hashee,
         )?;
 
         let param_types_g0_ast = self
             .ipist_converter
-            .convert_expressions(&for_g0.hashee.param_types);
+            .convert_expressions(&for_g0.hashee.param_types.hashee);
         let normalized_param_types_g0 = self.evaluator.eval_expressions(param_types_g0_ast);
 
         let tcon_with_param_types_g1 =
@@ -51,9 +51,9 @@ impl TypeChecker {
 
     fn assert_for_has_at_least_one_param(
         &mut self,
-        for_: RcHashed<ipist::For>,
+        for_: RcHashed<spanned_ast::For>,
     ) -> Result<(), TypeError> {
-        if for_.hashee.param_types.is_empty() {
+        if for_.hashee.param_types.hashee.is_empty() {
             return Err(TypeError::ForHasZeroParams {
                 for_: for_.hashee.clone(),
             });
@@ -65,7 +65,7 @@ impl TypeChecker {
     fn assert_every_type_is_universe(
         &mut self,
         types: Normalized<&[minimal_ast::Expr]>,
-        exprs: &[ipist::Expr],
+        exprs: &[spanned_ast::Expr],
     ) -> Result<(), TypeError> {
         for i in 0..types.raw().len() {
             if !types.raw()[i].is_universe() {

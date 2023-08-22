@@ -7,93 +7,93 @@ use std::fmt::{Debug, Result as FmtResult};
 #[derive(Clone)]
 pub enum TypeError {
     InvalidDeb {
-        deb: NumberLiteral,
+        deb: spanned_ast::DebNode,
         tcon_len: usize,
     },
-    InvalidVconIndex(ipist::Vcon),
+    InvalidVconIndex(spanned_ast::Vcon),
     UnexpectedNonTypeExpression {
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
         type_: NormalForm,
     },
     UniverseInconsistencyInIndDef {
-        index_or_param_type: ipist::Expr,
+        index_or_param_type: spanned_ast::Expr,
         universe: Universe,
-        ind: ipist::Ind,
+        ind: spanned_ast::Ind,
     },
     WrongNumberOfIndexArguments {
-        def: ipist::VconDef,
+        def: spanned_ast::VconDef,
         expected: usize,
         actual: usize,
     },
     NonInductiveMatcheeType {
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
         type_: NormalForm,
     },
     WrongNumberOfMatchCases {
-        match_: ipist::Match,
+        match_: spanned_ast::Match,
         matchee_type_ind: Normalized<minimal_ast::Ind>,
     },
     WrongMatchReturnTypeArity {
-        match_: ipist::Match,
+        match_: spanned_ast::Match,
         matchee_type_args: Vec<NormalForm>,
     },
     WrongMatchCaseArity {
-        actual_node: ipist::NumberLiteral,
+        stated_arity: usize,
         expected: usize,
-        match_: ipist::Match,
+        match_: spanned_ast::Match,
         match_case_index: usize,
     },
     TypeMismatch {
-        expr: ipist::Expr,
+        expr: spanned_ast::Expr,
         expected_type: NormalForm,
         actual_type: NormalForm,
     },
     CalleeTypeIsNotAForExpression {
-        app: ipist::App,
+        app: spanned_ast::App,
         callee_type: NormalForm,
     },
     WrongNumberOfAppArguments {
-        app: ipist::App,
+        app: spanned_ast::App,
         callee_type: Normalized<minimal_ast::For>,
         expected: usize,
         actual: usize,
     },
     FunHasZeroParams {
-        fun: ipist::Fun,
+        fun: spanned_ast::Fun,
     },
     AppHasZeroArgs {
-        app: ipist::App,
+        app: spanned_ast::App,
     },
     ForHasZeroParams {
-        for_: ipist::For,
+        for_: spanned_ast::For,
     },
 
     IllegalRecursiveCall {
-        app: ipist::App,
-        callee_deb_definition_src: ipist::Fun,
+        app: spanned_ast::App,
+        callee_deb_definition_src: spanned_ast::Fun,
         required_decreasing_arg_index: usize,
         required_strict_superstruct: Deb,
     },
     RecursiveFunParamInNonCalleePosition {
-        deb: ipist::NumberLiteral,
-        definition_src: ipist::Fun,
+        deb: spanned_ast::DebNode,
+        definition_src: spanned_ast::Fun,
     },
     DeclaredFunNonrecursiveButUsedRecursiveFunParam {
-        deb: ipist::NumberLiteral,
-        definition_src: ipist::Fun,
+        deb: spanned_ast::DebNode,
+        definition_src: spanned_ast::Fun,
     },
     DecreasingArgIndexTooBig {
-        fun: ipist::Fun,
+        fun: spanned_ast::Fun,
     },
 
     VconDefParamTypeFailsStrictPositivityCondition {
-        def: ipist::VconDef,
+        def: spanned_ast::VconDef,
         param_type_index: usize,
         normalized_param_type: NormalForm,
         path_from_param_type_to_problematic_deb: Vec<minimal_ast::NodeEdge>,
     },
     RecursiveIndParamAppearsInVconDefIndexArg {
-        def: ipist::VconDef,
+        def: spanned_ast::VconDef,
         index_arg_index: usize,
         normalized_index_arg: NormalForm,
         path_from_index_arg_to_problematic_deb: Vec<minimal_ast::NodeEdge>,

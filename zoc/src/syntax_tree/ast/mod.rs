@@ -2,14 +2,14 @@ use std::{fmt::Debug, hash::Hash, rc::Rc};
 
 pub use crate::hash::*;
 
-pub use crate::syntax_tree::ipist::{rc_hashed, RcHashed, RcHashedVec};
-
 mod conversion;
 mod get_digest;
 mod hash;
 
 pub mod node_path;
 pub use node_path::{NodeEdge, NodePath};
+
+pub mod prelude;
 
 pub trait AuxDataFamily:
     Debug + Clone + Copy + PartialEq + Eq + PartialOrd + Ord + Hash + Default
@@ -146,4 +146,14 @@ impl<A: AuxDataFamily> For<A> {
             Expr::For(Rc::new(Hashed::new(self)))
         }
     }
+}
+
+/// Reference-counted hashed.
+pub type RcHashed<T> = Rc<Hashed<T>>;
+
+/// Reference-counted hashed vector.
+pub type RcHashedVec<T> = RcHashed<Vec<T>>;
+
+pub fn rc_hashed<T: Hash>(t: T) -> RcHashed<T> {
+    Rc::new(Hashed::new(t))
 }

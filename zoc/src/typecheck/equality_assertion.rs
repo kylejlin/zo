@@ -2,7 +2,7 @@ use super::*;
 
 #[derive(Clone, Debug)]
 pub struct ExpectedTypeEquality {
-    pub expr: ipist::Expr,
+    pub expr: spanned_ast::Expr,
     pub expected_type: NormalForm,
     pub actual_type: NormalForm,
 }
@@ -10,7 +10,7 @@ pub struct ExpectedTypeEquality {
 /// `exprs`, `expected_types`, and `actual_types` **must** all have the same length.
 #[derive(Clone, Debug)]
 pub struct ExpectedTypeEqualities<'a> {
-    pub exprs: &'a [ipist::Expr],
+    pub exprs: &'a [spanned_ast::Expr],
     pub expected_types: Normalized<&'a [minimal_ast::Expr]>,
     pub actual_types: Normalized<&'a [minimal_ast::Expr]>,
 }

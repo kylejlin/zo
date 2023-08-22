@@ -103,7 +103,7 @@ struct IsRestrictedRecursiveIndEntry(pub bool);
 impl PositivityChecker<'_> {
     pub fn check_ind_positivity_assuming_it_is_otherwise_well_typed(
         &mut self,
-        ind: RcHashed<ipist::Ind>,
+        ind: RcHashed<spanned_ast::Ind>,
         tcon_len: usize,
     ) -> Result<(), TypeError> {
         let base = RestrictionStatusVec::unrestricted(tcon_len);
@@ -112,31 +112,31 @@ impl PositivityChecker<'_> {
 }
 
 impl PositivityChecker<'_> {
-    fn check(&mut self, expr: ipist::Expr, context: Context) -> Result<(), TypeError> {
+    fn check(&mut self, expr: spanned_ast::Expr, context: Context) -> Result<(), TypeError> {
         match expr {
-            ipist::Expr::Ind(e) => self.check_ind(&e.hashee, context),
-            ipist::Expr::Vcon(e) => self.check_vcon(&e.hashee, context),
-            ipist::Expr::Match(e) => self.check_match(&e.hashee, context),
-            ipist::Expr::Fun(e) => self.check_fun(&e.hashee, context),
-            ipist::Expr::App(e) => self.check_app(&e.hashee, context),
-            ipist::Expr::For(e) => self.check_for(&e.hashee, context),
-            ipist::Expr::Deb(_) | ipist::Expr::Universe(_) => Ok(()),
+            spanned_ast::Expr::Ind(e) => self.check_ind(&e.hashee, context),
+            spanned_ast::Expr::Vcon(e) => self.check_vcon(&e.hashee, context),
+            spanned_ast::Expr::Match(e) => self.check_match(&e.hashee, context),
+            spanned_ast::Expr::Fun(e) => self.check_fun(&e.hashee, context),
+            spanned_ast::Expr::App(e) => self.check_app(&e.hashee, context),
+            spanned_ast::Expr::For(e) => self.check_for(&e.hashee, context),
+            spanned_ast::Expr::Deb(_) | spanned_ast::Expr::Universe(_) => Ok(()),
         }
     }
 
-    fn check_ind(&mut self, ind: &ipist::Ind, context: Context) -> Result<(), TypeError> {
-        self.check_dependent_exprs(&ind.index_types, context)?;
+    fn check_ind(&mut self, ind: &spanned_ast::Ind, context: Context) -> Result<(), TypeError> {
+        self.check_dependent_exprs(&ind.index_types.hashee, context)?;
 
         let singleton = RestrictionStatusVec::restricted_singleton();
         let extended_context = context.collapsing_snoc(singleton);
-        self.check_vcon_defs(&ind.vcon_defs, extended_context)?;
+        self.check_vcon_defs(&ind.vcon_defs.hashee, extended_context)?;
 
         Ok(())
     }
 
     fn check_vcon_defs(
         &mut self,
-        defs: &[ipist::VconDef],
+        defs: &[spanned_ast::VconDef],
         context: Context,
     ) -> Result<(), TypeError> {
         for def in defs {
@@ -145,12 +145,16 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon_def(&mut self, def: &ipist::VconDef, context: Context) -> Result<(), TypeError> {
-        self.check_dependent_exprs(&def.param_types, context)?;
+    fn check_vcon_def(
+        &mut self,
+        def: &spanned_ast::VconDef,
+        context: Context,
+    ) -> Result<(), TypeError> {
+        self.check_dependent_exprs(&def.param_types.hashee, context)?;
 
-        let extension = RestrictionStatusVec::unrestricted(def.param_types.len());
+        let extension = RestrictionStatusVec::unrestricted(def.param_types.hashee.len());
         let extended_context = context.collapsing_snoc(extension);
-        self.check_independent_exprs(&def.index_args, extended_context)?;
+        self.check_independent_exprs(&def.index_args.hashee, extended_context)?;
 
         self.vcon_positivity_checker()
             .assert_vcon_type_satisfies_positivity_condition(def, context)?;
@@ -158,26 +162,29 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon(&mut self, vcon: &ipist::Vcon, context: Context) -> Result<(), TypeError> {
+    fn check_vcon(&mut self, vcon: &spanned_ast::Vcon, context: Context) -> Result<(), TypeError> {
         self.check_ind(&vcon.ind.hashee, context)
     }
 
-    fn check_match(&mut self, match_: &ipist::Match, context: Context) -> Result<(), TypeError> {
+    fn check_match(
+        &mut self,
+        match_: &spanned_ast::Match,
+        context: Context,
+    ) -> Result<(), TypeError> {
         self.check(match_.matchee.clone(), context)?;
 
-        let return_type_extension =
-            RestrictionStatusVec::unrestricted(match_.return_type_arity.value);
+        let return_type_extension = RestrictionStatusVec::unrestricted(match_.return_type_arity);
         let return_type_context = context.collapsing_snoc(return_type_extension);
         self.check(match_.return_type.clone(), return_type_context)?;
 
-        self.check_match_cases(&match_.cases, context)?;
+        self.check_match_cases(&match_.cases.hashee, context)?;
 
         Ok(())
     }
 
     fn check_match_cases(
         &mut self,
-        cases: &[ipist::MatchCase],
+        cases: &[spanned_ast::MatchCase],
         context: Context,
     ) -> Result<(), TypeError> {
         for case in cases {
@@ -188,20 +195,21 @@ impl PositivityChecker<'_> {
 
     fn check_match_case(
         &mut self,
-        case: &ipist::MatchCase,
+        case: &spanned_ast::MatchCase,
         context: Context,
     ) -> Result<(), TypeError> {
-        let return_val_extension = RestrictionStatusVec::unrestricted(case.arity.value);
+        let return_val_extension = RestrictionStatusVec::unrestricted(case.arity);
         let return_val_context = context.collapsing_snoc(return_val_extension);
         self.check(case.return_val.clone(), return_val_context)?;
 
         Ok(())
     }
 
-    fn check_fun(&mut self, fun: &ipist::Fun, context: Context) -> Result<(), TypeError> {
-        self.check_dependent_exprs(&fun.param_types, context)?;
+    fn check_fun(&mut self, fun: &spanned_ast::Fun, context: Context) -> Result<(), TypeError> {
+        self.check_dependent_exprs(&fun.param_types.hashee, context)?;
 
-        let return_type_extension = RestrictionStatusVec::unrestricted(fun.param_types.len());
+        let return_type_extension =
+            RestrictionStatusVec::unrestricted(fun.param_types.hashee.len());
         let context_with_params = context.collapsing_snoc(return_type_extension);
         self.check(fun.return_type.clone(), context_with_params)?;
 
@@ -216,16 +224,16 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_app(&mut self, app: &ipist::App, context: Context) -> Result<(), TypeError> {
+    fn check_app(&mut self, app: &spanned_ast::App, context: Context) -> Result<(), TypeError> {
         self.check(app.callee.clone(), context)?;
-        self.check_independent_exprs(&app.args, context)?;
+        self.check_independent_exprs(&app.args.hashee, context)?;
         Ok(())
     }
 
-    fn check_for(&mut self, for_: &ipist::For, context: Context) -> Result<(), TypeError> {
-        self.check_dependent_exprs(&for_.param_types, context)?;
+    fn check_for(&mut self, for_: &spanned_ast::For, context: Context) -> Result<(), TypeError> {
+        self.check_dependent_exprs(&for_.param_types.hashee, context)?;
 
-        let extension = RestrictionStatusVec::unrestricted(for_.param_types.len());
+        let extension = RestrictionStatusVec::unrestricted(for_.param_types.hashee.len());
         let extended_context = context.collapsing_snoc(extension);
         self.check(for_.return_type.clone(), extended_context)?;
 
@@ -234,7 +242,7 @@ impl PositivityChecker<'_> {
 
     fn check_dependent_exprs(
         &mut self,
-        exprs: &[ipist::Expr],
+        exprs: &[spanned_ast::Expr],
         context: Context,
     ) -> Result<(), TypeError> {
         if exprs.is_empty() {
@@ -252,7 +260,7 @@ impl PositivityChecker<'_> {
 
     fn check_independent_exprs(
         &mut self,
-        exprs: &[ipist::Expr],
+        exprs: &[spanned_ast::Expr],
         context: Context,
     ) -> Result<(), TypeError> {
         for expr in exprs.iter().cloned() {
@@ -277,12 +285,12 @@ impl PositivityChecker<'_> {
 impl VconPositivityChecker<'_> {
     fn assert_vcon_type_satisfies_positivity_condition(
         &mut self,
-        def: &ipist::VconDef,
+        def: &spanned_ast::VconDef,
         context: Context,
     ) -> Result<(), TypeError> {
         self.check_vcon_def_param_types(def, context)?;
 
-        let extension = RestrictionStatusVec::unrestricted(def.param_types.len());
+        let extension = RestrictionStatusVec::unrestricted(def.param_types.hashee.len());
         let extended_context = context.collapsing_snoc(extension);
         self.check_vcon_def_index_args(def, extended_context)?;
 
@@ -291,14 +299,14 @@ impl VconPositivityChecker<'_> {
 
     fn check_vcon_def_param_types(
         &mut self,
-        def: &ipist::VconDef,
+        def: &spanned_ast::VconDef,
         context: Context,
     ) -> Result<(), TypeError> {
         let param_types_ast = self
             .0
             .typechecker
             .ipist_converter
-            .convert_expressions(&def.param_types);
+            .convert_expressions(&def.param_types.hashee);
         let normalized_param_types = self
             .0
             .typechecker
@@ -331,14 +339,14 @@ impl VconPositivityChecker<'_> {
 
     fn check_vcon_def_index_args(
         &mut self,
-        def: &ipist::VconDef,
+        def: &spanned_ast::VconDef,
         context: Context,
     ) -> Result<(), TypeError> {
         let index_args_ast = self
             .0
             .typechecker
             .ipist_converter
-            .convert_expressions(&def.index_args);
+            .convert_expressions(&def.index_args.hashee);
         let normalized_index_args = self
             .0
             .typechecker

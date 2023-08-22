@@ -3,7 +3,7 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_match(
         &mut self,
-        match_g0: RcHashed<ipist::Match>,
+        match_g0: RcHashed<spanned_ast::Match>,
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         let matchee_type_g0 = self.get_type(match_g0.hashee.matchee.clone(), tcon_g0)?;
@@ -64,7 +64,7 @@ impl TypeChecker {
 
     fn assert_matchee_type_is_inductive(
         &mut self,
-        matchee: ipist::Expr,
+        matchee: spanned_ast::Expr,
         matchee_type: NormalForm,
     ) -> Result<
         (
@@ -85,11 +85,11 @@ impl TypeChecker {
 
     fn assert_number_of_match_cases_is_correct(
         &mut self,
-        match_: RcHashed<ipist::Match>,
+        match_: RcHashed<spanned_ast::Match>,
         matchee_type_ind: Normalized<RcHashed<minimal_ast::Ind>>,
     ) -> Result<(), TypeError> {
         let expected = matchee_type_ind.raw().hashee.vcon_defs.hashee.len();
-        let actual = match_.hashee.cases.len();
+        let actual = match_.hashee.cases.hashee.len();
         if expected != actual {
             return Err(TypeError::WrongNumberOfMatchCases {
                 match_: match_.hashee.clone(),
@@ -102,12 +102,12 @@ impl TypeChecker {
 
     fn assert_stated_return_type_arity_is_correct(
         &mut self,
-        match_: RcHashed<ipist::Match>,
+        match_: RcHashed<spanned_ast::Match>,
         matchee_type_args: Normalized<RcHashedVec<minimal_ast::Expr>>,
     ) -> Result<(), TypeError> {
         let correct_return_type_arity = 1 + matchee_type_args.raw().hashee.len();
 
-        if match_.hashee.return_type_arity.value != correct_return_type_arity {
+        if match_.hashee.return_type_arity != correct_return_type_arity {
             let matchee_type_args = matchee_type_args.to_hashee().into_vec();
             return Err(TypeError::WrongMatchReturnTypeArity {
                 match_: match_.hashee.clone(),
@@ -120,12 +120,12 @@ impl TypeChecker {
 
     fn typecheck_match_cases_assuming_number_of_cases_is_correct(
         &mut self,
-        match_: RcHashed<ipist::Match>,
+        match_: RcHashed<spanned_ast::Match>,
         matchee_type_ind: Normalized<RcHashed<minimal_ast::Ind>>,
         matchee_type_args: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon: LazyTypeContext,
     ) -> Result<(), TypeError> {
-        for i in 0..match_.hashee.cases.len() {
+        for i in 0..match_.hashee.cases.hashee.len() {
             self.typecheck_match_case(
                 i,
                 match_.clone(),
@@ -140,12 +140,12 @@ impl TypeChecker {
     fn typecheck_match_case(
         &mut self,
         case_index: usize,
-        match_g0: RcHashed<ipist::Match>,
+        match_g0: RcHashed<spanned_ast::Match>,
         matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,
         matchee_type_args_g0: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon_g0: LazyTypeContext,
     ) -> Result<(), TypeError> {
-        let case = &match_g0.hashee.cases[case_index];
+        let case = &match_g0.hashee.cases.hashee[case_index];
         let vcon_type_g0 = self.get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
             matchee_type_ind_g0.clone(),
             case_index,
@@ -159,7 +159,6 @@ impl TypeChecker {
             case_index,
             match_g0.clone(),
         )?;
-        let case_arity = case.arity.value;
 
         let extended_tcon_g1 =
             LazyTypeContext::Snoc(&tcon_g0, param_types_g0.to_hashee().derefed());
@@ -171,7 +170,7 @@ impl TypeChecker {
         let vcon_type_cfor_return_type_capp_args_g1 = vcon_type_g0
             .for_return_type_or_self()
             .app_args_or_empty_vec();
-        let matchee_type_ind_g1 = matchee_type_ind_g0.upshift(case_arity, 0);
+        let matchee_type_ind_g1 = matchee_type_ind_g0.upshift(case.arity, 0);
         let vcon_capp_g1 =
             NormalForm::vcon_capp_of_descending_debs(matchee_type_ind_g1, case_index).into_raw();
         let substituter_new_exprs = vcon_type_cfor_return_type_capp_args_g1
@@ -188,7 +187,7 @@ impl TypeChecker {
             .ipist_converter
             .convert(match_g0.hashee.return_type.clone());
         let match_return_type_g1 = match_return_type_g0matchparams
-            .replace_debs(&DebUpshifter(case_arity), match_arity)
+            .replace_debs(&DebUpshifter(case.arity), match_arity)
             .replace_debs(&substituter, 0);
         let normalized_match_return_type_g1 = self.evaluator.eval(match_return_type_g1);
 
@@ -203,14 +202,14 @@ impl TypeChecker {
 
     fn assert_stated_case_arity_is_correct(
         &mut self,
-        stated_arity: ipist::NumberLiteral,
+        stated_arity: usize,
         expected_arity: usize,
         match_case_index: usize,
-        match_: RcHashed<ipist::Match>,
+        match_: RcHashed<spanned_ast::Match>,
     ) -> Result<(), TypeError> {
-        if stated_arity.value != expected_arity {
+        if stated_arity != expected_arity {
             return Err(TypeError::WrongMatchCaseArity {
-                actual_node: stated_arity,
+                stated_arity,
                 expected: expected_arity,
                 match_: match_.hashee.clone(),
                 match_case_index,

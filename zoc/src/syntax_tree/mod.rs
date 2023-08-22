@@ -1,10 +1,10 @@
 pub mod ast;
-pub mod ipist;
-pub mod ipist_to_ast;
+pub mod cst_to_spanned_ast;
 pub mod lexer;
 pub mod minimal_ast;
 pub mod ost;
-pub mod ost_to_ipist;
 pub mod parser;
 pub mod replace_debs;
+pub mod spanned_ast;
+pub mod spanned_ast_to_minimal;
 pub mod token;
