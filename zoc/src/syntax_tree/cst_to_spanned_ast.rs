@@ -40,7 +40,7 @@ impl From<ost::Ind> for spanned_ast::Ind {
             vcon_defs: rc_hashed((*ost.vcon_defs).into()),
             aux_data: IndSpans {
                 span: (ost.lparen, ost.rparen),
-                universe_span: ost.type_.span(),
+                universe_span: ost.type_.span,
                 name_span: ost.name.span,
                 index_types_span: (ost.index_types_lparen, ost.index_types_rparen),
                 vcon_defs_span: (ost.vcon_defs_lparen, ost.vcon_defs_rparen),
@@ -207,7 +207,7 @@ impl From<ost::UniverseLiteral> for spanned_ast::UniverseNode {
                 level: UniverseLevel(ost.level),
                 erasable: ost.erasable,
             },
-            aux_data: ost.span(),
+            aux_data: ost.span,
         }
     }
 }

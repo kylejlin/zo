@@ -1,6 +1,6 @@
 ---
 source: zoc/src/syntax_tree/parser/tests/for_.rs
-expression: "&cst"
+expression: "&ost"
 ---
 For(
     For {
@@ -17,8 +17,13 @@ For(
                     Universe(
                         UniverseLiteral {
                             level: 0,
-                            start: ByteIndex(
-                                36,
+                            span: (
+                                ByteIndex(
+                                    36,
+                                ),
+                                ByteIndex(
+                                    40,
+                                ),
                             ),
                             erasable: false,
                         },
@@ -58,8 +63,13 @@ For(
         return_type: Universe(
             UniverseLiteral {
                 level: 0,
-                start: ByteIndex(
-                    70,
+                span: (
+                    ByteIndex(
+                        70,
+                    ),
+                    ByteIndex(
+                        75,
+                    ),
                 ),
                 erasable: true,
             },

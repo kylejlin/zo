@@ -1,6 +1,6 @@
 ---
 source: zoc/src/syntax_tree/parser/tests/ind.rs
-expression: "&cst"
+expression: "&ost"
 ---
 Ind(
     Ind {
@@ -9,8 +9,13 @@ Ind(
         ),
         type_: UniverseLiteral {
             level: 0,
-            start: ByteIndex(
-                8,
+            span: (
+                ByteIndex(
+                    8,
+                ),
+                ByteIndex(
+                    12,
+                ),
             ),
             erasable: false,
         },

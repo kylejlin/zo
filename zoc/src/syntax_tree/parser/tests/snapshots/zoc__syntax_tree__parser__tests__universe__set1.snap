@@ -1,12 +1,17 @@
 ---
 source: zoc/src/syntax_tree/parser/tests/universe.rs
-expression: "&cst"
+expression: "&ost"
 ---
 Universe(
     UniverseLiteral {
         level: 1,
-        start: ByteIndex(
-            0,
+        span: (
+            ByteIndex(
+                0,
+            ),
+            ByteIndex(
+                4,
+            ),
         ),
         erasable: false,
     },

@@ -1,6 +1,6 @@
 ---
 source: zoc/src/syntax_tree/parser/tests/vcon.rs
-expression: "&cst"
+expression: "&ost"
 ---
 Vcon(
     Vcon {
@@ -13,8 +13,13 @@ Vcon(
             ),
             type_: UniverseLiteral {
                 level: 0,
-                start: ByteIndex(
-                    24,
+                span: (
+                    ByteIndex(
+                        24,
+                    ),
+                    ByteIndex(
+                        28,
+                    ),
                 ),
                 erasable: false,
             },

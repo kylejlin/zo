@@ -221,7 +221,7 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
         let level = get_number_after_prefix(s, "Set")?;
         return Some(Token::Universe(UniverseLiteral {
             level,
-            start,
+            span: (start, ByteIndex(start.0 + s.len())),
             erasable: false,
         }));
     }
@@ -230,7 +230,7 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
         let level = get_number_after_prefix(s, "Prop")?;
         return Some(Token::Universe(UniverseLiteral {
             level,
-            start,
+            span: (start, ByteIndex(start.0 + s.len())),
             erasable: true,
         }));
     }
@@ -558,7 +558,7 @@ mod tests {
             Token::IndKw(ByteIndex(1)),
             Token::Universe(UniverseLiteral {
                 level: 0,
-                start: ByteIndex(5),
+                span: (ByteIndex(5), ByteIndex(9)),
                 erasable: false,
             }),
             Token::String(StringLiteral {
@@ -605,32 +605,50 @@ mod tests {
             Token::NonrecKw(ByteIndex(src.find("nonrec").unwrap())),
             Token::Universe(UniverseLiteral {
                 level: 0,
-                start: ByteIndex(src.find("Set0").unwrap()),
+                span: (
+                    ByteIndex(src.find("Set0").unwrap()),
+                    ByteIndex(src.find("Set0").unwrap() + "Set0".len()),
+                ),
                 erasable: false,
             }),
             Token::Universe(UniverseLiteral {
                 level: 1,
-                start: ByteIndex(src.find("Set1").unwrap()),
+                span: (
+                    ByteIndex(src.find("Set1").unwrap()),
+                    ByteIndex(src.find("Set1").unwrap() + "Set1".len()),
+                ),
                 erasable: false,
             }),
             Token::Universe(UniverseLiteral {
                 level: 33,
-                start: ByteIndex(src.find("Set33").unwrap()),
+                span: (
+                    ByteIndex(src.find("Set33").unwrap()),
+                    ByteIndex(src.find("Set33").unwrap() + "Set33".len()),
+                ),
                 erasable: false,
             }),
             Token::Universe(UniverseLiteral {
                 level: 0,
-                start: ByteIndex(src.find("Prop0").unwrap()),
+                span: (
+                    ByteIndex(src.find("Prop0").unwrap()),
+                    ByteIndex(src.find("Prop0").unwrap() + "Prop0".len()),
+                ),
                 erasable: true,
             }),
             Token::Universe(UniverseLiteral {
                 level: 1,
-                start: ByteIndex(src.find("Prop1").unwrap()),
+                span: (
+                    ByteIndex(src.find("Prop1").unwrap()),
+                    ByteIndex(src.find("Prop1").unwrap() + "Prop1".len()),
+                ),
                 erasable: true,
             }),
             Token::Universe(UniverseLiteral {
                 level: 33,
-                start: ByteIndex(src.find("Prop33").unwrap()),
+                span: (
+                    ByteIndex(src.find("Prop33").unwrap()),
+                    ByteIndex(src.find("Prop33").unwrap() + "Prop33".len()),
+                ),
                 erasable: true,
             }),
         ]);
