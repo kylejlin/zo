@@ -292,9 +292,8 @@ impl TypeChecker {
                 &vcon_def_g1.param_types.hashee,
                 tcon_with_ind_type_g1,
             )
-            // TODO: Convert this to a proper `.expect()`
-            // once we impl Debug for TypeError<A> for all A.
-            .unwrap_or_else(|_err| panic!("`ind_g0` is should be well-typed"));
+            .map_err(|err| err.remove_ast_aux_data(&mut self.aux_remover))
+            .expect("`ind_g0` is should be well-typed");
 
         vcon_def_param_type_types_g1
             .into_raw()
