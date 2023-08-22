@@ -2,14 +2,29 @@ use super::*;
 
 use crate::{
     syntax_tree::{
-        minimal_ast,
+        ast::prelude::*,
+        minimal_ast::{self, UnitAuxData},
         remove_ast_aux_data::*,
-        spanned_ast::{rc_hashed, SpanAuxData},
+        spanned_ast::{self, SpanAuxData},
     },
     typecheck::TypeError,
 };
 
-impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
+impl<A> Display for PrettyPrint<'_, TypeError<A>>
+where
+    A: AuxDataFamily,
+    ast::Expr<A>: GetOptSpan,
+    ast::Ind<A>: GetOptSpan,
+    ast::VconDef<A>: GetOptSpan,
+    ast::Vcon<A>: GetOptSpan,
+    ast::Match<A>: GetOptSpan,
+    ast::MatchCase<A>: GetOptSpan,
+    ast::Fun<A>: GetOptSpan,
+    ast::App<A>: GetOptSpan,
+    ast::For<A>: GetOptSpan,
+    ast::DebNode<A>: GetOptSpan,
+    ast::UniverseNode<A>: GetOptSpan,
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match &self.0 {
             TypeError::InvalidDeb { deb, tcon_len } => {
@@ -22,7 +37,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "deb",
                         &deb_minimal
                             .pretty_printed()
-                            .with_location_appended(deb.span()),
+                            .with_opt_location_appended(deb.opt_span()),
                     )
                     .field("tcon_len", tcon_len)
                     .finish()
@@ -37,7 +52,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         &vcon_minimal
                             .hashee
                             .pretty_printed()
-                            .with_location_appended(vcon.span()),
+                            .with_opt_location_appended(vcon.opt_span()),
                     )
                     .finish()
             }
@@ -50,7 +65,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "expr",
                         &expr_minimal
                             .pretty_printed()
-                            .with_location_appended(expr.span()),
+                            .with_opt_location_appended(expr.opt_span()),
                     )
                     .field("type_", &type_.raw().pretty_printed())
                     .finish()
@@ -69,7 +84,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "index_or_param_type",
                         &index_or_param_type_minimal
                             .pretty_printed()
-                            .with_location_appended(index_or_param_type.span()),
+                            .with_opt_location_appended(index_or_param_type.opt_span()),
                     )
                     .field("universe", &universe)
                     .field(
@@ -77,7 +92,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         &ind_minimal
                             .hashee
                             .pretty_printed()
-                            .with_location_appended(ind.span()),
+                            .with_opt_location_appended(ind.opt_span()),
                     )
                     .finish()
             }
@@ -94,7 +109,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "def",
                         &def_minimal
                             .pretty_printed()
-                            .with_location_appended(def.span()),
+                            .with_opt_location_appended(def.opt_span()),
                     )
                     .field("expected", expected)
                     .field("actual", actual)
@@ -109,7 +124,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "expr",
                         &expr_minimal
                             .pretty_printed()
-                            .with_location_appended(expr.span()),
+                            .with_opt_location_appended(expr.opt_span()),
                     )
                     .field("type_", &type_.raw().pretty_printed())
                     .finish()
@@ -127,7 +142,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         &match_minimal
                             .hashee
                             .pretty_printed()
-                            .with_location_appended(match_.span()),
+                            .with_opt_location_appended(match_.opt_span()),
                     )
                     .field("matchee_type_ind", &matchee_type_ind.raw().pretty_printed())
                     .finish()
@@ -149,7 +164,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         &match_minimal
                             .hashee
                             .pretty_printed()
-                            .with_location_appended(match_.span()),
+                            .with_opt_location_appended(match_.opt_span()),
                     )
                     .field("matchee_type_args", &matchee_type_args)
                     .finish()
@@ -171,7 +186,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         &match_minimal
                             .hashee
                             .pretty_printed()
-                            .with_location_appended(match_.span()),
+                            .with_opt_location_appended(match_.opt_span()),
                     )
                     .field("match_case_index", match_case_index)
                     .finish()
@@ -189,7 +204,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "expr",
                         &expr_minimal
                             .pretty_printed()
-                            .with_location_appended(expr.span()),
+                            .with_opt_location_appended(expr.opt_span()),
                     )
                     .field("expected_type", &expected_type.raw().pretty_printed())
                     .field("actual_type", &actual_type.raw().pretty_printed())
@@ -205,7 +220,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         &app_minimal
                             .hashee
                             .pretty_printed()
-                            .with_location_appended(app.span()),
+                            .with_opt_location_appended(app.opt_span()),
                     )
                     .field("callee_type", &callee_type.raw().pretty_printed())
                     .finish()
@@ -225,7 +240,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         &app_minimal
                             .hashee
                             .pretty_printed()
-                            .with_location_appended(app.span()),
+                            .with_opt_location_appended(app.opt_span()),
                     )
                     .field("callee_type", &callee_type.raw().pretty_printed())
                     .field("expected", expected)
@@ -241,7 +256,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "fun",
                         &fun_minimal
                             .pretty_printed()
-                            .with_location_appended(fun.span()),
+                            .with_opt_location_appended(fun.opt_span()),
                     )
                     .finish()
             }
@@ -255,7 +270,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         &app_minimal
                             .hashee
                             .pretty_printed()
-                            .with_location_appended(app.span()),
+                            .with_opt_location_appended(app.opt_span()),
                     )
                     .finish()
             }
@@ -268,7 +283,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "for_",
                         &for_minimal
                             .pretty_printed()
-                            .with_location_appended(for_.span()),
+                            .with_opt_location_appended(for_.opt_span()),
                     )
                     .finish()
             }
@@ -289,13 +304,13 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         &app_minimal
                             .hashee
                             .pretty_printed()
-                            .with_location_appended(app.span()),
+                            .with_opt_location_appended(app.opt_span()),
                     )
                     .field(
                         "callee_deb_definition_src",
                         &callee_deb_definition_src_minimal
                             .pretty_printed()
-                            .with_location_appended(callee_deb_definition_src.span()),
+                            .with_opt_location_appended(callee_deb_definition_src.opt_span()),
                     )
                     .field(
                         "required_decreasing_arg_index",
@@ -320,13 +335,13 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "deb",
                         &deb_minimal
                             .pretty_printed()
-                            .with_location_appended(deb.span()),
+                            .with_opt_location_appended(deb.opt_span()),
                     )
                     .field(
                         "definition_src",
                         &definition_src_minimal
                             .pretty_printed()
-                            .with_location_appended(definition_src.span()),
+                            .with_opt_location_appended(definition_src.opt_span()),
                     )
                     .finish()
             }
@@ -346,13 +361,13 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "deb",
                         &deb_minimal
                             .pretty_printed()
-                            .with_location_appended(deb.span()),
+                            .with_opt_location_appended(deb.opt_span()),
                     )
                     .field(
                         "definition_src",
                         &definition_src_minimal
                             .pretty_printed()
-                            .with_location_appended(definition_src.span()),
+                            .with_opt_location_appended(definition_src.opt_span()),
                     )
                     .finish()
             }
@@ -365,7 +380,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "fun",
                         &fun_minimal
                             .pretty_printed()
-                            .with_location_appended(fun.span()),
+                            .with_opt_location_appended(fun.opt_span()),
                     )
                     .finish()
             }
@@ -383,7 +398,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "def",
                         &def_minimal
                             .pretty_printed()
-                            .with_location_appended(def.span()),
+                            .with_opt_location_appended(def.opt_span()),
                     )
                     .field("param_type_index", param_type_index)
                     .field(
@@ -410,7 +425,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         "def",
                         &def_minimal
                             .pretty_printed()
-                            .with_location_appended(def.span()),
+                            .with_opt_location_appended(def.opt_span()),
                     )
                     .field("index_arg_index", index_arg_index)
                     .field(
@@ -437,7 +452,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                         &match_minimal
                             .hashee
                             .pretty_printed()
-                            .with_location_appended(match_.span()),
+                            .with_opt_location_appended(match_.opt_span()),
                     )
                     .field("matchee_type_type", &matchee_type_type.pretty_printed())
                     .field(
@@ -447,5 +462,187 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                     .finish()
             }
         }
+    }
+}
+
+/// A marker trait for aux data families
+/// whose corresponding AST families
+/// implement `GetOptSpan`.
+trait AuxDataFamilyWhoseAstFamilyImplsGetOptSpan: AuxDataFamily
+where
+    ast::Expr<Self>: GetOptSpan,
+    ast::Ind<Self>: GetOptSpan,
+    ast::VconDef<Self>: GetOptSpan,
+    ast::Vcon<Self>: GetOptSpan,
+    ast::Match<Self>: GetOptSpan,
+    ast::MatchCase<Self>: GetOptSpan,
+    ast::Fun<Self>: GetOptSpan,
+    ast::App<Self>: GetOptSpan,
+    ast::For<Self>: GetOptSpan,
+    ast::DebNode<Self>: GetOptSpan,
+    ast::UniverseNode<Self>: GetOptSpan,
+{
+}
+
+impl AuxDataFamilyWhoseAstFamilyImplsGetOptSpan for SpanAuxData {}
+
+impl GetOptSpan for spanned_ast::Expr {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+impl GetOptSpan for spanned_ast::Ind {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+impl GetOptSpan for spanned_ast::VconDef {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+impl GetOptSpan for spanned_ast::Vcon {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+impl GetOptSpan for spanned_ast::Match {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+impl GetOptSpan for spanned_ast::MatchCase {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+impl GetOptSpan for spanned_ast::Fun {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+impl GetOptSpan for spanned_ast::App {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+impl GetOptSpan for spanned_ast::For {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+impl GetOptSpan for spanned_ast::DebNode {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+impl GetOptSpan for spanned_ast::UniverseNode {
+    fn opt_span(&self) -> Option<Span> {
+        Some(self.span())
+    }
+}
+
+impl AuxDataFamilyWhoseAstFamilyImplsGetOptSpan for UnitAuxData {}
+
+impl GetOptSpan for minimal_ast::Expr {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+impl GetOptSpan for minimal_ast::Ind {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+impl GetOptSpan for minimal_ast::VconDef {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+impl GetOptSpan for minimal_ast::Vcon {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+impl GetOptSpan for minimal_ast::Match {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+impl GetOptSpan for minimal_ast::MatchCase {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+impl GetOptSpan for minimal_ast::Fun {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+impl GetOptSpan for minimal_ast::App {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+impl GetOptSpan for minimal_ast::For {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+impl GetOptSpan for minimal_ast::DebNode {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+impl GetOptSpan for minimal_ast::UniverseNode {
+    fn opt_span(&self) -> Option<Span> {
+        None
+    }
+}
+
+trait GetOptSpan {
+    fn opt_span(&self) -> Option<Span>;
+}
+
+pub struct AppendOptLocation<T> {
+    pub val: T,
+    pub span: Option<Span>,
+}
+
+impl<T> Debug for AppendOptLocation<T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        Display::fmt(self, f)
+    }
+}
+
+impl<T> Display for AppendOptLocation<T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        if let Some(span) = self.span {
+            Display::fmt(
+                &AppendLocation {
+                    val: &self.val,
+                    span,
+                },
+                f,
+            )
+        } else {
+            self.val.fmt(f)
+        }
+    }
+}
+
+pub trait WithOptLocationAppended: Sized {
+    fn with_opt_location_appended(self, span: Option<Span>) -> AppendOptLocation<Self>;
+}
+
+impl<T> WithOptLocationAppended for T {
+    fn with_opt_location_appended(self, span: Option<Span>) -> AppendOptLocation<Self> {
+        AppendOptLocation { val: self, span }
     }
 }
