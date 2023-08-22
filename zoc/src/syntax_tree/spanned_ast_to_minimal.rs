@@ -3,8 +3,6 @@ use crate::{
     syntax_tree::{ast::prelude::*, minimal_ast, spanned_ast},
 };
 
-// TODO: Redesign this module.
-
 #[derive(Debug, Clone, Default)]
 pub struct SpanRemover {
     ind_cache: NoHashHashMap<Digest, RcHashed<minimal_ast::Ind>>,
