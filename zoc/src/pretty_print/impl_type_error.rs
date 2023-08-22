@@ -12,7 +12,7 @@ use crate::{
 
 impl<A> Display for PrettyPrint<'_, TypeError<A>>
 where
-    A: AuxDataFamily,
+    A: AuxDataFamilyWhoseAstFamilyImplsGetOptSpan,
     ast::Expr<A>: GetOptSpan,
     ast::Ind<A>: GetOptSpan,
     ast::VconDef<A>: GetOptSpan,
