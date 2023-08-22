@@ -1,59 +1,59 @@
 use crate::syntax_tree::{
     ast::prelude::*,
-    ost,
+    cst,
     spanned_ast::{
         self, ForSpans, FunSpans, IndSpans, MatchCaseSpans, MatchSpans, VconDefSpans, VconSpans,
     },
 };
 
-impl From<ost::Expr> for spanned_ast::Expr {
-    fn from(ost: ost::Expr) -> Self {
-        match ost {
-            ost::Expr::Ind(ost) => spanned_ast::Ind::from(*ost).into(),
+impl From<cst::Expr> for spanned_ast::Expr {
+    fn from(cst: cst::Expr) -> Self {
+        match cst {
+            cst::Expr::Ind(cst) => spanned_ast::Ind::from(*cst).into(),
 
-            ost::Expr::Vcon(ost) => spanned_ast::Vcon::from(*ost).into(),
+            cst::Expr::Vcon(cst) => spanned_ast::Vcon::from(*cst).into(),
 
-            ost::Expr::Match(ost) => spanned_ast::Match::from(*ost).into(),
+            cst::Expr::Match(cst) => spanned_ast::Match::from(*cst).into(),
 
-            ost::Expr::Fun(ost) => spanned_ast::Fun::from(*ost).into(),
+            cst::Expr::Fun(cst) => spanned_ast::Fun::from(*cst).into(),
 
-            ost::Expr::App(ost) => spanned_ast::App::from(*ost).into(),
+            cst::Expr::App(cst) => spanned_ast::App::from(*cst).into(),
 
-            ost::Expr::For(ost) => spanned_ast::For::from(*ost).into(),
+            cst::Expr::For(cst) => spanned_ast::For::from(*cst).into(),
 
-            ost::Expr::Deb(ost) => spanned_ast::DebNode::from(ost).into(),
+            cst::Expr::Deb(cst) => spanned_ast::DebNode::from(cst).into(),
 
-            ost::Expr::Universe(ost) => spanned_ast::UniverseNode::from(ost).into(),
+            cst::Expr::Universe(cst) => spanned_ast::UniverseNode::from(cst).into(),
         }
     }
 }
 
-impl From<ost::Ind> for spanned_ast::Ind {
-    fn from(ost: ost::Ind) -> Self {
+impl From<cst::Ind> for spanned_ast::Ind {
+    fn from(cst: cst::Ind) -> Self {
         spanned_ast::Ind {
             universe: Universe {
-                level: UniverseLevel(ost.type_.level),
-                erasable: ost.type_.erasable,
+                level: UniverseLevel(cst.type_.level),
+                erasable: cst.type_.erasable,
             },
-            name: Rc::new(StringValue(ost.name.value.clone())),
-            index_types: rc_hashed((*ost.index_types).into()),
-            vcon_defs: rc_hashed((*ost.vcon_defs).into()),
+            name: Rc::new(StringValue(cst.name.value.clone())),
+            index_types: rc_hashed((*cst.index_types).into()),
+            vcon_defs: rc_hashed((*cst.vcon_defs).into()),
             aux_data: IndSpans {
-                span: (ost.lparen, ost.rparen),
-                universe_span: ost.type_.span,
-                name_span: ost.name.span,
-                index_types_span: (ost.index_types_lparen, ost.index_types_rparen),
-                vcon_defs_span: (ost.vcon_defs_lparen, ost.vcon_defs_rparen),
+                span: (cst.lparen, cst.rparen),
+                universe_span: cst.type_.span,
+                name_span: cst.name.span,
+                index_types_span: (cst.index_types_lparen, cst.index_types_rparen),
+                vcon_defs_span: (cst.vcon_defs_lparen, cst.vcon_defs_rparen),
             },
         }
     }
 }
 
-impl From<ost::ZeroOrMoreExprs> for Vec<spanned_ast::Expr> {
-    fn from(ost: ost::ZeroOrMoreExprs) -> Self {
-        match ost {
-            ost::ZeroOrMoreExprs::Nil => vec![],
-            ost::ZeroOrMoreExprs::Snoc(rdc, rac) => {
+impl From<cst::ZeroOrMoreExprs> for Vec<spanned_ast::Expr> {
+    fn from(cst: cst::ZeroOrMoreExprs) -> Self {
+        match cst {
+            cst::ZeroOrMoreExprs::Nil => vec![],
+            cst::ZeroOrMoreExprs::Snoc(rdc, rac) => {
                 let mut rdc: Vec<spanned_ast::Expr> = (*rdc).into();
                 rdc.push((*rac).into());
                 rdc
@@ -62,11 +62,11 @@ impl From<ost::ZeroOrMoreExprs> for Vec<spanned_ast::Expr> {
     }
 }
 
-impl From<ost::ZeroOrMoreVconDefs> for Vec<spanned_ast::VconDef> {
-    fn from(ost: ost::ZeroOrMoreVconDefs) -> Self {
-        match ost {
-            ost::ZeroOrMoreVconDefs::Nil => vec![],
-            ost::ZeroOrMoreVconDefs::Snoc(rdc, rac) => {
+impl From<cst::ZeroOrMoreVconDefs> for Vec<spanned_ast::VconDef> {
+    fn from(cst: cst::ZeroOrMoreVconDefs) -> Self {
+        match cst {
+            cst::ZeroOrMoreVconDefs::Nil => vec![],
+            cst::ZeroOrMoreVconDefs::Snoc(rdc, rac) => {
                 let mut rdc: Vec<spanned_ast::VconDef> = (*rdc).into();
                 rdc.push((*rac).into());
                 rdc
@@ -75,54 +75,54 @@ impl From<ost::ZeroOrMoreVconDefs> for Vec<spanned_ast::VconDef> {
     }
 }
 
-impl From<ost::VconDef> for spanned_ast::VconDef {
-    fn from(ost: ost::VconDef) -> Self {
+impl From<cst::VconDef> for spanned_ast::VconDef {
+    fn from(cst: cst::VconDef) -> Self {
         spanned_ast::VconDef {
-            param_types: rc_hashed((*ost.param_types).into()),
-            index_args: rc_hashed((*ost.index_args).into()),
+            param_types: rc_hashed((*cst.param_types).into()),
+            index_args: rc_hashed((*cst.index_args).into()),
             aux_data: VconDefSpans {
-                span: (ost.lparen, ost.rparen),
-                param_types_span: (ost.param_types_lparen, ost.param_types_rparen),
-                index_args_span: (ost.index_args_lparen, ost.index_args_rparen),
+                span: (cst.lparen, cst.rparen),
+                param_types_span: (cst.param_types_lparen, cst.param_types_rparen),
+                index_args_span: (cst.index_args_lparen, cst.index_args_rparen),
             },
         }
     }
 }
 
-impl From<ost::Vcon> for spanned_ast::Vcon {
-    fn from(ost: ost::Vcon) -> Self {
+impl From<cst::Vcon> for spanned_ast::Vcon {
+    fn from(cst: cst::Vcon) -> Self {
         spanned_ast::Vcon {
-            ind: rc_hashed((*ost.ind).into()),
-            vcon_index: ost.vcon_index.value,
+            ind: rc_hashed((*cst.ind).into()),
+            vcon_index: cst.vcon_index.value,
             aux_data: VconSpans {
-                span: (ost.lparen, ost.rparen),
-                vcon_index_span: ost.vcon_index.span,
+                span: (cst.lparen, cst.rparen),
+                vcon_index_span: cst.vcon_index.span,
             },
         }
     }
 }
 
-impl From<ost::Match> for spanned_ast::Match {
-    fn from(ost: ost::Match) -> Self {
+impl From<cst::Match> for spanned_ast::Match {
+    fn from(cst: cst::Match) -> Self {
         spanned_ast::Match {
-            matchee: (*ost.matchee).into(),
-            return_type_arity: ost.return_type_arity.value,
-            return_type: (*ost.return_type).into(),
-            cases: rc_hashed((*ost.cases).into()),
+            matchee: (*cst.matchee).into(),
+            return_type_arity: cst.return_type_arity.value,
+            return_type: (*cst.return_type).into(),
+            cases: rc_hashed((*cst.cases).into()),
             aux_data: MatchSpans {
-                span: (ost.lparen, ost.rparen),
-                return_type_arity_span: ost.return_type_arity.span,
-                cases_span: (ost.cases_lparen, ost.cases_rparen),
+                span: (cst.lparen, cst.rparen),
+                return_type_arity_span: cst.return_type_arity.span,
+                cases_span: (cst.cases_lparen, cst.cases_rparen),
             },
         }
     }
 }
 
-impl From<ost::ZeroOrMoreMatchCases> for Vec<spanned_ast::MatchCase> {
-    fn from(ost: ost::ZeroOrMoreMatchCases) -> Self {
-        match ost {
-            ost::ZeroOrMoreMatchCases::Nil => vec![],
-            ost::ZeroOrMoreMatchCases::Snoc(rdc, rac) => {
+impl From<cst::ZeroOrMoreMatchCases> for Vec<spanned_ast::MatchCase> {
+    fn from(cst: cst::ZeroOrMoreMatchCases) -> Self {
+        match cst {
+            cst::ZeroOrMoreMatchCases::Nil => vec![],
+            cst::ZeroOrMoreMatchCases::Snoc(rdc, rac) => {
                 let mut rdc: Vec<spanned_ast::MatchCase> = (*rdc).into();
                 rdc.push((*rac).into());
                 rdc
@@ -131,83 +131,83 @@ impl From<ost::ZeroOrMoreMatchCases> for Vec<spanned_ast::MatchCase> {
     }
 }
 
-impl From<ost::MatchCase> for spanned_ast::MatchCase {
-    fn from(ost: ost::MatchCase) -> Self {
+impl From<cst::MatchCase> for spanned_ast::MatchCase {
+    fn from(cst: cst::MatchCase) -> Self {
         spanned_ast::MatchCase {
-            arity: ost.arity.value,
-            return_val: (*ost.return_val.clone()).into(),
+            arity: cst.arity.value,
+            return_val: (*cst.return_val.clone()).into(),
             aux_data: MatchCaseSpans {
-                span: (ost.lparen, ost.rparen),
-                arity_span: ost.arity.span,
+                span: (cst.lparen, cst.rparen),
+                arity_span: cst.arity.span,
             },
         }
     }
 }
 
-impl From<ost::Fun> for spanned_ast::Fun {
-    fn from(ost: ost::Fun) -> Self {
+impl From<cst::Fun> for spanned_ast::Fun {
+    fn from(cst: cst::Fun) -> Self {
         spanned_ast::Fun {
-            decreasing_index: match *ost.decreasing_index {
-                ost::NumberOrNonrecKw::NonrecKw(_) => None,
-                ost::NumberOrNonrecKw::Number(n) => Some(n.value),
+            decreasing_index: match *cst.decreasing_index {
+                cst::NumberOrNonrecKw::NonrecKw(_) => None,
+                cst::NumberOrNonrecKw::Number(n) => Some(n.value),
             },
-            param_types: rc_hashed((*ost.param_types).into()),
-            return_type: (*ost.return_type.clone()).into(),
-            return_val: (*ost.return_val).into(),
+            param_types: rc_hashed((*cst.param_types).into()),
+            return_type: (*cst.return_type.clone()).into(),
+            return_val: (*cst.return_val).into(),
             aux_data: FunSpans {
-                span: (ost.lparen, ost.rparen),
-                decreasing_index_span: match *ost.decreasing_index {
-                    ost::NumberOrNonrecKw::NonrecKw(start) => {
+                span: (cst.lparen, cst.rparen),
+                decreasing_index_span: match *cst.decreasing_index {
+                    cst::NumberOrNonrecKw::NonrecKw(start) => {
                         (start, ByteIndex(start.0 + "nonrec".len()))
                     }
-                    ost::NumberOrNonrecKw::Number(n) => n.span,
+                    cst::NumberOrNonrecKw::Number(n) => n.span,
                 },
-                param_types_span: (ost.param_types_lparen, ost.param_types_rparen),
+                param_types_span: (cst.param_types_lparen, cst.param_types_rparen),
             },
         }
     }
 }
 
-impl From<ost::App> for spanned_ast::App {
-    fn from(ost: ost::App) -> Self {
+impl From<cst::App> for spanned_ast::App {
+    fn from(cst: cst::App) -> Self {
         spanned_ast::App {
-            callee: (*ost.callee).into(),
-            args: rc_hashed((*ost.args).into()),
-            aux_data: (ost.lparen, ost.rparen),
+            callee: (*cst.callee).into(),
+            args: rc_hashed((*cst.args).into()),
+            aux_data: (cst.lparen, cst.rparen),
         }
     }
 }
 
-impl From<ost::For> for spanned_ast::For {
-    fn from(ost: ost::For) -> Self {
+impl From<cst::For> for spanned_ast::For {
+    fn from(cst: cst::For) -> Self {
         spanned_ast::For {
-            param_types: rc_hashed((*ost.param_types).into()),
-            return_type: (*ost.return_type.clone()).into(),
+            param_types: rc_hashed((*cst.param_types).into()),
+            return_type: (*cst.return_type.clone()).into(),
             aux_data: ForSpans {
-                span: (ost.lparen, ost.rparen),
-                param_types_span: (ost.param_types_lparen, ost.param_types_rparen),
+                span: (cst.lparen, cst.rparen),
+                param_types_span: (cst.param_types_lparen, cst.param_types_rparen),
             },
         }
     }
 }
 
-impl From<ost::NumberLiteral> for spanned_ast::DebNode {
-    fn from(ost: ost::NumberLiteral) -> Self {
+impl From<cst::NumberLiteral> for spanned_ast::DebNode {
+    fn from(cst: cst::NumberLiteral) -> Self {
         spanned_ast::DebNode {
-            deb: Deb(ost.value),
-            aux_data: ost.span,
+            deb: Deb(cst.value),
+            aux_data: cst.span,
         }
     }
 }
 
-impl From<ost::UniverseLiteral> for spanned_ast::UniverseNode {
-    fn from(ost: ost::UniverseLiteral) -> Self {
+impl From<cst::UniverseLiteral> for spanned_ast::UniverseNode {
+    fn from(cst: cst::UniverseLiteral) -> Self {
         spanned_ast::UniverseNode {
             universe: Universe {
-                level: UniverseLevel(ost.level),
-                erasable: ost.erasable,
+                level: UniverseLevel(cst.level),
+                erasable: cst.erasable,
             },
-            aux_data: ost.span,
+            aux_data: cst.span,
         }
     }
 }

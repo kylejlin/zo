@@ -26,8 +26,8 @@ vcon
 0
 )"#;
     let tokens = lex(src).unwrap();
-    let ost = parse(tokens).unwrap();
-    insta::assert_debug_snapshot!(&ost);
+    let cst = parse(tokens).unwrap();
+    insta::assert_debug_snapshot!(&cst);
 }
 
 #[test]

@@ -29,8 +29,8 @@ pub fn substitute_without_compounding(replacements: &[(&str, String)], original:
 
 pub fn parse_spanned_ast_or_panic(src: &str) -> spanned_ast::Expr {
     let tokens = lex(src).unwrap();
-    let ost = parse(tokens).unwrap();
-    ost.into()
+    let cst = parse(tokens).unwrap();
+    cst.into()
 }
 
 pub fn parse_minimal_ast_or_panic(src: &str) -> minimal_ast::Expr {

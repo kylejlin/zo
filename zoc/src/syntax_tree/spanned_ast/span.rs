@@ -1,6 +1,6 @@
 use super::*;
 
-use crate::syntax_tree::ost::Span;
+use crate::syntax_tree::cst::Span;
 
 impl Expr {
     pub fn span(&self) -> Span {
