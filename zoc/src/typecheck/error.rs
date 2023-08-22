@@ -4,6 +4,19 @@ use crate::pretty_print::PrettyPrinted;
 
 use std::fmt::{Debug, Result as FmtResult};
 
+/// We parameterize `TypeError`s over AST families
+/// (i.e., using the `A` type parameter)
+/// so that you can typecheck an AST in any AST family.
+/// If the typechecking results in an error,
+/// the error will be in the same AST family
+/// as the family of the input AST.
+///
+/// So, for example, if you typecheck an AST with
+/// span information (i.e., a node in the `spanned_ast` family),
+/// then the error will also include span information.
+/// On the other hand, if you typecheck an AST with
+/// no auxiliary information whatsoever (i.e., a node in the `minimal_ast` family),
+/// then the error will also have no auxiliary information.
 #[derive(Clone)]
 pub enum TypeError<A: AuxDataFamily> {
     InvalidDeb {
