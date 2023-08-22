@@ -6,7 +6,7 @@ use crate::{
 // TODO: Redesign this module.
 
 #[derive(Debug, Clone, Default)]
-pub struct SpannedAstToMinimalAstConverter {
+pub struct SpanRemover {
     ind_cache: NoHashHashMap<Digest, RcHashed<minimal_ast::Ind>>,
     vcon_cache: NoHashHashMap<Digest, RcHashed<minimal_ast::Vcon>>,
     match_cache: NoHashHashMap<Digest, RcHashed<minimal_ast::Match>>,
@@ -15,13 +15,13 @@ pub struct SpannedAstToMinimalAstConverter {
     for_cache: NoHashHashMap<Digest, RcHashed<minimal_ast::For>>,
 }
 
-impl SpannedAstToMinimalAstConverter {
+impl SpanRemover {
     pub fn new() -> Self {
         Default::default()
     }
 }
 
-impl SpannedAstToMinimalAstConverter {
+impl SpanRemover {
     pub fn convert(&mut self, ist: spanned_ast::Expr) -> minimal_ast::Expr {
         match ist {
             spanned_ast::Expr::Ind(e) => self.convert_ind(e).into(),

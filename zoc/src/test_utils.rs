@@ -2,8 +2,7 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     pretty_print::*,
     syntax_tree::{
-        lexer::lex, minimal_ast, parser::parse, spanned_ast,
-        spanned_ast_to_minimal::SpannedAstToMinimalAstConverter,
+        lexer::lex, minimal_ast, parser::parse, spanned_ast, spanned_ast_to_minimal::SpanRemover,
     },
     typecheck::{LazyTypeContext, TypeChecker, TypeError},
 };
@@ -28,28 +27,28 @@ pub fn substitute_without_compounding(replacements: &[(&str, String)], original:
     result
 }
 
-pub fn parse_ipist_or_panic(src: &str) -> spanned_ast::Expr {
+pub fn parse_spanned_ast_or_panic(src: &str) -> spanned_ast::Expr {
     let tokens = lex(src).unwrap();
     let ost = parse(tokens).unwrap();
     ost.into()
 }
 
-pub fn parse_ast_or_panic(src: &str) -> minimal_ast::Expr {
-    let ipist: spanned_ast::Expr = parse_ipist_or_panic(src);
-    let mut converter = SpannedAstToMinimalAstConverter::default();
-    converter.convert(ipist)
+pub fn parse_minimal_ast_or_panic(src: &str) -> minimal_ast::Expr {
+    let spanned: spanned_ast::Expr = parse_spanned_ast_or_panic(src);
+    let mut converter = SpanRemover::default();
+    converter.convert(spanned)
 }
 
 pub fn eval_or_panic(src: &str) -> NormalForm {
-    let ast = parse_ast_or_panic(src);
+    let ast = parse_minimal_ast_or_panic(src);
     Evaluator::default().eval(ast)
 }
 
 pub fn get_type_under_empty_tcon_or_panic(src: &str) -> NormalForm {
-    let ipist = parse_ipist_or_panic(src);
+    let spanned = parse_spanned_ast_or_panic(src);
     let empty = Normalized::<[_; 0]>::new();
     TypeChecker::default()
-        .get_type(ipist, LazyTypeContext::Base(empty.as_ref().convert_ref()))
+        .get_type(spanned, LazyTypeContext::Base(empty.as_ref().convert_ref()))
         .pretty_unwrap()
 }
 
@@ -60,9 +59,9 @@ pub fn get_type_error_under_empty_tcon_or_panic(src: &str) -> TypeError {
 }
 
 pub fn get_type_error_or_panic(src: &str, tcon: LazyTypeContext) -> TypeError {
-    let ipist = parse_ipist_or_panic(src);
+    let spanned = parse_spanned_ast_or_panic(src);
     TypeChecker::default()
-        .get_type(ipist, tcon)
+        .get_type(spanned, tcon)
         .map(Normalized::into_raw)
         .pretty_unwrap_err()
 }

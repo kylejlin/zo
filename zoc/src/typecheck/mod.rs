@@ -5,7 +5,7 @@ use crate::{
         minimal_ast::{self, Deb, RcHashed, RcHashedVec, Universe, UniverseLevel},
         replace_debs::*,
         spanned_ast,
-        spanned_ast_to_minimal::SpannedAstToMinimalAstConverter,
+        spanned_ast_to_minimal::SpanRemover,
     },
 };
 
@@ -34,7 +34,7 @@ mod tests;
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
-    pub ipist_converter: SpannedAstToMinimalAstConverter,
+    pub span_remover: SpanRemover,
 }
 
 impl TypeChecker {

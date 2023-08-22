@@ -23,7 +23,7 @@ impl Display for PrettyPrint<'_, TypeError> {
             }
 
             TypeError::InvalidVconIndex(vcon) => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let vcon_ast = converter.convert_vcon(rc_hashed(vcon.clone()));
                 f.debug_struct("TypeError::InvalidVconIndex")
                     .field(
@@ -37,7 +37,7 @@ impl Display for PrettyPrint<'_, TypeError> {
             }
 
             TypeError::UnexpectedNonTypeExpression { expr, type_ } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let expr_ast = converter.convert(expr.clone());
                 f.debug_struct("TypeError::UnexpectedNonTypeExpression")
                     .field(
@@ -55,7 +55,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 universe,
                 ind,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let index_or_param_type_ast = converter.convert(index_or_param_type.clone());
                 let ind_ast = converter.convert_ind(rc_hashed(ind.clone()));
                 f.debug_struct("TypeError::UniverseInconsistencyInIndDef")
@@ -81,7 +81,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 expected,
                 actual,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let def_ast = converter.convert_vcon_def(def.clone());
                 f.debug_struct("TypeError::WrongNumberOfIndexArguments")
                     .field(
@@ -94,7 +94,7 @@ impl Display for PrettyPrint<'_, TypeError> {
             }
 
             TypeError::NonInductiveMatcheeType { expr, type_ } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let expr_ast = converter.convert(expr.clone());
                 f.debug_struct("TypeError::NonInductiveMatcheeType")
                     .field(
@@ -111,7 +111,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 match_,
                 matchee_type_ind,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let match_ast = converter.convert_match(rc_hashed(match_.clone()));
                 f.debug_struct("TypeError::WrongNumberOfMatchCases")
                     .field(
@@ -129,7 +129,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 match_,
                 matchee_type_args,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let match_ast = converter.convert_match(rc_hashed(match_.clone()));
                 let matchee_type_args: Vec<_> = matchee_type_args
                     .iter()
@@ -153,7 +153,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 match_,
                 match_case_index,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let match_ast = converter.convert_match(rc_hashed(match_.clone()));
                 f.debug_struct("TypeError::WrongMatchCaseArity")
                     .field("stated_arity", &stated_arity)
@@ -174,7 +174,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 expected_type,
                 actual_type,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let expr_ast = converter.convert(expr.clone());
                 f.debug_struct("TypeError::TypeMismatch")
                     .field(
@@ -189,7 +189,7 @@ impl Display for PrettyPrint<'_, TypeError> {
             }
 
             TypeError::CalleeTypeIsNotAForExpression { app, callee_type } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let app_ast = converter.convert_app(rc_hashed(app.clone()));
                 f.debug_struct("TypeError::CalleeTypeIsNotAForExpression")
                     .field(
@@ -209,7 +209,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 expected,
                 actual,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let app_ast = converter.convert_app(rc_hashed(app.clone()));
                 f.debug_struct("TypeError::WrongNumberOfAppArguments")
                     .field(
@@ -226,7 +226,7 @@ impl Display for PrettyPrint<'_, TypeError> {
             }
 
             TypeError::FunHasZeroParams { fun } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let fun_ast = converter.convert(fun.clone().into());
                 f.debug_struct("TypeError::FunHasZeroParams")
                     .field(
@@ -237,7 +237,7 @@ impl Display for PrettyPrint<'_, TypeError> {
             }
 
             TypeError::AppHasZeroArgs { app } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let app_ast = converter.convert_app(rc_hashed(app.clone()));
                 f.debug_struct("TypeError::AppHasZeroArgs")
                     .field(
@@ -251,7 +251,7 @@ impl Display for PrettyPrint<'_, TypeError> {
             }
 
             TypeError::ForHasZeroParams { for_ } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let for_ast = converter.convert(for_.clone().into());
                 f.debug_struct("TypeError::ForHasZeroParams")
                     .field(
@@ -267,7 +267,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 required_decreasing_arg_index,
                 required_strict_superstruct,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let app_ast = converter.convert_app(rc_hashed(app.clone()));
                 let callee_deb_definition_src_ast =
                     converter.convert(callee_deb_definition_src.clone().into());
@@ -297,7 +297,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 deb,
                 definition_src,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let deb_ast = minimal_ast::DebNode {
                     deb: deb.deb,
                     aux_data: (),
@@ -321,7 +321,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 deb,
                 definition_src,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let deb_ast = minimal_ast::DebNode {
                     deb: deb.deb,
                     aux_data: (),
@@ -342,7 +342,7 @@ impl Display for PrettyPrint<'_, TypeError> {
             }
 
             TypeError::DecreasingArgIndexTooBig { fun } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let fun_ast = converter.convert(fun.clone().into());
                 f.debug_struct("TypeError::DecreasingArgIndexTooBig")
                     .field(
@@ -358,7 +358,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 normalized_param_type,
                 path_from_param_type_to_problematic_deb,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let def_ast = converter.convert_vcon_def(def.clone());
                 f.debug_struct("TypeError::VconDefParamTypeFailsStrictPositivityCondition")
                     .field(
@@ -383,7 +383,7 @@ impl Display for PrettyPrint<'_, TypeError> {
                 normalized_index_arg,
                 path_from_index_arg_to_problematic_deb,
             } => {
-                let mut converter = SpannedAstToMinimalAstConverter::default();
+                let mut converter = SpanRemover::default();
                 let def_ast = converter.convert_vcon_def(def.clone());
                 f.debug_struct("TypeError::RecursiveIndParamAppearsInVconDefIndexArg")
                     .field(

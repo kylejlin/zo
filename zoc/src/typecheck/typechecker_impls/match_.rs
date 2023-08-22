@@ -41,9 +41,7 @@ impl TypeChecker {
             tcon_g0,
         )?;
 
-        let matchee_g0 = self
-            .ipist_converter
-            .convert(match_g0.hashee.matchee.clone());
+        let matchee_g0 = self.span_remover.convert(match_g0.hashee.matchee.clone());
         let substituter_new_exprs: Vec<minimal_ast::Expr> = matchee_type_args_g0
             .raw()
             .hashee
@@ -55,7 +53,7 @@ impl TypeChecker {
             new_exprs: &substituter_new_exprs,
         };
         let return_type = self
-            .ipist_converter
+            .span_remover
             .convert(match_g0.hashee.return_type.clone())
             .replace_debs(&substituter, 0);
         let normalized_return_type = self.evaluator.eval(return_type);
@@ -184,7 +182,7 @@ impl TypeChecker {
             new_exprs: &substituter_new_exprs,
         };
         let match_return_type_g0matchparams = self
-            .ipist_converter
+            .span_remover
             .convert(match_g0.hashee.return_type.clone());
         let match_return_type_g1 = match_return_type_g0matchparams
             .replace_debs(&DebUpshifter(case.arity), match_arity)

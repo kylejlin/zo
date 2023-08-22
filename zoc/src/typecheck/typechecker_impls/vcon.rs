@@ -38,7 +38,7 @@ impl TypeChecker {
     ) -> Result<Normalized<RcHashed<minimal_ast::Ind>>, TypeError> {
         self.get_type_of_ind(ind.clone(), tcon)?;
 
-        let ind_ast = self.ipist_converter.convert_ind(ind);
+        let ind_ast = self.span_remover.convert_ind(ind);
         let normalized = self.evaluator.eval_ind(ind_ast);
         Ok(normalized)
     }

@@ -72,7 +72,7 @@ fn add_2_3() {
     );
 
     let actual = eval_or_panic(&add_two_three_src).into_raw();
-    let expected = parse_ast_or_panic(&five_src);
+    let expected = parse_minimal_ast_or_panic(&five_src);
 
     assert_exprs_eq!(expected, actual);
 }
@@ -101,7 +101,7 @@ fn nullary_match_case() {
     let expected_src = r#"12"#;
 
     let actual = eval_or_panic(&match_src).into_raw();
-    let expected = parse_ast_or_panic(&expected_src);
+    let expected = parse_minimal_ast_or_panic(&expected_src);
 
     assert_exprs_eq!(expected, actual);
 }
@@ -130,7 +130,7 @@ fn match_case_param_substitution() {
     let expected_src = r#"(14 10 11)"#;
 
     let actual = eval_or_panic(&match_src).into_raw();
-    let expected = parse_ast_or_panic(&expected_src);
+    let expected = parse_minimal_ast_or_panic(&expected_src);
 
     assert_exprs_eq!(expected, actual);
 }
@@ -322,7 +322,7 @@ fn rev_1_2_3() {
             substitute_with_compounding(src_defs, "(<NORMALIZED_NAT_CONS> <3> (<NORMALIZED_NAT_CONS> <2> (<NORMALIZED_NAT_CONS> <1> <NORMALIZED_NAT_NIL>)))");
 
     let actual = eval_or_panic(&rev_one_two_three_src).into_raw();
-    let expected = parse_ast_or_panic(&three_two_one_src);
+    let expected = parse_minimal_ast_or_panic(&three_two_one_src);
 
     assert_exprs_eq!(expected, actual);
 }
@@ -517,7 +517,7 @@ fn polymorphic_rev_1_2_3() {
             substitute_with_compounding(src_defs, "(<NORMALIZED_NAT_CONS> <3> (<NORMALIZED_NAT_CONS> <2> (<NORMALIZED_NAT_CONS> <1> <NORMALIZED_NAT_NIL>)))");
 
     let actual = eval_or_panic(&rev_one_two_three_src).into_raw();
-    let expected = parse_ast_or_panic(&three_two_one_src);
+    let expected = parse_minimal_ast_or_panic(&three_two_one_src);
 
     assert_exprs_eq!(expected, actual);
 }
@@ -560,7 +560,7 @@ fn recursive_fun_app_stops_unfolding_when_decreasing_arg_not_vconlike() {
         substitute_with_compounding(defs, "(<SUCC> (<RECURSIVE_IDENTITY> 123))");
 
     let actual = eval_or_panic(&ident_succ_deb_123_src).into_raw();
-    let expected = parse_ast_or_panic(&succ_ident_deb_123_src);
+    let expected = parse_minimal_ast_or_panic(&succ_ident_deb_123_src);
 
     assert_exprs_eq!(expected, actual);
 }
@@ -609,7 +609,7 @@ fn substitution_upshifts_new_expr_debs() {
     let deb_5_src = "5";
 
     let actual = eval_or_panic(&match_src).into_raw();
-    let expected = parse_ast_or_panic(&deb_5_src);
+    let expected = parse_minimal_ast_or_panic(&deb_5_src);
 
     assert_exprs_eq!(expected, actual);
 }

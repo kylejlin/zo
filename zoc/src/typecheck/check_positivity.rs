@@ -305,7 +305,7 @@ impl VconPositivityChecker<'_> {
         let param_types_ast = self
             .0
             .typechecker
-            .ipist_converter
+            .span_remover
             .convert_expressions(&def.param_types.hashee);
         let normalized_param_types = self
             .0
@@ -345,7 +345,7 @@ impl VconPositivityChecker<'_> {
         let index_args_ast = self
             .0
             .typechecker
-            .ipist_converter
+            .span_remover
             .convert_expressions(&def.index_args.hashee);
         let normalized_index_args = self
             .0

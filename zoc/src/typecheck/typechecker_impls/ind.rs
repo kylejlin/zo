@@ -78,7 +78,7 @@ impl TypeChecker {
         )?;
 
         let index_args_ast = self
-            .ipist_converter
+            .span_remover
             .convert_expressions(&def.index_args.hashee);
         let normalized_index_args_g2 = self.evaluator.eval_expressions(index_args_ast);
 

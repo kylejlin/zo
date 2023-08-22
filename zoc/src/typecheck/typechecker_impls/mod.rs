@@ -41,7 +41,7 @@ impl TypeChecker {
             let type_ = self.get_type(expr.clone(), current_tcon)?;
             out.push(type_);
 
-            let expr_ast = self.ipist_converter.convert(expr.clone());
+            let expr_ast = self.span_remover.convert(expr.clone());
             let normalized = self.evaluator.eval(expr_ast);
             normalized_visited_exprs.push(normalized);
         }
@@ -87,7 +87,7 @@ impl TypeChecker {
             limiter.assert_ul_is_within_limit(param_type_type_ul, exprs[i].clone())?;
         }
 
-        let exprs_ast = self.ipist_converter.convert_expressions(exprs.clone());
+        let exprs_ast = self.span_remover.convert_expressions(exprs.clone());
         let normalized = self.evaluator.eval_expressions(exprs_ast);
         Ok(normalized.to_hashee().cloned())
     }
@@ -117,7 +117,7 @@ impl TypeChecker {
             return Err(TypeError::UnexpectedNonTypeExpression { expr, type_ });
         }
 
-        let expr_ast = self.ipist_converter.convert(expr.clone());
+        let expr_ast = self.span_remover.convert(expr.clone());
         let normalized = self.evaluator.eval(expr_ast);
         Ok(normalized)
     }
