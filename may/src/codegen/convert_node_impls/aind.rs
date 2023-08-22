@@ -68,6 +68,7 @@ impl MayConverter {
             name,
             index_types,
             vcon_defs,
+            aux_data: (),
         })
     }
 
@@ -104,6 +105,7 @@ impl MayConverter {
         Ok(znode::VconDef {
             param_types,
             index_args,
+            aux_data: (),
         })
     }
 
@@ -126,8 +128,10 @@ impl MayConverter {
             param_types: return_type_ind.index_types.clone(),
             return_type: znode::UniverseNode {
                 universe: return_type_ind.universe,
+                aux_data: (),
             }
             .into(),
+            aux_data: (),
         }
         .collapse_if_nullary();
 
@@ -146,6 +150,7 @@ impl MayConverter {
             param_types,
             return_type: ind_type_cfor,
             return_val,
+            aux_data: (),
         }))
     }
 }

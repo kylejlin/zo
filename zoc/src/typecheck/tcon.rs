@@ -1,6 +1,6 @@
 use super::*;
 
-use ast::Expr;
+use minimal_ast::Expr;
 
 /// This type context is "lazy" in the sense
 /// that it doesn't store the shifted types.

@@ -1,4 +1,4 @@
-use crate::syntax_tree::{ast::*, replace_debs::*};
+use crate::syntax_tree::{minimal_ast::*, replace_debs::*};
 
 use std::{hash::Hash, ops::Deref, rc::Rc};
 
@@ -254,6 +254,7 @@ impl Normalized<App> {
         Normalized(App {
             callee: Expr::Ind(callee.into_raw()),
             args: args.into_raw(),
+            aux_data: (),
         })
     }
 
@@ -277,6 +278,7 @@ impl Normalized<For> {
         Normalized(For {
             param_types: param_types.into_raw(),
             return_type: return_type.into_raw(),
+            aux_data: (),
         })
     }
 
@@ -309,15 +311,23 @@ impl NormalForm {
         let vcon = Vcon {
             ind: ind.into_raw(),
             vcon_index,
+            aux_data: (),
         };
         let args: Vec<Expr> = (0..arg_count)
             .into_iter()
             .rev()
-            .map(|i| DebNode { deb: Deb(i) }.into())
+            .map(|i| {
+                DebNode {
+                    deb: Deb(i),
+                    aux_data: (),
+                }
+                .into()
+            })
             .collect();
         let capp = App {
             callee: vcon.into(),
             args: rc_hashed(args),
+            aux_data: (),
         }
         .collapse_if_nullary();
         Normalized(capp)
@@ -340,11 +350,18 @@ impl NormalForm {
         let args: Vec<Expr> = (0..index_count)
             .into_iter()
             .rev()
-            .map(|i| DebNode { deb: Deb(i) }.into())
+            .map(|i| {
+                DebNode {
+                    deb: Deb(i),
+                    aux_data: (),
+                }
+                .into()
+            })
             .collect();
         let capp = App {
             callee: ind.into_raw().into(),
             args: rc_hashed(args),
+            aux_data: (),
         }
         .collapse_if_nullary();
         Normalized(capp)

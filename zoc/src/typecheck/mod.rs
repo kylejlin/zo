@@ -2,9 +2,9 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::*,
     syntax_tree::{
-        ast::{self, Deb, RcHashed, RcHashedVec, Universe, UniverseLevel},
         ipist::{self as cst},
         ipist_to_ast::IpistToAstConverter,
+        minimal_ast::{self, Deb, RcHashed, RcHashedVec, Universe, UniverseLevel},
         replace_debs::*,
         token::*,
     },
@@ -44,10 +44,10 @@ impl TypeChecker {
     }
 }
 
-impl ast::Expr {
+impl minimal_ast::Expr {
     fn is_universe(&self) -> bool {
         match self {
-            ast::Expr::Universe(_) => true,
+            minimal_ast::Expr::Universe(_) => true,
             _ => false,
         }
     }
@@ -56,12 +56,12 @@ impl ast::Expr {
 /// Non-universe expressions are ignored.
 /// If there are no universe expressions, `None` is returned.
 fn get_max_universe_level<'a>(
-    exprs: impl IntoIterator<Item = &'a ast::Expr>,
+    exprs: impl IntoIterator<Item = &'a minimal_ast::Expr>,
 ) -> Option<UniverseLevel> {
     exprs
         .into_iter()
         .filter_map(|expr| match expr {
-            ast::Expr::Universe(universe) => Some(universe.hashee.universe.level),
+            minimal_ast::Expr::Universe(universe) => Some(universe.hashee.universe.level),
             _ => None,
         })
         .max()

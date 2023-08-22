@@ -31,7 +31,7 @@ pub enum TypeError {
     },
     WrongNumberOfMatchCases {
         match_: cst::Match,
-        matchee_type_ind: Normalized<ast::Ind>,
+        matchee_type_ind: Normalized<minimal_ast::Ind>,
     },
     WrongMatchReturnTypeArity {
         match_: cst::Match,
@@ -54,7 +54,7 @@ pub enum TypeError {
     },
     WrongNumberOfAppArguments {
         app: cst::App,
-        callee_type: Normalized<ast::For>,
+        callee_type: Normalized<minimal_ast::For>,
         expected: usize,
         actual: usize,
     },
@@ -90,13 +90,13 @@ pub enum TypeError {
         def: cst::VconDef,
         param_type_index: usize,
         normalized_param_type: NormalForm,
-        path_from_param_type_to_problematic_deb: Vec<ast::NodeEdge>,
+        path_from_param_type_to_problematic_deb: Vec<minimal_ast::NodeEdge>,
     },
     RecursiveIndParamAppearsInVconDefIndexArg {
         def: cst::VconDef,
         index_arg_index: usize,
         normalized_index_arg: NormalForm,
-        path_from_index_arg_to_problematic_deb: Vec<ast::NodeEdge>,
+        path_from_index_arg_to_problematic_deb: Vec<minimal_ast::NodeEdge>,
     },
 }
 

@@ -1,6 +1,6 @@
 use super::*;
 
-impl GetDigest for Expr {
+impl<A: AuxDataFamily> GetDigest for Expr<A> {
     fn digest(&self) -> &Digest {
         match self {
             Expr::Ind(e) => &e.digest,
@@ -14,42 +14,42 @@ impl GetDigest for Expr {
         }
     }
 }
-impl GetDigest for RcHashed<Ind> {
+impl<A: AuxDataFamily> GetDigest for RcHashed<Ind<A>> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcHashed<Vcon> {
+impl<A: AuxDataFamily> GetDigest for RcHashed<Vcon<A>> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcHashed<Match> {
+impl<A: AuxDataFamily> GetDigest for RcHashed<Match<A>> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcHashed<Fun> {
+impl<A: AuxDataFamily> GetDigest for RcHashed<Fun<A>> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcHashed<App> {
+impl<A: AuxDataFamily> GetDigest for RcHashed<App<A>> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcHashed<For> {
+impl<A: AuxDataFamily> GetDigest for RcHashed<For<A>> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcHashed<DebNode> {
+impl<A: AuxDataFamily> GetDigest for RcHashed<DebNode<A>> {
     fn digest(&self) -> &Digest {
         &self.digest
     }
 }
-impl GetDigest for RcHashed<UniverseNode> {
+impl<A: AuxDataFamily> GetDigest for RcHashed<UniverseNode<A>> {
     fn digest(&self) -> &Digest {
         &self.digest
     }

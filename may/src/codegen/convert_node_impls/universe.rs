@@ -10,6 +10,7 @@ impl MayConverter {
                 level: UniverseLevel(expr.level),
                 erasable: expr.erasable,
             },
+            aux_data: (),
         }))
     }
 }

@@ -1,138 +1,138 @@
 use super::*;
 
-impl From<RcHashed<Ind>> for Expr {
-    fn from(ind: RcHashed<Ind>) -> Self {
+impl<A: AuxDataFamily> From<RcHashed<Ind<A>>> for Expr<A> {
+    fn from(ind: RcHashed<Ind<A>>) -> Self {
         Expr::Ind(ind)
     }
 }
-impl From<RcHashed<Vcon>> for Expr {
-    fn from(vcon: RcHashed<Vcon>) -> Self {
+impl<A: AuxDataFamily> From<RcHashed<Vcon<A>>> for Expr<A> {
+    fn from(vcon: RcHashed<Vcon<A>>) -> Self {
         Expr::Vcon(vcon)
     }
 }
-impl From<RcHashed<Match>> for Expr {
-    fn from(match_: RcHashed<Match>) -> Self {
+impl<A: AuxDataFamily> From<RcHashed<Match<A>>> for Expr<A> {
+    fn from(match_: RcHashed<Match<A>>) -> Self {
         Expr::Match(match_)
     }
 }
-impl From<RcHashed<Fun>> for Expr {
-    fn from(fun: RcHashed<Fun>) -> Self {
+impl<A: AuxDataFamily> From<RcHashed<Fun<A>>> for Expr<A> {
+    fn from(fun: RcHashed<Fun<A>>) -> Self {
         Expr::Fun(fun)
     }
 }
-impl From<RcHashed<App>> for Expr {
-    fn from(app: RcHashed<App>) -> Self {
+impl<A: AuxDataFamily> From<RcHashed<App<A>>> for Expr<A> {
+    fn from(app: RcHashed<App<A>>) -> Self {
         Expr::App(app)
     }
 }
-impl From<RcHashed<For>> for Expr {
-    fn from(for_: RcHashed<For>) -> Self {
+impl<A: AuxDataFamily> From<RcHashed<For<A>>> for Expr<A> {
+    fn from(for_: RcHashed<For<A>>) -> Self {
         Expr::For(for_)
     }
 }
-impl From<RcHashed<DebNode>> for Expr {
-    fn from(deb: RcHashed<DebNode>) -> Self {
+impl<A: AuxDataFamily> From<RcHashed<DebNode<A>>> for Expr<A> {
+    fn from(deb: RcHashed<DebNode<A>>) -> Self {
         Expr::Deb(deb)
     }
 }
-impl From<RcHashed<UniverseNode>> for Expr {
-    fn from(universe: RcHashed<UniverseNode>) -> Self {
+impl<A: AuxDataFamily> From<RcHashed<UniverseNode<A>>> for Expr<A> {
+    fn from(universe: RcHashed<UniverseNode<A>>) -> Self {
         Expr::Universe(universe)
     }
 }
 
-impl From<Ind> for Expr {
-    fn from(ind: Ind) -> Self {
+impl<A: AuxDataFamily> From<Ind<A>> for Expr<A> {
+    fn from(ind: Ind<A>) -> Self {
         rc_hashed(ind).into()
     }
 }
-impl From<Vcon> for Expr {
-    fn from(vcon: Vcon) -> Self {
+impl<A: AuxDataFamily> From<Vcon<A>> for Expr<A> {
+    fn from(vcon: Vcon<A>) -> Self {
         rc_hashed(vcon).into()
     }
 }
-impl From<Match> for Expr {
-    fn from(match_: Match) -> Self {
+impl<A: AuxDataFamily> From<Match<A>> for Expr<A> {
+    fn from(match_: Match<A>) -> Self {
         rc_hashed(match_).into()
     }
 }
-impl From<Fun> for Expr {
-    fn from(fun: Fun) -> Self {
+impl<A: AuxDataFamily> From<Fun<A>> for Expr<A> {
+    fn from(fun: Fun<A>) -> Self {
         rc_hashed(fun).into()
     }
 }
-impl From<App> for Expr {
-    fn from(app: App) -> Self {
+impl<A: AuxDataFamily> From<App<A>> for Expr<A> {
+    fn from(app: App<A>) -> Self {
         rc_hashed(app).into()
     }
 }
-impl From<For> for Expr {
-    fn from(for_: For) -> Self {
+impl<A: AuxDataFamily> From<For<A>> for Expr<A> {
+    fn from(for_: For<A>) -> Self {
         rc_hashed(for_).into()
     }
 }
-impl From<DebNode> for Expr {
-    fn from(deb: DebNode) -> Self {
+impl<A: AuxDataFamily> From<DebNode<A>> for Expr<A> {
+    fn from(deb: DebNode<A>) -> Self {
         rc_hashed(deb).into()
     }
 }
-impl From<UniverseNode> for Expr {
-    fn from(universe: UniverseNode) -> Self {
+impl<A: AuxDataFamily> From<UniverseNode<A>> for Expr<A> {
+    fn from(universe: UniverseNode<A>) -> Self {
         rc_hashed(universe).into()
     }
 }
 
-impl Expr {
-    pub fn try_into_ind(self) -> Result<RcHashed<Ind>, Self> {
+impl<A: AuxDataFamily> Expr<A> {
+    pub fn try_into_ind(self) -> Result<RcHashed<Ind<A>>, Self> {
         match self {
             Expr::Ind(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_vcon(self) -> Result<RcHashed<Vcon>, Self> {
+    pub fn try_into_vcon(self) -> Result<RcHashed<Vcon<A>>, Self> {
         match self {
             Expr::Vcon(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_match(self) -> Result<RcHashed<Match>, Self> {
+    pub fn try_into_match(self) -> Result<RcHashed<Match<A>>, Self> {
         match self {
             Expr::Match(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_fun(self) -> Result<RcHashed<Fun>, Self> {
+    pub fn try_into_fun(self) -> Result<RcHashed<Fun<A>>, Self> {
         match self {
             Expr::Fun(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_app(self) -> Result<RcHashed<App>, Self> {
+    pub fn try_into_app(self) -> Result<RcHashed<App<A>>, Self> {
         match self {
             Expr::App(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_for(self) -> Result<RcHashed<For>, Self> {
+    pub fn try_into_for(self) -> Result<RcHashed<For<A>>, Self> {
         match self {
             Expr::For(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_deb(self) -> Result<RcHashed<DebNode>, Self> {
+    pub fn try_into_deb(self) -> Result<RcHashed<DebNode<A>>, Self> {
         match self {
             Expr::Deb(e) => Ok(e),
             _ => Err(self),
         }
     }
 
-    pub fn try_into_universe(self) -> Result<RcHashed<UniverseNode>, Self> {
+    pub fn try_into_universe(self) -> Result<RcHashed<UniverseNode<A>>, Self> {
         match self {
             Expr::Universe(e) => Ok(e),
             _ => Err(self),

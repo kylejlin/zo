@@ -31,9 +31,9 @@ impl TypeChecker {
         &mut self,
         exprs: &[cst::Expr],
         tcon: LazyTypeContext,
-    ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
-        let mut out: Normalized<Vec<ast::Expr>> = Normalized::with_capacity(exprs.len());
-        let mut normalized_visited_exprs: Normalized<Vec<ast::Expr>> =
+    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
+        let mut out: Normalized<Vec<minimal_ast::Expr>> = Normalized::with_capacity(exprs.len());
+        let mut normalized_visited_exprs: Normalized<Vec<minimal_ast::Expr>> =
             Normalized::with_capacity(exprs.len());
 
         for expr in exprs {
@@ -53,8 +53,8 @@ impl TypeChecker {
         &mut self,
         exprs: &[cst::Expr],
         tcon: LazyTypeContext,
-    ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
-        let mut out: Normalized<Vec<ast::Expr>> = Normalized::with_capacity(exprs.len());
+    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
+        let mut out: Normalized<Vec<minimal_ast::Expr>> = Normalized::with_capacity(exprs.len());
 
         for expr in exprs {
             let type_ = self.get_type(expr.clone(), tcon)?;
@@ -69,13 +69,13 @@ impl TypeChecker {
         exprs: &[cst::Expr],
         limiter: impl UniverseLimit,
         tcon: LazyTypeContext,
-    ) -> Result<Normalized<Vec<ast::Expr>>, TypeError> {
+    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
         let param_type_types = self.get_types_of_dependent_expressions(exprs, tcon)?;
 
         for i in 0..param_type_types.raw().len() {
-            let param_type_type: Normalized<&ast::Expr> = param_type_types.index_ref(i);
+            let param_type_type: Normalized<&minimal_ast::Expr> = param_type_types.index_ref(i);
             let param_type_type_ul = match param_type_type.into_raw() {
-                ast::Expr::Universe(universe) => universe.hashee.universe,
+                minimal_ast::Expr::Universe(universe) => universe.hashee.universe,
                 _ => {
                     return Err(TypeError::UnexpectedNonTypeExpression {
                         expr: exprs[i].clone(),

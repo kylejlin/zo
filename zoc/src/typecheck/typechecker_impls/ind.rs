@@ -14,11 +14,12 @@ impl TypeChecker {
             )?
             .into_rc_hashed();
 
-        let universe_node = NormalForm::universe(ast::UniverseNode {
+        let universe_node = NormalForm::universe(minimal_ast::UniverseNode {
             universe: Universe {
                 level: UniverseLevel(ind.hashee.type_.level),
                 erasable: ind.hashee.type_.erasable,
             },
+            aux_data: (),
         });
         let ind_type_g0 = Normalized::for_(normalized_index_types_g0.clone(), universe_node)
             .collapse_if_nullary();
@@ -42,7 +43,7 @@ impl TypeChecker {
     fn typecheck_ind_vcon_defs(
         &mut self,
         ind: RcHashed<cst::Ind>,
-        normalized_index_types_g0: Normalized<RcHashedVec<ast::Expr>>,
+        normalized_index_types_g0: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon_g1: LazyTypeContext,
     ) -> Result<(), TypeError> {
         for def in &ind.hashee.vcon_defs {
@@ -60,7 +61,7 @@ impl TypeChecker {
         &mut self,
         def: &cst::VconDef,
         ind: RcHashed<cst::Ind>,
-        normalized_index_types_g0: Normalized<RcHashedVec<ast::Expr>>,
+        normalized_index_types_g0: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon_g1: LazyTypeContext,
     ) -> Result<(), TypeError> {
         self.assert_index_arg_count_is_correct(def, normalized_index_types_g0.raw().hashee.len())?;

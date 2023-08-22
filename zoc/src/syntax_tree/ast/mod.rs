@@ -1,94 +1,119 @@
-use std::{hash::Hash, rc::Rc};
+use std::{fmt::Debug, hash::Hash, rc::Rc};
 
 pub use crate::hash::*;
 
 pub use crate::syntax_tree::ipist::{rc_hashed, RcHashed, RcHashedVec};
 
 mod conversion;
-mod debug;
 mod get_digest;
 mod hash;
 
 pub mod node_path;
 pub use node_path::{NodeEdge, NodePath};
 
-#[derive(Clone, PartialEq, Eq)]
-pub enum Expr {
-    Ind(RcHashed<Ind>),
-    Vcon(RcHashed<Vcon>),
-    Match(RcHashed<Match>),
-    Fun(RcHashed<Fun>),
-    App(RcHashed<App>),
-    For(RcHashed<For>),
-    Deb(RcHashed<DebNode>),
-    Universe(RcHashed<UniverseNode>),
+pub trait AuxDataFamily:
+    Debug + Clone + Copy + PartialEq + Eq + PartialOrd + Ord + Hash + Default
+{
+    type Ind: Clone + Hash;
+    type Vcon: Clone + Hash;
+    type Match: Clone + Hash;
+    type Fun: Clone + Hash;
+    type App: Clone + Hash;
+    type For: Clone + Hash;
+    type Deb: Clone + Hash;
+    type Universe: Clone + Hash;
+
+    type VconDef: Clone + Hash;
+    type MatchCase: Clone + Hash;
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct Ind {
+pub enum Expr<A: AuxDataFamily> {
+    Ind(RcHashed<Ind<A>>),
+    Vcon(RcHashed<Vcon<A>>),
+    Match(RcHashed<Match<A>>),
+    Fun(RcHashed<Fun<A>>),
+    App(RcHashed<App<A>>),
+    For(RcHashed<For<A>>),
+    Deb(RcHashed<DebNode<A>>),
+    Universe(RcHashed<UniverseNode<A>>),
+}
+
+#[derive(Clone, PartialEq, Eq)]
+pub struct Ind<A: AuxDataFamily> {
     pub name: Rc<StringValue>,
     pub universe: Universe,
-    pub index_types: RcHashedVec<Expr>,
-    pub vcon_defs: RcHashedVec<VconDef>,
+    pub index_types: RcHashedVec<Expr<A>>,
+    pub vcon_defs: RcHashedVec<VconDef<A>>,
+    pub aux_data: A::Ind,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct StringValue(pub String);
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct VconDef {
-    pub param_types: RcHashedVec<Expr>,
-    pub index_args: RcHashedVec<Expr>,
+pub struct VconDef<A: AuxDataFamily> {
+    pub param_types: RcHashedVec<Expr<A>>,
+    pub index_args: RcHashedVec<Expr<A>>,
+    pub aux_data: A::VconDef,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct Vcon {
-    pub ind: RcHashed<Ind>,
+pub struct Vcon<A: AuxDataFamily> {
+    pub ind: RcHashed<Ind<A>>,
     pub vcon_index: usize,
+    pub aux_data: A::Vcon,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct Match {
-    pub matchee: Expr,
+pub struct Match<A: AuxDataFamily> {
+    pub matchee: Expr<A>,
     pub return_type_arity: usize,
-    pub return_type: Expr,
-    pub cases: RcHashedVec<MatchCase>,
+    pub return_type: Expr<A>,
+    pub cases: RcHashedVec<MatchCase<A>>,
+    pub aux_data: A::Match,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct MatchCase {
+pub struct MatchCase<A: AuxDataFamily> {
     pub arity: usize,
-    pub return_val: Expr,
+    pub return_val: Expr<A>,
+    pub aux_data: A::MatchCase,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct Fun {
+pub struct Fun<A: AuxDataFamily> {
     pub decreasing_index: Option<usize>,
-    pub param_types: RcHashedVec<Expr>,
-    pub return_type: Expr,
-    pub return_val: Expr,
+    pub param_types: RcHashedVec<Expr<A>>,
+    pub return_type: Expr<A>,
+    pub return_val: Expr<A>,
+    pub aux_data: A::Fun,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct App {
-    pub callee: Expr,
-    pub args: RcHashedVec<Expr>,
+pub struct App<A: AuxDataFamily> {
+    pub callee: Expr<A>,
+    pub args: RcHashedVec<Expr<A>>,
+    pub aux_data: A::App,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct For {
-    pub param_types: RcHashedVec<Expr>,
-    pub return_type: Expr,
+pub struct For<A: AuxDataFamily> {
+    pub param_types: RcHashedVec<Expr<A>>,
+    pub return_type: Expr<A>,
+    pub aux_data: A::For,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct DebNode {
+pub struct DebNode<A: AuxDataFamily> {
     pub deb: Deb,
+    pub aux_data: A::Deb,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct UniverseNode {
+pub struct UniverseNode<A: AuxDataFamily> {
     pub universe: Universe,
+    pub aux_data: A::Universe,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
@@ -103,8 +128,8 @@ pub struct Universe {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct UniverseLevel(pub usize);
 
-impl App {
-    pub fn collapse_if_nullary(self) -> Expr {
+impl<A: AuxDataFamily> App<A> {
+    pub fn collapse_if_nullary(self) -> Expr<A> {
         if self.args.hashee.is_empty() {
             self.callee
         } else {
@@ -113,8 +138,8 @@ impl App {
     }
 }
 
-impl For {
-    pub fn collapse_if_nullary(self) -> Expr {
+impl<A: AuxDataFamily> For<A> {
+    pub fn collapse_if_nullary(self) -> Expr<A> {
         if self.param_types.hashee.is_empty() {
             self.return_type
         } else {

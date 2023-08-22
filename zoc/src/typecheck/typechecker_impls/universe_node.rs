@@ -5,13 +5,16 @@ impl TypeChecker {
         &mut self,
         universe: RcHashed<UniverseLiteral>,
     ) -> Result<NormalForm, TypeError> {
-        return Ok(self.evaluator.eval(ast::Expr::Universe(Rc::new(Hashed::new(
-            ast::UniverseNode {
-                universe: Universe {
-                    level: UniverseLevel(universe.hashee.level + 1),
-                    erasable: true,
+        return Ok(self
+            .evaluator
+            .eval(minimal_ast::Expr::Universe(Rc::new(Hashed::new(
+                minimal_ast::UniverseNode {
+                    universe: Universe {
+                        level: UniverseLevel(universe.hashee.level + 1),
+                        erasable: true,
+                    },
+                    aux_data: (),
                 },
-            },
-        )))));
+            )))));
     }
 }

@@ -54,7 +54,7 @@ impl TypeChecker {
         &mut self,
         callee_type: NormalForm,
         app: RcHashed<cst::App>,
-    ) -> Result<Normalized<RcHashed<ast::For>>, TypeError> {
+    ) -> Result<Normalized<RcHashed<minimal_ast::For>>, TypeError> {
         if let Ok(for_) = callee_type.clone().try_into_for() {
             return Ok(for_);
         }
@@ -68,7 +68,7 @@ impl TypeChecker {
     fn assert_arg_count_is_correct(
         &mut self,
         app: RcHashed<cst::App>,
-        callee_type: Normalized<RcHashed<ast::For>>,
+        callee_type: Normalized<RcHashed<minimal_ast::For>>,
     ) -> Result<(), TypeError> {
         let arg_count = app.hashee.args.len();
         let param_count = callee_type.raw().hashee.param_types.hashee.len();
@@ -86,9 +86,9 @@ impl TypeChecker {
 
     pub(in crate::typecheck) fn substitute_callee_type_param_types(
         &mut self,
-        param_types: Normalized<RcHashedVec<ast::Expr>>,
-        args: Normalized<RcHashedVec<ast::Expr>>,
-    ) -> Normalized<RcHashedVec<ast::Expr>> {
+        param_types: Normalized<RcHashedVec<minimal_ast::Expr>>,
+        args: Normalized<RcHashedVec<minimal_ast::Expr>>,
+    ) -> Normalized<RcHashedVec<minimal_ast::Expr>> {
         let len = args.raw().hashee.len();
 
         (0..len)
@@ -113,7 +113,7 @@ impl TypeChecker {
     fn substitute_callee_type_return_type(
         &mut self,
         return_type_g0f: NormalForm,
-        args: Normalized<RcHashedVec<ast::Expr>>,
+        args: Normalized<RcHashedVec<minimal_ast::Expr>>,
     ) -> NormalForm {
         let substituter = DebDownshiftSubstituter {
             new_exprs: &args.raw().hashee,

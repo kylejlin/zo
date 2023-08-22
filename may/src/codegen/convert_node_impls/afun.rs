@@ -39,6 +39,7 @@ impl MayConverter {
             param_types,
             return_type,
             return_val,
+            aux_data: (),
         }))
     }
 }

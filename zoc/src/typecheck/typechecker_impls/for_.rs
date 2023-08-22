@@ -27,7 +27,7 @@ impl TypeChecker {
         let return_type_type_g1 =
             self.get_type(for_g0.hashee.return_type.clone(), tcon_with_param_types_g1)?;
         let return_type_type_g1_universe_level = match return_type_type_g1.raw() {
-            ast::Expr::Universe(universe_node) => universe_node.hashee.universe,
+            minimal_ast::Expr::Universe(universe_node) => universe_node.hashee.universe,
 
             _ => {
                 return Err(TypeError::UnexpectedNonTypeExpression {
@@ -40,11 +40,12 @@ impl TypeChecker {
         let max_level = return_type_type_g1_universe_level
             .level
             .max_or_self(get_max_universe_level(param_type_types_g0.raw()));
-        Ok(Normalized::universe(ast::UniverseNode {
+        Ok(Normalized::universe(minimal_ast::UniverseNode {
             universe: Universe {
                 level: max_level,
                 erasable: return_type_type_g1_universe_level.erasable,
             },
+            aux_data: (),
         }))
     }
 
@@ -63,7 +64,7 @@ impl TypeChecker {
 
     fn assert_every_type_is_universe(
         &mut self,
-        types: Normalized<&[ast::Expr]>,
+        types: Normalized<&[minimal_ast::Expr]>,
         exprs: &[cst::Expr],
     ) -> Result<(), TypeError> {
         for i in 0..types.raw().len() {

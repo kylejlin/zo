@@ -42,7 +42,7 @@ impl TypeChecker {
         )?;
 
         let matchee_g0 = self.cst_converter.convert(match_g0.hashee.matchee.clone());
-        let substituter_new_exprs: Vec<ast::Expr> = matchee_type_args_g0
+        let substituter_new_exprs: Vec<minimal_ast::Expr> = matchee_type_args_g0
             .raw()
             .hashee
             .iter()
@@ -66,8 +66,8 @@ impl TypeChecker {
         matchee_type: NormalForm,
     ) -> Result<
         (
-            Normalized<RcHashed<ast::Ind>>,
-            Normalized<RcHashedVec<ast::Expr>>,
+            Normalized<RcHashed<minimal_ast::Ind>>,
+            Normalized<RcHashedVec<minimal_ast::Expr>>,
         ),
         TypeError,
     > {
@@ -84,7 +84,7 @@ impl TypeChecker {
     fn assert_number_of_match_cases_is_correct(
         &mut self,
         match_: RcHashed<cst::Match>,
-        matchee_type_ind: Normalized<RcHashed<ast::Ind>>,
+        matchee_type_ind: Normalized<RcHashed<minimal_ast::Ind>>,
     ) -> Result<(), TypeError> {
         let expected = matchee_type_ind.raw().hashee.vcon_defs.hashee.len();
         let actual = match_.hashee.cases.len();
@@ -101,7 +101,7 @@ impl TypeChecker {
     fn assert_stated_return_type_arity_is_correct(
         &mut self,
         match_: RcHashed<cst::Match>,
-        matchee_type_args: Normalized<RcHashedVec<ast::Expr>>,
+        matchee_type_args: Normalized<RcHashedVec<minimal_ast::Expr>>,
     ) -> Result<(), TypeError> {
         let correct_return_type_arity = 1 + matchee_type_args.raw().hashee.len();
 
@@ -119,8 +119,8 @@ impl TypeChecker {
     fn typecheck_match_cases_assuming_number_of_cases_is_correct(
         &mut self,
         match_: RcHashed<cst::Match>,
-        matchee_type_ind: Normalized<RcHashed<ast::Ind>>,
-        matchee_type_args: Normalized<RcHashedVec<ast::Expr>>,
+        matchee_type_ind: Normalized<RcHashed<minimal_ast::Ind>>,
+        matchee_type_args: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon: LazyTypeContext,
     ) -> Result<(), TypeError> {
         for i in 0..match_.hashee.cases.len() {
@@ -139,8 +139,8 @@ impl TypeChecker {
         &mut self,
         case_index: usize,
         match_g0: RcHashed<cst::Match>,
-        matchee_type_ind_g0: Normalized<RcHashed<ast::Ind>>,
-        matchee_type_args_g0: Normalized<RcHashedVec<ast::Expr>>,
+        matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,
+        matchee_type_args_g0: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon_g0: LazyTypeContext,
     ) -> Result<(), TypeError> {
         let case = &match_g0.hashee.cases[case_index];

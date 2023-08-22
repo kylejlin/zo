@@ -53,6 +53,7 @@ impl MayConverter {
         Ok(self.cache_vcon(znode::Vcon {
             ind,
             vcon_index: valid_vcon_index,
+            aux_data: (),
         }))
     }
 
@@ -102,6 +103,7 @@ impl MayConverter {
         let return_val = self.cache_vcon(znode::Vcon {
             ind: return_val_ind,
             vcon_index: valid_vcon_index,
+            aux_data: (),
         });
 
         Ok(self.cache_fun(znode::Fun {
@@ -109,6 +111,7 @@ impl MayConverter {
             param_types,
             return_type,
             return_val,
+            aux_data: (),
         }))
     }
 }

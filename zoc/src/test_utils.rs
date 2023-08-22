@@ -1,7 +1,9 @@
 use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     pretty_print::*,
-    syntax_tree::{ast, ipist, ipist_to_ast::IpistToAstConverter, lexer::lex, parser::parse},
+    syntax_tree::{
+        ipist, ipist_to_ast::IpistToAstConverter, lexer::lex, minimal_ast, parser::parse,
+    },
     typecheck::{LazyTypeContext, TypeChecker, TypeError},
 };
 
@@ -31,7 +33,7 @@ pub fn parse_ipist_or_panic(src: &str) -> ipist::Expr {
     nh_cst.into()
 }
 
-pub fn parse_ast_or_panic(src: &str) -> ast::Expr {
+pub fn parse_ast_or_panic(src: &str) -> minimal_ast::Expr {
     let ipist: ipist::Expr = parse_ipist_or_panic(src);
     let mut converter = IpistToAstConverter::default();
     converter.convert(ipist)

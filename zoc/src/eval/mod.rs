@@ -1,4 +1,4 @@
-use crate::syntax_tree::{ast::*, replace_debs::*};
+use crate::syntax_tree::{minimal_ast::*, replace_debs::*};
 
 #[cfg(test)]
 mod tests;
@@ -49,6 +49,7 @@ impl Evaluator {
             universe: ind.universe,
             index_types: self.eval_expressions(ind.index_types.clone()).into_raw(),
             vcon_defs: self.eval_vcon_defs(ind.vcon_defs.clone()).into_raw(),
+            aux_data: (),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
@@ -118,6 +119,7 @@ impl Evaluator {
         Normalized(VconDef {
             param_types: self.eval_expressions(def.param_types.clone()).into_raw(),
             index_args: self.eval_expressions(def.index_args.clone()).into_raw(),
+            aux_data: (),
         })
     }
 
@@ -127,6 +129,7 @@ impl Evaluator {
         let normalized = Vcon {
             ind: self.eval_ind(vcon.ind.clone()).into_raw(),
             vcon_index: vcon.vcon_index,
+            aux_data: (),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
@@ -180,6 +183,7 @@ impl Evaluator {
             return_type_arity: match_.return_type_arity,
             return_type: self.eval(match_.return_type.clone()).into_raw(),
             cases: self.eval_match_cases(match_.cases.clone()).into_raw(),
+            aux_data: (),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
@@ -239,6 +243,7 @@ impl Evaluator {
         Normalized(MatchCase {
             arity: case.arity,
             return_val: self.eval(case.return_val.clone()).into_raw(),
+            aux_data: (),
         })
     }
 
@@ -250,6 +255,7 @@ impl Evaluator {
             param_types: self.eval_expressions(fun.param_types.clone()).into_raw(),
             return_type: self.eval(fun.return_type.clone()).into_raw(),
             return_val: self.eval(fun.return_val.clone()).into_raw(),
+            aux_data: (),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
@@ -279,6 +285,7 @@ impl Evaluator {
         let normalized = App {
             callee: normalized_callee,
             args: normalized_args,
+            aux_data: (),
         }
         .convert_to_expr_and_wrap_in_normalized();
 
@@ -292,6 +299,7 @@ impl Evaluator {
         let normalized = For {
             param_types: self.eval_expressions(for_.param_types.clone()).into_raw(),
             return_type: self.eval(for_.return_type.clone()).into_raw(),
+            aux_data: (),
         }
         .convert_to_expr_and_wrap_in_normalized();
 

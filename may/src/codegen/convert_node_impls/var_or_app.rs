@@ -31,6 +31,10 @@ impl MayConverter {
     ) -> Result<znode::Expr, SemanticError> {
         let callee = self.convert_var_or_app(&expr.callee, context)?;
         let args = self.convert_exprs(&expr.args, context)?;
-        Ok(self.cache_app(znode::App { callee, args }))
+        Ok(self.cache_app(znode::App {
+            callee,
+            args,
+            aux_data: (),
+        }))
     }
 }

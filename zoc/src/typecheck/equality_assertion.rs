@@ -11,8 +11,8 @@ pub struct ExpectedTypeEquality {
 #[derive(Clone, Debug)]
 pub struct ExpectedTypeEqualities<'a> {
     pub exprs: &'a [cst::Expr],
-    pub expected_types: Normalized<&'a [ast::Expr]>,
-    pub actual_types: Normalized<&'a [ast::Expr]>,
+    pub expected_types: Normalized<&'a [minimal_ast::Expr]>,
+    pub actual_types: Normalized<&'a [minimal_ast::Expr]>,
 }
 
 impl<'a> ExpectedTypeEqualities<'a> {

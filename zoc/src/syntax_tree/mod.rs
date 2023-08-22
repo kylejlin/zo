@@ -2,6 +2,7 @@ pub mod ast;
 pub mod ipist;
 pub mod ipist_to_ast;
 pub mod lexer;
+pub mod minimal_ast;
 pub mod ost;
 pub mod ost_to_ipist;
 pub mod parser;

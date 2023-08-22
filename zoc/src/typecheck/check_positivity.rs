@@ -27,7 +27,7 @@
 
 use super::*;
 
-use crate::syntax_tree::ast::node_path::{self, NodeEdge, NodePath};
+use crate::syntax_tree::minimal_ast::node_path::{self, NodeEdge, NodePath};
 
 #[derive(Debug)]
 pub struct PositivityChecker<'a> {
@@ -381,29 +381,29 @@ impl VconPositivityChecker<'_> {
 impl StrictPositivityChecker<'_> {
     fn check(
         &mut self,
-        expr: ast::Expr,
+        expr: minimal_ast::Expr,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
         match expr {
-            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
+            minimal_ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
 
-            ast::Expr::Deb(_) => Ok(()),
+            minimal_ast::Expr::Deb(_) => Ok(()),
 
-            ast::Expr::App(e) => self.check_app(&e.hashee, context, path),
+            minimal_ast::Expr::App(e) => self.check_app(&e.hashee, context, path),
 
-            ast::Expr::For(e) => self.check_for(&e.hashee, context, path),
+            minimal_ast::Expr::For(e) => self.check_for(&e.hashee, context, path),
 
-            ast::Expr::Vcon(_)
-            | ast::Expr::Match(_)
-            | ast::Expr::Fun(_)
-            | ast::Expr::Universe(_) => self.absence_checker().check(expr, context, path),
+            minimal_ast::Expr::Vcon(_)
+            | minimal_ast::Expr::Match(_)
+            | minimal_ast::Expr::Fun(_)
+            | minimal_ast::Expr::Universe(_) => self.absence_checker().check(expr, context, path),
         }
     }
 
     fn check_ind(
         &mut self,
-        ind: &ast::Ind,
+        ind: &minimal_ast::Ind,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -424,7 +424,7 @@ impl StrictPositivityChecker<'_> {
 
     fn check_vcon_defs(
         &mut self,
-        defs: &[ast::VconDef],
+        defs: &[minimal_ast::VconDef],
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -437,7 +437,7 @@ impl StrictPositivityChecker<'_> {
 
     fn check_vcon_def(
         &mut self,
-        def: ast::VconDef,
+        def: minimal_ast::VconDef,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -458,7 +458,7 @@ impl StrictPositivityChecker<'_> {
 
     fn check_app(
         &mut self,
-        app: &ast::App,
+        app: &minimal_ast::App,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -474,27 +474,27 @@ impl StrictPositivityChecker<'_> {
 
     fn check_app_callee(
         &mut self,
-        callee: ast::Expr,
+        callee: minimal_ast::Expr,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
         match callee {
-            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
+            minimal_ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
 
-            ast::Expr::Deb(_) => Ok(()),
+            minimal_ast::Expr::Deb(_) => Ok(()),
 
-            ast::Expr::Vcon(_)
-            | ast::Expr::Match(_)
-            | ast::Expr::Fun(_)
-            | ast::Expr::App(_)
-            | ast::Expr::For(_)
-            | ast::Expr::Universe(_) => self.absence_checker().check(callee, context, path),
+            minimal_ast::Expr::Vcon(_)
+            | minimal_ast::Expr::Match(_)
+            | minimal_ast::Expr::Fun(_)
+            | minimal_ast::Expr::App(_)
+            | minimal_ast::Expr::For(_)
+            | minimal_ast::Expr::Universe(_) => self.absence_checker().check(callee, context, path),
         }
     }
 
     fn check_for(
         &mut self,
-        for_: &ast::For,
+        for_: &minimal_ast::For,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -519,7 +519,7 @@ impl StrictPositivityChecker<'_> {
 
     fn check_dependent_exprs(
         &mut self,
-        exprs: &[ast::Expr],
+        exprs: &[minimal_ast::Expr],
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -547,25 +547,25 @@ impl StrictPositivityChecker<'_> {
 impl AbsenceChecker<'_> {
     fn check(
         &mut self,
-        expr: ast::Expr,
+        expr: minimal_ast::Expr,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
         match expr {
-            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
-            ast::Expr::Vcon(e) => self.check_vcon(&e.hashee, context, path),
-            ast::Expr::Match(e) => self.check_match(&e.hashee, context, path),
-            ast::Expr::Fun(e) => self.check_fun(&e.hashee, context, path),
-            ast::Expr::App(e) => self.check_app(&e.hashee, context, path),
-            ast::Expr::For(e) => self.check_for(&e.hashee, context, path),
-            ast::Expr::Deb(e) => self.check_deb(&e.hashee, context, path),
-            ast::Expr::Universe(_) => Ok(()),
+            minimal_ast::Expr::Ind(e) => self.check_ind(&e.hashee, context, path),
+            minimal_ast::Expr::Vcon(e) => self.check_vcon(&e.hashee, context, path),
+            minimal_ast::Expr::Match(e) => self.check_match(&e.hashee, context, path),
+            minimal_ast::Expr::Fun(e) => self.check_fun(&e.hashee, context, path),
+            minimal_ast::Expr::App(e) => self.check_app(&e.hashee, context, path),
+            minimal_ast::Expr::For(e) => self.check_for(&e.hashee, context, path),
+            minimal_ast::Expr::Deb(e) => self.check_deb(&e.hashee, context, path),
+            minimal_ast::Expr::Universe(_) => Ok(()),
         }
     }
 
     fn check_ind(
         &mut self,
-        ind: &ast::Ind,
+        ind: &minimal_ast::Ind,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -582,7 +582,7 @@ impl AbsenceChecker<'_> {
 
     fn check_vcon_defs(
         &mut self,
-        defs: &[ast::VconDef],
+        defs: &[minimal_ast::VconDef],
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -596,7 +596,7 @@ impl AbsenceChecker<'_> {
 
     fn check_vcon_def(
         &mut self,
-        def: ast::VconDef,
+        def: minimal_ast::VconDef,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -613,7 +613,7 @@ impl AbsenceChecker<'_> {
 
     fn check_vcon(
         &mut self,
-        vcon: &ast::Vcon,
+        vcon: &minimal_ast::Vcon,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -623,7 +623,7 @@ impl AbsenceChecker<'_> {
 
     fn check_match(
         &mut self,
-        match_: &ast::Match,
+        match_: &minimal_ast::Match,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -647,7 +647,7 @@ impl AbsenceChecker<'_> {
 
     fn check_match_cases(
         &mut self,
-        cases: &[ast::MatchCase],
+        cases: &[minimal_ast::MatchCase],
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -663,7 +663,7 @@ impl AbsenceChecker<'_> {
 
     fn check_fun(
         &mut self,
-        fun: &ast::Fun,
+        fun: &minimal_ast::Fun,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -694,7 +694,7 @@ impl AbsenceChecker<'_> {
 
     fn check_app(
         &mut self,
-        app: &ast::App,
+        app: &minimal_ast::App,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -709,7 +709,7 @@ impl AbsenceChecker<'_> {
 
     fn check_for(
         &mut self,
-        for_: &ast::For,
+        for_: &minimal_ast::For,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -730,7 +730,7 @@ impl AbsenceChecker<'_> {
 
     fn check_deb(
         &mut self,
-        deb: &ast::DebNode,
+        deb: &minimal_ast::DebNode,
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -743,7 +743,7 @@ impl AbsenceChecker<'_> {
 
     fn check_dependent_exprs(
         &mut self,
-        exprs: &[ast::Expr],
+        exprs: &[minimal_ast::Expr],
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {
@@ -763,7 +763,7 @@ impl AbsenceChecker<'_> {
 
     fn check_independent_exprs(
         &mut self,
-        exprs: &[ast::Expr],
+        exprs: &[minimal_ast::Expr],
         context: Context,
         path: NodePath,
     ) -> Result<(), Vec<NodeEdge>> {

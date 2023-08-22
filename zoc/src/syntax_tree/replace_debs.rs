@@ -1,4 +1,4 @@
-use crate::syntax_tree::ast::*;
+use crate::syntax_tree::minimal_ast::*;
 
 use std::{hash::Hash, rc::Rc};
 
@@ -29,7 +29,10 @@ impl DebReplacer for DebDownshiftSubstituter<'_> {
         }
 
         let shifted = Deb(original.hashee.deb.0 - new_exprs_len);
-        Expr::Deb(Rc::new(Hashed::new(DebNode { deb: shifted })))
+        Expr::Deb(Rc::new(Hashed::new(DebNode {
+            deb: shifted,
+            aux_data: original.hashee.aux_data.clone(),
+        })))
     }
 }
 
@@ -43,6 +46,7 @@ impl DebReplacer for DebUpshifter {
 
         Expr::Deb(Rc::new(Hashed::new(DebNode {
             deb: Deb(original.hashee.deb.0 + self.0),
+            aux_data: original.hashee.aux_data.clone(),
         })))
     }
 }
@@ -165,6 +169,7 @@ impl ReplaceDebs for RcHashed<Ind> {
                 .vcon_defs
                 .clone()
                 .replace_debs_with_constant_cutoff(replacer, cutoff + 1),
+            aux_data: original.aux_data.clone(),
         }))
     }
 }
@@ -182,6 +187,7 @@ impl ReplaceDebs for VconDef {
                 replacer,
                 cutoff + self.param_types.hashee.len(),
             ),
+            aux_data: self.aux_data.clone(),
         }
     }
 }
@@ -194,6 +200,7 @@ impl ReplaceDebs for RcHashed<Vcon> {
         Rc::new(Hashed::new(Vcon {
             ind: original.ind.clone().replace_debs(replacer, cutoff),
             vcon_index: original.vcon_index,
+            aux_data: original.aux_data.clone(),
         }))
     }
 }
@@ -214,6 +221,7 @@ impl ReplaceDebs for RcHashed<Match> {
                 .cases
                 .clone()
                 .replace_debs_with_constant_cutoff(replacer, cutoff),
+            aux_data: original.aux_data.clone(),
         }))
     }
 }
@@ -225,6 +233,7 @@ impl ReplaceDebs for MatchCase {
         MatchCase {
             arity: self.arity,
             return_val: self.return_val.replace_debs(replacer, cutoff + self.arity),
+            aux_data: self.aux_data.clone(),
         }
     }
 }
@@ -248,6 +257,7 @@ impl ReplaceDebs for RcHashed<Fun> {
                 .return_val
                 .clone()
                 .replace_debs(replacer, cutoff + original.param_types.hashee.len() + 1),
+            aux_data: original.aux_data.clone(),
         }))
     }
 }
@@ -263,6 +273,7 @@ impl ReplaceDebs for RcHashed<App> {
                 .args
                 .clone()
                 .replace_debs_with_constant_cutoff(replacer, cutoff),
+            aux_data: original.aux_data.clone(),
         }))
     }
 }
@@ -281,6 +292,7 @@ impl ReplaceDebs for RcHashed<For> {
                 .return_type
                 .clone()
                 .replace_debs(replacer, cutoff + original.param_types.hashee.len()),
+            aux_data: original.aux_data.clone(),
         }))
     }
 }

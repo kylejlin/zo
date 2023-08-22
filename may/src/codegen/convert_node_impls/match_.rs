@@ -21,6 +21,7 @@ impl MayConverter {
             return_type_arity,
             return_type,
             cases,
+            aux_data: (),
         }))
     }
 
@@ -58,6 +59,10 @@ impl MayConverter {
 
         let return_val = self.convert(&case.return_val, context_with_params)?;
 
-        Ok(znode::MatchCase { arity, return_val })
+        Ok(znode::MatchCase {
+            arity,
+            return_val,
+            aux_data: (),
+        })
     }
 }

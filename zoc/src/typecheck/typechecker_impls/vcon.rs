@@ -32,7 +32,7 @@ impl TypeChecker {
         &mut self,
         ind: RcHashed<cst::Ind>,
         tcon: LazyTypeContext,
-    ) -> Result<Normalized<RcHashed<ast::Ind>>, TypeError> {
+    ) -> Result<Normalized<RcHashed<minimal_ast::Ind>>, TypeError> {
         self.get_type_of_ind(ind.clone(), tcon)?;
 
         let ind_ast = self.cst_converter.convert_ind(ind);
@@ -42,11 +42,11 @@ impl TypeChecker {
 
     pub fn get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
         &mut self,
-        ind: Normalized<RcHashed<ast::Ind>>,
+        ind: Normalized<RcHashed<minimal_ast::Ind>>,
         vcon_index: usize,
     ) -> NormalForm {
         let defs = ind.to_hashee().vcon_defs().hashee().derefed();
-        let def: Normalized<&ast::VconDef> = defs.index_ref(vcon_index);
+        let def: Normalized<&minimal_ast::VconDef> = defs.index_ref(vcon_index);
 
         let substituted_downshifted_param_types = def
             .param_types()
