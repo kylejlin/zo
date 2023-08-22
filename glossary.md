@@ -8,33 +8,66 @@ with the ordinary definitions.
 - app: (function) application
 - AST: abstract syntax tree.
 
-  **AST nodes only contain semantically relevant information.**
+  ASTs are divided into _families_
+  depending on what kind of auxiliary data
+  they hold.
+  Here are the AST families:
+
+  - minimal AST: Minimal AST nodes have no auxiliary data.
+
+  - spanned AST: Each node of a spanned AST stores
+    the node's span in its auxiliary data.
+
+- auxiliary data: AST data that does not determine
+  a node's semantic value.
+  One example might include spans.
+  Another example might include a node's type.
+
+- CST: concrete syntax tree.
+  The parser constructors this tree.
+  The tree is later converted into a spanned AST.
+
+- deb: De Bruijn index
+
+- digest: the output of a hash algorithm.
+  Unless otherwise specified, "digest" refers to
+  a SHA256 digest.
+
+- ind: inductive data type definition
+
+- minimal AST: An AST that
+  **only contains semantically relevant information.**
   This implies that any two AST nodes are equal
   under Rust's `std::cmp::Eq` iff
   they are semantically equal under Zo's semantic rules.
 
-- deb: De Bruijn index
-- digest: the output of a hash algorithm.
-  Unless otherwise specified, "digest" refers to
-  a SHA256 digest.
-- ind: inductive data type definition
-- IPIST: information-preserving intermediate syntax tree.
-  This is an intermediate representation of the OST.
-
-  It is "information-preserving" in the sense that
-  there is a one-to-one correspondence between OSTs and IPISTs.
-  This implies that you can _always_
-  reconstruct an OST from an IPIST.
-
 - NG: no good - unacceptable. This is the opposite of OK.
-
 - OK: okay - acceptable. This is the opposite of NG.
-
-- OST: original syntax tree.
-  The parser constructors this tree.
-  The tree is later converted into an IPIST,
-  and then into an AST.
 - RC: reference counted
+
+- span: the location of a syntax tree node in the source code.
+  For example, in the following source code...
+
+  ```zo
+  (for (Set0) 0)
+  ```
+
+  ...the `for` token has the span `(1, 4)`,
+  since it starts at index `1` and continues
+  up to but not including index `4`.
+
+  Indices start from `0`.
+  When counting, we think of strings as
+  UTF-8 encoded byte sequences
+  (as opposed to say, codepoint sequences, for example).
+  So the `hi` in `😎hi` has the span `(4, 6)`,
+  since `😎` is 4 bytes long.
+
+- spanned AST: An AST that contains the span
+  of each node
+  (i.e., the start and end position of each node
+  in the source code).
+
 - tcon: type context
 - vcon: variant constructor
 
@@ -42,10 +75,7 @@ with the ordinary definitions.
 
 You should read the fully capitalized phrases using their individual letters.
 For example, you read "AST" as "ay ess tee".
-As another example, you read "OST" as "oh ess tee".
-
-**There is one exception: "IPIST".**
-You should read "IPIST" as "eye pissed".
+As another example, you read "CST" as "see ess tee".
 
 ## Pronunciation of tcon and vcon
 
@@ -60,10 +90,10 @@ The "con" is pronounced like the English word (e.g., as in "pros and cons").
 Here is an ASCII diagram:
 
 ```plaintext
-|-----------------------------------------------------------------------------------------------|
-| Phase:      | Plain text --------> OST ---------> IPIST --------------------------------> AST |
-| Transition: |             Parse         Simplify         Remove non-semantic information      |
-|-----------------------------------------------------------------------------------------------|
+|-------------------------------------------------------------------------------------------------------------|
+| Phase:      | Plain text --------> CST ---------> spanned AST --------------------------------> minimal AST |
+| Transition: |             Parse         Simplify               Remove non-semantic information              |
+|-------------------------------------------------------------------------------------------------------------|
 ```
 
 In case the diagram renders weirdly (e.g., due to line wrapping),
