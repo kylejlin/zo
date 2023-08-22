@@ -103,7 +103,7 @@ struct IsRestrictedRecursiveIndEntry(pub bool);
 impl PositivityChecker<'_> {
     pub fn check_ind_positivity_assuming_it_is_otherwise_well_typed(
         &mut self,
-        ind: RcHashed<cst::Ind>,
+        ind: RcHashed<ipist::Ind>,
         tcon_len: usize,
     ) -> Result<(), TypeError> {
         let base = RestrictionStatusVec::unrestricted(tcon_len);
@@ -112,19 +112,19 @@ impl PositivityChecker<'_> {
 }
 
 impl PositivityChecker<'_> {
-    fn check(&mut self, expr: cst::Expr, context: Context) -> Result<(), TypeError> {
+    fn check(&mut self, expr: ipist::Expr, context: Context) -> Result<(), TypeError> {
         match expr {
-            cst::Expr::Ind(e) => self.check_ind(&e.hashee, context),
-            cst::Expr::Vcon(e) => self.check_vcon(&e.hashee, context),
-            cst::Expr::Match(e) => self.check_match(&e.hashee, context),
-            cst::Expr::Fun(e) => self.check_fun(&e.hashee, context),
-            cst::Expr::App(e) => self.check_app(&e.hashee, context),
-            cst::Expr::For(e) => self.check_for(&e.hashee, context),
-            cst::Expr::Deb(_) | cst::Expr::Universe(_) => Ok(()),
+            ipist::Expr::Ind(e) => self.check_ind(&e.hashee, context),
+            ipist::Expr::Vcon(e) => self.check_vcon(&e.hashee, context),
+            ipist::Expr::Match(e) => self.check_match(&e.hashee, context),
+            ipist::Expr::Fun(e) => self.check_fun(&e.hashee, context),
+            ipist::Expr::App(e) => self.check_app(&e.hashee, context),
+            ipist::Expr::For(e) => self.check_for(&e.hashee, context),
+            ipist::Expr::Deb(_) | ipist::Expr::Universe(_) => Ok(()),
         }
     }
 
-    fn check_ind(&mut self, ind: &cst::Ind, context: Context) -> Result<(), TypeError> {
+    fn check_ind(&mut self, ind: &ipist::Ind, context: Context) -> Result<(), TypeError> {
         self.check_dependent_exprs(&ind.index_types, context)?;
 
         let singleton = RestrictionStatusVec::restricted_singleton();
@@ -136,7 +136,7 @@ impl PositivityChecker<'_> {
 
     fn check_vcon_defs(
         &mut self,
-        defs: &[cst::VconDef],
+        defs: &[ipist::VconDef],
         context: Context,
     ) -> Result<(), TypeError> {
         for def in defs {
@@ -145,7 +145,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon_def(&mut self, def: &cst::VconDef, context: Context) -> Result<(), TypeError> {
+    fn check_vcon_def(&mut self, def: &ipist::VconDef, context: Context) -> Result<(), TypeError> {
         self.check_dependent_exprs(&def.param_types, context)?;
 
         let extension = RestrictionStatusVec::unrestricted(def.param_types.len());
@@ -158,11 +158,11 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon(&mut self, vcon: &cst::Vcon, context: Context) -> Result<(), TypeError> {
+    fn check_vcon(&mut self, vcon: &ipist::Vcon, context: Context) -> Result<(), TypeError> {
         self.check_ind(&vcon.ind.hashee, context)
     }
 
-    fn check_match(&mut self, match_: &cst::Match, context: Context) -> Result<(), TypeError> {
+    fn check_match(&mut self, match_: &ipist::Match, context: Context) -> Result<(), TypeError> {
         self.check(match_.matchee.clone(), context)?;
 
         let return_type_extension =
@@ -177,7 +177,7 @@ impl PositivityChecker<'_> {
 
     fn check_match_cases(
         &mut self,
-        cases: &[cst::MatchCase],
+        cases: &[ipist::MatchCase],
         context: Context,
     ) -> Result<(), TypeError> {
         for case in cases {
@@ -188,7 +188,7 @@ impl PositivityChecker<'_> {
 
     fn check_match_case(
         &mut self,
-        case: &cst::MatchCase,
+        case: &ipist::MatchCase,
         context: Context,
     ) -> Result<(), TypeError> {
         let return_val_extension = RestrictionStatusVec::unrestricted(case.arity.value);
@@ -198,7 +198,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_fun(&mut self, fun: &cst::Fun, context: Context) -> Result<(), TypeError> {
+    fn check_fun(&mut self, fun: &ipist::Fun, context: Context) -> Result<(), TypeError> {
         self.check_dependent_exprs(&fun.param_types, context)?;
 
         let return_type_extension = RestrictionStatusVec::unrestricted(fun.param_types.len());
@@ -216,13 +216,13 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_app(&mut self, app: &cst::App, context: Context) -> Result<(), TypeError> {
+    fn check_app(&mut self, app: &ipist::App, context: Context) -> Result<(), TypeError> {
         self.check(app.callee.clone(), context)?;
         self.check_independent_exprs(&app.args, context)?;
         Ok(())
     }
 
-    fn check_for(&mut self, for_: &cst::For, context: Context) -> Result<(), TypeError> {
+    fn check_for(&mut self, for_: &ipist::For, context: Context) -> Result<(), TypeError> {
         self.check_dependent_exprs(&for_.param_types, context)?;
 
         let extension = RestrictionStatusVec::unrestricted(for_.param_types.len());
@@ -234,7 +234,7 @@ impl PositivityChecker<'_> {
 
     fn check_dependent_exprs(
         &mut self,
-        exprs: &[cst::Expr],
+        exprs: &[ipist::Expr],
         context: Context,
     ) -> Result<(), TypeError> {
         if exprs.is_empty() {
@@ -252,7 +252,7 @@ impl PositivityChecker<'_> {
 
     fn check_independent_exprs(
         &mut self,
-        exprs: &[cst::Expr],
+        exprs: &[ipist::Expr],
         context: Context,
     ) -> Result<(), TypeError> {
         for expr in exprs.iter().cloned() {
@@ -277,7 +277,7 @@ impl PositivityChecker<'_> {
 impl VconPositivityChecker<'_> {
     fn assert_vcon_type_satisfies_positivity_condition(
         &mut self,
-        def: &cst::VconDef,
+        def: &ipist::VconDef,
         context: Context,
     ) -> Result<(), TypeError> {
         self.check_vcon_def_param_types(def, context)?;
@@ -291,13 +291,13 @@ impl VconPositivityChecker<'_> {
 
     fn check_vcon_def_param_types(
         &mut self,
-        def: &cst::VconDef,
+        def: &ipist::VconDef,
         context: Context,
     ) -> Result<(), TypeError> {
         let param_types_ast = self
             .0
             .typechecker
-            .cst_converter
+            .ipist_converter
             .convert_expressions(&def.param_types);
         let normalized_param_types = self
             .0
@@ -331,13 +331,13 @@ impl VconPositivityChecker<'_> {
 
     fn check_vcon_def_index_args(
         &mut self,
-        def: &cst::VconDef,
+        def: &ipist::VconDef,
         context: Context,
     ) -> Result<(), TypeError> {
         let index_args_ast = self
             .0
             .typechecker
-            .cst_converter
+            .ipist_converter
             .convert_expressions(&def.index_args);
         let normalized_index_args = self
             .0

@@ -12,24 +12,24 @@ mod vcon;
 impl TypeChecker {
     pub fn get_type(
         &mut self,
-        expr: cst::Expr,
+        expr: ipist::Expr,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         match expr {
-            cst::Expr::Ind(e) => self.get_type_of_ind(e, tcon),
-            cst::Expr::Vcon(e) => self.get_type_of_vcon(e, tcon),
-            cst::Expr::Match(e) => self.get_type_of_match(e, tcon),
-            cst::Expr::Fun(e) => self.get_type_of_fun(e, tcon),
-            cst::Expr::App(e) => self.get_type_of_app(e, tcon),
-            cst::Expr::For(e) => self.get_type_of_for(e, tcon),
-            cst::Expr::Deb(e) => self.get_type_of_deb(e, tcon),
-            cst::Expr::Universe(e) => self.get_type_of_universe(e),
+            ipist::Expr::Ind(e) => self.get_type_of_ind(e, tcon),
+            ipist::Expr::Vcon(e) => self.get_type_of_vcon(e, tcon),
+            ipist::Expr::Match(e) => self.get_type_of_match(e, tcon),
+            ipist::Expr::Fun(e) => self.get_type_of_fun(e, tcon),
+            ipist::Expr::App(e) => self.get_type_of_app(e, tcon),
+            ipist::Expr::For(e) => self.get_type_of_for(e, tcon),
+            ipist::Expr::Deb(e) => self.get_type_of_deb(e, tcon),
+            ipist::Expr::Universe(e) => self.get_type_of_universe(e),
         }
     }
 
     fn get_types_of_dependent_expressions(
         &mut self,
-        exprs: &[cst::Expr],
+        exprs: &[ipist::Expr],
         tcon: LazyTypeContext,
     ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
         let mut out: Normalized<Vec<minimal_ast::Expr>> = Normalized::with_capacity(exprs.len());
@@ -41,7 +41,7 @@ impl TypeChecker {
             let type_ = self.get_type(expr.clone(), current_tcon)?;
             out.push(type_);
 
-            let expr_ast = self.cst_converter.convert(expr.clone());
+            let expr_ast = self.ipist_converter.convert(expr.clone());
             let normalized = self.evaluator.eval(expr_ast);
             normalized_visited_exprs.push(normalized);
         }
@@ -51,7 +51,7 @@ impl TypeChecker {
 
     fn get_types_of_independent_expressions(
         &mut self,
-        exprs: &[cst::Expr],
+        exprs: &[ipist::Expr],
         tcon: LazyTypeContext,
     ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
         let mut out: Normalized<Vec<minimal_ast::Expr>> = Normalized::with_capacity(exprs.len());
@@ -66,7 +66,7 @@ impl TypeChecker {
 
     fn typecheck_and_normalize_param_types_with_limit(
         &mut self,
-        exprs: &[cst::Expr],
+        exprs: &[ipist::Expr],
         limiter: impl UniverseLimit,
         tcon: LazyTypeContext,
     ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
@@ -87,14 +87,14 @@ impl TypeChecker {
             limiter.assert_ul_is_within_limit(param_type_type_ul, exprs[i].clone())?;
         }
 
-        let exprs_ast = self.cst_converter.convert_expressions(exprs.clone());
+        let exprs_ast = self.ipist_converter.convert_expressions(exprs.clone());
         let normalized = self.evaluator.eval_expressions(exprs_ast);
         Ok(normalized.to_hashee().cloned())
     }
 
     fn assert_expr_type_is_universe(
         &mut self,
-        expr: cst::Expr,
+        expr: ipist::Expr,
         tcon: LazyTypeContext,
     ) -> Result<(), TypeError> {
         let type_ = self.get_type(expr.clone(), tcon)?;
@@ -108,7 +108,7 @@ impl TypeChecker {
 
     fn assert_expr_type_is_universe_and_then_eval(
         &mut self,
-        expr: cst::Expr,
+        expr: ipist::Expr,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         let type_ = self.get_type(expr.clone(), tcon)?;
@@ -117,7 +117,7 @@ impl TypeChecker {
             return Err(TypeError::UnexpectedNonTypeExpression { expr, type_ });
         }
 
-        let expr_ast = self.cst_converter.convert(expr.clone());
+        let expr_ast = self.ipist_converter.convert(expr.clone());
         let normalized = self.evaluator.eval(expr_ast);
         Ok(normalized)
     }
@@ -127,17 +127,17 @@ trait UniverseLimit {
     fn assert_ul_is_within_limit(
         &self,
         param_type_type_universe: Universe,
-        expr: cst::Expr,
+        expr: ipist::Expr,
     ) -> Result<(), TypeError>;
 }
 
-struct LimitToIndUniverse(RcHashed<cst::Ind>);
+struct LimitToIndUniverse(RcHashed<ipist::Ind>);
 
 impl UniverseLimit for LimitToIndUniverse {
     fn assert_ul_is_within_limit(
         &self,
         param_type_type_universe: Universe,
-        expr: cst::Expr,
+        expr: ipist::Expr,
     ) -> Result<(), TypeError> {
         let inclusive_max = UniverseLevel(self.0.hashee.type_.level);
         if param_type_type_universe.level > inclusive_max {
@@ -155,7 +155,7 @@ impl UniverseLimit for LimitToIndUniverse {
 struct NoLimit;
 
 impl UniverseLimit for NoLimit {
-    fn assert_ul_is_within_limit(&self, _: Universe, _: cst::Expr) -> Result<(), TypeError> {
+    fn assert_ul_is_within_limit(&self, _: Universe, _: ipist::Expr) -> Result<(), TypeError> {
         Ok(())
     }
 }

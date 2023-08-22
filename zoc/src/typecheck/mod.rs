@@ -2,7 +2,7 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::*,
     syntax_tree::{
-        ipist::{self as cst},
+        ipist,
         ipist_to_ast::IpistToAstConverter,
         minimal_ast::{self, Deb, RcHashed, RcHashedVec, Universe, UniverseLevel},
         replace_debs::*,
@@ -35,7 +35,7 @@ mod tests;
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
-    pub cst_converter: IpistToAstConverter,
+    pub ipist_converter: IpistToAstConverter,
 }
 
 impl TypeChecker {

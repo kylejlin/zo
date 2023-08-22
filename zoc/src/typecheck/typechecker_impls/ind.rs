@@ -3,7 +3,7 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_ind(
         &mut self,
-        ind: RcHashed<cst::Ind>,
+        ind: RcHashed<ipist::Ind>,
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         let normalized_index_types_g0 = self
@@ -42,7 +42,7 @@ impl TypeChecker {
 
     fn typecheck_ind_vcon_defs(
         &mut self,
-        ind: RcHashed<cst::Ind>,
+        ind: RcHashed<ipist::Ind>,
         normalized_index_types_g0: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon_g1: LazyTypeContext,
     ) -> Result<(), TypeError> {
@@ -59,8 +59,8 @@ impl TypeChecker {
 
     fn typecheck_ind_vcon_def(
         &mut self,
-        def: &cst::VconDef,
-        ind: RcHashed<cst::Ind>,
+        def: &ipist::VconDef,
+        ind: RcHashed<ipist::Ind>,
         normalized_index_types_g0: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon_g1: LazyTypeContext,
     ) -> Result<(), TypeError> {
@@ -78,7 +78,7 @@ impl TypeChecker {
         let index_arg_types_g2 =
             self.get_types_of_independent_expressions(&def.index_args, tcon_with_param_types_g2)?;
 
-        let index_args_ast = self.cst_converter.convert_expressions(&def.index_args);
+        let index_args_ast = self.ipist_converter.convert_expressions(&def.index_args);
         let normalized_index_args_g2 = self.evaluator.eval_expressions(index_args_ast);
 
         let normalized_index_types_g2 =
@@ -99,7 +99,7 @@ impl TypeChecker {
 
     fn assert_index_arg_count_is_correct(
         &mut self,
-        def: &cst::VconDef,
+        def: &ipist::VconDef,
         expected_index_arg_count: usize,
     ) -> Result<(), TypeError> {
         let actual_index_arg_count = def.index_args.len();

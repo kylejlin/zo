@@ -29,8 +29,8 @@ pub fn substitute_without_compounding(replacements: &[(&str, String)], original:
 
 pub fn parse_ipist_or_panic(src: &str) -> ipist::Expr {
     let tokens = lex(src).unwrap();
-    let nh_cst = parse(tokens).unwrap();
-    nh_cst.into()
+    let ost = parse(tokens).unwrap();
+    ost.into()
 }
 
 pub fn parse_ast_or_panic(src: &str) -> minimal_ast::Expr {
@@ -45,10 +45,10 @@ pub fn eval_or_panic(src: &str) -> NormalForm {
 }
 
 pub fn get_type_under_empty_tcon_or_panic(src: &str) -> NormalForm {
-    let cst = parse_ipist_or_panic(src);
+    let ipist = parse_ipist_or_panic(src);
     let empty = Normalized::<[_; 0]>::new();
     TypeChecker::default()
-        .get_type(cst, LazyTypeContext::Base(empty.as_ref().convert_ref()))
+        .get_type(ipist, LazyTypeContext::Base(empty.as_ref().convert_ref()))
         .pretty_unwrap()
 }
 
@@ -59,9 +59,9 @@ pub fn get_type_error_under_empty_tcon_or_panic(src: &str) -> TypeError {
 }
 
 pub fn get_type_error_or_panic(src: &str, tcon: LazyTypeContext) -> TypeError {
-    let cst = parse_ipist_or_panic(src);
+    let ipist = parse_ipist_or_panic(src);
     TypeChecker::default()
-        .get_type(cst, tcon)
+        .get_type(ipist, tcon)
         .map(Normalized::into_raw)
         .pretty_unwrap_err()
 }

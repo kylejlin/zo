@@ -3,7 +3,7 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_vcon(
         &mut self,
-        vcon: RcHashed<cst::Vcon>,
+        vcon: RcHashed<ipist::Vcon>,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         self.assert_vcon_index_is_valid(vcon.clone())?;
@@ -19,7 +19,7 @@ impl TypeChecker {
         )
     }
 
-    fn assert_vcon_index_is_valid(&mut self, vcon: RcHashed<cst::Vcon>) -> Result<(), TypeError> {
+    fn assert_vcon_index_is_valid(&mut self, vcon: RcHashed<ipist::Vcon>) -> Result<(), TypeError> {
         let vcon_index = vcon.hashee.vcon_index.value;
         let defs = &vcon.hashee.ind.hashee.vcon_defs;
         if vcon_index >= defs.len() {
@@ -30,12 +30,12 @@ impl TypeChecker {
 
     fn typecheck_and_normalize_ind(
         &mut self,
-        ind: RcHashed<cst::Ind>,
+        ind: RcHashed<ipist::Ind>,
         tcon: LazyTypeContext,
     ) -> Result<Normalized<RcHashed<minimal_ast::Ind>>, TypeError> {
         self.get_type_of_ind(ind.clone(), tcon)?;
 
-        let ind_ast = self.cst_converter.convert_ind(ind);
+        let ind_ast = self.ipist_converter.convert_ind(ind);
         let normalized = self.evaluator.eval_ind(ind_ast);
         Ok(normalized)
     }

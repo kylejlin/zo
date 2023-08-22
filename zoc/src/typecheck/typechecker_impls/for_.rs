@@ -3,7 +3,7 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_for(
         &mut self,
-        for_g0: RcHashed<cst::For>,
+        for_g0: RcHashed<ipist::For>,
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         self.assert_for_has_at_least_one_param(for_g0.clone())?;
@@ -17,7 +17,7 @@ impl TypeChecker {
         )?;
 
         let param_types_g0_ast = self
-            .cst_converter
+            .ipist_converter
             .convert_expressions(&for_g0.hashee.param_types);
         let normalized_param_types_g0 = self.evaluator.eval_expressions(param_types_g0_ast);
 
@@ -51,7 +51,7 @@ impl TypeChecker {
 
     fn assert_for_has_at_least_one_param(
         &mut self,
-        for_: RcHashed<cst::For>,
+        for_: RcHashed<ipist::For>,
     ) -> Result<(), TypeError> {
         if for_.hashee.param_types.is_empty() {
             return Err(TypeError::ForHasZeroParams {
@@ -65,7 +65,7 @@ impl TypeChecker {
     fn assert_every_type_is_universe(
         &mut self,
         types: Normalized<&[minimal_ast::Expr]>,
-        exprs: &[cst::Expr],
+        exprs: &[ipist::Expr],
     ) -> Result<(), TypeError> {
         for i in 0..types.raw().len() {
             if !types.raw()[i].is_universe() {

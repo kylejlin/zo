@@ -13,6 +13,6 @@ fn for_() {
     Prop0
 )"#;
     let tokens = lex(src).unwrap();
-    let cst = parse(tokens).unwrap();
-    insta::assert_debug_snapshot!(&cst);
+    let ost = parse(tokens).unwrap();
+    insta::assert_debug_snapshot!(&ost);
 }

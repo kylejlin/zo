@@ -3,7 +3,7 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_fun(
         &mut self,
-        fun_g0: RcHashed<cst::Fun>,
+        fun_g0: RcHashed<ipist::Fun>,
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         self.assert_fun_has_at_least_one_param(fun_g0.clone())?;
@@ -65,7 +65,10 @@ impl TypeChecker {
         .into())
     }
 
-    fn assert_fun_has_at_least_one_param(&self, fun: RcHashed<cst::Fun>) -> Result<(), TypeError> {
+    fn assert_fun_has_at_least_one_param(
+        &self,
+        fun: RcHashed<ipist::Fun>,
+    ) -> Result<(), TypeError> {
         if fun.hashee.param_types.is_empty() {
             return Err(TypeError::FunHasZeroParams {
                 fun: fun.hashee.clone(),

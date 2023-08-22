@@ -3,7 +3,7 @@ use super::*;
 impl TypeChecker {
     pub fn get_type_of_app(
         &mut self,
-        app: RcHashed<cst::App>,
+        app: RcHashed<ipist::App>,
         tcon: LazyTypeContext,
     ) -> Result<NormalForm, TypeError> {
         self.assert_app_has_at_least_one_arg(app.clone())?;
@@ -18,7 +18,7 @@ impl TypeChecker {
 
         let arg_types = self.get_types_of_independent_expressions(&app.hashee.args, tcon)?;
 
-        let args_ast = self.cst_converter.convert_expressions(&app.hashee.args);
+        let args_ast = self.ipist_converter.convert_expressions(&app.hashee.args);
         let normalized_args = self.evaluator.eval_expressions(args_ast);
 
         let substituted_callee_type_param_types = self.substitute_callee_type_param_types(
@@ -39,7 +39,7 @@ impl TypeChecker {
 
     fn assert_app_has_at_least_one_arg(
         &mut self,
-        app: RcHashed<cst::App>,
+        app: RcHashed<ipist::App>,
     ) -> Result<(), TypeError> {
         if app.hashee.args.is_empty() {
             return Err(TypeError::AppHasZeroArgs {
@@ -53,7 +53,7 @@ impl TypeChecker {
     fn assert_callee_type_is_a_for_expression(
         &mut self,
         callee_type: NormalForm,
-        app: RcHashed<cst::App>,
+        app: RcHashed<ipist::App>,
     ) -> Result<Normalized<RcHashed<minimal_ast::For>>, TypeError> {
         if let Ok(for_) = callee_type.clone().try_into_for() {
             return Ok(for_);
@@ -67,7 +67,7 @@ impl TypeChecker {
 
     fn assert_arg_count_is_correct(
         &mut self,
-        app: RcHashed<cst::App>,
+        app: RcHashed<ipist::App>,
         callee_type: Normalized<RcHashed<minimal_ast::For>>,
     ) -> Result<(), TypeError> {
         let arg_count = app.hashee.args.len();
