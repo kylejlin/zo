@@ -18,10 +18,10 @@ impl TypeChecker {
 
         let arg_types = self.get_types_of_independent_expressions(&app.hashee.args.hashee, tcon)?;
 
-        let args_ast = self
+        let args_minimal = self
             .aux_remover
             .convert_expressions(&app.hashee.args.hashee);
-        let normalized_args = self.evaluator.eval_expressions(args_ast);
+        let normalized_args = self.evaluator.eval_expressions(args_minimal);
 
         let substituted_callee_type_param_types = self.substitute_callee_type_param_types(
             callee_type_param_types.clone(),

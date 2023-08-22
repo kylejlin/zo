@@ -38,8 +38,8 @@ impl TypeChecker {
     ) -> Result<Normalized<RcHashed<minimal_ast::Ind>>, TypeError<A>> {
         self.get_type_of_ind(ind.clone(), tcon)?;
 
-        let ind_ast = self.aux_remover.convert_ind(ind);
-        let normalized = self.evaluator.eval_ind(ind_ast);
+        let ind_minimal = self.aux_remover.convert_ind(ind);
+        let normalized = self.evaluator.eval_ind(ind_minimal);
         Ok(normalized)
     }
 

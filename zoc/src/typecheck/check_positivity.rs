@@ -326,7 +326,7 @@ impl VconPositivityChecker<'_> {
         def: &ast::VconDef<A>,
         context: Context,
     ) -> Result<(), TypeError<A>> {
-        let param_types_ast = self
+        let param_types_minimal = self
             .0
             .typechecker
             .aux_remover
@@ -335,7 +335,7 @@ impl VconPositivityChecker<'_> {
             .0
             .typechecker
             .evaluator
-            .eval_expressions(param_types_ast);
+            .eval_expressions(param_types_minimal);
 
         for (i, param_type) in normalized_param_types
             .raw()
@@ -366,7 +366,7 @@ impl VconPositivityChecker<'_> {
         def: &ast::VconDef<A>,
         context: Context,
     ) -> Result<(), TypeError<A>> {
-        let index_args_ast = self
+        let index_args_minimal = self
             .0
             .typechecker
             .aux_remover
@@ -375,7 +375,7 @@ impl VconPositivityChecker<'_> {
             .0
             .typechecker
             .evaluator
-            .eval_expressions(index_args_ast);
+            .eval_expressions(index_args_minimal);
 
         for (i, index_arg) in normalized_index_args
             .raw()

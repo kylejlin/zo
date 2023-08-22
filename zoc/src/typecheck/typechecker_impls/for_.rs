@@ -16,10 +16,10 @@ impl TypeChecker {
             &for_g0.hashee.param_types.hashee,
         )?;
 
-        let param_types_g0_ast = self
+        let param_types_g0_minimal = self
             .aux_remover
             .convert_expressions(&for_g0.hashee.param_types.hashee);
-        let normalized_param_types_g0 = self.evaluator.eval_expressions(param_types_g0_ast);
+        let normalized_param_types_g0 = self.evaluator.eval_expressions(param_types_g0_minimal);
 
         let tcon_with_param_types_g1 =
             LazyTypeContext::Snoc(&tcon_g0, normalized_param_types_g0.to_hashee().derefed());

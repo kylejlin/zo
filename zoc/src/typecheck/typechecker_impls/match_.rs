@@ -305,6 +305,3 @@ impl TypeChecker {
             })
     }
 }
-
-// TODO: Replace all the `foobar_ast` with `foobar_minimal`
-// (in the whole crate, not just this file).

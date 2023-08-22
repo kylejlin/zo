@@ -13,14 +13,16 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match &self.0 {
             TypeError::InvalidDeb { deb, tcon_len } => {
-                let deb_ast = minimal_ast::DebNode {
+                let deb_minimal = minimal_ast::DebNode {
                     deb: deb.deb,
                     aux_data: (),
                 };
                 f.debug_struct("TypeError::InvalidDeb")
                     .field(
                         "deb",
-                        &deb_ast.pretty_printed().with_location_appended(deb.span()),
+                        &deb_minimal
+                            .pretty_printed()
+                            .with_location_appended(deb.span()),
                     )
                     .field("tcon_len", tcon_len)
                     .finish()
@@ -28,11 +30,11 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
 
             TypeError::InvalidVconIndex(vcon) => {
                 let mut converter = AuxDataRemover::default();
-                let vcon_ast = converter.convert_vcon(rc_hashed(vcon.clone()));
+                let vcon_minimal = converter.convert_vcon(rc_hashed(vcon.clone()));
                 f.debug_struct("TypeError::InvalidVconIndex")
                     .field(
                         "vcon",
-                        &vcon_ast
+                        &vcon_minimal
                             .hashee
                             .pretty_printed()
                             .with_location_appended(vcon.span()),
@@ -42,11 +44,11 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
 
             TypeError::UnexpectedNonTypeExpression { expr, type_ } => {
                 let mut converter = AuxDataRemover::default();
-                let expr_ast = converter.convert(expr.clone());
+                let expr_minimal = converter.convert(expr.clone());
                 f.debug_struct("TypeError::UnexpectedNonTypeExpression")
                     .field(
                         "expr",
-                        &expr_ast
+                        &expr_minimal
                             .pretty_printed()
                             .with_location_appended(expr.span()),
                     )
@@ -60,19 +62,19 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 ind,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let index_or_param_type_ast = converter.convert(index_or_param_type.clone());
-                let ind_ast = converter.convert_ind(rc_hashed(ind.clone()));
+                let index_or_param_type_minimal = converter.convert(index_or_param_type.clone());
+                let ind_minimal = converter.convert_ind(rc_hashed(ind.clone()));
                 f.debug_struct("TypeError::UniverseInconsistencyInIndDef")
                     .field(
                         "index_or_param_type",
-                        &index_or_param_type_ast
+                        &index_or_param_type_minimal
                             .pretty_printed()
                             .with_location_appended(index_or_param_type.span()),
                     )
                     .field("universe", &universe)
                     .field(
                         "ind",
-                        &ind_ast
+                        &ind_minimal
                             .hashee
                             .pretty_printed()
                             .with_location_appended(ind.span()),
@@ -86,11 +88,13 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 actual,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let def_ast = converter.convert_vcon_def(def.clone());
+                let def_minimal = converter.convert_vcon_def(def.clone());
                 f.debug_struct("TypeError::WrongNumberOfIndexArguments")
                     .field(
                         "def",
-                        &def_ast.pretty_printed().with_location_appended(def.span()),
+                        &def_minimal
+                            .pretty_printed()
+                            .with_location_appended(def.span()),
                     )
                     .field("expected", expected)
                     .field("actual", actual)
@@ -99,11 +103,11 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
 
             TypeError::NonInductiveMatcheeType { expr, type_ } => {
                 let mut converter = AuxDataRemover::default();
-                let expr_ast = converter.convert(expr.clone());
+                let expr_minimal = converter.convert(expr.clone());
                 f.debug_struct("TypeError::NonInductiveMatcheeType")
                     .field(
                         "expr",
-                        &expr_ast
+                        &expr_minimal
                             .pretty_printed()
                             .with_location_appended(expr.span()),
                     )
@@ -116,11 +120,11 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 matchee_type_ind,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let match_ast = converter.convert_match(rc_hashed(match_.clone()));
+                let match_minimal = converter.convert_match(rc_hashed(match_.clone()));
                 f.debug_struct("TypeError::WrongNumberOfMatchCases")
                     .field(
                         "match_",
-                        &match_ast
+                        &match_minimal
                             .hashee
                             .pretty_printed()
                             .with_location_appended(match_.span()),
@@ -134,7 +138,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 matchee_type_args,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let match_ast = converter.convert_match(rc_hashed(match_.clone()));
+                let match_minimal = converter.convert_match(rc_hashed(match_.clone()));
                 let matchee_type_args: Vec<_> = matchee_type_args
                     .iter()
                     .map(|arg| arg.raw().pretty_printed())
@@ -142,7 +146,7 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 f.debug_struct("TypeError::WrongMatchReturnTypeArity")
                     .field(
                         "match_",
-                        &match_ast
+                        &match_minimal
                             .hashee
                             .pretty_printed()
                             .with_location_appended(match_.span()),
@@ -158,13 +162,13 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 match_case_index,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let match_ast = converter.convert_match(rc_hashed(match_.clone()));
+                let match_minimal = converter.convert_match(rc_hashed(match_.clone()));
                 f.debug_struct("TypeError::WrongMatchCaseArity")
                     .field("stated_arity", &stated_arity)
                     .field("expected", expected)
                     .field(
                         "match_",
-                        &match_ast
+                        &match_minimal
                             .hashee
                             .pretty_printed()
                             .with_location_appended(match_.span()),
@@ -179,11 +183,11 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 actual_type,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let expr_ast = converter.convert(expr.clone());
+                let expr_minimal = converter.convert(expr.clone());
                 f.debug_struct("TypeError::TypeMismatch")
                     .field(
                         "expr",
-                        &expr_ast
+                        &expr_minimal
                             .pretty_printed()
                             .with_location_appended(expr.span()),
                     )
@@ -194,11 +198,11 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
 
             TypeError::CalleeTypeIsNotAForExpression { app, callee_type } => {
                 let mut converter = AuxDataRemover::default();
-                let app_ast = converter.convert_app(rc_hashed(app.clone()));
+                let app_minimal = converter.convert_app(rc_hashed(app.clone()));
                 f.debug_struct("TypeError::CalleeTypeIsNotAForExpression")
                     .field(
                         "app",
-                        &app_ast
+                        &app_minimal
                             .hashee
                             .pretty_printed()
                             .with_location_appended(app.span()),
@@ -214,11 +218,11 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 actual,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let app_ast = converter.convert_app(rc_hashed(app.clone()));
+                let app_minimal = converter.convert_app(rc_hashed(app.clone()));
                 f.debug_struct("TypeError::WrongNumberOfAppArguments")
                     .field(
                         "app",
-                        &app_ast
+                        &app_minimal
                             .hashee
                             .pretty_printed()
                             .with_location_appended(app.span()),
@@ -231,22 +235,24 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
 
             TypeError::FunHasZeroParams { fun } => {
                 let mut converter = AuxDataRemover::default();
-                let fun_ast = converter.convert(fun.clone().into());
+                let fun_minimal = converter.convert(fun.clone().into());
                 f.debug_struct("TypeError::FunHasZeroParams")
                     .field(
                         "fun",
-                        &fun_ast.pretty_printed().with_location_appended(fun.span()),
+                        &fun_minimal
+                            .pretty_printed()
+                            .with_location_appended(fun.span()),
                     )
                     .finish()
             }
 
             TypeError::AppHasZeroArgs { app } => {
                 let mut converter = AuxDataRemover::default();
-                let app_ast = converter.convert_app(rc_hashed(app.clone()));
+                let app_minimal = converter.convert_app(rc_hashed(app.clone()));
                 f.debug_struct("TypeError::AppHasZeroArgs")
                     .field(
                         "app",
-                        &app_ast
+                        &app_minimal
                             .hashee
                             .pretty_printed()
                             .with_location_appended(app.span()),
@@ -256,11 +262,13 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
 
             TypeError::ForHasZeroParams { for_ } => {
                 let mut converter = AuxDataRemover::default();
-                let for_ast = converter.convert(for_.clone().into());
+                let for_minimal = converter.convert(for_.clone().into());
                 f.debug_struct("TypeError::ForHasZeroParams")
                     .field(
                         "for_",
-                        &for_ast.pretty_printed().with_location_appended(for_.span()),
+                        &for_minimal
+                            .pretty_printed()
+                            .with_location_appended(for_.span()),
                     )
                     .finish()
             }
@@ -272,20 +280,20 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 required_strict_superstruct,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let app_ast = converter.convert_app(rc_hashed(app.clone()));
-                let callee_deb_definition_src_ast =
+                let app_minimal = converter.convert_app(rc_hashed(app.clone()));
+                let callee_deb_definition_src_minimal =
                     converter.convert(callee_deb_definition_src.clone().into());
                 f.debug_struct("TypeError::IllegalRecursiveCall")
                     .field(
                         "app",
-                        &app_ast
+                        &app_minimal
                             .hashee
                             .pretty_printed()
                             .with_location_appended(app.span()),
                     )
                     .field(
                         "callee_deb_definition_src",
-                        &callee_deb_definition_src_ast
+                        &callee_deb_definition_src_minimal
                             .pretty_printed()
                             .with_location_appended(callee_deb_definition_src.span()),
                     )
@@ -302,19 +310,21 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 definition_src,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let deb_ast = minimal_ast::DebNode {
+                let deb_minimal = minimal_ast::DebNode {
                     deb: deb.deb,
                     aux_data: (),
                 };
-                let definition_src_ast = converter.convert(definition_src.clone().into());
+                let definition_src_minimal = converter.convert(definition_src.clone().into());
                 f.debug_struct("TypeError::RecursiveFunParamInNonCalleePosition")
                     .field(
                         "deb",
-                        &deb_ast.pretty_printed().with_location_appended(deb.span()),
+                        &deb_minimal
+                            .pretty_printed()
+                            .with_location_appended(deb.span()),
                     )
                     .field(
                         "definition_src",
-                        &definition_src_ast
+                        &definition_src_minimal
                             .pretty_printed()
                             .with_location_appended(definition_src.span()),
                     )
@@ -326,19 +336,21 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 definition_src,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let deb_ast = minimal_ast::DebNode {
+                let deb_minimal = minimal_ast::DebNode {
                     deb: deb.deb,
                     aux_data: (),
                 };
-                let definition_src_ast = converter.convert(definition_src.clone().into());
+                let definition_src_minimal = converter.convert(definition_src.clone().into());
                 f.debug_struct("TypeError::DeclaredFunNonrecursiveButUsedRecursiveFunParam")
                     .field(
                         "deb",
-                        &deb_ast.pretty_printed().with_location_appended(deb.span()),
+                        &deb_minimal
+                            .pretty_printed()
+                            .with_location_appended(deb.span()),
                     )
                     .field(
                         "definition_src",
-                        &definition_src_ast
+                        &definition_src_minimal
                             .pretty_printed()
                             .with_location_appended(definition_src.span()),
                     )
@@ -347,11 +359,13 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
 
             TypeError::DecreasingArgIndexTooBig { fun } => {
                 let mut converter = AuxDataRemover::default();
-                let fun_ast = converter.convert(fun.clone().into());
+                let fun_minimal = converter.convert(fun.clone().into());
                 f.debug_struct("TypeError::DecreasingArgIndexTooBig")
                     .field(
                         "fun",
-                        &fun_ast.pretty_printed().with_location_appended(fun.span()),
+                        &fun_minimal
+                            .pretty_printed()
+                            .with_location_appended(fun.span()),
                     )
                     .finish()
             }
@@ -363,11 +377,13 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 path_from_param_type_to_problematic_deb,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let def_ast = converter.convert_vcon_def(def.clone());
+                let def_minimal = converter.convert_vcon_def(def.clone());
                 f.debug_struct("TypeError::VconDefParamTypeFailsStrictPositivityCondition")
                     .field(
                         "def",
-                        &def_ast.pretty_printed().with_location_appended(def.span()),
+                        &def_minimal
+                            .pretty_printed()
+                            .with_location_appended(def.span()),
                     )
                     .field("param_type_index", param_type_index)
                     .field(
@@ -388,11 +404,13 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 path_from_index_arg_to_problematic_deb,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let def_ast = converter.convert_vcon_def(def.clone());
+                let def_minimal = converter.convert_vcon_def(def.clone());
                 f.debug_struct("TypeError::RecursiveIndParamAppearsInVconDefIndexArg")
                     .field(
                         "def",
-                        &def_ast.pretty_printed().with_location_appended(def.span()),
+                        &def_minimal
+                            .pretty_printed()
+                            .with_location_appended(def.span()),
                     )
                     .field("index_arg_index", index_arg_index)
                     .field(
@@ -412,11 +430,11 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 match_return_type_type,
             } => {
                 let mut converter = AuxDataRemover::default();
-                let match_ast = converter.convert_match(rc_hashed(match_.clone()));
+                let match_minimal = converter.convert_match(rc_hashed(match_.clone()));
                 f.debug_struct("TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable")
                     .field(
                         "match_",
-                        &match_ast
+                        &match_minimal
                             .hashee
                             .pretty_printed()
                             .with_location_appended(match_.span()),

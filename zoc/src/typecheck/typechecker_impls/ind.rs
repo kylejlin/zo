@@ -77,8 +77,8 @@ impl TypeChecker {
             tcon_with_param_types_g2,
         )?;
 
-        let index_args_ast = self.aux_remover.convert_expressions(&def.index_args.hashee);
-        let normalized_index_args_g2 = self.evaluator.eval_expressions(index_args_ast);
+        let index_args_minimal = self.aux_remover.convert_expressions(&def.index_args.hashee);
+        let normalized_index_args_g2 = self.evaluator.eval_expressions(index_args_minimal);
 
         let normalized_index_types_g2 = normalized_index_types_g0
             .upshift_with_increasing_cutoff(1 + def.param_types.hashee.len());

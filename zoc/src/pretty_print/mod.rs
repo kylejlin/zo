@@ -14,7 +14,7 @@ where
     }
 }
 
-mod impl_ast;
+mod impl_minimal_ast;
 mod impl_type_error;
 
 pub trait PrettyPrinted {
