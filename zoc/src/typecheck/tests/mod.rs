@@ -10,4 +10,4 @@ mod should_fail;
 mod should_succeed;
 
 // TODO: Reorganize this module into "topics" instead of
-// "should succeed" and "should fail".
+// `should succeed` and `should fail`.
