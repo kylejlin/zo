@@ -32,7 +32,10 @@ impl TypeChecker {
             out
         };
         let tcon_g0matchparams = LazyTypeContext::Snoc(&tcon_g0, tcon_extension.to_derefed());
-        self.assert_expr_type_is_universe(match_g0.hashee.return_type.clone(), tcon_g0matchparams)?;
+        let return_type_type = self.assert_expr_type_is_universe(
+            match_g0.hashee.return_type.clone(),
+            tcon_g0matchparams,
+        )?;
 
         self.typecheck_match_cases_assuming_number_of_cases_is_correct(
             match_g0.clone(),
@@ -41,7 +44,7 @@ impl TypeChecker {
             tcon_g0,
         )?;
 
-        let matchee_g0 = self.span_remover.convert(match_g0.hashee.matchee.clone());
+        let matchee_g0 = self.aux_remover.convert(match_g0.hashee.matchee.clone());
         let substituter_new_exprs: Vec<minimal_ast::Expr> = matchee_type_args_g0
             .raw()
             .hashee
@@ -53,10 +56,13 @@ impl TypeChecker {
             new_exprs: &substituter_new_exprs,
         };
         let return_type = self
-            .span_remover
+            .aux_remover
             .convert(match_g0.hashee.return_type.clone())
             .replace_debs(&substituter, 0);
         let normalized_return_type = self.evaluator.eval(return_type);
+
+        self.check_erasability(match_g0, matchee_type_ind_g0, return_type_type, tcon_g0)?;
+
         Ok(normalized_return_type)
     }
 
@@ -182,7 +188,7 @@ impl TypeChecker {
             new_exprs: &substituter_new_exprs,
         };
         let match_return_type_g0matchparams = self
-            .span_remover
+            .aux_remover
             .convert(match_g0.hashee.return_type.clone());
         let match_return_type_g1 = match_return_type_g0matchparams
             .replace_debs(&DebUpshifter(case.arity), match_arity)
@@ -217,3 +223,88 @@ impl TypeChecker {
         Ok(())
     }
 }
+
+impl TypeChecker {
+    fn check_erasability<A: AuxDataFamily>(
+        &mut self,
+        match_g0: RcHashed<ast::Match<A>>,
+        matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,
+        match_return_type_type: RcHashed<minimal_ast::UniverseNode>,
+        tcon_g0: LazyTypeContext,
+    ) -> Result<(), TypeError<A>> {
+        if match_return_type_type.hashee.universe.erasable
+            || !matchee_type_ind_g0.raw().hashee.universe.erasable
+            || self.does_well_typed_ind_have_at_most_one_vcon_def_where_all_params_are_erasable(
+                &matchee_type_ind_g0.raw().hashee,
+                tcon_g0,
+            )
+        {
+            return Ok(());
+        }
+
+        Err(
+            TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
+                match_: match_g0.hashee.clone(),
+                matchee_type_type: minimal_ast::UniverseNode {
+                    universe: matchee_type_ind_g0.raw().hashee.universe,
+                    aux_data: (),
+                },
+                match_return_type_type: match_return_type_type.hashee.clone(),
+            },
+        )
+    }
+
+    fn does_well_typed_ind_have_at_most_one_vcon_def_where_all_params_are_erasable<
+        A: AuxDataFamily,
+    >(
+        &mut self,
+        ind_g0: &ast::Ind<A>,
+        tcon_g0: LazyTypeContext,
+    ) -> bool {
+        let vcon_defs = &ind_g0.vcon_defs.hashee;
+
+        if vcon_defs.len() > 1 {
+            return false;
+        }
+
+        if vcon_defs.len() == 0 {
+            return true;
+        }
+
+        let index_types_g0_minimal = self
+            .aux_remover
+            .convert_expressions(&ind_g0.index_types.hashee);
+        let normalized_index_types_g0 = self.evaluator.eval_expressions(index_types_g0_minimal);
+        let universe_node = NormalForm::universe(minimal_ast::UniverseNode {
+            universe: ind_g0.universe,
+            aux_data: (),
+        });
+        let ind_type_g0 =
+            Normalized::for_(normalized_index_types_g0, universe_node).collapse_if_nullary();
+
+        let ind_type_singleton = Normalized::<[_; 1]>::new(ind_type_g0.clone());
+        let tcon_with_ind_type_g1 =
+            LazyTypeContext::Snoc(&tcon_g0, ind_type_singleton.as_ref().convert_ref());
+
+        let vcon_def_g1 = &vcon_defs[0];
+        let vcon_def_param_type_types_g1 = self
+            .get_types_of_dependent_expressions(
+                &vcon_def_g1.param_types.hashee,
+                tcon_with_ind_type_g1,
+            )
+            // TODO: Convert this to a proper `.expect()`
+            // once we impl Debug for TypeError<A> for all A.
+            .unwrap_or_else(|_err| panic!("`ind_g0` is should be well-typed"));
+
+        vcon_def_param_type_types_g1
+            .into_raw()
+            .into_iter()
+            .all(|param_type| {
+                let param_type = param_type.try_into_universe().expect("`ind_g0` is well-typed, so every vcon def param type type should be a universe");
+                param_type.hashee.universe.erasable
+            })
+    }
+}
+
+// TODO: Replace all the `foobar_ast` with `foobar_minimal`
+// (in the whole crate, not just this file).

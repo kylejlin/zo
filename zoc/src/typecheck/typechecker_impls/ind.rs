@@ -7,7 +7,7 @@ impl TypeChecker {
         tcon_g0: LazyTypeContext,
     ) -> Result<NormalForm, TypeError<A>> {
         let normalized_index_types_g0 = self
-            .typecheck_and_normalize_param_types_with_limit(
+            .typecheck_param_types_with_limit_and_normalize(
                 &ind.hashee.index_types.hashee,
                 LimitToIndUniverse(ind.clone()),
                 tcon_g0,
@@ -63,7 +63,7 @@ impl TypeChecker {
     ) -> Result<(), TypeError<A>> {
         self.assert_index_arg_count_is_correct(def, normalized_index_types_g0.raw().hashee.len())?;
 
-        let normalized_param_types_g1 = self.typecheck_and_normalize_param_types_with_limit(
+        let normalized_param_types_g1 = self.typecheck_param_types_with_limit_and_normalize(
             &def.param_types.hashee,
             LimitToIndUniverse(ind),
             tcon_g1,
@@ -77,9 +77,7 @@ impl TypeChecker {
             tcon_with_param_types_g2,
         )?;
 
-        let index_args_ast = self
-            .span_remover
-            .convert_expressions(&def.index_args.hashee);
+        let index_args_ast = self.aux_remover.convert_expressions(&def.index_args.hashee);
         let normalized_index_args_g2 = self.evaluator.eval_expressions(index_args_ast);
 
         let normalized_index_types_g2 = normalized_index_types_g0

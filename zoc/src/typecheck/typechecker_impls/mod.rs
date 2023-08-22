@@ -41,7 +41,7 @@ impl TypeChecker {
             let type_ = self.get_type(expr.clone(), current_tcon)?;
             out.push(type_);
 
-            let expr_ast = self.span_remover.convert(expr.clone());
+            let expr_ast = self.aux_remover.convert(expr.clone());
             let normalized = self.evaluator.eval(expr_ast);
             normalized_visited_exprs.push(normalized);
         }
@@ -64,10 +64,10 @@ impl TypeChecker {
         Ok(out)
     }
 
-    fn typecheck_and_normalize_param_types_with_limit<A: AuxDataFamily>(
+    fn typecheck_param_types_with_limit_and_normalize<A: AuxDataFamily>(
         &mut self,
         exprs: &[ast::Expr<A>],
-        limiter: impl UniverseLimit<A>,
+        limit: impl UniverseLimit<A>,
         tcon: LazyTypeContext,
     ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError<A>> {
         let param_type_types = self.get_types_of_dependent_expressions(exprs, tcon)?;
@@ -84,10 +84,10 @@ impl TypeChecker {
                 }
             };
 
-            limiter.assert_ul_is_within_limit(param_type_type_ul, exprs[i].clone())?;
+            limit.assert_ul_is_within_limit(param_type_type_ul, exprs[i].clone())?;
         }
 
-        let exprs_ast = self.span_remover.convert_expressions(exprs.clone());
+        let exprs_ast = self.aux_remover.convert_expressions(exprs.clone());
         let normalized = self.evaluator.eval_expressions(exprs_ast);
         Ok(normalized.to_hashee().cloned())
     }
@@ -96,14 +96,14 @@ impl TypeChecker {
         &mut self,
         expr: ast::Expr<A>,
         tcon: LazyTypeContext,
-    ) -> Result<(), TypeError<A>> {
+    ) -> Result<RcHashed<minimal_ast::UniverseNode>, TypeError<A>> {
         let type_ = self.get_type(expr.clone(), tcon)?;
 
-        if !type_.raw().is_universe() {
-            return Err(TypeError::UnexpectedNonTypeExpression { expr, type_ });
-        }
+        match type_.raw() {
+            ast::Expr::Universe(universe) => Ok(universe.clone()),
 
-        Ok(())
+            _ => Err(TypeError::UnexpectedNonTypeExpression { expr, type_ }),
+        }
     }
 
     fn assert_expr_type_is_universe_and_then_eval<A: AuxDataFamily>(
@@ -117,7 +117,7 @@ impl TypeChecker {
             return Err(TypeError::UnexpectedNonTypeExpression { expr, type_ });
         }
 
-        let expr_ast = self.span_remover.convert(expr.clone());
+        let expr_ast = self.aux_remover.convert(expr.clone());
         let normalized = self.evaluator.eval(expr_ast);
         Ok(normalized)
     }

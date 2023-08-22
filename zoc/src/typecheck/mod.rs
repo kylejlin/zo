@@ -32,7 +32,7 @@ mod tests;
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
-    pub span_remover: AuxDataRemover,
+    pub aux_remover: AuxDataRemover,
 }
 
 impl TypeChecker {

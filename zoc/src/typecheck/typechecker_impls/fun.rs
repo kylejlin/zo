@@ -10,7 +10,7 @@ impl TypeChecker {
 
         self.check_recursion(fun_g0.clone().into(), RecursionCheckingContext::empty())?;
 
-        let normalized_param_types_g0 = self.typecheck_and_normalize_param_types_with_limit(
+        let normalized_param_types_g0 = self.typecheck_param_types_with_limit_and_normalize(
             &fun_g0.hashee.param_types.hashee,
             NoLimit::<A>::default(),
             tcon_g0,

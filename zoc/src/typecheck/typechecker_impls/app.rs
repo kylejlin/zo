@@ -19,7 +19,7 @@ impl TypeChecker {
         let arg_types = self.get_types_of_independent_expressions(&app.hashee.args.hashee, tcon)?;
 
         let args_ast = self
-            .span_remover
+            .aux_remover
             .convert_expressions(&app.hashee.args.hashee);
         let normalized_args = self.evaluator.eval_expressions(args_ast);
 

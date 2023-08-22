@@ -17,7 +17,7 @@ impl TypeChecker {
         )?;
 
         let param_types_g0_ast = self
-            .span_remover
+            .aux_remover
             .convert_expressions(&for_g0.hashee.param_types.hashee);
         let normalized_param_types_g0 = self.evaluator.eval_expressions(param_types_g0_ast);
 

@@ -405,6 +405,32 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                     )
                     .finish()
             }
+
+            TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
+                match_,
+                matchee_type_type,
+                match_return_type_type,
+            } => {
+                let mut converter = AuxDataRemover::default();
+                let match_ast = converter.convert_match(rc_hashed(match_.clone()));
+                f.debug_struct("TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable")
+                    .field(
+                        "match_",
+                        &match_ast
+                            .hashee
+                            .pretty_printed()
+                            .with_location_appended(match_.span()),
+                    )
+                    .field("matchee_type_type", &matchee_type_type.pretty_printed())
+                    .field(
+                        "match_return_type_type",
+                        &match_return_type_type.pretty_printed(),
+                    )
+                    .finish()
+            }
         }
     }
 }
+
+// TODO: Rename `let mut converter` to `let mut remover`
+// (all over the crate, not just in this file).
