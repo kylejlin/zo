@@ -10,28 +10,28 @@ mod universe_node;
 mod vcon;
 
 impl TypeChecker {
-    pub fn get_type(
+    pub fn get_type<A: AuxDataFamily>(
         &mut self,
-        expr: spanned_ast::Expr,
+        expr: ast::Expr<A>,
         tcon: LazyTypeContext,
-    ) -> Result<NormalForm, TypeError> {
+    ) -> Result<NormalForm, TypeError<A>> {
         match expr {
-            spanned_ast::Expr::Ind(e) => self.get_type_of_ind(e, tcon),
-            spanned_ast::Expr::Vcon(e) => self.get_type_of_vcon(e, tcon),
-            spanned_ast::Expr::Match(e) => self.get_type_of_match(e, tcon),
-            spanned_ast::Expr::Fun(e) => self.get_type_of_fun(e, tcon),
-            spanned_ast::Expr::App(e) => self.get_type_of_app(e, tcon),
-            spanned_ast::Expr::For(e) => self.get_type_of_for(e, tcon),
-            spanned_ast::Expr::Deb(e) => self.get_type_of_deb(e, tcon),
-            spanned_ast::Expr::Universe(e) => self.get_type_of_universe(e),
+            ast::Expr::Ind(e) => self.get_type_of_ind(e, tcon),
+            ast::Expr::Vcon(e) => self.get_type_of_vcon(e, tcon),
+            ast::Expr::Match(e) => self.get_type_of_match(e, tcon),
+            ast::Expr::Fun(e) => self.get_type_of_fun(e, tcon),
+            ast::Expr::App(e) => self.get_type_of_app(e, tcon),
+            ast::Expr::For(e) => self.get_type_of_for(e, tcon),
+            ast::Expr::Deb(e) => self.get_type_of_deb(e, tcon),
+            ast::Expr::Universe(e) => self.get_type_of_universe(e),
         }
     }
 
-    fn get_types_of_dependent_expressions(
+    fn get_types_of_dependent_expressions<A: AuxDataFamily>(
         &mut self,
-        exprs: &[spanned_ast::Expr],
+        exprs: &[ast::Expr<A>],
         tcon: LazyTypeContext,
-    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
+    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError<A>> {
         let mut out: Normalized<Vec<minimal_ast::Expr>> = Normalized::with_capacity(exprs.len());
         let mut normalized_visited_exprs: Normalized<Vec<minimal_ast::Expr>> =
             Normalized::with_capacity(exprs.len());
@@ -49,11 +49,11 @@ impl TypeChecker {
         Ok(out)
     }
 
-    fn get_types_of_independent_expressions(
+    fn get_types_of_independent_expressions<A: AuxDataFamily>(
         &mut self,
-        exprs: &[spanned_ast::Expr],
+        exprs: &[ast::Expr<A>],
         tcon: LazyTypeContext,
-    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
+    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError<A>> {
         let mut out: Normalized<Vec<minimal_ast::Expr>> = Normalized::with_capacity(exprs.len());
 
         for expr in exprs {
@@ -64,12 +64,12 @@ impl TypeChecker {
         Ok(out)
     }
 
-    fn typecheck_and_normalize_param_types_with_limit(
+    fn typecheck_and_normalize_param_types_with_limit<A: AuxDataFamily>(
         &mut self,
-        exprs: &[spanned_ast::Expr],
-        limiter: impl UniverseLimit,
+        exprs: &[ast::Expr<A>],
+        limiter: impl UniverseLimit<A>,
         tcon: LazyTypeContext,
-    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError> {
+    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, TypeError<A>> {
         let param_type_types = self.get_types_of_dependent_expressions(exprs, tcon)?;
 
         for i in 0..param_type_types.raw().len() {
@@ -92,11 +92,11 @@ impl TypeChecker {
         Ok(normalized.to_hashee().cloned())
     }
 
-    fn assert_expr_type_is_universe(
+    fn assert_expr_type_is_universe<A: AuxDataFamily>(
         &mut self,
-        expr: spanned_ast::Expr,
+        expr: ast::Expr<A>,
         tcon: LazyTypeContext,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         let type_ = self.get_type(expr.clone(), tcon)?;
 
         if !type_.raw().is_universe() {
@@ -106,11 +106,11 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_expr_type_is_universe_and_then_eval(
+    fn assert_expr_type_is_universe_and_then_eval<A: AuxDataFamily>(
         &mut self,
-        expr: spanned_ast::Expr,
+        expr: ast::Expr<A>,
         tcon: LazyTypeContext,
-    ) -> Result<NormalForm, TypeError> {
+    ) -> Result<NormalForm, TypeError<A>> {
         let type_ = self.get_type(expr.clone(), tcon)?;
 
         if !type_.raw().is_universe() {
@@ -123,22 +123,22 @@ impl TypeChecker {
     }
 }
 
-trait UniverseLimit {
+trait UniverseLimit<A: AuxDataFamily> {
     fn assert_ul_is_within_limit(
         &self,
         param_type_type_universe: Universe,
-        expr: spanned_ast::Expr,
-    ) -> Result<(), TypeError>;
+        expr: ast::Expr<A>,
+    ) -> Result<(), TypeError<A>>;
 }
 
-struct LimitToIndUniverse(RcHashed<spanned_ast::Ind>);
+struct LimitToIndUniverse<A: AuxDataFamily>(RcHashed<ast::Ind<A>>);
 
-impl UniverseLimit for LimitToIndUniverse {
+impl<A: AuxDataFamily> UniverseLimit<A> for LimitToIndUniverse<A> {
     fn assert_ul_is_within_limit(
         &self,
         param_type_type_universe: Universe,
-        expr: spanned_ast::Expr,
-    ) -> Result<(), TypeError> {
+        expr: ast::Expr<A>,
+    ) -> Result<(), TypeError<A>> {
         let inclusive_max = self.0.hashee.universe.level;
         if param_type_type_universe.level > inclusive_max {
             return Err(TypeError::UniverseInconsistencyInIndDef {
@@ -152,14 +152,11 @@ impl UniverseLimit for LimitToIndUniverse {
     }
 }
 
-struct NoLimit;
+#[derive(Default)]
+struct NoLimit<A: AuxDataFamily>(PhantomData<A>);
 
-impl UniverseLimit for NoLimit {
-    fn assert_ul_is_within_limit(
-        &self,
-        _: Universe,
-        _: spanned_ast::Expr,
-    ) -> Result<(), TypeError> {
+impl<A: AuxDataFamily> UniverseLimit<A> for NoLimit<A> {
+    fn assert_ul_is_within_limit(&self, _: Universe, _: ast::Expr<A>) -> Result<(), TypeError<A>> {
         Ok(())
     }
 }

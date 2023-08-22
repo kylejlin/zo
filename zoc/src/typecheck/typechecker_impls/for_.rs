@@ -1,11 +1,11 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_for(
+    pub fn get_type_of_for<A: AuxDataFamily>(
         &mut self,
-        for_g0: RcHashed<spanned_ast::For>,
+        for_g0: RcHashed<ast::For<A>>,
         tcon_g0: LazyTypeContext,
-    ) -> Result<NormalForm, TypeError> {
+    ) -> Result<NormalForm, TypeError<A>> {
         self.assert_for_has_at_least_one_param(for_g0.clone())?;
 
         let param_type_types_g0 =
@@ -49,10 +49,10 @@ impl TypeChecker {
         }))
     }
 
-    fn assert_for_has_at_least_one_param(
+    fn assert_for_has_at_least_one_param<A: AuxDataFamily>(
         &mut self,
-        for_: RcHashed<spanned_ast::For>,
-    ) -> Result<(), TypeError> {
+        for_: RcHashed<ast::For<A>>,
+    ) -> Result<(), TypeError<A>> {
         if for_.hashee.param_types.hashee.is_empty() {
             return Err(TypeError::ForHasZeroParams {
                 for_: for_.hashee.clone(),
@@ -62,11 +62,11 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_every_type_is_universe(
+    fn assert_every_type_is_universe<A: AuxDataFamily>(
         &mut self,
         types: Normalized<&[minimal_ast::Expr]>,
-        exprs: &[spanned_ast::Expr],
-    ) -> Result<(), TypeError> {
+        exprs: &[ast::Expr<A>],
+    ) -> Result<(), TypeError<A>> {
         for i in 0..types.raw().len() {
             if !types.raw()[i].is_universe() {
                 return Err(TypeError::UnexpectedNonTypeExpression {

@@ -2,24 +2,27 @@ use super::*;
 
 use std::ops::BitOr;
 
-#[derive(Clone, Copy, Debug)]
-pub enum RecursionCheckingContext<'a> {
-    Base(&'a [UnshiftedEntry<'a>]),
-    Snoc(&'a RecursionCheckingContext<'a>, &'a [UnshiftedEntry<'a>]),
+#[derive(Clone, Copy)]
+pub enum RecursionCheckingContext<'a, A: AuxDataFamily> {
+    Base(&'a [UnshiftedEntry<'a, A>]),
+    Snoc(
+        &'a RecursionCheckingContext<'a, A>,
+        &'a [UnshiftedEntry<'a, A>],
+    ),
 }
 
-impl RecursionCheckingContext<'static> {
+impl<A: AuxDataFamily> RecursionCheckingContext<'static, A> {
     pub fn empty() -> Self {
         RecursionCheckingContext::Base(&[])
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct UnshiftedEntry<'a>(pub Entry<'a>);
+#[derive(Clone)]
+pub struct UnshiftedEntry<'a, A: AuxDataFamily>(pub Entry<'a, A>);
 
-#[derive(Clone, Debug)]
-pub enum Entry<'a> {
-    Top(Option<&'a spanned_ast::Fun>),
+#[derive(Clone)]
+pub enum Entry<'a, A: AuxDataFamily> {
+    Top(Option<&'a ast::Fun<A>>),
     Substruct(SizeBound, Strict),
 }
 
@@ -32,41 +35,41 @@ pub enum SizeBound {
     CaselessMatch,
 }
 
-enum CallRequirement<'a> {
-    Recursive(RecursiveCallRequirement<'a>),
-    AccessForbidden(&'a spanned_ast::Fun),
+enum CallRequirement<'a, A: AuxDataFamily> {
+    Recursive(RecursiveCallRequirement<'a, A>),
+    AccessForbidden(&'a ast::Fun<A>),
 }
 
 #[derive(Clone)]
-struct RecursiveCallRequirement<'a> {
+struct RecursiveCallRequirement<'a, A: AuxDataFamily> {
     arg_index: usize,
     strict_superstruct: Deb,
-    definition_src: &'a spanned_ast::Fun,
+    definition_src: &'a ast::Fun<A>,
 }
 
 impl TypeChecker {
-    pub(crate) fn check_recursion(
+    pub(crate) fn check_recursion<A: AuxDataFamily>(
         &mut self,
-        expr: spanned_ast::Expr,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        expr: ast::Expr<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         match expr {
-            spanned_ast::Expr::Ind(e) => self.check_recursion_in_ind(&e.hashee, rcon),
-            spanned_ast::Expr::Vcon(e) => self.check_recursion_in_vcon(&e.hashee, rcon),
-            spanned_ast::Expr::Match(e) => self.check_recursion_in_match(&e.hashee, rcon),
-            spanned_ast::Expr::Fun(e) => self.check_recursion_in_fun(&e.hashee, None, rcon),
-            spanned_ast::Expr::App(e) => self.check_recursion_in_app(&e.hashee, rcon),
-            spanned_ast::Expr::For(e) => self.check_recursion_in_for(&e.hashee, rcon),
-            spanned_ast::Expr::Deb(e) => self.check_recursion_in_deb(&e.hashee, rcon),
-            spanned_ast::Expr::Universe(_) => Ok(()),
+            ast::Expr::Ind(e) => self.check_recursion_in_ind(&e.hashee, rcon),
+            ast::Expr::Vcon(e) => self.check_recursion_in_vcon(&e.hashee, rcon),
+            ast::Expr::Match(e) => self.check_recursion_in_match(&e.hashee, rcon),
+            ast::Expr::Fun(e) => self.check_recursion_in_fun(&e.hashee, None, rcon),
+            ast::Expr::App(e) => self.check_recursion_in_app(&e.hashee, rcon),
+            ast::Expr::For(e) => self.check_recursion_in_for(&e.hashee, rcon),
+            ast::Expr::Deb(e) => self.check_recursion_in_deb(&e.hashee, rcon),
+            ast::Expr::Universe(_) => Ok(()),
         }
     }
 
-    fn check_recursion_in_ind(
+    fn check_recursion_in_ind<A: AuxDataFamily>(
         &mut self,
-        ind: &spanned_ast::Ind,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        ind: &ast::Ind<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         self.check_recursion_in_dependent_exprs(&ind.index_types.hashee, rcon)?;
 
         let singleton = vec![UnshiftedEntry(Entry::Top(None))];
@@ -76,22 +79,22 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_vcon_defs(
+    fn check_recursion_in_vcon_defs<A: AuxDataFamily>(
         &mut self,
-        defs: &[spanned_ast::VconDef],
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        defs: &[ast::VconDef<A>],
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         for def in defs {
             self.check_recursion_in_vcon_def(def, rcon)?;
         }
         Ok(())
     }
 
-    fn check_recursion_in_vcon_def(
+    fn check_recursion_in_vcon_def<A: AuxDataFamily>(
         &mut self,
-        def: &spanned_ast::VconDef,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        def: &ast::VconDef<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         self.check_recursion_in_dependent_exprs(&def.param_types.hashee, rcon)?;
 
         let extension = vec![UnshiftedEntry(Entry::Top(None)); def.param_types.hashee.len()];
@@ -101,19 +104,19 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_vcon(
+    fn check_recursion_in_vcon<A: AuxDataFamily>(
         &mut self,
-        vcon: &spanned_ast::Vcon,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        vcon: &ast::Vcon<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         self.check_recursion_in_ind(&vcon.ind.hashee, rcon)
     }
 
-    fn check_recursion_in_match(
+    fn check_recursion_in_match<A: AuxDataFamily>(
         &mut self,
-        match_: &spanned_ast::Match,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        match_: &ast::Match<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         self.check_recursion(match_.matchee.clone(), rcon)?;
 
         let matchee_bound = self.get_size_bound(match_.matchee.clone(), rcon);
@@ -122,36 +125,36 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_match_cases(
+    fn check_recursion_in_match_cases<A: AuxDataFamily>(
         &mut self,
-        cases: &[spanned_ast::MatchCase],
+        cases: &[ast::MatchCase<A>],
         matchee_bound: Option<SizeBound>,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         for case in cases {
             self.check_recursion_in_match_case(case, matchee_bound, rcon)?;
         }
         Ok(())
     }
 
-    fn check_recursion_in_match_case(
+    fn check_recursion_in_match_case<A: AuxDataFamily>(
         &mut self,
-        case: &spanned_ast::MatchCase,
+        case: &ast::MatchCase<A>,
         matchee_bound: Option<SizeBound>,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         let extension = get_rcon_extension_for_match_case_params(matchee_bound, case.arity);
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(case.return_val.clone(), extended_rcon)?;
         Ok(())
     }
 
-    fn check_recursion_in_fun(
+    fn check_recursion_in_fun<A: AuxDataFamily>(
         &mut self,
-        fun: &spanned_ast::Fun,
-        app_arg_status: Option<Vec<UnshiftedEntry>>,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        fun: &ast::Fun<A>,
+        app_arg_status: Option<Vec<UnshiftedEntry<A>>>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         self.check_recursion_in_dependent_exprs(&fun.param_types.hashee, rcon)?;
         self.check_recursion_in_fun_return_type(fun, rcon)?;
 
@@ -163,22 +166,22 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_fun_return_type(
+    fn check_recursion_in_fun_return_type<A: AuxDataFamily>(
         &mut self,
-        fun: &spanned_ast::Fun,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        fun: &ast::Fun<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         let extension = vec![UnshiftedEntry(Entry::Top(None)); fun.param_types.hashee.len()];
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.check_recursion(fun.return_type.clone(), extended_rcon)?;
         Ok(())
     }
 
-    fn get_fun_rcon_extension<'a>(
+    fn get_fun_rcon_extension<'a, A: AuxDataFamily>(
         &mut self,
-        fun: &'a spanned_ast::Fun,
-        app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
-    ) -> Result<Vec<UnshiftedEntry<'a>>, TypeError> {
+        fun: &'a ast::Fun<A>,
+        app_arg_status: Option<Vec<UnshiftedEntry<'a, A>>>,
+    ) -> Result<Vec<UnshiftedEntry<'a, A>>, TypeError<A>> {
         self.assert_decreasing_index_is_valid(fun)?;
         let fun_entry = UnshiftedEntry(Entry::Top(Some(fun)));
         let param_entries = self.get_fun_param_entries(fun, app_arg_status);
@@ -188,10 +191,10 @@ impl TypeChecker {
         Ok(out)
     }
 
-    fn assert_decreasing_index_is_valid(
+    fn assert_decreasing_index_is_valid<A: AuxDataFamily>(
         &mut self,
-        fun: &spanned_ast::Fun,
-    ) -> Result<(), TypeError> {
+        fun: &ast::Fun<A>,
+    ) -> Result<(), TypeError<A>> {
         match &fun.decreasing_index {
             Some(decreasing_arg_index) => {
                 if *decreasing_arg_index >= fun.param_types.hashee.len() {
@@ -205,36 +208,36 @@ impl TypeChecker {
         }
     }
 
-    fn get_fun_param_entries<'a>(
+    fn get_fun_param_entries<'a, A: AuxDataFamily>(
         &mut self,
-        fun: &'a spanned_ast::Fun,
-        app_arg_status: Option<Vec<UnshiftedEntry<'a>>>,
-    ) -> Vec<UnshiftedEntry<'a>> {
+        fun: &'a ast::Fun<A>,
+        app_arg_status: Option<Vec<UnshiftedEntry<'a, A>>>,
+    ) -> Vec<UnshiftedEntry<'a, A>> {
         app_arg_status
             .unwrap_or_else(|| vec![UnshiftedEntry(Entry::Top(None)); fun.param_types.hashee.len()])
     }
 
-    fn check_recursion_in_app(
+    fn check_recursion_in_app<A: AuxDataFamily>(
         &mut self,
-        app: &spanned_ast::App,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        app: &ast::App<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         self.check_recursion_in_app_callee(app, rcon)?;
         self.check_recursion_in_independent_exprs(&app.args.hashee, rcon)?;
         Ok(())
     }
 
-    fn check_recursion_in_app_callee(
+    fn check_recursion_in_app_callee<A: AuxDataFamily>(
         &mut self,
-        app: &spanned_ast::App,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        app: &ast::App<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         match &app.callee {
-            spanned_ast::Expr::Deb(callee) => {
+            ast::Expr::Deb(callee) => {
                 self.check_recursion_in_app_callee_deb(app, &callee.hashee, rcon)
             }
 
-            spanned_ast::Expr::Fun(callee) => {
+            ast::Expr::Fun(callee) => {
                 self.check_recursion_in_app_callee_fun(app, &callee.hashee, rcon)
             }
 
@@ -242,12 +245,12 @@ impl TypeChecker {
         }
     }
 
-    fn check_recursion_in_app_callee_deb(
+    fn check_recursion_in_app_callee_deb<A: AuxDataFamily>(
         &mut self,
-        app: &spanned_ast::App,
-        callee: &spanned_ast::DebNode,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        app: &ast::App<A>,
+        callee: &ast::DebNode<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         let requirement = rcon.get_call_requirement(callee.deb);
 
         match requirement {
@@ -266,22 +269,22 @@ impl TypeChecker {
         }
     }
 
-    fn check_recursion_in_app_callee_fun(
+    fn check_recursion_in_app_callee_fun<A: AuxDataFamily>(
         &mut self,
-        app: &spanned_ast::App,
-        callee: &spanned_ast::Fun,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        app: &ast::App<A>,
+        callee: &ast::Fun<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         let arg_status = self.get_app_callee_fun_arg_status(app, callee, rcon);
         self.check_recursion_in_fun(&callee, Some(arg_status), rcon)
     }
 
-    fn get_app_callee_fun_arg_status(
+    fn get_app_callee_fun_arg_status<A: AuxDataFamily>(
         &mut self,
-        app: &spanned_ast::App,
-        callee: &spanned_ast::Fun,
-        rcon: RecursionCheckingContext,
-    ) -> Vec<UnshiftedEntry<'static>> {
+        app: &ast::App<A>,
+        callee: &ast::Fun<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Vec<UnshiftedEntry<'static, A>> {
         match &callee.decreasing_index {
             None => self.get_app_callee_nonrecursive_fun_arg_status(app, rcon),
 
@@ -291,11 +294,11 @@ impl TypeChecker {
         }
     }
 
-    fn get_app_callee_nonrecursive_fun_arg_status(
+    fn get_app_callee_nonrecursive_fun_arg_status<A: AuxDataFamily>(
         &mut self,
-        app: &spanned_ast::App,
-        rcon: RecursionCheckingContext,
-    ) -> Vec<UnshiftedEntry<'static>> {
+        app: &ast::App<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Vec<UnshiftedEntry<'static, A>> {
         app.args
             .hashee
             .iter()
@@ -318,12 +321,12 @@ impl TypeChecker {
             .collect()
     }
 
-    fn get_app_callee_recursive_fun_arg_status(
+    fn get_app_callee_recursive_fun_arg_status<A: AuxDataFamily>(
         &mut self,
-        app: &spanned_ast::App,
+        app: &ast::App<A>,
         decreasing_index: usize,
-        rcon: RecursionCheckingContext,
-    ) -> Vec<UnshiftedEntry<'static>> {
+        rcon: RecursionCheckingContext<A>,
+    ) -> Vec<UnshiftedEntry<'static, A>> {
         app.args
             .hashee
             .iter()
@@ -342,12 +345,12 @@ impl TypeChecker {
             .collect()
     }
 
-    fn assert_arg_satisfies_recursive_call_requirement(
+    fn assert_arg_satisfies_recursive_call_requirement<A: AuxDataFamily>(
         &mut self,
-        app: &spanned_ast::App,
-        requirement: RecursiveCallRequirement,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        app: &ast::App<A>,
+        requirement: RecursiveCallRequirement<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         if requirement.arg_index >= app.args.hashee.len() {
             // Do nothing.
             //
@@ -375,11 +378,11 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_for(
+    fn check_recursion_in_for<A: AuxDataFamily>(
         &mut self,
-        for_: &spanned_ast::For,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        for_: &ast::For<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         self.check_recursion_in_dependent_exprs(&for_.param_types.hashee, rcon)?;
 
         let extension = vec![UnshiftedEntry(Entry::Top(None)); for_.param_types.hashee.len()];
@@ -389,11 +392,11 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_deb(
+    fn check_recursion_in_deb<A: AuxDataFamily>(
         &mut self,
-        deb: &spanned_ast::DebNode,
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        deb: &ast::DebNode<A>,
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         if let Some(requirement) = rcon.get_call_requirement(deb.deb) {
             let err = match requirement {
                 CallRequirement::Recursive(requirement) => {
@@ -418,11 +421,11 @@ impl TypeChecker {
 }
 
 impl TypeChecker {
-    fn check_recursion_in_dependent_exprs(
+    fn check_recursion_in_dependent_exprs<A: AuxDataFamily>(
         &mut self,
-        exprs: &[spanned_ast::Expr],
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        exprs: &[ast::Expr<A>],
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         if exprs.is_empty() {
             return Ok(());
         }
@@ -437,11 +440,11 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_independent_exprs(
+    fn check_recursion_in_independent_exprs<A: AuxDataFamily>(
         &mut self,
-        exprs: &[spanned_ast::Expr],
-        rcon: RecursionCheckingContext,
-    ) -> Result<(), TypeError> {
+        exprs: &[ast::Expr<A>],
+        rcon: RecursionCheckingContext<A>,
+    ) -> Result<(), TypeError<A>> {
         for expr in exprs {
             self.check_recursion(expr.clone(), rcon)?;
         }
@@ -450,11 +453,11 @@ impl TypeChecker {
 }
 
 impl TypeChecker {
-    fn is_strict_substruct(
+    fn is_strict_substruct<A: AuxDataFamily>(
         &mut self,
-        expr: spanned_ast::Expr,
+        expr: ast::Expr<A>,
         possible_superstruct: Deb,
-        rcon: RecursionCheckingContext,
+        rcon: RecursionCheckingContext<A>,
     ) -> bool {
         let bound = self.get_size_bound(expr, rcon);
         match bound {
@@ -474,29 +477,29 @@ impl TypeChecker {
 }
 
 impl TypeChecker {
-    fn get_size_bound(
+    fn get_size_bound<A: AuxDataFamily>(
         &mut self,
-        expr: spanned_ast::Expr,
-        rcon: RecursionCheckingContext,
+        expr: ast::Expr<A>,
+        rcon: RecursionCheckingContext<A>,
     ) -> Option<SizeBound> {
         match expr {
-            spanned_ast::Expr::Ind(_)
-            | spanned_ast::Expr::Vcon(_)
-            | spanned_ast::Expr::Fun(_)
-            | spanned_ast::Expr::App(_)
-            | spanned_ast::Expr::For(_)
-            | spanned_ast::Expr::Universe(_) => None,
+            ast::Expr::Ind(_)
+            | ast::Expr::Vcon(_)
+            | ast::Expr::Fun(_)
+            | ast::Expr::App(_)
+            | ast::Expr::For(_)
+            | ast::Expr::Universe(_) => None,
 
-            spanned_ast::Expr::Match(e) => self.get_size_bound_of_match(&e.hashee, rcon),
+            ast::Expr::Match(e) => self.get_size_bound_of_match(&e.hashee, rcon),
 
-            spanned_ast::Expr::Deb(e) => self.get_size_bound_of_deb(&e.hashee, rcon),
+            ast::Expr::Deb(e) => self.get_size_bound_of_deb(&e.hashee, rcon),
         }
     }
 
-    fn get_size_bound_of_match(
+    fn get_size_bound_of_match<A: AuxDataFamily>(
         &mut self,
-        expr: &spanned_ast::Match,
-        rcon: RecursionCheckingContext,
+        expr: &ast::Match<A>,
+        rcon: RecursionCheckingContext<A>,
     ) -> Option<SizeBound> {
         if expr.cases.hashee.is_empty() {
             return Some(SizeBound::CaselessMatch);
@@ -517,21 +520,21 @@ impl TypeChecker {
         Some(lowest_common_bound)
     }
 
-    fn get_size_bound_of_match_case(
+    fn get_size_bound_of_match_case<A: AuxDataFamily>(
         &mut self,
-        expr: &spanned_ast::MatchCase,
+        expr: &ast::MatchCase<A>,
         matchee_bound: Option<SizeBound>,
-        rcon: RecursionCheckingContext,
+        rcon: RecursionCheckingContext<A>,
     ) -> Option<SizeBound> {
         let extension = get_rcon_extension_for_match_case_params(matchee_bound, expr.arity);
         let extended_rcon = RecursionCheckingContext::Snoc(&rcon, &extension);
         self.get_size_bound(expr.return_val.clone(), extended_rcon)
     }
 
-    fn get_size_bound_of_deb(
+    fn get_size_bound_of_deb<A: AuxDataFamily>(
         &mut self,
-        expr: &spanned_ast::DebNode,
-        rcon: RecursionCheckingContext,
+        expr: &ast::DebNode<A>,
+        rcon: RecursionCheckingContext<A>,
     ) -> Option<SizeBound> {
         let entry = rcon.get(expr.deb)?;
         match entry {
@@ -544,10 +547,10 @@ impl TypeChecker {
     }
 }
 
-fn get_rcon_extension_for_match_case_params(
+fn get_rcon_extension_for_match_case_params<A: AuxDataFamily>(
     matchee_bound: Option<SizeBound>,
     case_arity: usize,
-) -> Vec<UnshiftedEntry<'static>> {
+) -> Vec<UnshiftedEntry<'static, A>> {
     let Some(matchee_bound) = matchee_bound else {
         return vec![UnshiftedEntry(Entry::Top(None)); case_arity];
     };
@@ -562,10 +565,10 @@ fn get_rcon_extension_for_match_case_params(
         .collect()
 }
 
-fn get_min_size_bound(
+fn get_min_size_bound<A: AuxDataFamily>(
     a: SizeBound,
     b: SizeBound,
-    rcon: RecursionCheckingContext,
+    rcon: RecursionCheckingContext<A>,
 ) -> Option<SizeBound> {
     match (a, b) {
         (SizeBound::CaselessMatch, b) => Some(b),
@@ -576,15 +579,19 @@ fn get_min_size_bound(
     }
 }
 
-fn get_min_size_bound_of_debs(a: Deb, b: Deb, rcon: RecursionCheckingContext) -> Option<SizeBound> {
+fn get_min_size_bound_of_debs<A: AuxDataFamily>(
+    a: Deb,
+    b: Deb,
+    rcon: RecursionCheckingContext<A>,
+) -> Option<SizeBound> {
     get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(a, b, rcon)
         .or_else(|| get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(b, a, rcon))
 }
 
-fn get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(
+fn get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b<A: AuxDataFamily>(
     a: Deb,
     b: Deb,
-    rcon: RecursionCheckingContext,
+    rcon: RecursionCheckingContext<A>,
 ) -> Option<SizeBound> {
     let mut a_superstruct = a;
 
@@ -611,10 +618,10 @@ fn get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(
 /// If `deb` is a substruct `possible_superstruct`,
 /// this function returns `Some(strictness)`.
 /// Otherwise, it returns `None`.
-fn is_deb_substruct(
+fn is_deb_substruct<A: AuxDataFamily>(
     deb: Deb,
     possible_superstruct: Deb,
-    rcon: RecursionCheckingContext,
+    rcon: RecursionCheckingContext<A>,
 ) -> Option<Strict> {
     if deb == possible_superstruct {
         return Some(Strict(false));
@@ -634,8 +641,8 @@ fn is_deb_substruct(
     }
 }
 
-impl RecursionCheckingContext<'_> {
-    fn get_call_requirement(&self, deb: Deb) -> Option<CallRequirement> {
+impl<A: AuxDataFamily> RecursionCheckingContext<'_, A> {
+    fn get_call_requirement(&self, deb: Deb) -> Option<CallRequirement<A>> {
         let entry = self.get(deb)?;
         match entry {
             Entry::Top(Some(fun)) => match fun.decreasing_index {
@@ -656,12 +663,12 @@ impl RecursionCheckingContext<'_> {
         }
     }
 
-    fn get(&self, deb: Deb) -> Option<Entry> {
+    fn get(&self, deb: Deb) -> Option<Entry<A>> {
         let unshifted = self.get_unshifted(deb)?;
         Some(unshifted.0.upshift(deb.0 + 1))
     }
 
-    fn get_unshifted(&self, deb: Deb) -> Option<UnshiftedEntry> {
+    fn get_unshifted(&self, deb: Deb) -> Option<UnshiftedEntry<A>> {
         match self {
             RecursionCheckingContext::Base(entries) => {
                 let index = (entries.len()).checked_sub(1 + deb.0)?;
@@ -679,7 +686,7 @@ impl RecursionCheckingContext<'_> {
     }
 }
 
-impl Entry<'_> {
+impl<A: AuxDataFamily> Entry<'_, A> {
     fn upshift(self, upshift_amount: usize) -> Self {
         match self {
             Entry::Top(_) => self,

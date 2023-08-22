@@ -101,30 +101,38 @@ struct RepeatVec<T> {
 struct IsRestrictedRecursiveIndEntry(pub bool);
 
 impl PositivityChecker<'_> {
-    pub fn check_ind_positivity_assuming_it_is_otherwise_well_typed(
+    pub fn check_ind_positivity_assuming_it_is_otherwise_well_typed<A: AuxDataFamily>(
         &mut self,
-        ind: RcHashed<spanned_ast::Ind>,
+        ind: RcHashed<ast::Ind<A>>,
         tcon_len: usize,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         let base = RestrictionStatusVec::unrestricted(tcon_len);
         self.check_ind(&ind.hashee, Context::Base(base))
     }
 }
 
 impl PositivityChecker<'_> {
-    fn check(&mut self, expr: spanned_ast::Expr, context: Context) -> Result<(), TypeError> {
+    fn check<A: AuxDataFamily>(
+        &mut self,
+        expr: ast::Expr<A>,
+        context: Context,
+    ) -> Result<(), TypeError<A>> {
         match expr {
-            spanned_ast::Expr::Ind(e) => self.check_ind(&e.hashee, context),
-            spanned_ast::Expr::Vcon(e) => self.check_vcon(&e.hashee, context),
-            spanned_ast::Expr::Match(e) => self.check_match(&e.hashee, context),
-            spanned_ast::Expr::Fun(e) => self.check_fun(&e.hashee, context),
-            spanned_ast::Expr::App(e) => self.check_app(&e.hashee, context),
-            spanned_ast::Expr::For(e) => self.check_for(&e.hashee, context),
-            spanned_ast::Expr::Deb(_) | spanned_ast::Expr::Universe(_) => Ok(()),
+            ast::Expr::Ind(e) => self.check_ind(&e.hashee, context),
+            ast::Expr::Vcon(e) => self.check_vcon(&e.hashee, context),
+            ast::Expr::Match(e) => self.check_match(&e.hashee, context),
+            ast::Expr::Fun(e) => self.check_fun(&e.hashee, context),
+            ast::Expr::App(e) => self.check_app(&e.hashee, context),
+            ast::Expr::For(e) => self.check_for(&e.hashee, context),
+            ast::Expr::Deb(_) | ast::Expr::Universe(_) => Ok(()),
         }
     }
 
-    fn check_ind(&mut self, ind: &spanned_ast::Ind, context: Context) -> Result<(), TypeError> {
+    fn check_ind<A: AuxDataFamily>(
+        &mut self,
+        ind: &ast::Ind<A>,
+        context: Context,
+    ) -> Result<(), TypeError<A>> {
         self.check_dependent_exprs(&ind.index_types.hashee, context)?;
 
         let singleton = RestrictionStatusVec::restricted_singleton();
@@ -134,22 +142,22 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon_defs(
+    fn check_vcon_defs<A: AuxDataFamily>(
         &mut self,
-        defs: &[spanned_ast::VconDef],
+        defs: &[ast::VconDef<A>],
         context: Context,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         for def in defs {
             self.check_vcon_def(def, context)?;
         }
         Ok(())
     }
 
-    fn check_vcon_def(
+    fn check_vcon_def<A: AuxDataFamily>(
         &mut self,
-        def: &spanned_ast::VconDef,
+        def: &ast::VconDef<A>,
         context: Context,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         self.check_dependent_exprs(&def.param_types.hashee, context)?;
 
         let extension = RestrictionStatusVec::unrestricted(def.param_types.hashee.len());
@@ -162,15 +170,19 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon(&mut self, vcon: &spanned_ast::Vcon, context: Context) -> Result<(), TypeError> {
+    fn check_vcon<A: AuxDataFamily>(
+        &mut self,
+        vcon: &ast::Vcon<A>,
+        context: Context,
+    ) -> Result<(), TypeError<A>> {
         self.check_ind(&vcon.ind.hashee, context)
     }
 
-    fn check_match(
+    fn check_match<A: AuxDataFamily>(
         &mut self,
-        match_: &spanned_ast::Match,
+        match_: &ast::Match<A>,
         context: Context,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         self.check(match_.matchee.clone(), context)?;
 
         let return_type_extension = RestrictionStatusVec::unrestricted(match_.return_type_arity);
@@ -182,22 +194,22 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_match_cases(
+    fn check_match_cases<A: AuxDataFamily>(
         &mut self,
-        cases: &[spanned_ast::MatchCase],
+        cases: &[ast::MatchCase<A>],
         context: Context,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         for case in cases {
             self.check_match_case(case, context)?;
         }
         Ok(())
     }
 
-    fn check_match_case(
+    fn check_match_case<A: AuxDataFamily>(
         &mut self,
-        case: &spanned_ast::MatchCase,
+        case: &ast::MatchCase<A>,
         context: Context,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         let return_val_extension = RestrictionStatusVec::unrestricted(case.arity);
         let return_val_context = context.collapsing_snoc(return_val_extension);
         self.check(case.return_val.clone(), return_val_context)?;
@@ -205,7 +217,11 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_fun(&mut self, fun: &spanned_ast::Fun, context: Context) -> Result<(), TypeError> {
+    fn check_fun<A: AuxDataFamily>(
+        &mut self,
+        fun: &ast::Fun<A>,
+        context: Context,
+    ) -> Result<(), TypeError<A>> {
         self.check_dependent_exprs(&fun.param_types.hashee, context)?;
 
         let return_type_extension =
@@ -224,13 +240,21 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_app(&mut self, app: &spanned_ast::App, context: Context) -> Result<(), TypeError> {
+    fn check_app<A: AuxDataFamily>(
+        &mut self,
+        app: &ast::App<A>,
+        context: Context,
+    ) -> Result<(), TypeError<A>> {
         self.check(app.callee.clone(), context)?;
         self.check_independent_exprs(&app.args.hashee, context)?;
         Ok(())
     }
 
-    fn check_for(&mut self, for_: &spanned_ast::For, context: Context) -> Result<(), TypeError> {
+    fn check_for<A: AuxDataFamily>(
+        &mut self,
+        for_: &ast::For<A>,
+        context: Context,
+    ) -> Result<(), TypeError<A>> {
         self.check_dependent_exprs(&for_.param_types.hashee, context)?;
 
         let extension = RestrictionStatusVec::unrestricted(for_.param_types.hashee.len());
@@ -240,11 +264,11 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_dependent_exprs(
+    fn check_dependent_exprs<A: AuxDataFamily>(
         &mut self,
-        exprs: &[spanned_ast::Expr],
+        exprs: &[ast::Expr<A>],
         context: Context,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         if exprs.is_empty() {
             return Ok(());
         }
@@ -258,11 +282,11 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_independent_exprs(
+    fn check_independent_exprs<A: AuxDataFamily>(
         &mut self,
-        exprs: &[spanned_ast::Expr],
+        exprs: &[ast::Expr<A>],
         context: Context,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         for expr in exprs.iter().cloned() {
             self.check(expr, context)?;
         }
@@ -283,11 +307,11 @@ impl PositivityChecker<'_> {
 }
 
 impl VconPositivityChecker<'_> {
-    fn assert_vcon_type_satisfies_positivity_condition(
+    fn assert_vcon_type_satisfies_positivity_condition<A: AuxDataFamily>(
         &mut self,
-        def: &spanned_ast::VconDef,
+        def: &ast::VconDef<A>,
         context: Context,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         self.check_vcon_def_param_types(def, context)?;
 
         let extension = RestrictionStatusVec::unrestricted(def.param_types.hashee.len());
@@ -297,11 +321,11 @@ impl VconPositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon_def_param_types(
+    fn check_vcon_def_param_types<A: AuxDataFamily>(
         &mut self,
-        def: &spanned_ast::VconDef,
+        def: &ast::VconDef<A>,
         context: Context,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         let param_types_ast = self
             .0
             .typechecker
@@ -337,11 +361,11 @@ impl VconPositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon_def_index_args(
+    fn check_vcon_def_index_args<A: AuxDataFamily>(
         &mut self,
-        def: &spanned_ast::VconDef,
+        def: &ast::VconDef<A>,
         context: Context,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         let index_args_ast = self
             .0
             .typechecker

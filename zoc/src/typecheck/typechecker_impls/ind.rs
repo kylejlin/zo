@@ -1,11 +1,11 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_ind(
+    pub fn get_type_of_ind<A: AuxDataFamily>(
         &mut self,
-        ind: RcHashed<spanned_ast::Ind>,
+        ind: RcHashed<ast::Ind<A>>,
         tcon_g0: LazyTypeContext,
-    ) -> Result<NormalForm, TypeError> {
+    ) -> Result<NormalForm, TypeError<A>> {
         let normalized_index_types_g0 = self
             .typecheck_and_normalize_param_types_with_limit(
                 &ind.hashee.index_types.hashee,
@@ -37,12 +37,12 @@ impl TypeChecker {
         Ok(ind_type_g0)
     }
 
-    fn typecheck_ind_vcon_defs(
+    fn typecheck_ind_vcon_defs<A: AuxDataFamily>(
         &mut self,
-        ind: RcHashed<spanned_ast::Ind>,
+        ind: RcHashed<ast::Ind<A>>,
         normalized_index_types_g0: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon_g1: LazyTypeContext,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         for def in &ind.hashee.vcon_defs.hashee {
             self.typecheck_ind_vcon_def(
                 def,
@@ -54,13 +54,13 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn typecheck_ind_vcon_def(
+    fn typecheck_ind_vcon_def<A: AuxDataFamily>(
         &mut self,
-        def: &spanned_ast::VconDef,
-        ind: RcHashed<spanned_ast::Ind>,
+        def: &ast::VconDef<A>,
+        ind: RcHashed<ast::Ind<A>>,
         normalized_index_types_g0: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon_g1: LazyTypeContext,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         self.assert_index_arg_count_is_correct(def, normalized_index_types_g0.raw().hashee.len())?;
 
         let normalized_param_types_g1 = self.typecheck_and_normalize_param_types_with_limit(
@@ -98,11 +98,11 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_index_arg_count_is_correct(
+    fn assert_index_arg_count_is_correct<A: AuxDataFamily>(
         &mut self,
-        def: &spanned_ast::VconDef,
+        def: &ast::VconDef<A>,
         expected_index_arg_count: usize,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         let actual_index_arg_count = def.index_args.hashee.len();
         if expected_index_arg_count != actual_index_arg_count {
             return Err(TypeError::WrongNumberOfIndexArguments {

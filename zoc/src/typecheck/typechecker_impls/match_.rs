@@ -1,11 +1,11 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_match(
+    pub fn get_type_of_match<A: AuxDataFamily>(
         &mut self,
-        match_g0: RcHashed<spanned_ast::Match>,
+        match_g0: RcHashed<ast::Match<A>>,
         tcon_g0: LazyTypeContext,
-    ) -> Result<NormalForm, TypeError> {
+    ) -> Result<NormalForm, TypeError<A>> {
         let matchee_type_g0 = self.get_type(match_g0.hashee.matchee.clone(), tcon_g0)?;
 
         let (matchee_type_ind_g0, matchee_type_args_g0) = self.assert_matchee_type_is_inductive(
@@ -60,16 +60,16 @@ impl TypeChecker {
         Ok(normalized_return_type)
     }
 
-    fn assert_matchee_type_is_inductive(
+    fn assert_matchee_type_is_inductive<A: AuxDataFamily>(
         &mut self,
-        matchee: spanned_ast::Expr,
+        matchee: ast::Expr<A>,
         matchee_type: NormalForm,
     ) -> Result<
         (
             Normalized<RcHashed<minimal_ast::Ind>>,
             Normalized<RcHashedVec<minimal_ast::Expr>>,
         ),
-        TypeError,
+        TypeError<A>,
     > {
         if let Some(ind_and_args) = matchee_type.clone().ind_or_ind_app() {
             return Ok(ind_and_args);
@@ -81,11 +81,11 @@ impl TypeChecker {
         })
     }
 
-    fn assert_number_of_match_cases_is_correct(
+    fn assert_number_of_match_cases_is_correct<A: AuxDataFamily>(
         &mut self,
-        match_: RcHashed<spanned_ast::Match>,
+        match_: RcHashed<ast::Match<A>>,
         matchee_type_ind: Normalized<RcHashed<minimal_ast::Ind>>,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         let expected = matchee_type_ind.raw().hashee.vcon_defs.hashee.len();
         let actual = match_.hashee.cases.hashee.len();
         if expected != actual {
@@ -98,11 +98,11 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_stated_return_type_arity_is_correct(
+    fn assert_stated_return_type_arity_is_correct<A: AuxDataFamily>(
         &mut self,
-        match_: RcHashed<spanned_ast::Match>,
+        match_: RcHashed<ast::Match<A>>,
         matchee_type_args: Normalized<RcHashedVec<minimal_ast::Expr>>,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         let correct_return_type_arity = 1 + matchee_type_args.raw().hashee.len();
 
         if match_.hashee.return_type_arity != correct_return_type_arity {
@@ -116,13 +116,13 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn typecheck_match_cases_assuming_number_of_cases_is_correct(
+    fn typecheck_match_cases_assuming_number_of_cases_is_correct<A: AuxDataFamily>(
         &mut self,
-        match_: RcHashed<spanned_ast::Match>,
+        match_: RcHashed<ast::Match<A>>,
         matchee_type_ind: Normalized<RcHashed<minimal_ast::Ind>>,
         matchee_type_args: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon: LazyTypeContext,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         for i in 0..match_.hashee.cases.hashee.len() {
             self.typecheck_match_case(
                 i,
@@ -135,14 +135,14 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn typecheck_match_case(
+    fn typecheck_match_case<A: AuxDataFamily>(
         &mut self,
         case_index: usize,
-        match_g0: RcHashed<spanned_ast::Match>,
+        match_g0: RcHashed<ast::Match<A>>,
         matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,
         matchee_type_args_g0: Normalized<RcHashedVec<minimal_ast::Expr>>,
         tcon_g0: LazyTypeContext,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         let case = &match_g0.hashee.cases.hashee[case_index];
         let vcon_type_g0 = self.get_type_of_vcon_from_well_typed_ind_and_valid_vcon_index(
             matchee_type_ind_g0.clone(),
@@ -198,13 +198,13 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_stated_case_arity_is_correct(
+    fn assert_stated_case_arity_is_correct<A: AuxDataFamily>(
         &mut self,
         stated_arity: usize,
         expected_arity: usize,
         match_case_index: usize,
-        match_: RcHashed<spanned_ast::Match>,
-    ) -> Result<(), TypeError> {
+        match_: RcHashed<ast::Match<A>>,
+    ) -> Result<(), TypeError<A>> {
         if stated_arity != expected_arity {
             return Err(TypeError::WrongMatchCaseArity {
                 stated_arity,

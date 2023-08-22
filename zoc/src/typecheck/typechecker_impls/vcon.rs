@@ -1,11 +1,11 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_vcon(
+    pub fn get_type_of_vcon<A: AuxDataFamily>(
         &mut self,
-        vcon: RcHashed<spanned_ast::Vcon>,
+        vcon: RcHashed<ast::Vcon<A>>,
         tcon: LazyTypeContext,
-    ) -> Result<NormalForm, TypeError> {
+    ) -> Result<NormalForm, TypeError<A>> {
         self.assert_vcon_index_is_valid(vcon.clone())?;
 
         let normalized_ind = self.typecheck_and_normalize_ind(vcon.hashee.ind.clone(), tcon)?;
@@ -19,10 +19,10 @@ impl TypeChecker {
         )
     }
 
-    fn assert_vcon_index_is_valid(
+    fn assert_vcon_index_is_valid<A: AuxDataFamily>(
         &mut self,
-        vcon: RcHashed<spanned_ast::Vcon>,
-    ) -> Result<(), TypeError> {
+        vcon: RcHashed<ast::Vcon<A>>,
+    ) -> Result<(), TypeError<A>> {
         let vcon_index = vcon.hashee.vcon_index;
         let defs = &vcon.hashee.ind.hashee.vcon_defs;
         if vcon_index >= defs.hashee.len() {
@@ -31,11 +31,11 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn typecheck_and_normalize_ind(
+    fn typecheck_and_normalize_ind<A: AuxDataFamily>(
         &mut self,
-        ind: RcHashed<spanned_ast::Ind>,
+        ind: RcHashed<ast::Ind<A>>,
         tcon: LazyTypeContext,
-    ) -> Result<Normalized<RcHashed<minimal_ast::Ind>>, TypeError> {
+    ) -> Result<Normalized<RcHashed<minimal_ast::Ind>>, TypeError<A>> {
         self.get_type_of_ind(ind.clone(), tcon)?;
 
         let ind_ast = self.span_remover.convert_ind(ind);

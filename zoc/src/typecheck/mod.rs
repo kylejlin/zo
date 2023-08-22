@@ -2,14 +2,12 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::*,
     syntax_tree::{
-        minimal_ast::{self, Deb, RcHashed, RcHashedVec, Universe, UniverseLevel},
-        replace_debs::*,
-        spanned_ast,
-        spanned_ast_to_minimal::SpanRemover,
+        ast::prelude::*, minimal_ast, remove_ast_aux_data::AuxDataRemover, replace_debs::*,
+        spanned_ast::SpanAuxData,
     },
 };
 
-use std::rc::Rc;
+use std::{marker::PhantomData, rc::Rc};
 
 mod check_fun_recursion;
 use check_fun_recursion::*;
@@ -34,7 +32,7 @@ mod tests;
 #[derive(Clone, Debug, Default)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
-    pub span_remover: SpanRemover,
+    pub span_remover: AuxDataRemover,
 }
 
 impl TypeChecker {

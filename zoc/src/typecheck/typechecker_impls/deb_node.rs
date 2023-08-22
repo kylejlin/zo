@@ -1,11 +1,11 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_deb(
+    pub fn get_type_of_deb<A: AuxDataFamily>(
         &mut self,
-        deb_node: RcHashed<spanned_ast::DebNode>,
+        deb_node: RcHashed<ast::DebNode<A>>,
         tcon: LazyTypeContext,
-    ) -> Result<NormalForm, TypeError> {
+    ) -> Result<NormalForm, TypeError<A>> {
         if let Some(expr) = tcon.get(deb_node.hashee.deb) {
             return Ok(expr);
         }

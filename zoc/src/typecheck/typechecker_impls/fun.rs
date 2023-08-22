@@ -1,18 +1,18 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_fun(
+    pub fn get_type_of_fun<A: AuxDataFamily>(
         &mut self,
-        fun_g0: RcHashed<spanned_ast::Fun>,
+        fun_g0: RcHashed<ast::Fun<A>>,
         tcon_g0: LazyTypeContext,
-    ) -> Result<NormalForm, TypeError> {
+    ) -> Result<NormalForm, TypeError<A>> {
         self.assert_fun_has_at_least_one_param(fun_g0.clone())?;
 
         self.check_recursion(fun_g0.clone().into(), RecursionCheckingContext::empty())?;
 
         let normalized_param_types_g0 = self.typecheck_and_normalize_param_types_with_limit(
             &fun_g0.hashee.param_types.hashee,
-            NoLimit,
+            NoLimit::<A>::default(),
             tcon_g0,
         )?;
         let param_count = normalized_param_types_g0.raw().len();
@@ -65,10 +65,10 @@ impl TypeChecker {
         .into())
     }
 
-    fn assert_fun_has_at_least_one_param(
+    fn assert_fun_has_at_least_one_param<A: AuxDataFamily>(
         &self,
-        fun: RcHashed<spanned_ast::Fun>,
-    ) -> Result<(), TypeError> {
+        fun: RcHashed<ast::Fun<A>>,
+    ) -> Result<(), TypeError<A>> {
         if fun.hashee.param_types.hashee.is_empty() {
             return Err(TypeError::FunHasZeroParams {
                 fun: fun.hashee.clone(),

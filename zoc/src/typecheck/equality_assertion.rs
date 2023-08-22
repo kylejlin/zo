@@ -1,22 +1,22 @@
 use super::*;
 
-#[derive(Clone, Debug)]
-pub struct ExpectedTypeEquality {
-    pub expr: spanned_ast::Expr,
+#[derive(Clone)]
+pub struct ExpectedTypeEquality<A: AuxDataFamily> {
+    pub expr: ast::Expr<A>,
     pub expected_type: NormalForm,
     pub actual_type: NormalForm,
 }
 
 /// `exprs`, `expected_types`, and `actual_types` **must** all have the same length.
-#[derive(Clone, Debug)]
-pub struct ExpectedTypeEqualities<'a> {
-    pub exprs: &'a [spanned_ast::Expr],
+#[derive(Clone)]
+pub struct ExpectedTypeEqualities<'a, A: AuxDataFamily> {
+    pub exprs: &'a [ast::Expr<A>],
     pub expected_types: Normalized<&'a [minimal_ast::Expr]>,
     pub actual_types: Normalized<&'a [minimal_ast::Expr]>,
 }
 
-impl<'a> ExpectedTypeEqualities<'a> {
-    pub fn zip(self) -> impl Iterator<Item = ExpectedTypeEquality> + 'a {
+impl<'a, A: AuxDataFamily> ExpectedTypeEqualities<'a, A> {
+    pub fn zip(self) -> impl Iterator<Item = ExpectedTypeEquality<A>> + 'a {
         (0..self.len()).into_iter().map(move |i| {
             let expr = self.exprs[i].clone();
             let expected_type = self.expected_types.index_ref(i).cloned();
@@ -35,10 +35,10 @@ impl<'a> ExpectedTypeEqualities<'a> {
 }
 
 impl TypeChecker {
-    pub(super) fn assert_expected_type_equalities_holds(
+    pub(super) fn assert_expected_type_equalities_holds<A: AuxDataFamily>(
         &mut self,
-        equalities: ExpectedTypeEqualities,
-    ) -> Result<(), TypeError> {
+        equalities: ExpectedTypeEqualities<A>,
+    ) -> Result<(), TypeError<A>> {
         for equality in equalities.zip() {
             self.assert_expected_type_equality_holds(equality)?;
         }
@@ -46,10 +46,10 @@ impl TypeChecker {
         Ok(())
     }
 
-    pub(super) fn assert_expected_type_equality_holds(
+    pub(super) fn assert_expected_type_equality_holds<A: AuxDataFamily>(
         &mut self,
-        expected_equality: ExpectedTypeEquality,
-    ) -> Result<(), TypeError> {
+        expected_equality: ExpectedTypeEquality<A>,
+    ) -> Result<(), TypeError<A>> {
         let ExpectedTypeEquality {
             expr,
             expected_type,

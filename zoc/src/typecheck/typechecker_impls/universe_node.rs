@@ -1,10 +1,10 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_universe(
+    pub fn get_type_of_universe<A: AuxDataFamily>(
         &mut self,
-        universe_node: RcHashed<spanned_ast::UniverseNode>,
-    ) -> Result<NormalForm, TypeError> {
+        universe_node: RcHashed<ast::UniverseNode<A>>,
+    ) -> Result<NormalForm, TypeError<A>> {
         return Ok(self
             .evaluator
             .eval(minimal_ast::Expr::Universe(Rc::new(Hashed::new(

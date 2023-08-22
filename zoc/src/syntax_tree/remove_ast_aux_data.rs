@@ -1,10 +1,10 @@
 use crate::{
     hash::*,
-    syntax_tree::{ast::prelude::*, minimal_ast, spanned_ast},
+    syntax_tree::{ast::prelude::*, minimal_ast},
 };
 
 #[derive(Debug, Clone, Default)]
-pub struct SpanRemover {
+pub struct AuxDataRemover {
     ind_cache: NoHashHashMap<Digest, RcHashed<minimal_ast::Ind>>,
     vcon_cache: NoHashHashMap<Digest, RcHashed<minimal_ast::Vcon>>,
     match_cache: NoHashHashMap<Digest, RcHashed<minimal_ast::Match>>,
@@ -13,27 +13,27 @@ pub struct SpanRemover {
     for_cache: NoHashHashMap<Digest, RcHashed<minimal_ast::For>>,
 }
 
-impl SpanRemover {
+impl AuxDataRemover {
     pub fn new() -> Self {
         Default::default()
     }
 }
 
-impl SpanRemover {
-    pub fn convert(&mut self, ist: spanned_ast::Expr) -> minimal_ast::Expr {
+impl AuxDataRemover {
+    pub fn convert<A: AuxDataFamily>(&mut self, ist: ast::Expr<A>) -> minimal_ast::Expr {
         match ist {
-            spanned_ast::Expr::Ind(e) => self.convert_ind(e).into(),
-            spanned_ast::Expr::Vcon(e) => self.convert_vcon(e).into(),
-            spanned_ast::Expr::Match(e) => self.convert_match(e).into(),
-            spanned_ast::Expr::Fun(e) => self.convert_fun(e).into(),
-            spanned_ast::Expr::App(e) => self.convert_app(e).into(),
-            spanned_ast::Expr::For(e) => self.convert_for(e).into(),
-            spanned_ast::Expr::Deb(e) => minimal_ast::DebNode {
+            ast::Expr::Ind(e) => self.convert_ind(e).into(),
+            ast::Expr::Vcon(e) => self.convert_vcon(e).into(),
+            ast::Expr::Match(e) => self.convert_match(e).into(),
+            ast::Expr::Fun(e) => self.convert_fun(e).into(),
+            ast::Expr::App(e) => self.convert_app(e).into(),
+            ast::Expr::For(e) => self.convert_for(e).into(),
+            ast::Expr::Deb(e) => minimal_ast::DebNode {
                 deb: e.hashee.deb,
                 aux_data: (),
             }
             .into(),
-            spanned_ast::Expr::Universe(e) => minimal_ast::UniverseNode {
+            ast::Expr::Universe(e) => minimal_ast::UniverseNode {
                 universe: e.hashee.universe,
                 aux_data: (),
             }
@@ -41,7 +41,10 @@ impl SpanRemover {
         }
     }
 
-    pub fn convert_ind(&mut self, ist: RcHashed<spanned_ast::Ind>) -> RcHashed<minimal_ast::Ind> {
+    pub fn convert_ind<A: AuxDataFamily>(
+        &mut self,
+        ist: RcHashed<ast::Ind<A>>,
+    ) -> RcHashed<minimal_ast::Ind> {
         if let Some(ind) = self.ind_cache.get(&ist.digest) {
             return ind.clone();
         }
@@ -49,9 +52,9 @@ impl SpanRemover {
         self.convert_and_cache_unseen_ind(ist)
     }
 
-    fn convert_and_cache_unseen_ind(
+    fn convert_and_cache_unseen_ind<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::Ind>,
+        ist: RcHashed<ast::Ind<A>>,
     ) -> RcHashed<minimal_ast::Ind> {
         let digest = ist.digest.clone();
         let ind = self.convert_unseen_ind(ist);
@@ -59,9 +62,9 @@ impl SpanRemover {
         ind
     }
 
-    fn convert_unseen_ind(
+    fn convert_unseen_ind<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::Ind>,
+        ist: RcHashed<ast::Ind<A>>,
     ) -> RcHashed<minimal_ast::Ind> {
         rc_hashed(minimal_ast::Ind {
             name: ist.hashee.name.clone(),
@@ -72,9 +75,9 @@ impl SpanRemover {
         })
     }
 
-    pub fn convert_vcon_defs(
+    pub fn convert_vcon_defs<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashedVec<spanned_ast::VconDef>,
+        ist: RcHashedVec<ast::VconDef<A>>,
     ) -> RcHashedVec<minimal_ast::VconDef> {
         let v = ist
             .hashee
@@ -85,7 +88,10 @@ impl SpanRemover {
         rc_hashed(v)
     }
 
-    pub fn convert_vcon_def(&mut self, ist: spanned_ast::VconDef) -> minimal_ast::VconDef {
+    pub fn convert_vcon_def<A: AuxDataFamily>(
+        &mut self,
+        ist: ast::VconDef<A>,
+    ) -> minimal_ast::VconDef {
         minimal_ast::VconDef {
             param_types: self.convert_expressions(&ist.param_types.hashee),
             index_args: self.convert_expressions(&ist.index_args.hashee),
@@ -93,9 +99,9 @@ impl SpanRemover {
         }
     }
 
-    pub fn convert_vcon(
+    pub fn convert_vcon<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::Vcon>,
+        ist: RcHashed<ast::Vcon<A>>,
     ) -> RcHashed<minimal_ast::Vcon> {
         if let Some(vcon) = self.vcon_cache.get(&ist.digest) {
             return vcon.clone();
@@ -104,9 +110,9 @@ impl SpanRemover {
         self.convert_and_cache_unseen_vcon(ist)
     }
 
-    fn convert_and_cache_unseen_vcon(
+    fn convert_and_cache_unseen_vcon<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::Vcon>,
+        ist: RcHashed<ast::Vcon<A>>,
     ) -> RcHashed<minimal_ast::Vcon> {
         let digest = ist.digest.clone();
         let vcon = self.convert_unseen_vcon(ist);
@@ -114,9 +120,9 @@ impl SpanRemover {
         vcon
     }
 
-    fn convert_unseen_vcon(
+    fn convert_unseen_vcon<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::Vcon>,
+        ist: RcHashed<ast::Vcon<A>>,
     ) -> RcHashed<minimal_ast::Vcon> {
         rc_hashed(minimal_ast::Vcon {
             ind: self.convert_ind(ist.hashee.ind.clone()),
@@ -125,9 +131,9 @@ impl SpanRemover {
         })
     }
 
-    pub fn convert_match(
+    pub fn convert_match<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::Match>,
+        ist: RcHashed<ast::Match<A>>,
     ) -> RcHashed<minimal_ast::Match> {
         if let Some(match_) = self.match_cache.get(&ist.digest) {
             return match_.clone();
@@ -136,9 +142,9 @@ impl SpanRemover {
         self.convert_and_cache_unseen_match(ist)
     }
 
-    fn convert_and_cache_unseen_match(
+    fn convert_and_cache_unseen_match<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::Match>,
+        ist: RcHashed<ast::Match<A>>,
     ) -> RcHashed<minimal_ast::Match> {
         let digest = ist.digest.clone();
         let match_ = self.convert_unseen_match(ist);
@@ -146,9 +152,9 @@ impl SpanRemover {
         match_
     }
 
-    fn convert_unseen_match(
+    fn convert_unseen_match<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::Match>,
+        ist: RcHashed<ast::Match<A>>,
     ) -> RcHashed<minimal_ast::Match> {
         rc_hashed(minimal_ast::Match {
             matchee: self.convert(ist.hashee.matchee.clone()),
@@ -159,9 +165,9 @@ impl SpanRemover {
         })
     }
 
-    fn convert_match_cases(
+    fn convert_match_cases<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashedVec<spanned_ast::MatchCase>,
+        ist: RcHashedVec<ast::MatchCase<A>>,
     ) -> RcHashedVec<minimal_ast::MatchCase> {
         let v = ist
             .hashee
@@ -172,7 +178,10 @@ impl SpanRemover {
         rc_hashed(v)
     }
 
-    pub fn convert_match_case(&mut self, ist: spanned_ast::MatchCase) -> minimal_ast::MatchCase {
+    pub fn convert_match_case<A: AuxDataFamily>(
+        &mut self,
+        ist: ast::MatchCase<A>,
+    ) -> minimal_ast::MatchCase {
         minimal_ast::MatchCase {
             arity: ist.arity,
             return_val: self.convert(ist.return_val),
@@ -180,7 +189,10 @@ impl SpanRemover {
         }
     }
 
-    pub fn convert_fun(&mut self, ist: RcHashed<spanned_ast::Fun>) -> RcHashed<minimal_ast::Fun> {
+    pub fn convert_fun<A: AuxDataFamily>(
+        &mut self,
+        ist: RcHashed<ast::Fun<A>>,
+    ) -> RcHashed<minimal_ast::Fun> {
         if let Some(fun) = self.fun_cache.get(&ist.digest) {
             return fun.clone();
         }
@@ -188,9 +200,9 @@ impl SpanRemover {
         self.convert_and_cache_unseen_fun(ist)
     }
 
-    fn convert_and_cache_unseen_fun(
+    fn convert_and_cache_unseen_fun<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::Fun>,
+        ist: RcHashed<ast::Fun<A>>,
     ) -> RcHashed<minimal_ast::Fun> {
         let digest = ist.digest.clone();
         let fun = self.convert_unseen_fun(ist);
@@ -198,9 +210,9 @@ impl SpanRemover {
         fun
     }
 
-    fn convert_unseen_fun(
+    fn convert_unseen_fun<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::Fun>,
+        ist: RcHashed<ast::Fun<A>>,
     ) -> RcHashed<minimal_ast::Fun> {
         rc_hashed(minimal_ast::Fun {
             decreasing_index: ist.hashee.decreasing_index,
@@ -211,7 +223,10 @@ impl SpanRemover {
         })
     }
 
-    pub fn convert_app(&mut self, ist: RcHashed<spanned_ast::App>) -> RcHashed<minimal_ast::App> {
+    pub fn convert_app<A: AuxDataFamily>(
+        &mut self,
+        ist: RcHashed<ast::App<A>>,
+    ) -> RcHashed<minimal_ast::App> {
         if let Some(app) = self.app_cache.get(&ist.digest) {
             return app.clone();
         }
@@ -219,9 +234,9 @@ impl SpanRemover {
         self.convert_and_cache_unseen_app(ist)
     }
 
-    fn convert_and_cache_unseen_app(
+    fn convert_and_cache_unseen_app<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::App>,
+        ist: RcHashed<ast::App<A>>,
     ) -> RcHashed<minimal_ast::App> {
         let digest = ist.digest.clone();
         let app = self.convert_unseen_app(ist);
@@ -229,9 +244,9 @@ impl SpanRemover {
         app
     }
 
-    fn convert_unseen_app(
+    fn convert_unseen_app<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::App>,
+        ist: RcHashed<ast::App<A>>,
     ) -> RcHashed<minimal_ast::App> {
         rc_hashed(minimal_ast::App {
             callee: self.convert(ist.hashee.callee.clone()),
@@ -240,7 +255,10 @@ impl SpanRemover {
         })
     }
 
-    pub fn convert_for(&mut self, ist: RcHashed<spanned_ast::For>) -> RcHashed<minimal_ast::For> {
+    pub fn convert_for<A: AuxDataFamily>(
+        &mut self,
+        ist: RcHashed<ast::For<A>>,
+    ) -> RcHashed<minimal_ast::For> {
         if let Some(for_) = self.for_cache.get(&ist.digest) {
             return for_.clone();
         }
@@ -248,9 +266,9 @@ impl SpanRemover {
         self.convert_and_cache_unseen_for(ist)
     }
 
-    fn convert_and_cache_unseen_for(
+    fn convert_and_cache_unseen_for<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::For>,
+        ist: RcHashed<ast::For<A>>,
     ) -> RcHashed<minimal_ast::For> {
         let digest = ist.digest.clone();
         let for_ = self.convert_unseen_for(ist);
@@ -258,9 +276,9 @@ impl SpanRemover {
         for_
     }
 
-    fn convert_unseen_for(
+    fn convert_unseen_for<A: AuxDataFamily>(
         &mut self,
-        ist: RcHashed<spanned_ast::For>,
+        ist: RcHashed<ast::For<A>>,
     ) -> RcHashed<minimal_ast::For> {
         rc_hashed(minimal_ast::For {
             param_types: self.convert_expressions(&ist.hashee.param_types.hashee),
@@ -269,9 +287,9 @@ impl SpanRemover {
         })
     }
 
-    pub fn convert_expressions(
+    pub fn convert_expressions<A: AuxDataFamily>(
         &mut self,
-        ist: &[spanned_ast::Expr],
+        ist: &[ast::Expr<A>],
     ) -> RcHashedVec<minimal_ast::Expr> {
         let v = ist
             .into_iter()

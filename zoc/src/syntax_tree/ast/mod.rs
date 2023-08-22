@@ -12,7 +12,7 @@ pub use node_path::{NodeEdge, NodePath};
 pub mod prelude;
 
 pub trait AuxDataFamily:
-    Debug + Clone + Copy + PartialEq + Eq + PartialOrd + Ord + Hash + Default
+    'static + Debug + Clone + Copy + PartialEq + Eq + PartialOrd + Ord + Hash + Default
 {
     type Ind: Clone + Hash;
     type Vcon: Clone + Hash;

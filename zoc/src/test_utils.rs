@@ -2,7 +2,11 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     pretty_print::*,
     syntax_tree::{
-        lexer::lex, minimal_ast, parser::parse, spanned_ast, spanned_ast_to_minimal::SpanRemover,
+        lexer::lex,
+        minimal_ast,
+        parser::parse,
+        remove_ast_aux_data::AuxDataRemover,
+        spanned_ast::{self, SpanAuxData},
     },
     typecheck::{LazyTypeContext, TypeChecker, TypeError},
 };
@@ -35,7 +39,7 @@ pub fn parse_spanned_ast_or_panic(src: &str) -> spanned_ast::Expr {
 
 pub fn parse_minimal_ast_or_panic(src: &str) -> minimal_ast::Expr {
     let spanned: spanned_ast::Expr = parse_spanned_ast_or_panic(src);
-    let mut converter = SpanRemover::default();
+    let mut converter = AuxDataRemover::default();
     converter.convert(spanned)
 }
 
@@ -52,13 +56,13 @@ pub fn get_type_under_empty_tcon_or_panic(src: &str) -> NormalForm {
         .pretty_unwrap()
 }
 
-pub fn get_type_error_under_empty_tcon_or_panic(src: &str) -> TypeError {
+pub fn get_type_error_under_empty_tcon_or_panic(src: &str) -> TypeError<SpanAuxData> {
     let empty = Normalized::<[_; 0]>::new();
     let tcon = LazyTypeContext::Base(empty.as_ref().convert_ref());
     get_type_error_or_panic(src, tcon)
 }
 
-pub fn get_type_error_or_panic(src: &str, tcon: LazyTypeContext) -> TypeError {
+pub fn get_type_error_or_panic(src: &str, tcon: LazyTypeContext) -> TypeError<SpanAuxData> {
     let spanned = parse_spanned_ast_or_panic(src);
     TypeChecker::default()
         .get_type(spanned, tcon)

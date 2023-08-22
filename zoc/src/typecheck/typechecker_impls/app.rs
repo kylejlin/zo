@@ -1,11 +1,11 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_app(
+    pub fn get_type_of_app<A: AuxDataFamily>(
         &mut self,
-        app: RcHashed<spanned_ast::App>,
+        app: RcHashed<ast::App<A>>,
         tcon: LazyTypeContext,
-    ) -> Result<NormalForm, TypeError> {
+    ) -> Result<NormalForm, TypeError<A>> {
         self.assert_app_has_at_least_one_arg(app.clone())?;
 
         let callee_type = self.get_type(app.hashee.callee.clone(), tcon)?;
@@ -39,10 +39,10 @@ impl TypeChecker {
         Ok(substituted_callee_type_return_type)
     }
 
-    fn assert_app_has_at_least_one_arg(
+    fn assert_app_has_at_least_one_arg<A: AuxDataFamily>(
         &mut self,
-        app: RcHashed<spanned_ast::App>,
-    ) -> Result<(), TypeError> {
+        app: RcHashed<ast::App<A>>,
+    ) -> Result<(), TypeError<A>> {
         if app.hashee.args.hashee.is_empty() {
             return Err(TypeError::AppHasZeroArgs {
                 app: app.hashee.clone(),
@@ -52,11 +52,11 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_callee_type_is_a_for_expression(
+    fn assert_callee_type_is_a_for_expression<A: AuxDataFamily>(
         &mut self,
         callee_type: NormalForm,
-        app: RcHashed<spanned_ast::App>,
-    ) -> Result<Normalized<RcHashed<minimal_ast::For>>, TypeError> {
+        app: RcHashed<ast::App<A>>,
+    ) -> Result<Normalized<RcHashed<minimal_ast::For>>, TypeError<A>> {
         if let Ok(for_) = callee_type.clone().try_into_for() {
             return Ok(for_);
         }
@@ -67,11 +67,11 @@ impl TypeChecker {
         })
     }
 
-    fn assert_arg_count_is_correct(
+    fn assert_arg_count_is_correct<A: AuxDataFamily>(
         &mut self,
-        app: RcHashed<spanned_ast::App>,
+        app: RcHashed<ast::App<A>>,
         callee_type: Normalized<RcHashed<minimal_ast::For>>,
-    ) -> Result<(), TypeError> {
+    ) -> Result<(), TypeError<A>> {
         let arg_count = app.hashee.args.hashee.len();
         let param_count = callee_type.raw().hashee.param_types.hashee.len();
         if arg_count != param_count {
