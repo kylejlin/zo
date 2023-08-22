@@ -39,8 +39,8 @@ pub fn parse_spanned_ast_or_panic(src: &str) -> spanned_ast::Expr {
 
 pub fn parse_minimal_ast_or_panic(src: &str) -> minimal_ast::Expr {
     let spanned: spanned_ast::Expr = parse_spanned_ast_or_panic(src);
-    let mut converter = AuxDataRemover::default();
-    converter.convert(spanned)
+    let mut remover = AuxDataRemover::default();
+    remover.convert(spanned)
 }
 
 pub fn eval_or_panic(src: &str) -> NormalForm {

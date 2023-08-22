@@ -29,8 +29,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
             }
 
             TypeError::InvalidVconIndex(vcon) => {
-                let mut converter = AuxDataRemover::default();
-                let vcon_minimal = converter.convert_vcon(rc_hashed(vcon.clone()));
+                let mut remover = AuxDataRemover::default();
+                let vcon_minimal = remover.convert_vcon(rc_hashed(vcon.clone()));
                 f.debug_struct("TypeError::InvalidVconIndex")
                     .field(
                         "vcon",
@@ -43,8 +43,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
             }
 
             TypeError::UnexpectedNonTypeExpression { expr, type_ } => {
-                let mut converter = AuxDataRemover::default();
-                let expr_minimal = converter.convert(expr.clone());
+                let mut remover = AuxDataRemover::default();
+                let expr_minimal = remover.convert(expr.clone());
                 f.debug_struct("TypeError::UnexpectedNonTypeExpression")
                     .field(
                         "expr",
@@ -61,9 +61,9 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 universe,
                 ind,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let index_or_param_type_minimal = converter.convert(index_or_param_type.clone());
-                let ind_minimal = converter.convert_ind(rc_hashed(ind.clone()));
+                let mut remover = AuxDataRemover::default();
+                let index_or_param_type_minimal = remover.convert(index_or_param_type.clone());
+                let ind_minimal = remover.convert_ind(rc_hashed(ind.clone()));
                 f.debug_struct("TypeError::UniverseInconsistencyInIndDef")
                     .field(
                         "index_or_param_type",
@@ -87,8 +87,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 expected,
                 actual,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let def_minimal = converter.convert_vcon_def(def.clone());
+                let mut remover = AuxDataRemover::default();
+                let def_minimal = remover.convert_vcon_def(def.clone());
                 f.debug_struct("TypeError::WrongNumberOfIndexArguments")
                     .field(
                         "def",
@@ -102,8 +102,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
             }
 
             TypeError::NonInductiveMatcheeType { expr, type_ } => {
-                let mut converter = AuxDataRemover::default();
-                let expr_minimal = converter.convert(expr.clone());
+                let mut remover = AuxDataRemover::default();
+                let expr_minimal = remover.convert(expr.clone());
                 f.debug_struct("TypeError::NonInductiveMatcheeType")
                     .field(
                         "expr",
@@ -119,8 +119,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 match_,
                 matchee_type_ind,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let match_minimal = converter.convert_match(rc_hashed(match_.clone()));
+                let mut remover = AuxDataRemover::default();
+                let match_minimal = remover.convert_match(rc_hashed(match_.clone()));
                 f.debug_struct("TypeError::WrongNumberOfMatchCases")
                     .field(
                         "match_",
@@ -137,8 +137,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 match_,
                 matchee_type_args,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let match_minimal = converter.convert_match(rc_hashed(match_.clone()));
+                let mut remover = AuxDataRemover::default();
+                let match_minimal = remover.convert_match(rc_hashed(match_.clone()));
                 let matchee_type_args: Vec<_> = matchee_type_args
                     .iter()
                     .map(|arg| arg.raw().pretty_printed())
@@ -161,8 +161,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 match_,
                 match_case_index,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let match_minimal = converter.convert_match(rc_hashed(match_.clone()));
+                let mut remover = AuxDataRemover::default();
+                let match_minimal = remover.convert_match(rc_hashed(match_.clone()));
                 f.debug_struct("TypeError::WrongMatchCaseArity")
                     .field("stated_arity", &stated_arity)
                     .field("expected", expected)
@@ -182,8 +182,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 expected_type,
                 actual_type,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let expr_minimal = converter.convert(expr.clone());
+                let mut remover = AuxDataRemover::default();
+                let expr_minimal = remover.convert(expr.clone());
                 f.debug_struct("TypeError::TypeMismatch")
                     .field(
                         "expr",
@@ -197,8 +197,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
             }
 
             TypeError::CalleeTypeIsNotAForExpression { app, callee_type } => {
-                let mut converter = AuxDataRemover::default();
-                let app_minimal = converter.convert_app(rc_hashed(app.clone()));
+                let mut remover = AuxDataRemover::default();
+                let app_minimal = remover.convert_app(rc_hashed(app.clone()));
                 f.debug_struct("TypeError::CalleeTypeIsNotAForExpression")
                     .field(
                         "app",
@@ -217,8 +217,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 expected,
                 actual,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let app_minimal = converter.convert_app(rc_hashed(app.clone()));
+                let mut remover = AuxDataRemover::default();
+                let app_minimal = remover.convert_app(rc_hashed(app.clone()));
                 f.debug_struct("TypeError::WrongNumberOfAppArguments")
                     .field(
                         "app",
@@ -234,8 +234,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
             }
 
             TypeError::FunHasZeroParams { fun } => {
-                let mut converter = AuxDataRemover::default();
-                let fun_minimal = converter.convert(fun.clone().into());
+                let mut remover = AuxDataRemover::default();
+                let fun_minimal = remover.convert(fun.clone().into());
                 f.debug_struct("TypeError::FunHasZeroParams")
                     .field(
                         "fun",
@@ -247,8 +247,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
             }
 
             TypeError::AppHasZeroArgs { app } => {
-                let mut converter = AuxDataRemover::default();
-                let app_minimal = converter.convert_app(rc_hashed(app.clone()));
+                let mut remover = AuxDataRemover::default();
+                let app_minimal = remover.convert_app(rc_hashed(app.clone()));
                 f.debug_struct("TypeError::AppHasZeroArgs")
                     .field(
                         "app",
@@ -261,8 +261,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
             }
 
             TypeError::ForHasZeroParams { for_ } => {
-                let mut converter = AuxDataRemover::default();
-                let for_minimal = converter.convert(for_.clone().into());
+                let mut remover = AuxDataRemover::default();
+                let for_minimal = remover.convert(for_.clone().into());
                 f.debug_struct("TypeError::ForHasZeroParams")
                     .field(
                         "for_",
@@ -279,10 +279,10 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 required_decreasing_arg_index,
                 required_strict_superstruct,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let app_minimal = converter.convert_app(rc_hashed(app.clone()));
+                let mut remover = AuxDataRemover::default();
+                let app_minimal = remover.convert_app(rc_hashed(app.clone()));
                 let callee_deb_definition_src_minimal =
-                    converter.convert(callee_deb_definition_src.clone().into());
+                    remover.convert(callee_deb_definition_src.clone().into());
                 f.debug_struct("TypeError::IllegalRecursiveCall")
                     .field(
                         "app",
@@ -309,12 +309,12 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 deb,
                 definition_src,
             } => {
-                let mut converter = AuxDataRemover::default();
+                let mut remover = AuxDataRemover::default();
                 let deb_minimal = minimal_ast::DebNode {
                     deb: deb.deb,
                     aux_data: (),
                 };
-                let definition_src_minimal = converter.convert(definition_src.clone().into());
+                let definition_src_minimal = remover.convert(definition_src.clone().into());
                 f.debug_struct("TypeError::RecursiveFunParamInNonCalleePosition")
                     .field(
                         "deb",
@@ -335,12 +335,12 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 deb,
                 definition_src,
             } => {
-                let mut converter = AuxDataRemover::default();
+                let mut remover = AuxDataRemover::default();
                 let deb_minimal = minimal_ast::DebNode {
                     deb: deb.deb,
                     aux_data: (),
                 };
-                let definition_src_minimal = converter.convert(definition_src.clone().into());
+                let definition_src_minimal = remover.convert(definition_src.clone().into());
                 f.debug_struct("TypeError::DeclaredFunNonrecursiveButUsedRecursiveFunParam")
                     .field(
                         "deb",
@@ -358,8 +358,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
             }
 
             TypeError::DecreasingArgIndexTooBig { fun } => {
-                let mut converter = AuxDataRemover::default();
-                let fun_minimal = converter.convert(fun.clone().into());
+                let mut remover = AuxDataRemover::default();
+                let fun_minimal = remover.convert(fun.clone().into());
                 f.debug_struct("TypeError::DecreasingArgIndexTooBig")
                     .field(
                         "fun",
@@ -376,8 +376,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 normalized_param_type,
                 path_from_param_type_to_problematic_deb,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let def_minimal = converter.convert_vcon_def(def.clone());
+                let mut remover = AuxDataRemover::default();
+                let def_minimal = remover.convert_vcon_def(def.clone());
                 f.debug_struct("TypeError::VconDefParamTypeFailsStrictPositivityCondition")
                     .field(
                         "def",
@@ -403,8 +403,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 normalized_index_arg,
                 path_from_index_arg_to_problematic_deb,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let def_minimal = converter.convert_vcon_def(def.clone());
+                let mut remover = AuxDataRemover::default();
+                let def_minimal = remover.convert_vcon_def(def.clone());
                 f.debug_struct("TypeError::RecursiveIndParamAppearsInVconDefIndexArg")
                     .field(
                         "def",
@@ -429,8 +429,8 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
                 matchee_type_type,
                 match_return_type_type,
             } => {
-                let mut converter = AuxDataRemover::default();
-                let match_minimal = converter.convert_match(rc_hashed(match_.clone()));
+                let mut remover = AuxDataRemover::default();
+                let match_minimal = remover.convert_match(rc_hashed(match_.clone()));
                 f.debug_struct("TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable")
                     .field(
                         "match_",
@@ -449,6 +449,3 @@ impl Display for PrettyPrint<'_, TypeError<SpanAuxData>> {
         }
     }
 }
-
-// TODO: Rename `let mut converter` to `let mut remover`
-// (all over the crate, not just in this file).
