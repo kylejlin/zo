@@ -1,0 +1,35 @@
+---
+source: zoc/src/typecheck/tests/erasability.rs
+expression: pretty_printed_err
+---
+TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
+    match_: (
+        match
+        1
+        1
+        (
+            ind
+            Set0
+            "Bool"
+            ()
+            (
+                (
+                    ()
+                    ()
+                )
+                (
+                    ()
+                    ()
+                )
+            )
+        )
+        (
+            (
+                1
+                0
+            )
+        )
+    )@(ByteIndex(156)..ByteIndex(238)),
+    matchee_type_type: Prop0,
+    match_return_type_type: Set0,
+}
