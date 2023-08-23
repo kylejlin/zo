@@ -160,3 +160,6 @@ impl<A: AuxDataFamily> UniverseLimit<A> for NoLimit<A> {
         Ok(())
     }
 }
+
+// TODO: Reconsider we need `Normalized<Vec<T>>`.
+// It might be easier to use `Vec<Normalized<T>>`.
