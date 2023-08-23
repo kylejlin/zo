@@ -9,7 +9,7 @@ impl Debug for TypeError<UnitAuxDataFamily> {
     }
 }
 
-impl Debug for TypeError<SpanAuxData> {
+impl Debug for TypeError<SpanAuxDataFamily> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> FmtResult {
         let pretty = self.pretty_printed();
         write!(f, "{pretty:#}")

@@ -2,7 +2,7 @@ use super::*;
 
 use crate::{
     syntax_tree::{
-        ast::prelude::{minimal_ast::UnitAuxDataFamily, spanned_ast::SpanAuxData, *},
+        ast::prelude::{minimal_ast::UnitAuxDataFamily, spanned_ast::SpanAuxDataFamily, *},
         remove_ast_aux_data::*,
     },
     typecheck::TypeError,
@@ -482,7 +482,7 @@ where
 {
 }
 
-impl AuxDataFamilyWhoseAstFamilyImplsGetOptSpan for SpanAuxData {}
+impl AuxDataFamilyWhoseAstFamilyImplsGetOptSpan for SpanAuxDataFamily {}
 
 impl GetOptSpan for spanned_ast::Expr {
     fn opt_span(&self) -> Option<Span> {

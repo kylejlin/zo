@@ -2,7 +2,7 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     pretty_print::*,
     syntax_tree::{
-        ast::prelude::{spanned_ast::SpanAuxData, *},
+        ast::prelude::{spanned_ast::SpanAuxDataFamily, *},
         lexer::lex,
         parser::parse,
         remove_ast_aux_data::AuxDataRemover,
@@ -55,13 +55,13 @@ pub fn get_type_under_empty_tcon_or_panic(src: &str) -> NormalForm {
         .pretty_unwrap()
 }
 
-pub fn get_type_error_under_empty_tcon_or_panic(src: &str) -> TypeError<SpanAuxData> {
+pub fn get_type_error_under_empty_tcon_or_panic(src: &str) -> TypeError<SpanAuxDataFamily> {
     let empty = Normalized::<[_; 0]>::new();
     let tcon = LazyTypeContext::Base(empty.as_ref().convert_ref());
     get_type_error_or_panic(src, tcon)
 }
 
-pub fn get_type_error_or_panic(src: &str, tcon: LazyTypeContext) -> TypeError<SpanAuxData> {
+pub fn get_type_error_or_panic(src: &str, tcon: LazyTypeContext) -> TypeError<SpanAuxDataFamily> {
     let spanned = parse_spanned_ast_or_panic(src);
     TypeChecker::default()
         .get_type(spanned, tcon)
