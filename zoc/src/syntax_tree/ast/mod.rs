@@ -29,6 +29,14 @@ pub trait AuxDataFamily:
     type MatchCase: Clone + Hash;
 }
 
+/// This marker trait can safely be implemented for `A`
+/// if and only if
+/// `<A as AuxDataFamily>::Ind` is zero-sized and
+/// `<A as AuxDataFamily>::Vcon` is zero-sized and
+/// `<A as AuxDataFamily>::Match` is zero-sized and
+/// `<A as AuxDataFamily>::Fun` is zero-sized and ... etc.
+pub trait ZeroSizedAuxDataFamily: AuxDataFamily {}
+
 #[derive(Clone, PartialEq, Eq)]
 pub enum Expr<A: AuxDataFamily> {
     Ind(RcHashed<Ind<A>>),

@@ -1,80 +1,80 @@
 use super::*;
 
-use crate::syntax_tree::ast::prelude::minimal_ast::*;
+use crate::syntax_tree::ast::*;
 
-impl Display for PrettyPrint<'_, Expr> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, Expr<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_expr(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, Ind> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, Ind<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_ind(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, [VconDef]> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, [VconDef<A>]> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_parenthesized_vcon_defs(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, VconDef> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, VconDef<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_vcon_def(self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, Vcon> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, Vcon<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_vcon(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, Match> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, Match<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_match(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, [MatchCase]> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, [MatchCase<A>]> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_parenthesized_match_cases(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, MatchCase> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, MatchCase<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_match_case(self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, Fun> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, Fun<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_fun(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, App> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, App<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_app(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, For> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, For<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_for(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, DebNode> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, DebNode<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_deb_node(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl Display for PrettyPrint<'_, UniverseNode> {
+impl<A: ZeroSizedAuxDataFamily> Display for PrettyPrint<'_, UniverseNode<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_universe_node(&self.0, f, Indentation { soft_tab_count: 0 })
     }
@@ -84,7 +84,11 @@ impl Display for PrettyPrint<'_, UniverseNode> {
 // at the beginning.
 // It does _not_ write a newline at the end.
 
-fn fmt_expr(expr: Expr, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_expr<A: ZeroSizedAuxDataFamily>(
+    expr: Expr<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     match expr {
         Expr::Ind(e) => fmt_ind(&e.hashee, f, indent),
         Expr::Vcon(e) => fmt_vcon(&e.hashee, f, indent),
@@ -97,7 +101,11 @@ fn fmt_expr(expr: Expr, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult
     }
 }
 
-fn fmt_ind(ind: &Ind, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_ind<A: ZeroSizedAuxDataFamily>(
+    ind: &Ind<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}ind\n")?;
     fmt_universe(ind.universe, f, i1)?;
@@ -140,8 +148,8 @@ fn fmt_str_literal(
     Ok(())
 }
 
-fn fmt_parenthesized_vcon_defs(
-    defs: &[VconDef],
+fn fmt_parenthesized_vcon_defs<A: ZeroSizedAuxDataFamily>(
+    defs: &[VconDef<A>],
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -161,7 +169,11 @@ fn fmt_parenthesized_vcon_defs(
     Ok(())
 }
 
-fn fmt_vcon_def(def: &VconDef, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_vcon_def<A: ZeroSizedAuxDataFamily>(
+    def: &VconDef<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     write!(f, "{indent}(\n")?;
 
     let i1 = indent.incremented();
@@ -174,7 +186,11 @@ fn fmt_vcon_def(def: &VconDef, f: &mut Formatter<'_>, indent: Indentation) -> Fm
     Ok(())
 }
 
-fn fmt_vcon(vcon: &Vcon, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_vcon<A: ZeroSizedAuxDataFamily>(
+    vcon: &Vcon<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}vcon\n")?;
 
@@ -185,7 +201,11 @@ fn fmt_vcon(vcon: &Vcon, f: &mut Formatter<'_>, indent: Indentation) -> FmtResul
     Ok(())
 }
 
-fn fmt_match(m: &Match, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_match<A: ZeroSizedAuxDataFamily>(
+    m: &Match<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}match\n")?;
 
@@ -203,8 +223,8 @@ fn fmt_match(m: &Match, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult
     Ok(())
 }
 
-fn fmt_parenthesized_match_cases(
-    cases: &[MatchCase],
+fn fmt_parenthesized_match_cases<A: ZeroSizedAuxDataFamily>(
+    cases: &[MatchCase<A>],
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {
@@ -224,7 +244,11 @@ fn fmt_parenthesized_match_cases(
     Ok(())
 }
 
-fn fmt_match_case(case: &MatchCase, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_match_case<A: ZeroSizedAuxDataFamily>(
+    case: &MatchCase<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     let i1 = indent.incremented();
     let case_arity = case.arity;
     write!(f, "{indent}(\n{i1}{case_arity}\n")?;
@@ -234,7 +258,11 @@ fn fmt_match_case(case: &MatchCase, f: &mut Formatter<'_>, indent: Indentation) 
     Ok(())
 }
 
-fn fmt_fun(fun: &Fun, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_fun<A: ZeroSizedAuxDataFamily>(
+    fun: &Fun<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}fun\n")?;
 
@@ -263,7 +291,11 @@ fn fmt_decreasing_index(
     }
 }
 
-fn fmt_app(app: &App, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_app<A: ZeroSizedAuxDataFamily>(
+    app: &App<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     if app.args.hashee.is_empty() {
         write!(f, "{indent}(")?;
         fmt_expr(app.callee.clone(), f, indent)?;
@@ -285,7 +317,11 @@ fn fmt_app(app: &App, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
     Ok(())
 }
 
-fn fmt_for(for_: &For, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_for<A: ZeroSizedAuxDataFamily>(
+    for_: &For<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     let i1 = indent.incremented();
     write!(f, "{indent}(\n{i1}for\n")?;
 
@@ -297,17 +333,25 @@ fn fmt_for(for_: &For, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult 
     Ok(())
 }
 
-fn fmt_deb_node(node: &DebNode, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_deb_node<A: ZeroSizedAuxDataFamily>(
+    node: &DebNode<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     let index = node.deb.0;
     write!(f, "{indent}{index}")
 }
 
-fn fmt_universe_node(node: &UniverseNode, f: &mut Formatter<'_>, indent: Indentation) -> FmtResult {
+fn fmt_universe_node<A: ZeroSizedAuxDataFamily>(
+    node: &UniverseNode<A>,
+    f: &mut Formatter<'_>,
+    indent: Indentation,
+) -> FmtResult {
     fmt_universe(node.universe, f, indent)
 }
 
-fn fmt_parenthesized_expressions(
-    parenthesized_expressions: RcHashedVec<Expr>,
+fn fmt_parenthesized_expressions<A: ZeroSizedAuxDataFamily>(
+    parenthesized_expressions: RcHashedVec<Expr<A>>,
     f: &mut Formatter<'_>,
     indent: Indentation,
 ) -> FmtResult {

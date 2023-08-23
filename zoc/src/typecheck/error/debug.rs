@@ -2,7 +2,7 @@ use super::*;
 
 use std::fmt::{Debug, Result as FmtResult};
 
-impl Debug for TypeError<UnitAuxData> {
+impl Debug for TypeError<UnitAuxDataFamily> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> FmtResult {
         let pretty = self.pretty_printed();
         write!(f, "{pretty:#}")
