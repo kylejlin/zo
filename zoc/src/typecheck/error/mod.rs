@@ -113,6 +113,7 @@ pub enum TypeError<A: AuxDataFamily> {
         path_from_index_arg_to_problematic_deb: Vec<minimal_ast::NodeEdge>,
     },
 
+    // TODO: Delete
     MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
         match_: ast::Match<A>,
         matchee_type_type: minimal_ast::UniverseNode,
