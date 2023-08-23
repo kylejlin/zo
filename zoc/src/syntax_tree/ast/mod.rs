@@ -13,20 +13,20 @@ pub use node_path::{NodeEdge, NodePath};
 
 pub mod prelude;
 
-pub trait AuxDataFamily:
+pub trait AstFamily:
     'static + Debug + Clone + Copy + PartialEq + Eq + PartialOrd + Ord + Hash + Default
 {
-    type Ind: Clone + Hash;
-    type Vcon: Clone + Hash;
-    type Match: Clone + Hash;
-    type Fun: Clone + Hash;
-    type App: Clone + Hash;
-    type For: Clone + Hash;
-    type Deb: Clone + Hash;
-    type Universe: Clone + Hash;
+    type IndAux: Clone + Hash;
+    type VconAux: Clone + Hash;
+    type MatchAux: Clone + Hash;
+    type FunAux: Clone + Hash;
+    type AppAux: Clone + Hash;
+    type ForAux: Clone + Hash;
+    type DebAux: Clone + Hash;
+    type UniverseAux: Clone + Hash;
 
-    type VconDef: Clone + Hash;
-    type MatchCase: Clone + Hash;
+    type VconDefAux: Clone + Hash;
+    type MatchCaseAux: Clone + Hash;
 }
 
 /// This marker trait can safely be implemented for `A`
@@ -35,10 +35,10 @@ pub trait AuxDataFamily:
 /// `<A as AuxDataFamily>::Vcon` is zero-sized and
 /// `<A as AuxDataFamily>::Match` is zero-sized and
 /// `<A as AuxDataFamily>::Fun` is zero-sized and ... etc.
-pub trait ZeroSizedAuxDataFamily: AuxDataFamily {}
+pub trait AstFamilyWithZeroSizedAux: AstFamily {}
 
 #[derive(Clone, PartialEq, Eq)]
-pub enum Expr<A: AuxDataFamily> {
+pub enum Expr<A: AstFamily> {
     Ind(RcHashed<Ind<A>>),
     Vcon(RcHashed<Vcon<A>>),
     Match(RcHashed<Match<A>>),
@@ -50,80 +50,80 @@ pub enum Expr<A: AuxDataFamily> {
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct Ind<A: AuxDataFamily> {
+pub struct Ind<A: AstFamily> {
     pub name: Rc<StringValue>,
     pub universe: Universe,
     pub index_types: RcHashedVec<Expr<A>>,
     pub vcon_defs: RcHashedVec<VconDef<A>>,
-    pub aux_data: A::Ind,
+    pub aux_data: A::IndAux,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct StringValue(pub String);
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct VconDef<A: AuxDataFamily> {
+pub struct VconDef<A: AstFamily> {
     pub param_types: RcHashedVec<Expr<A>>,
     pub index_args: RcHashedVec<Expr<A>>,
-    pub aux_data: A::VconDef,
+    pub aux_data: A::VconDefAux,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct Vcon<A: AuxDataFamily> {
+pub struct Vcon<A: AstFamily> {
     pub ind: RcHashed<Ind<A>>,
     pub vcon_index: usize,
-    pub aux_data: A::Vcon,
+    pub aux_data: A::VconAux,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct Match<A: AuxDataFamily> {
+pub struct Match<A: AstFamily> {
     pub matchee: Expr<A>,
     pub return_type_arity: usize,
     pub return_type: Expr<A>,
     pub cases: RcHashedVec<MatchCase<A>>,
-    pub aux_data: A::Match,
+    pub aux_data: A::MatchAux,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct MatchCase<A: AuxDataFamily> {
+pub struct MatchCase<A: AstFamily> {
     pub arity: usize,
     pub return_val: Expr<A>,
-    pub aux_data: A::MatchCase,
+    pub aux_data: A::MatchCaseAux,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct Fun<A: AuxDataFamily> {
+pub struct Fun<A: AstFamily> {
     pub decreasing_index: Option<usize>,
     pub param_types: RcHashedVec<Expr<A>>,
     pub return_type: Expr<A>,
     pub return_val: Expr<A>,
-    pub aux_data: A::Fun,
+    pub aux_data: A::FunAux,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct App<A: AuxDataFamily> {
+pub struct App<A: AstFamily> {
     pub callee: Expr<A>,
     pub args: RcHashedVec<Expr<A>>,
-    pub aux_data: A::App,
+    pub aux_data: A::AppAux,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct For<A: AuxDataFamily> {
+pub struct For<A: AstFamily> {
     pub param_types: RcHashedVec<Expr<A>>,
     pub return_type: Expr<A>,
-    pub aux_data: A::For,
+    pub aux_data: A::ForAux,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct DebNode<A: AuxDataFamily> {
+pub struct DebNode<A: AstFamily> {
     pub deb: Deb,
-    pub aux_data: A::Deb,
+    pub aux_data: A::DebAux,
 }
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct UniverseNode<A: AuxDataFamily> {
+pub struct UniverseNode<A: AstFamily> {
     pub universe: Universe,
-    pub aux_data: A::Universe,
+    pub aux_data: A::UniverseAux,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
@@ -138,7 +138,7 @@ pub struct Universe {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct UniverseLevel(pub usize);
 
-impl<A: AuxDataFamily> App<A> {
+impl<A: AstFamily> App<A> {
     pub fn collapse_if_nullary(self) -> Expr<A> {
         if self.args.hashee.is_empty() {
             self.callee
@@ -148,7 +148,7 @@ impl<A: AuxDataFamily> App<A> {
     }
 }
 
-impl<A: AuxDataFamily> For<A> {
+impl<A: AstFamily> For<A> {
     pub fn collapse_if_nullary(self) -> Expr<A> {
         if self.param_types.hashee.is_empty() {
             self.return_type

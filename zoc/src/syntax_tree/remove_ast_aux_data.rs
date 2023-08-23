@@ -17,7 +17,7 @@ impl AuxDataRemover {
 }
 
 impl AuxDataRemover {
-    pub fn convert<A: AuxDataFamily>(&mut self, original: ast::Expr<A>) -> minimal_ast::Expr {
+    pub fn convert<A: AstFamily>(&mut self, original: ast::Expr<A>) -> minimal_ast::Expr {
         match original {
             ast::Expr::Ind(e) => self.convert_ind(e).into(),
             ast::Expr::Vcon(e) => self.convert_vcon(e).into(),
@@ -30,7 +30,7 @@ impl AuxDataRemover {
         }
     }
 
-    pub fn convert_ind<A: AuxDataFamily>(
+    pub fn convert_ind<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Ind<A>>,
     ) -> RcHashed<minimal_ast::Ind> {
@@ -41,7 +41,7 @@ impl AuxDataRemover {
         self.convert_and_cache_unseen_ind(original)
     }
 
-    fn convert_and_cache_unseen_ind<A: AuxDataFamily>(
+    fn convert_and_cache_unseen_ind<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Ind<A>>,
     ) -> RcHashed<minimal_ast::Ind> {
@@ -51,7 +51,7 @@ impl AuxDataRemover {
         ind
     }
 
-    fn convert_unseen_ind<A: AuxDataFamily>(
+    fn convert_unseen_ind<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Ind<A>>,
     ) -> RcHashed<minimal_ast::Ind> {
@@ -64,7 +64,7 @@ impl AuxDataRemover {
         })
     }
 
-    pub fn convert_vcon_defs<A: AuxDataFamily>(
+    pub fn convert_vcon_defs<A: AstFamily>(
         &mut self,
         original: RcHashedVec<ast::VconDef<A>>,
     ) -> RcHashedVec<minimal_ast::VconDef> {
@@ -77,7 +77,7 @@ impl AuxDataRemover {
         rc_hashed(v)
     }
 
-    pub fn convert_vcon_def<A: AuxDataFamily>(
+    pub fn convert_vcon_def<A: AstFamily>(
         &mut self,
         original: ast::VconDef<A>,
     ) -> minimal_ast::VconDef {
@@ -88,7 +88,7 @@ impl AuxDataRemover {
         }
     }
 
-    pub fn convert_vcon<A: AuxDataFamily>(
+    pub fn convert_vcon<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Vcon<A>>,
     ) -> RcHashed<minimal_ast::Vcon> {
@@ -99,7 +99,7 @@ impl AuxDataRemover {
         self.convert_and_cache_unseen_vcon(original)
     }
 
-    fn convert_and_cache_unseen_vcon<A: AuxDataFamily>(
+    fn convert_and_cache_unseen_vcon<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Vcon<A>>,
     ) -> RcHashed<minimal_ast::Vcon> {
@@ -109,7 +109,7 @@ impl AuxDataRemover {
         vcon
     }
 
-    fn convert_unseen_vcon<A: AuxDataFamily>(
+    fn convert_unseen_vcon<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Vcon<A>>,
     ) -> RcHashed<minimal_ast::Vcon> {
@@ -120,7 +120,7 @@ impl AuxDataRemover {
         })
     }
 
-    pub fn convert_match<A: AuxDataFamily>(
+    pub fn convert_match<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Match<A>>,
     ) -> RcHashed<minimal_ast::Match> {
@@ -131,7 +131,7 @@ impl AuxDataRemover {
         self.convert_and_cache_unseen_match(original)
     }
 
-    fn convert_and_cache_unseen_match<A: AuxDataFamily>(
+    fn convert_and_cache_unseen_match<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Match<A>>,
     ) -> RcHashed<minimal_ast::Match> {
@@ -141,7 +141,7 @@ impl AuxDataRemover {
         match_
     }
 
-    fn convert_unseen_match<A: AuxDataFamily>(
+    fn convert_unseen_match<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Match<A>>,
     ) -> RcHashed<minimal_ast::Match> {
@@ -154,7 +154,7 @@ impl AuxDataRemover {
         })
     }
 
-    fn convert_match_cases<A: AuxDataFamily>(
+    fn convert_match_cases<A: AstFamily>(
         &mut self,
         original: RcHashedVec<ast::MatchCase<A>>,
     ) -> RcHashedVec<minimal_ast::MatchCase> {
@@ -167,7 +167,7 @@ impl AuxDataRemover {
         rc_hashed(v)
     }
 
-    pub fn convert_match_case<A: AuxDataFamily>(
+    pub fn convert_match_case<A: AstFamily>(
         &mut self,
         original: ast::MatchCase<A>,
     ) -> minimal_ast::MatchCase {
@@ -178,7 +178,7 @@ impl AuxDataRemover {
         }
     }
 
-    pub fn convert_fun<A: AuxDataFamily>(
+    pub fn convert_fun<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Fun<A>>,
     ) -> RcHashed<minimal_ast::Fun> {
@@ -189,7 +189,7 @@ impl AuxDataRemover {
         self.convert_and_cache_unseen_fun(original)
     }
 
-    fn convert_and_cache_unseen_fun<A: AuxDataFamily>(
+    fn convert_and_cache_unseen_fun<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Fun<A>>,
     ) -> RcHashed<minimal_ast::Fun> {
@@ -199,7 +199,7 @@ impl AuxDataRemover {
         fun
     }
 
-    fn convert_unseen_fun<A: AuxDataFamily>(
+    fn convert_unseen_fun<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::Fun<A>>,
     ) -> RcHashed<minimal_ast::Fun> {
@@ -212,7 +212,7 @@ impl AuxDataRemover {
         })
     }
 
-    pub fn convert_app<A: AuxDataFamily>(
+    pub fn convert_app<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::App<A>>,
     ) -> RcHashed<minimal_ast::App> {
@@ -223,7 +223,7 @@ impl AuxDataRemover {
         self.convert_and_cache_unseen_app(original)
     }
 
-    fn convert_and_cache_unseen_app<A: AuxDataFamily>(
+    fn convert_and_cache_unseen_app<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::App<A>>,
     ) -> RcHashed<minimal_ast::App> {
@@ -233,7 +233,7 @@ impl AuxDataRemover {
         app
     }
 
-    fn convert_unseen_app<A: AuxDataFamily>(
+    fn convert_unseen_app<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::App<A>>,
     ) -> RcHashed<minimal_ast::App> {
@@ -244,7 +244,7 @@ impl AuxDataRemover {
         })
     }
 
-    pub fn convert_for<A: AuxDataFamily>(
+    pub fn convert_for<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::For<A>>,
     ) -> RcHashed<minimal_ast::For> {
@@ -255,7 +255,7 @@ impl AuxDataRemover {
         self.convert_and_cache_unseen_for(original)
     }
 
-    fn convert_and_cache_unseen_for<A: AuxDataFamily>(
+    fn convert_and_cache_unseen_for<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::For<A>>,
     ) -> RcHashed<minimal_ast::For> {
@@ -265,7 +265,7 @@ impl AuxDataRemover {
         for_
     }
 
-    fn convert_unseen_for<A: AuxDataFamily>(
+    fn convert_unseen_for<A: AstFamily>(
         &mut self,
         original: RcHashed<ast::For<A>>,
     ) -> RcHashed<minimal_ast::For> {
@@ -276,7 +276,7 @@ impl AuxDataRemover {
         })
     }
 
-    pub fn convert_expressions<A: AuxDataFamily>(
+    pub fn convert_expressions<A: AstFamily>(
         &mut self,
         original: &[ast::Expr<A>],
     ) -> RcHashedVec<minimal_ast::Expr> {
@@ -287,7 +287,7 @@ impl AuxDataRemover {
         rc_hashed(v)
     }
 
-    pub fn convert_deb_node<A: AuxDataFamily>(
+    pub fn convert_deb_node<A: AstFamily>(
         &mut self,
         // Since debs are leaf nodes,
         // caching the conversion result
@@ -302,7 +302,7 @@ impl AuxDataRemover {
         })
     }
 
-    pub fn convert_universe_node<A: AuxDataFamily>(
+    pub fn convert_universe_node<A: AstFamily>(
         &mut self,
         // Since debs are leaf nodes,
         // caching the conversion result

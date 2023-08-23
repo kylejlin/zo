@@ -1,7 +1,7 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_fun<A: AuxDataFamily>(
+    pub fn get_type_of_fun<A: AstFamily>(
         &mut self,
         fun_g0: RcHashed<ast::Fun<A>>,
         tcon_g0: LazyTypeContext,
@@ -65,7 +65,7 @@ impl TypeChecker {
         .into())
     }
 
-    fn assert_fun_has_at_least_one_param<A: AuxDataFamily>(
+    fn assert_fun_has_at_least_one_param<A: AstFamily>(
         &self,
         fun: RcHashed<ast::Fun<A>>,
     ) -> Result<(), TypeError<A>> {

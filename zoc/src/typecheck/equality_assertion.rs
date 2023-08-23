@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Clone)]
-pub struct ExpectedTypeEquality<A: AuxDataFamily> {
+pub struct ExpectedTypeEquality<A: AstFamily> {
     pub expr: ast::Expr<A>,
     pub expected_type: NormalForm,
     pub actual_type: NormalForm,
@@ -9,13 +9,13 @@ pub struct ExpectedTypeEquality<A: AuxDataFamily> {
 
 /// `exprs`, `expected_types`, and `actual_types` **must** all have the same length.
 #[derive(Clone)]
-pub struct ExpectedTypeEqualities<'a, A: AuxDataFamily> {
+pub struct ExpectedTypeEqualities<'a, A: AstFamily> {
     pub exprs: &'a [ast::Expr<A>],
     pub expected_types: Normalized<&'a [minimal_ast::Expr]>,
     pub actual_types: Normalized<&'a [minimal_ast::Expr]>,
 }
 
-impl<'a, A: AuxDataFamily> ExpectedTypeEqualities<'a, A> {
+impl<'a, A: AstFamily> ExpectedTypeEqualities<'a, A> {
     pub fn zip(self) -> impl Iterator<Item = ExpectedTypeEquality<A>> + 'a {
         (0..self.len()).into_iter().map(move |i| {
             let expr = self.exprs[i].clone();
@@ -35,7 +35,7 @@ impl<'a, A: AuxDataFamily> ExpectedTypeEqualities<'a, A> {
 }
 
 impl TypeChecker {
-    pub(super) fn assert_expected_type_equalities_holds<A: AuxDataFamily>(
+    pub(super) fn assert_expected_type_equalities_holds<A: AstFamily>(
         &mut self,
         equalities: ExpectedTypeEqualities<A>,
     ) -> Result<(), TypeError<A>> {
@@ -46,7 +46,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    pub(super) fn assert_expected_type_equality_holds<A: AuxDataFamily>(
+    pub(super) fn assert_expected_type_equality_holds<A: AstFamily>(
         &mut self,
         expected_equality: ExpectedTypeEquality<A>,
     ) -> Result<(), TypeError<A>> {

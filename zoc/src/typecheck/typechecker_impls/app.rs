@@ -1,7 +1,7 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_app<A: AuxDataFamily>(
+    pub fn get_type_of_app<A: AstFamily>(
         &mut self,
         app: RcHashed<ast::App<A>>,
         tcon: LazyTypeContext,
@@ -39,7 +39,7 @@ impl TypeChecker {
         Ok(substituted_callee_type_return_type)
     }
 
-    fn assert_app_has_at_least_one_arg<A: AuxDataFamily>(
+    fn assert_app_has_at_least_one_arg<A: AstFamily>(
         &mut self,
         app: RcHashed<ast::App<A>>,
     ) -> Result<(), TypeError<A>> {
@@ -52,7 +52,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_callee_type_is_a_for_expression<A: AuxDataFamily>(
+    fn assert_callee_type_is_a_for_expression<A: AstFamily>(
         &mut self,
         callee_type: NormalForm,
         app: RcHashed<ast::App<A>>,
@@ -67,7 +67,7 @@ impl TypeChecker {
         })
     }
 
-    fn assert_arg_count_is_correct<A: AuxDataFamily>(
+    fn assert_arg_count_is_correct<A: AstFamily>(
         &mut self,
         app: RcHashed<ast::App<A>>,
         callee_type: Normalized<RcHashed<minimal_ast::For>>,

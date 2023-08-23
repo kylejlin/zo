@@ -1,7 +1,7 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_deb<A: AuxDataFamily>(
+    pub fn get_type_of_deb<A: AstFamily>(
         &mut self,
         deb_node: RcHashed<ast::DebNode<A>>,
         tcon: LazyTypeContext,

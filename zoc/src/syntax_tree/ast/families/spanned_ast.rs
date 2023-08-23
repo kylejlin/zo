@@ -8,32 +8,32 @@ use crate::{
 use std::fmt::{Debug, Result as FmtResult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct SpanAuxDataFamily;
+pub struct SpannedAst;
 
-pub type Expr = ast::Expr<SpanAuxDataFamily>;
-pub type Ind = ast::Ind<SpanAuxDataFamily>;
-pub type VconDef = ast::VconDef<SpanAuxDataFamily>;
-pub type Vcon = ast::Vcon<SpanAuxDataFamily>;
-pub type Match = ast::Match<SpanAuxDataFamily>;
-pub type MatchCase = ast::MatchCase<SpanAuxDataFamily>;
-pub type Fun = ast::Fun<SpanAuxDataFamily>;
-pub type App = ast::App<SpanAuxDataFamily>;
-pub type For = ast::For<SpanAuxDataFamily>;
-pub type DebNode = ast::DebNode<SpanAuxDataFamily>;
-pub type UniverseNode = ast::UniverseNode<SpanAuxDataFamily>;
+pub type Expr = ast::Expr<SpannedAst>;
+pub type Ind = ast::Ind<SpannedAst>;
+pub type VconDef = ast::VconDef<SpannedAst>;
+pub type Vcon = ast::Vcon<SpannedAst>;
+pub type Match = ast::Match<SpannedAst>;
+pub type MatchCase = ast::MatchCase<SpannedAst>;
+pub type Fun = ast::Fun<SpannedAst>;
+pub type App = ast::App<SpannedAst>;
+pub type For = ast::For<SpannedAst>;
+pub type DebNode = ast::DebNode<SpannedAst>;
+pub type UniverseNode = ast::UniverseNode<SpannedAst>;
 
-impl AuxDataFamily for SpanAuxDataFamily {
-    type Ind = IndSpans;
-    type Vcon = VconSpans;
-    type Match = MatchSpans;
-    type Fun = FunSpans;
-    type App = Span;
-    type For = ForSpans;
-    type Deb = Span;
-    type Universe = Span;
+impl AstFamily for SpannedAst {
+    type IndAux = IndSpans;
+    type VconAux = VconSpans;
+    type MatchAux = MatchSpans;
+    type FunAux = FunSpans;
+    type AppAux = Span;
+    type ForAux = ForSpans;
+    type DebAux = Span;
+    type UniverseAux = Span;
 
-    type VconDef = VconDefSpans;
-    type MatchCase = MatchCaseSpans;
+    type VconDefAux = VconDefSpans;
+    type MatchCaseAux = MatchCaseSpans;
 }
 
 #[derive(Debug, Clone, Hash)]

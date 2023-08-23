@@ -31,7 +31,7 @@ trait ExpectWellTyped {
 
 impl<T, A> ExpectWellTyped for Result<T, TypeError<A>>
 where
-    A: AuxDataFamily,
+    A: AstFamily,
     TypeError<A>: std::fmt::Debug,
 {
     type Output = T;

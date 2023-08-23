@@ -19,7 +19,7 @@ mod remove_ast_aux_data;
 /// no auxiliary information whatsoever (i.e., a node in the `minimal_ast` family),
 /// then the error will also have no auxiliary information.
 #[derive(Clone)]
-pub enum TypeError<A: AuxDataFamily> {
+pub enum TypeError<A: AstFamily> {
     InvalidDeb {
         deb: ast::DebNode<A>,
         tcon_len: usize,

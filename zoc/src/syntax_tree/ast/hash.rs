@@ -2,17 +2,17 @@ use super::*;
 
 impl<A> Hash for Expr<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         match self {
@@ -30,17 +30,17 @@ where
 
 impl<A> Hash for Ind<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_IND.hash(state);
@@ -54,17 +54,17 @@ where
 
 impl<A> Hash for VconDef<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_VCON_DEF.hash(state);
@@ -76,17 +76,17 @@ where
 
 impl<A> Hash for Vcon<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_VCON.hash(state);
@@ -98,17 +98,17 @@ where
 
 impl<A> Hash for Match<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_MATCH.hash(state);
@@ -121,17 +121,17 @@ where
 
 impl<A> Hash for MatchCase<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_MATCH_CASE.hash(state);
@@ -143,17 +143,17 @@ where
 
 impl<A> Hash for Fun<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_FUN.hash(state);
@@ -167,17 +167,17 @@ where
 
 impl<A> Hash for App<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_APP.hash(state);
@@ -189,17 +189,17 @@ where
 
 impl<A> Hash for For<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_FOR.hash(state);
@@ -211,17 +211,17 @@ where
 
 impl<A> Hash for DebNode<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_DEB.hash(state);
@@ -232,17 +232,17 @@ where
 
 impl<A> Hash for UniverseNode<A>
 where
-    A: AuxDataFamily,
-    A::Ind: Hash,
-    A::VconDef: Hash,
-    A::Vcon: Hash,
-    A::Match: Hash,
-    A::MatchCase: Hash,
-    A::Fun: Hash,
-    A::App: Hash,
-    A::For: Hash,
-    A::Deb: Hash,
-    A::Universe: Hash,
+    A: AstFamily,
+    A::IndAux: Hash,
+    A::VconDefAux: Hash,
+    A::VconAux: Hash,
+    A::MatchAux: Hash,
+    A::MatchCaseAux: Hash,
+    A::FunAux: Hash,
+    A::AppAux: Hash,
+    A::ForAux: Hash,
+    A::DebAux: Hash,
+    A::UniverseAux: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         delimiters::START_UNIVERSE.hash(state);

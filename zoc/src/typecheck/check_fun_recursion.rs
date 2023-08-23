@@ -3,7 +3,7 @@ use super::*;
 use std::ops::BitOr;
 
 #[derive(Clone, Copy)]
-pub enum RecursionCheckingContext<'a, A: AuxDataFamily> {
+pub enum RecursionCheckingContext<'a, A: AstFamily> {
     Base(&'a [UnshiftedEntry<'a, A>]),
     Snoc(
         &'a RecursionCheckingContext<'a, A>,
@@ -11,17 +11,17 @@ pub enum RecursionCheckingContext<'a, A: AuxDataFamily> {
     ),
 }
 
-impl<A: AuxDataFamily> RecursionCheckingContext<'static, A> {
+impl<A: AstFamily> RecursionCheckingContext<'static, A> {
     pub fn empty() -> Self {
         RecursionCheckingContext::Base(&[])
     }
 }
 
 #[derive(Clone)]
-pub struct UnshiftedEntry<'a, A: AuxDataFamily>(pub Entry<'a, A>);
+pub struct UnshiftedEntry<'a, A: AstFamily>(pub Entry<'a, A>);
 
 #[derive(Clone)]
-pub enum Entry<'a, A: AuxDataFamily> {
+pub enum Entry<'a, A: AstFamily> {
     Top(Option<&'a ast::Fun<A>>),
     Substruct(SizeBound, Strict),
 }
@@ -35,20 +35,20 @@ pub enum SizeBound {
     CaselessMatch,
 }
 
-enum CallRequirement<'a, A: AuxDataFamily> {
+enum CallRequirement<'a, A: AstFamily> {
     Recursive(RecursiveCallRequirement<'a, A>),
     AccessForbidden(&'a ast::Fun<A>),
 }
 
 #[derive(Clone)]
-struct RecursiveCallRequirement<'a, A: AuxDataFamily> {
+struct RecursiveCallRequirement<'a, A: AstFamily> {
     arg_index: usize,
     strict_superstruct: Deb,
     definition_src: &'a ast::Fun<A>,
 }
 
 impl TypeChecker {
-    pub(crate) fn check_recursion<A: AuxDataFamily>(
+    pub(crate) fn check_recursion<A: AstFamily>(
         &mut self,
         expr: ast::Expr<A>,
         rcon: RecursionCheckingContext<A>,
@@ -65,7 +65,7 @@ impl TypeChecker {
         }
     }
 
-    fn check_recursion_in_ind<A: AuxDataFamily>(
+    fn check_recursion_in_ind<A: AstFamily>(
         &mut self,
         ind: &ast::Ind<A>,
         rcon: RecursionCheckingContext<A>,
@@ -79,7 +79,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_vcon_defs<A: AuxDataFamily>(
+    fn check_recursion_in_vcon_defs<A: AstFamily>(
         &mut self,
         defs: &[ast::VconDef<A>],
         rcon: RecursionCheckingContext<A>,
@@ -90,7 +90,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_vcon_def<A: AuxDataFamily>(
+    fn check_recursion_in_vcon_def<A: AstFamily>(
         &mut self,
         def: &ast::VconDef<A>,
         rcon: RecursionCheckingContext<A>,
@@ -104,7 +104,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_vcon<A: AuxDataFamily>(
+    fn check_recursion_in_vcon<A: AstFamily>(
         &mut self,
         vcon: &ast::Vcon<A>,
         rcon: RecursionCheckingContext<A>,
@@ -112,7 +112,7 @@ impl TypeChecker {
         self.check_recursion_in_ind(&vcon.ind.hashee, rcon)
     }
 
-    fn check_recursion_in_match<A: AuxDataFamily>(
+    fn check_recursion_in_match<A: AstFamily>(
         &mut self,
         match_: &ast::Match<A>,
         rcon: RecursionCheckingContext<A>,
@@ -125,7 +125,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_match_cases<A: AuxDataFamily>(
+    fn check_recursion_in_match_cases<A: AstFamily>(
         &mut self,
         cases: &[ast::MatchCase<A>],
         matchee_bound: Option<SizeBound>,
@@ -137,7 +137,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_match_case<A: AuxDataFamily>(
+    fn check_recursion_in_match_case<A: AstFamily>(
         &mut self,
         case: &ast::MatchCase<A>,
         matchee_bound: Option<SizeBound>,
@@ -149,7 +149,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_fun<A: AuxDataFamily>(
+    fn check_recursion_in_fun<A: AstFamily>(
         &mut self,
         fun: &ast::Fun<A>,
         app_arg_status: Option<Vec<UnshiftedEntry<A>>>,
@@ -166,7 +166,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_fun_return_type<A: AuxDataFamily>(
+    fn check_recursion_in_fun_return_type<A: AstFamily>(
         &mut self,
         fun: &ast::Fun<A>,
         rcon: RecursionCheckingContext<A>,
@@ -177,7 +177,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn get_fun_rcon_extension<'a, A: AuxDataFamily>(
+    fn get_fun_rcon_extension<'a, A: AstFamily>(
         &mut self,
         fun: &'a ast::Fun<A>,
         app_arg_status: Option<Vec<UnshiftedEntry<'a, A>>>,
@@ -191,7 +191,7 @@ impl TypeChecker {
         Ok(out)
     }
 
-    fn assert_decreasing_index_is_valid<A: AuxDataFamily>(
+    fn assert_decreasing_index_is_valid<A: AstFamily>(
         &mut self,
         fun: &ast::Fun<A>,
     ) -> Result<(), TypeError<A>> {
@@ -208,7 +208,7 @@ impl TypeChecker {
         }
     }
 
-    fn get_fun_param_entries<'a, A: AuxDataFamily>(
+    fn get_fun_param_entries<'a, A: AstFamily>(
         &mut self,
         fun: &'a ast::Fun<A>,
         app_arg_status: Option<Vec<UnshiftedEntry<'a, A>>>,
@@ -217,7 +217,7 @@ impl TypeChecker {
             .unwrap_or_else(|| vec![UnshiftedEntry(Entry::Top(None)); fun.param_types.hashee.len()])
     }
 
-    fn check_recursion_in_app<A: AuxDataFamily>(
+    fn check_recursion_in_app<A: AstFamily>(
         &mut self,
         app: &ast::App<A>,
         rcon: RecursionCheckingContext<A>,
@@ -227,7 +227,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_app_callee<A: AuxDataFamily>(
+    fn check_recursion_in_app_callee<A: AstFamily>(
         &mut self,
         app: &ast::App<A>,
         rcon: RecursionCheckingContext<A>,
@@ -245,7 +245,7 @@ impl TypeChecker {
         }
     }
 
-    fn check_recursion_in_app_callee_deb<A: AuxDataFamily>(
+    fn check_recursion_in_app_callee_deb<A: AstFamily>(
         &mut self,
         app: &ast::App<A>,
         callee: &ast::DebNode<A>,
@@ -269,7 +269,7 @@ impl TypeChecker {
         }
     }
 
-    fn check_recursion_in_app_callee_fun<A: AuxDataFamily>(
+    fn check_recursion_in_app_callee_fun<A: AstFamily>(
         &mut self,
         app: &ast::App<A>,
         callee: &ast::Fun<A>,
@@ -279,7 +279,7 @@ impl TypeChecker {
         self.check_recursion_in_fun(&callee, Some(arg_status), rcon)
     }
 
-    fn get_app_callee_fun_arg_status<A: AuxDataFamily>(
+    fn get_app_callee_fun_arg_status<A: AstFamily>(
         &mut self,
         app: &ast::App<A>,
         callee: &ast::Fun<A>,
@@ -294,7 +294,7 @@ impl TypeChecker {
         }
     }
 
-    fn get_app_callee_nonrecursive_fun_arg_status<A: AuxDataFamily>(
+    fn get_app_callee_nonrecursive_fun_arg_status<A: AstFamily>(
         &mut self,
         app: &ast::App<A>,
         rcon: RecursionCheckingContext<A>,
@@ -321,7 +321,7 @@ impl TypeChecker {
             .collect()
     }
 
-    fn get_app_callee_recursive_fun_arg_status<A: AuxDataFamily>(
+    fn get_app_callee_recursive_fun_arg_status<A: AstFamily>(
         &mut self,
         app: &ast::App<A>,
         decreasing_index: usize,
@@ -345,7 +345,7 @@ impl TypeChecker {
             .collect()
     }
 
-    fn assert_arg_satisfies_recursive_call_requirement<A: AuxDataFamily>(
+    fn assert_arg_satisfies_recursive_call_requirement<A: AstFamily>(
         &mut self,
         app: &ast::App<A>,
         requirement: RecursiveCallRequirement<A>,
@@ -378,7 +378,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_for<A: AuxDataFamily>(
+    fn check_recursion_in_for<A: AstFamily>(
         &mut self,
         for_: &ast::For<A>,
         rcon: RecursionCheckingContext<A>,
@@ -392,7 +392,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_deb<A: AuxDataFamily>(
+    fn check_recursion_in_deb<A: AstFamily>(
         &mut self,
         deb: &ast::DebNode<A>,
         rcon: RecursionCheckingContext<A>,
@@ -421,7 +421,7 @@ impl TypeChecker {
 }
 
 impl TypeChecker {
-    fn check_recursion_in_dependent_exprs<A: AuxDataFamily>(
+    fn check_recursion_in_dependent_exprs<A: AstFamily>(
         &mut self,
         exprs: &[ast::Expr<A>],
         rcon: RecursionCheckingContext<A>,
@@ -440,7 +440,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn check_recursion_in_independent_exprs<A: AuxDataFamily>(
+    fn check_recursion_in_independent_exprs<A: AstFamily>(
         &mut self,
         exprs: &[ast::Expr<A>],
         rcon: RecursionCheckingContext<A>,
@@ -453,7 +453,7 @@ impl TypeChecker {
 }
 
 impl TypeChecker {
-    fn is_strict_substruct<A: AuxDataFamily>(
+    fn is_strict_substruct<A: AstFamily>(
         &mut self,
         expr: ast::Expr<A>,
         possible_superstruct: Deb,
@@ -477,7 +477,7 @@ impl TypeChecker {
 }
 
 impl TypeChecker {
-    fn get_size_bound<A: AuxDataFamily>(
+    fn get_size_bound<A: AstFamily>(
         &mut self,
         expr: ast::Expr<A>,
         rcon: RecursionCheckingContext<A>,
@@ -496,7 +496,7 @@ impl TypeChecker {
         }
     }
 
-    fn get_size_bound_of_match<A: AuxDataFamily>(
+    fn get_size_bound_of_match<A: AstFamily>(
         &mut self,
         expr: &ast::Match<A>,
         rcon: RecursionCheckingContext<A>,
@@ -520,7 +520,7 @@ impl TypeChecker {
         Some(lowest_common_bound)
     }
 
-    fn get_size_bound_of_match_case<A: AuxDataFamily>(
+    fn get_size_bound_of_match_case<A: AstFamily>(
         &mut self,
         expr: &ast::MatchCase<A>,
         matchee_bound: Option<SizeBound>,
@@ -531,7 +531,7 @@ impl TypeChecker {
         self.get_size_bound(expr.return_val.clone(), extended_rcon)
     }
 
-    fn get_size_bound_of_deb<A: AuxDataFamily>(
+    fn get_size_bound_of_deb<A: AstFamily>(
         &mut self,
         expr: &ast::DebNode<A>,
         rcon: RecursionCheckingContext<A>,
@@ -547,7 +547,7 @@ impl TypeChecker {
     }
 }
 
-fn get_rcon_extension_for_match_case_params<A: AuxDataFamily>(
+fn get_rcon_extension_for_match_case_params<A: AstFamily>(
     matchee_bound: Option<SizeBound>,
     case_arity: usize,
 ) -> Vec<UnshiftedEntry<'static, A>> {
@@ -565,7 +565,7 @@ fn get_rcon_extension_for_match_case_params<A: AuxDataFamily>(
         .collect()
 }
 
-fn get_min_size_bound<A: AuxDataFamily>(
+fn get_min_size_bound<A: AstFamily>(
     a: SizeBound,
     b: SizeBound,
     rcon: RecursionCheckingContext<A>,
@@ -579,7 +579,7 @@ fn get_min_size_bound<A: AuxDataFamily>(
     }
 }
 
-fn get_min_size_bound_of_debs<A: AuxDataFamily>(
+fn get_min_size_bound_of_debs<A: AstFamily>(
     a: Deb,
     b: Deb,
     rcon: RecursionCheckingContext<A>,
@@ -588,7 +588,7 @@ fn get_min_size_bound_of_debs<A: AuxDataFamily>(
         .or_else(|| get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b(b, a, rcon))
 }
 
-fn get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b<A: AuxDataFamily>(
+fn get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b<A: AstFamily>(
     a: Deb,
     b: Deb,
     rcon: RecursionCheckingContext<A>,
@@ -618,7 +618,7 @@ fn get_smallest_superstruct_of_a_that_is_also_a_superstruct_of_b<A: AuxDataFamil
 /// If `deb` is a substruct `possible_superstruct`,
 /// this function returns `Some(strictness)`.
 /// Otherwise, it returns `None`.
-fn is_deb_substruct<A: AuxDataFamily>(
+fn is_deb_substruct<A: AstFamily>(
     deb: Deb,
     possible_superstruct: Deb,
     rcon: RecursionCheckingContext<A>,
@@ -641,7 +641,7 @@ fn is_deb_substruct<A: AuxDataFamily>(
     }
 }
 
-impl<A: AuxDataFamily> RecursionCheckingContext<'_, A> {
+impl<A: AstFamily> RecursionCheckingContext<'_, A> {
     fn get_call_requirement(&self, deb: Deb) -> Option<CallRequirement<A>> {
         let entry = self.get(deb)?;
         match entry {
@@ -686,7 +686,7 @@ impl<A: AuxDataFamily> RecursionCheckingContext<'_, A> {
     }
 }
 
-impl<A: AuxDataFamily> Entry<'_, A> {
+impl<A: AstFamily> Entry<'_, A> {
     fn upshift(self, upshift_amount: usize) -> Self {
         match self {
             Entry::Top(_) => self,

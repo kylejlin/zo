@@ -2,7 +2,7 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::*,
     syntax_tree::{
-        ast::prelude::{minimal_ast::UnitAuxDataFamily, spanned_ast::SpanAuxDataFamily, *},
+        ast::prelude::{minimal_ast::MinimalAst, spanned_ast::SpannedAst, *},
         remove_ast_aux_data::AuxDataRemover,
         replace_debs::*,
     },

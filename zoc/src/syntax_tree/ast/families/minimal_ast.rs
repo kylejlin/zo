@@ -5,35 +5,35 @@ use crate::pretty_print::PrettyPrinted;
 use std::fmt::{Debug, Result as FmtResult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct UnitAuxDataFamily;
+pub struct MinimalAst;
 
-impl ZeroSizedAuxDataFamily for UnitAuxDataFamily {}
+impl AstFamilyWithZeroSizedAux for MinimalAst {}
 
-impl AuxDataFamily for UnitAuxDataFamily {
-    type Ind = ();
-    type Vcon = ();
-    type Match = ();
-    type Fun = ();
-    type App = ();
-    type For = ();
-    type Deb = ();
-    type Universe = ();
+impl AstFamily for MinimalAst {
+    type IndAux = ();
+    type VconAux = ();
+    type MatchAux = ();
+    type FunAux = ();
+    type AppAux = ();
+    type ForAux = ();
+    type DebAux = ();
+    type UniverseAux = ();
 
-    type VconDef = ();
-    type MatchCase = ();
+    type VconDefAux = ();
+    type MatchCaseAux = ();
 }
 
-pub type Expr = ast::Expr<UnitAuxDataFamily>;
-pub type Ind = ast::Ind<UnitAuxDataFamily>;
-pub type VconDef = ast::VconDef<UnitAuxDataFamily>;
-pub type Vcon = ast::Vcon<UnitAuxDataFamily>;
-pub type Match = ast::Match<UnitAuxDataFamily>;
-pub type MatchCase = ast::MatchCase<UnitAuxDataFamily>;
-pub type Fun = ast::Fun<UnitAuxDataFamily>;
-pub type App = ast::App<UnitAuxDataFamily>;
-pub type For = ast::For<UnitAuxDataFamily>;
-pub type DebNode = ast::DebNode<UnitAuxDataFamily>;
-pub type UniverseNode = ast::UniverseNode<UnitAuxDataFamily>;
+pub type Expr = ast::Expr<MinimalAst>;
+pub type Ind = ast::Ind<MinimalAst>;
+pub type VconDef = ast::VconDef<MinimalAst>;
+pub type Vcon = ast::Vcon<MinimalAst>;
+pub type Match = ast::Match<MinimalAst>;
+pub type MatchCase = ast::MatchCase<MinimalAst>;
+pub type Fun = ast::Fun<MinimalAst>;
+pub type App = ast::App<MinimalAst>;
+pub type For = ast::For<MinimalAst>;
+pub type DebNode = ast::DebNode<MinimalAst>;
+pub type UniverseNode = ast::UniverseNode<MinimalAst>;
 
 impl Debug for Expr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> FmtResult {

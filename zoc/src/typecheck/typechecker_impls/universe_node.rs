@@ -1,7 +1,7 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_universe<A: AuxDataFamily>(
+    pub fn get_type_of_universe<A: AstFamily>(
         &mut self,
         universe_node: RcHashed<ast::UniverseNode<A>>,
     ) -> Result<NormalForm, TypeError<A>> {

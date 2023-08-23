@@ -1,7 +1,7 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_vcon<A: AuxDataFamily>(
+    pub fn get_type_of_vcon<A: AstFamily>(
         &mut self,
         vcon: RcHashed<ast::Vcon<A>>,
         tcon: LazyTypeContext,
@@ -19,7 +19,7 @@ impl TypeChecker {
         )
     }
 
-    fn assert_vcon_index_is_valid<A: AuxDataFamily>(
+    fn assert_vcon_index_is_valid<A: AstFamily>(
         &mut self,
         vcon: RcHashed<ast::Vcon<A>>,
     ) -> Result<(), TypeError<A>> {
@@ -31,7 +31,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn typecheck_and_normalize_ind<A: AuxDataFamily>(
+    fn typecheck_and_normalize_ind<A: AstFamily>(
         &mut self,
         ind: RcHashed<ast::Ind<A>>,
         tcon: LazyTypeContext,

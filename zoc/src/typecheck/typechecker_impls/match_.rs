@@ -1,7 +1,7 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_match<A: AuxDataFamily>(
+    pub fn get_type_of_match<A: AstFamily>(
         &mut self,
         match_g0: RcHashed<ast::Match<A>>,
         tcon_g0: LazyTypeContext,
@@ -66,7 +66,7 @@ impl TypeChecker {
         Ok(normalized_return_type)
     }
 
-    fn assert_matchee_type_is_inductive<A: AuxDataFamily>(
+    fn assert_matchee_type_is_inductive<A: AstFamily>(
         &mut self,
         matchee: ast::Expr<A>,
         matchee_type: NormalForm,
@@ -87,7 +87,7 @@ impl TypeChecker {
         })
     }
 
-    fn assert_number_of_match_cases_is_correct<A: AuxDataFamily>(
+    fn assert_number_of_match_cases_is_correct<A: AstFamily>(
         &mut self,
         match_: RcHashed<ast::Match<A>>,
         matchee_type_ind: Normalized<RcHashed<minimal_ast::Ind>>,
@@ -104,7 +104,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_stated_return_type_arity_is_correct<A: AuxDataFamily>(
+    fn assert_stated_return_type_arity_is_correct<A: AstFamily>(
         &mut self,
         match_: RcHashed<ast::Match<A>>,
         matchee_type_args: Normalized<RcHashedVec<minimal_ast::Expr>>,
@@ -122,7 +122,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn typecheck_match_cases_assuming_number_of_cases_is_correct<A: AuxDataFamily>(
+    fn typecheck_match_cases_assuming_number_of_cases_is_correct<A: AstFamily>(
         &mut self,
         match_: RcHashed<ast::Match<A>>,
         matchee_type_ind: Normalized<RcHashed<minimal_ast::Ind>>,
@@ -141,7 +141,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn typecheck_match_case<A: AuxDataFamily>(
+    fn typecheck_match_case<A: AstFamily>(
         &mut self,
         case_index: usize,
         match_g0: RcHashed<ast::Match<A>>,
@@ -204,7 +204,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_stated_case_arity_is_correct<A: AuxDataFamily>(
+    fn assert_stated_case_arity_is_correct<A: AstFamily>(
         &mut self,
         stated_arity: usize,
         expected_arity: usize,
@@ -225,7 +225,7 @@ impl TypeChecker {
 }
 
 impl TypeChecker {
-    fn check_erasability<A: AuxDataFamily>(
+    fn check_erasability<A: AstFamily>(
         &mut self,
         match_g0: RcHashed<ast::Match<A>>,
         matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,
@@ -254,9 +254,7 @@ impl TypeChecker {
         )
     }
 
-    fn does_well_typed_ind_have_at_most_one_vcon_def_where_all_params_are_erasable<
-        A: AuxDataFamily,
-    >(
+    fn does_well_typed_ind_have_at_most_one_vcon_def_where_all_params_are_erasable<A: AstFamily>(
         &mut self,
         ind_g0: &ast::Ind<A>,
         tcon_g0: LazyTypeContext,

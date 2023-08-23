@@ -10,7 +10,7 @@ mod universe_node;
 mod vcon;
 
 impl TypeChecker {
-    pub fn get_type<A: AuxDataFamily>(
+    pub fn get_type<A: AstFamily>(
         &mut self,
         expr: ast::Expr<A>,
         tcon: LazyTypeContext,
@@ -27,7 +27,7 @@ impl TypeChecker {
         }
     }
 
-    fn get_types_of_dependent_expressions<A: AuxDataFamily>(
+    fn get_types_of_dependent_expressions<A: AstFamily>(
         &mut self,
         exprs: &[ast::Expr<A>],
         tcon: LazyTypeContext,
@@ -49,7 +49,7 @@ impl TypeChecker {
         Ok(out)
     }
 
-    fn get_types_of_independent_expressions<A: AuxDataFamily>(
+    fn get_types_of_independent_expressions<A: AstFamily>(
         &mut self,
         exprs: &[ast::Expr<A>],
         tcon: LazyTypeContext,
@@ -64,7 +64,7 @@ impl TypeChecker {
         Ok(out)
     }
 
-    fn typecheck_param_types_with_limit_and_normalize<A: AuxDataFamily>(
+    fn typecheck_param_types_with_limit_and_normalize<A: AstFamily>(
         &mut self,
         exprs: &[ast::Expr<A>],
         limit: impl UniverseLimit<A>,
@@ -92,7 +92,7 @@ impl TypeChecker {
         Ok(normalized.to_hashee().cloned())
     }
 
-    fn assert_expr_type_is_universe<A: AuxDataFamily>(
+    fn assert_expr_type_is_universe<A: AstFamily>(
         &mut self,
         expr: ast::Expr<A>,
         tcon: LazyTypeContext,
@@ -106,7 +106,7 @@ impl TypeChecker {
         }
     }
 
-    fn assert_expr_type_is_universe_and_then_eval<A: AuxDataFamily>(
+    fn assert_expr_type_is_universe_and_then_eval<A: AstFamily>(
         &mut self,
         expr: ast::Expr<A>,
         tcon: LazyTypeContext,
@@ -123,7 +123,7 @@ impl TypeChecker {
     }
 }
 
-trait UniverseLimit<A: AuxDataFamily> {
+trait UniverseLimit<A: AstFamily> {
     fn assert_ul_is_within_limit(
         &self,
         param_type_type_universe: Universe,
@@ -131,9 +131,9 @@ trait UniverseLimit<A: AuxDataFamily> {
     ) -> Result<(), TypeError<A>>;
 }
 
-struct LimitToIndUniverse<A: AuxDataFamily>(RcHashed<ast::Ind<A>>);
+struct LimitToIndUniverse<A: AstFamily>(RcHashed<ast::Ind<A>>);
 
-impl<A: AuxDataFamily> UniverseLimit<A> for LimitToIndUniverse<A> {
+impl<A: AstFamily> UniverseLimit<A> for LimitToIndUniverse<A> {
     fn assert_ul_is_within_limit(
         &self,
         param_type_type_universe: Universe,
@@ -153,9 +153,9 @@ impl<A: AuxDataFamily> UniverseLimit<A> for LimitToIndUniverse<A> {
 }
 
 #[derive(Default)]
-struct NoLimit<A: AuxDataFamily>(PhantomData<A>);
+struct NoLimit<A: AstFamily>(PhantomData<A>);
 
-impl<A: AuxDataFamily> UniverseLimit<A> for NoLimit<A> {
+impl<A: AstFamily> UniverseLimit<A> for NoLimit<A> {
     fn assert_ul_is_within_limit(&self, _: Universe, _: ast::Expr<A>) -> Result<(), TypeError<A>> {
         Ok(())
     }

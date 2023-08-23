@@ -1,7 +1,7 @@
 use super::*;
 
-impl<A: AuxDataFamily> TypeError<A> {
-    pub fn remove_ast_aux_data(self, remover: &mut AuxDataRemover) -> TypeError<UnitAuxDataFamily> {
+impl<A: AstFamily> TypeError<A> {
+    pub fn remove_ast_aux_data(self, remover: &mut AuxDataRemover) -> TypeError<MinimalAst> {
         match self {
             TypeError::InvalidDeb { deb, tcon_len } => TypeError::InvalidDeb {
                 deb: remover.convert_deb_node(&deb).hashee.clone(),

@@ -1,7 +1,7 @@
 use super::*;
 
 impl TypeChecker {
-    pub fn get_type_of_for<A: AuxDataFamily>(
+    pub fn get_type_of_for<A: AstFamily>(
         &mut self,
         for_g0: RcHashed<ast::For<A>>,
         tcon_g0: LazyTypeContext,
@@ -49,7 +49,7 @@ impl TypeChecker {
         }))
     }
 
-    fn assert_for_has_at_least_one_param<A: AuxDataFamily>(
+    fn assert_for_has_at_least_one_param<A: AstFamily>(
         &mut self,
         for_: RcHashed<ast::For<A>>,
     ) -> Result<(), TypeError<A>> {
@@ -62,7 +62,7 @@ impl TypeChecker {
         Ok(())
     }
 
-    fn assert_every_type_is_universe<A: AuxDataFamily>(
+    fn assert_every_type_is_universe<A: AstFamily>(
         &mut self,
         types: Normalized<&[minimal_ast::Expr]>,
         exprs: &[ast::Expr<A>],

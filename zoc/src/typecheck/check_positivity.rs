@@ -101,7 +101,7 @@ struct RepeatVec<T> {
 struct IsRestrictedRecursiveIndEntry(pub bool);
 
 impl PositivityChecker<'_> {
-    pub fn check_ind_positivity_assuming_it_is_otherwise_well_typed<A: AuxDataFamily>(
+    pub fn check_ind_positivity_assuming_it_is_otherwise_well_typed<A: AstFamily>(
         &mut self,
         ind: RcHashed<ast::Ind<A>>,
         tcon_len: usize,
@@ -112,7 +112,7 @@ impl PositivityChecker<'_> {
 }
 
 impl PositivityChecker<'_> {
-    fn check<A: AuxDataFamily>(
+    fn check<A: AstFamily>(
         &mut self,
         expr: ast::Expr<A>,
         context: Context,
@@ -128,7 +128,7 @@ impl PositivityChecker<'_> {
         }
     }
 
-    fn check_ind<A: AuxDataFamily>(
+    fn check_ind<A: AstFamily>(
         &mut self,
         ind: &ast::Ind<A>,
         context: Context,
@@ -142,7 +142,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon_defs<A: AuxDataFamily>(
+    fn check_vcon_defs<A: AstFamily>(
         &mut self,
         defs: &[ast::VconDef<A>],
         context: Context,
@@ -153,7 +153,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon_def<A: AuxDataFamily>(
+    fn check_vcon_def<A: AstFamily>(
         &mut self,
         def: &ast::VconDef<A>,
         context: Context,
@@ -170,7 +170,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon<A: AuxDataFamily>(
+    fn check_vcon<A: AstFamily>(
         &mut self,
         vcon: &ast::Vcon<A>,
         context: Context,
@@ -178,7 +178,7 @@ impl PositivityChecker<'_> {
         self.check_ind(&vcon.ind.hashee, context)
     }
 
-    fn check_match<A: AuxDataFamily>(
+    fn check_match<A: AstFamily>(
         &mut self,
         match_: &ast::Match<A>,
         context: Context,
@@ -194,7 +194,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_match_cases<A: AuxDataFamily>(
+    fn check_match_cases<A: AstFamily>(
         &mut self,
         cases: &[ast::MatchCase<A>],
         context: Context,
@@ -205,7 +205,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_match_case<A: AuxDataFamily>(
+    fn check_match_case<A: AstFamily>(
         &mut self,
         case: &ast::MatchCase<A>,
         context: Context,
@@ -217,7 +217,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_fun<A: AuxDataFamily>(
+    fn check_fun<A: AstFamily>(
         &mut self,
         fun: &ast::Fun<A>,
         context: Context,
@@ -240,7 +240,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_app<A: AuxDataFamily>(
+    fn check_app<A: AstFamily>(
         &mut self,
         app: &ast::App<A>,
         context: Context,
@@ -250,7 +250,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_for<A: AuxDataFamily>(
+    fn check_for<A: AstFamily>(
         &mut self,
         for_: &ast::For<A>,
         context: Context,
@@ -264,7 +264,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_dependent_exprs<A: AuxDataFamily>(
+    fn check_dependent_exprs<A: AstFamily>(
         &mut self,
         exprs: &[ast::Expr<A>],
         context: Context,
@@ -282,7 +282,7 @@ impl PositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_independent_exprs<A: AuxDataFamily>(
+    fn check_independent_exprs<A: AstFamily>(
         &mut self,
         exprs: &[ast::Expr<A>],
         context: Context,
@@ -307,7 +307,7 @@ impl PositivityChecker<'_> {
 }
 
 impl VconPositivityChecker<'_> {
-    fn assert_vcon_type_satisfies_positivity_condition<A: AuxDataFamily>(
+    fn assert_vcon_type_satisfies_positivity_condition<A: AstFamily>(
         &mut self,
         def: &ast::VconDef<A>,
         context: Context,
@@ -321,7 +321,7 @@ impl VconPositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon_def_param_types<A: AuxDataFamily>(
+    fn check_vcon_def_param_types<A: AstFamily>(
         &mut self,
         def: &ast::VconDef<A>,
         context: Context,
@@ -361,7 +361,7 @@ impl VconPositivityChecker<'_> {
         Ok(())
     }
 
-    fn check_vcon_def_index_args<A: AuxDataFamily>(
+    fn check_vcon_def_index_args<A: AstFamily>(
         &mut self,
         def: &ast::VconDef<A>,
         context: Context,
