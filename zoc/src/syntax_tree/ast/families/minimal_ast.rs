@@ -1,13 +1,13 @@
 pub use crate::syntax_tree::ast::prelude::*;
 
-use crate::pretty_print::PrettyPrinted;
+use crate::pretty_print::{PrettyPrinted, SimplyPrintableAstFamily};
 
 use std::fmt::{Debug, Result as FmtResult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct MinimalAst;
 
-impl AstFamilyWithZeroSizedAux for MinimalAst {}
+impl SimplyPrintableAstFamily for MinimalAst {}
 
 impl AstFamily for MinimalAst {
     type IndAux = ();

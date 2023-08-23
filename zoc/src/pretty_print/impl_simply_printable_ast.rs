@@ -2,79 +2,84 @@ use super::*;
 
 use crate::syntax_tree::ast::*;
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, Expr<A>> {
+/// This marker tells the pretty printer to
+/// not print any auxiliary data when printing
+/// nodes in this AST family.
+pub trait SimplyPrintableAstFamily: AstFamily {}
+
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, Expr<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_expr(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, Ind<A>> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, Ind<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_ind(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, [VconDef<A>]> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, [VconDef<A>]> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_parenthesized_vcon_defs(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, VconDef<A>> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, VconDef<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_vcon_def(self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, Vcon<A>> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, Vcon<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_vcon(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, Match<A>> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, Match<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_match(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, [MatchCase<A>]> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, [MatchCase<A>]> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_parenthesized_match_cases(self.0.clone(), f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, MatchCase<A>> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, MatchCase<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_match_case(self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, Fun<A>> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, Fun<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_fun(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, App<A>> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, App<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_app(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, For<A>> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, For<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_for(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, DebNode<A>> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, DebNode<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_deb_node(&self.0, f, Indentation { soft_tab_count: 0 })
     }
 }
 
-impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, UniverseNode<A>> {
+impl<A: SimplyPrintableAstFamily> Display for PrettyPrint<'_, UniverseNode<A>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fmt_universe_node(&self.0, f, Indentation { soft_tab_count: 0 })
     }
@@ -84,7 +89,7 @@ impl<A: AstFamilyWithZeroSizedAux> Display for PrettyPrint<'_, UniverseNode<A>> 
 // at the beginning.
 // It does _not_ write a newline at the end.
 
-fn fmt_expr<A: AstFamilyWithZeroSizedAux>(
+fn fmt_expr<A: SimplyPrintableAstFamily>(
     expr: Expr<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -101,7 +106,7 @@ fn fmt_expr<A: AstFamilyWithZeroSizedAux>(
     }
 }
 
-fn fmt_ind<A: AstFamilyWithZeroSizedAux>(
+fn fmt_ind<A: SimplyPrintableAstFamily>(
     ind: &Ind<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -148,7 +153,7 @@ fn fmt_str_literal(
     Ok(())
 }
 
-fn fmt_parenthesized_vcon_defs<A: AstFamilyWithZeroSizedAux>(
+fn fmt_parenthesized_vcon_defs<A: SimplyPrintableAstFamily>(
     defs: &[VconDef<A>],
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -169,7 +174,7 @@ fn fmt_parenthesized_vcon_defs<A: AstFamilyWithZeroSizedAux>(
     Ok(())
 }
 
-fn fmt_vcon_def<A: AstFamilyWithZeroSizedAux>(
+fn fmt_vcon_def<A: SimplyPrintableAstFamily>(
     def: &VconDef<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -186,7 +191,7 @@ fn fmt_vcon_def<A: AstFamilyWithZeroSizedAux>(
     Ok(())
 }
 
-fn fmt_vcon<A: AstFamilyWithZeroSizedAux>(
+fn fmt_vcon<A: SimplyPrintableAstFamily>(
     vcon: &Vcon<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -201,7 +206,7 @@ fn fmt_vcon<A: AstFamilyWithZeroSizedAux>(
     Ok(())
 }
 
-fn fmt_match<A: AstFamilyWithZeroSizedAux>(
+fn fmt_match<A: SimplyPrintableAstFamily>(
     m: &Match<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -223,7 +228,7 @@ fn fmt_match<A: AstFamilyWithZeroSizedAux>(
     Ok(())
 }
 
-fn fmt_parenthesized_match_cases<A: AstFamilyWithZeroSizedAux>(
+fn fmt_parenthesized_match_cases<A: SimplyPrintableAstFamily>(
     cases: &[MatchCase<A>],
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -244,7 +249,7 @@ fn fmt_parenthesized_match_cases<A: AstFamilyWithZeroSizedAux>(
     Ok(())
 }
 
-fn fmt_match_case<A: AstFamilyWithZeroSizedAux>(
+fn fmt_match_case<A: SimplyPrintableAstFamily>(
     case: &MatchCase<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -258,7 +263,7 @@ fn fmt_match_case<A: AstFamilyWithZeroSizedAux>(
     Ok(())
 }
 
-fn fmt_fun<A: AstFamilyWithZeroSizedAux>(
+fn fmt_fun<A: SimplyPrintableAstFamily>(
     fun: &Fun<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -291,7 +296,7 @@ fn fmt_decreasing_index(
     }
 }
 
-fn fmt_app<A: AstFamilyWithZeroSizedAux>(
+fn fmt_app<A: SimplyPrintableAstFamily>(
     app: &App<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -317,7 +322,7 @@ fn fmt_app<A: AstFamilyWithZeroSizedAux>(
     Ok(())
 }
 
-fn fmt_for<A: AstFamilyWithZeroSizedAux>(
+fn fmt_for<A: SimplyPrintableAstFamily>(
     for_: &For<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -333,7 +338,7 @@ fn fmt_for<A: AstFamilyWithZeroSizedAux>(
     Ok(())
 }
 
-fn fmt_deb_node<A: AstFamilyWithZeroSizedAux>(
+fn fmt_deb_node<A: SimplyPrintableAstFamily>(
     node: &DebNode<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -342,7 +347,7 @@ fn fmt_deb_node<A: AstFamilyWithZeroSizedAux>(
     write!(f, "{indent}{index}")
 }
 
-fn fmt_universe_node<A: AstFamilyWithZeroSizedAux>(
+fn fmt_universe_node<A: SimplyPrintableAstFamily>(
     node: &UniverseNode<A>,
     f: &mut Formatter<'_>,
     indent: Indentation,
@@ -350,7 +355,7 @@ fn fmt_universe_node<A: AstFamilyWithZeroSizedAux>(
     fmt_universe(node.universe, f, indent)
 }
 
-fn fmt_parenthesized_expressions<A: AstFamilyWithZeroSizedAux>(
+fn fmt_parenthesized_expressions<A: SimplyPrintableAstFamily>(
     parenthesized_expressions: RcHashedVec<Expr<A>>,
     f: &mut Formatter<'_>,
     indent: Indentation,

@@ -1,5 +1,7 @@
 pub use crate::{
-    eval::NormalFormMarker, pretty_print::PrettyPrinted, syntax_tree::ast::prelude::*,
+    eval::NormalFormMarker,
+    pretty_print::{PrettyPrinted, SimplyPrintableAstFamily},
+    syntax_tree::ast::prelude::*,
 };
 
 use std::fmt::{Debug, Result as FmtResult};
@@ -7,7 +9,7 @@ use std::fmt::{Debug, Result as FmtResult};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct NormalizedAst;
 
-impl AstFamilyWithZeroSizedAux for NormalizedAst {}
+impl SimplyPrintableAstFamily for NormalizedAst {}
 
 impl AstFamily for NormalizedAst {
     type IndAux = NormalFormMarker;
