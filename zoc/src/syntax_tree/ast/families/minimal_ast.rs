@@ -5,9 +5,9 @@ use crate::pretty_print::PrettyPrinted;
 use std::fmt::{Debug, Result as FmtResult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct UnitAuxData;
+pub struct UnitAuxDataFamily;
 
-impl AuxDataFamily for UnitAuxData {
+impl AuxDataFamily for UnitAuxDataFamily {
     type Ind = ();
     type Vcon = ();
     type Match = ();
@@ -21,17 +21,17 @@ impl AuxDataFamily for UnitAuxData {
     type MatchCase = ();
 }
 
-pub type Expr = ast::Expr<UnitAuxData>;
-pub type Ind = ast::Ind<UnitAuxData>;
-pub type VconDef = ast::VconDef<UnitAuxData>;
-pub type Vcon = ast::Vcon<UnitAuxData>;
-pub type Match = ast::Match<UnitAuxData>;
-pub type MatchCase = ast::MatchCase<UnitAuxData>;
-pub type Fun = ast::Fun<UnitAuxData>;
-pub type App = ast::App<UnitAuxData>;
-pub type For = ast::For<UnitAuxData>;
-pub type DebNode = ast::DebNode<UnitAuxData>;
-pub type UniverseNode = ast::UniverseNode<UnitAuxData>;
+pub type Expr = ast::Expr<UnitAuxDataFamily>;
+pub type Ind = ast::Ind<UnitAuxDataFamily>;
+pub type VconDef = ast::VconDef<UnitAuxDataFamily>;
+pub type Vcon = ast::Vcon<UnitAuxDataFamily>;
+pub type Match = ast::Match<UnitAuxDataFamily>;
+pub type MatchCase = ast::MatchCase<UnitAuxDataFamily>;
+pub type Fun = ast::Fun<UnitAuxDataFamily>;
+pub type App = ast::App<UnitAuxDataFamily>;
+pub type For = ast::For<UnitAuxDataFamily>;
+pub type DebNode = ast::DebNode<UnitAuxDataFamily>;
+pub type UniverseNode = ast::UniverseNode<UnitAuxDataFamily>;
 
 impl Debug for Expr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> FmtResult {
