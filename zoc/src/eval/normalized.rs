@@ -7,6 +7,13 @@ pub struct Normalized<T>(pub(in crate::eval) T);
 
 pub type NormalForm = Normalized<Expr>;
 
+/// You should **not** manually call `clone`  on this struct.
+/// It is a marker used to indicate that an AST is in normal form.
+/// The only reason this struct implements `Clone` is so that
+/// normalized AST nodes can be cloned.
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct NormalFormMarker(pub(in crate::eval) ());
+
 impl<T> Normalized<T> {
     pub fn into_raw(self) -> T {
         self.0

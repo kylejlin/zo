@@ -14,8 +14,8 @@ where
     }
 }
 
-mod impl_minimal_ast;
 mod impl_type_error;
+mod impl_zero_aux_ast;
 
 pub trait PrettyPrinted {
     fn pretty_printed(&self) -> PrettyPrint<'_, Self>

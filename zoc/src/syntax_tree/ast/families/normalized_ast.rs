@@ -1,39 +1,39 @@
-pub use crate::syntax_tree::ast::prelude::*;
-
-use crate::pretty_print::PrettyPrinted;
+pub use crate::{
+    eval::NormalFormMarker, pretty_print::PrettyPrinted, syntax_tree::ast::prelude::*,
+};
 
 use std::fmt::{Debug, Result as FmtResult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct UnitAuxDataFamily;
+pub struct NormalizedUnitAuxDataFamily;
 
-impl ZeroSizedAuxDataFamily for UnitAuxDataFamily {}
+impl ZeroSizedAuxDataFamily for NormalizedUnitAuxDataFamily {}
 
-impl AuxDataFamily for UnitAuxDataFamily {
-    type Ind = ();
-    type Vcon = ();
-    type Match = ();
-    type Fun = ();
-    type App = ();
-    type For = ();
-    type Deb = ();
-    type Universe = ();
+impl AuxDataFamily for NormalizedUnitAuxDataFamily {
+    type Ind = NormalFormMarker;
+    type Vcon = NormalFormMarker;
+    type Match = NormalFormMarker;
+    type Fun = NormalFormMarker;
+    type App = NormalFormMarker;
+    type For = NormalFormMarker;
+    type Deb = NormalFormMarker;
+    type Universe = NormalFormMarker;
 
-    type VconDef = ();
-    type MatchCase = ();
+    type VconDef = NormalFormMarker;
+    type MatchCase = NormalFormMarker;
 }
 
-pub type Expr = ast::Expr<UnitAuxDataFamily>;
-pub type Ind = ast::Ind<UnitAuxDataFamily>;
-pub type VconDef = ast::VconDef<UnitAuxDataFamily>;
-pub type Vcon = ast::Vcon<UnitAuxDataFamily>;
-pub type Match = ast::Match<UnitAuxDataFamily>;
-pub type MatchCase = ast::MatchCase<UnitAuxDataFamily>;
-pub type Fun = ast::Fun<UnitAuxDataFamily>;
-pub type App = ast::App<UnitAuxDataFamily>;
-pub type For = ast::For<UnitAuxDataFamily>;
-pub type DebNode = ast::DebNode<UnitAuxDataFamily>;
-pub type UniverseNode = ast::UniverseNode<UnitAuxDataFamily>;
+pub type Expr = ast::Expr<NormalizedUnitAuxDataFamily>;
+pub type Ind = ast::Ind<NormalizedUnitAuxDataFamily>;
+pub type VconDef = ast::VconDef<NormalizedUnitAuxDataFamily>;
+pub type Vcon = ast::Vcon<NormalizedUnitAuxDataFamily>;
+pub type Match = ast::Match<NormalizedUnitAuxDataFamily>;
+pub type MatchCase = ast::MatchCase<NormalizedUnitAuxDataFamily>;
+pub type Fun = ast::Fun<NormalizedUnitAuxDataFamily>;
+pub type App = ast::App<NormalizedUnitAuxDataFamily>;
+pub type For = ast::For<NormalizedUnitAuxDataFamily>;
+pub type DebNode = ast::DebNode<NormalizedUnitAuxDataFamily>;
+pub type UniverseNode = ast::UniverseNode<NormalizedUnitAuxDataFamily>;
 
 impl Debug for Expr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> FmtResult {
