@@ -5,26 +5,7 @@ expression: pretty_printed_err
 TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
     match_: (
         match
-        (
-            vcon
-            (
-                ind
-                Prop0
-                "Bool"
-                ()
-                (
-                    (
-                        ()
-                        ()
-                    )
-                    (
-                        ()
-                        ()
-                    )
-                )
-            )
-            0
-        )
+        1
         1
         (
             ind
@@ -90,7 +71,7 @@ TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
                 )
             )
         )
-    )@(ByteIndex(1)..ByteIndex(257)),
+    )@(ByteIndex(120)..ByteIndex(330)),
     matchee_type_type: Prop0,
     match_return_type_type: Set0,
 }
