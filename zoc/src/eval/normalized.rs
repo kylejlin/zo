@@ -375,13 +375,65 @@ impl NormalForm {
     }
 }
 
-impl<T: ReplaceDebs> Normalized<T> {
-    pub fn upshift(self, amount: usize, cutoff: usize) -> Normalized<T::Output> {
+impl NormalForm {
+    pub fn upshift(self, amount: usize, cutoff: usize) -> Self {
         Normalized(self.0.replace_debs(&DebUpshifter(amount), cutoff))
     }
 }
 
-impl<T: ReplaceDebsInEachItem> Normalized<T> {
+impl Normalized<RcHashed<minimal_ast::Ind>> {
+    pub fn upshift(self, amount: usize, cutoff: usize) -> Self {
+        Normalized(self.0.replace_debs(&DebUpshifter(amount), cutoff))
+    }
+}
+
+impl Normalized<RcHashedVec<minimal_ast::Expr>> {
+    pub fn upshift_with_constant_cutoff(self, amount: usize) -> Self {
+        Normalized(
+            self.0
+                .replace_debs_with_constant_cutoff(&DebUpshifter(amount), 0),
+        )
+    }
+
+    pub fn upshift_with_increasing_cutoff(self, amount: usize) -> Self {
+        Normalized(
+            self.0
+                .replace_debs_with_increasing_cutoff(&DebUpshifter(amount), 0),
+        )
+    }
+
+    pub fn replace_deb0_with_ind_with_constant_cutoff(
+        self,
+        ind: Normalized<RcHashed<Ind>>,
+        cutoff: usize,
+    ) -> Self {
+        let ind_singleton: [Expr; 1] = [ind.raw().clone().into()];
+        let substituter = DebDownshiftSubstituter {
+            new_exprs: &ind_singleton,
+        };
+        Normalized(
+            self.0
+                .replace_debs_with_constant_cutoff(&substituter, cutoff),
+        )
+    }
+
+    pub fn replace_deb0_with_ind_with_increasing_cutoff(
+        self,
+        ind: Normalized<RcHashed<Ind>>,
+        cutoff: usize,
+    ) -> Self {
+        let ind_singleton: [Expr; 1] = [ind.raw().clone().into()];
+        let substituter = DebDownshiftSubstituter {
+            new_exprs: &ind_singleton,
+        };
+        Normalized(
+            self.0
+                .replace_debs_with_increasing_cutoff(&substituter, cutoff),
+        )
+    }
+}
+
+impl Normalized<Vec<minimal_ast::Expr>> {
     pub fn upshift_with_constant_cutoff(self, amount: usize) -> Self {
         Normalized(
             self.0

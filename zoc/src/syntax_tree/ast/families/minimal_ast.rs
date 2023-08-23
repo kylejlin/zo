@@ -1,6 +1,7 @@
-pub use crate::syntax_tree::ast::prelude::*;
-
-use crate::pretty_print::{PrettyPrinted, SimplyPrintableAstFamily};
+pub use crate::{
+    pretty_print::{PrettyPrinted, SimplyPrintableAstFamily},
+    syntax_tree::{ast::prelude::*, replace_debs::DebReplacableAstFamily},
+};
 
 use std::fmt::{Debug, Result as FmtResult};
 
@@ -8,6 +9,11 @@ use std::fmt::{Debug, Result as FmtResult};
 pub struct MinimalAst;
 
 impl SimplyPrintableAstFamily for MinimalAst {}
+
+impl DebReplacableAstFamily<()> for MinimalAst {}
+
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct TrivialDebReplacementAccessToken;
 
 impl AstFamily for MinimalAst {
     type IndAux = ();
