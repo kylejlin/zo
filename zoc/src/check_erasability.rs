@@ -1,6 +1,6 @@
 use crate::{
     eval::{NormalForm, Normalized},
-    syntax_tree::minimal_ast::*,
+    syntax_tree::ast::prelude::minimal_ast::*,
     typecheck::{LazyTypeContext, TypeChecker},
 };
 

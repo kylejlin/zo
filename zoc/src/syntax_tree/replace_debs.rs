@@ -3,7 +3,7 @@
 // However, it's a hassle, and not a high priority.
 // So I'll do it later.
 
-use crate::syntax_tree::minimal_ast::*;
+use crate::syntax_tree::ast::prelude::minimal_ast::*;
 
 use std::{hash::Hash, rc::Rc};
 

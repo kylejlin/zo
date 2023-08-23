@@ -1,4 +1,4 @@
-use crate::syntax_tree::{minimal_ast::*, replace_debs::*};
+use crate::syntax_tree::{ast::prelude::minimal_ast::*, replace_debs::*};
 
 #[cfg(test)]
 mod tests;

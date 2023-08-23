@@ -6,6 +6,8 @@ mod conversion;
 mod get_digest;
 mod hash;
 
+pub mod families;
+
 pub mod node_path;
 pub use node_path::{NodeEdge, NodePath};
 

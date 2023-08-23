@@ -1,7 +1,4 @@
-use crate::{
-    hash::*,
-    syntax_tree::{ast::prelude::*, minimal_ast},
-};
+use crate::{hash::*, syntax_tree::ast::prelude::*};
 
 #[derive(Debug, Clone, Default)]
 pub struct AuxDataRemover {

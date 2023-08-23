@@ -2,10 +2,8 @@ use super::*;
 
 use crate::{
     syntax_tree::{
-        ast::prelude::*,
-        minimal_ast::{self, UnitAuxData},
+        ast::prelude::{minimal_ast::UnitAuxData, spanned_ast::SpanAuxData, *},
         remove_ast_aux_data::*,
-        spanned_ast::{self, SpanAuxData},
     },
     typecheck::TypeError,
 };

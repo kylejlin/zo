@@ -1,6 +1,6 @@
 use super::*;
 
-use crate::syntax_tree::minimal_ast::*;
+use crate::syntax_tree::ast::prelude::minimal_ast::*;
 
 impl Display for PrettyPrint<'_, Expr> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {

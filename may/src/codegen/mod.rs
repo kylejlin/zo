@@ -1,4 +1,4 @@
-use zoc::syntax_tree::minimal_ast as znode;
+use zoc::syntax_tree::ast::prelude::minimal_ast as znode;
 
 mod mnode {
     pub use crate::{cst::*, token::*};
@@ -7,7 +7,7 @@ mod mnode {
 use zoc::syntax_tree::replace_debs::{DebUpshifter, ReplaceDebs};
 use zoc::{
     hash::{Digest, GetDigest, NoHashHashMap},
-    syntax_tree::minimal_ast::{
+    syntax_tree::ast::prelude::minimal_ast::{
         rc_hashed as bypass_cache_and_rc_hash, Deb, RcHashedVec, StringValue, Universe,
         UniverseLevel,
     },

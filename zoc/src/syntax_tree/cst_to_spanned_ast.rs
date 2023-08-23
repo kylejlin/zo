@@ -1,9 +1,11 @@
 use crate::syntax_tree::{
-    ast::prelude::*,
-    cst,
-    spanned_ast::{
-        self, ForSpans, FunSpans, IndSpans, MatchCaseSpans, MatchSpans, VconDefSpans, VconSpans,
+    ast::prelude::{
+        spanned_ast::{
+            ForSpans, FunSpans, IndSpans, MatchCaseSpans, MatchSpans, VconDefSpans, VconSpans,
+        },
+        *,
     },
+    cst,
 };
 
 impl From<cst::Expr> for spanned_ast::Expr {

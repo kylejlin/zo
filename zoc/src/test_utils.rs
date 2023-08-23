@@ -2,11 +2,10 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     pretty_print::*,
     syntax_tree::{
+        ast::prelude::{spanned_ast::SpanAuxData, *},
         lexer::lex,
-        minimal_ast,
         parser::parse,
         remove_ast_aux_data::AuxDataRemover,
-        spanned_ast::{self, SpanAuxData},
     },
     typecheck::{LazyTypeContext, TypeChecker, TypeError},
 };

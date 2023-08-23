@@ -2,11 +2,9 @@ use crate::{
     eval::{Evaluator, NormalForm, Normalized},
     hash::*,
     syntax_tree::{
-        ast::prelude::*,
-        minimal_ast::{self, UnitAuxData},
+        ast::prelude::{minimal_ast::UnitAuxData, spanned_ast::SpanAuxData, *},
         remove_ast_aux_data::AuxDataRemover,
         replace_debs::*,
-        spanned_ast::SpanAuxData,
     },
 };
 
