@@ -1,7 +1,7 @@
 use crate::{
     eval::{NormalForm, Normalized},
     syntax_tree::ast::prelude::minimal_ast::*,
-    typecheck::{LazyTypeContext, TypeChecker},
+    typecheck::{LazyTypeContext, TypeChecker, TypeError},
 };
 
 pub struct ErasabilityChecker {
@@ -29,9 +29,10 @@ trait ExpectWellTyped {
     fn expect_well_typed(self) -> Self::Output;
 }
 
-impl<T, E> ExpectWellTyped for Result<T, E>
+impl<T, A> ExpectWellTyped for Result<T, TypeError<A>>
 where
-    E: std::fmt::Debug,
+    A: AuxDataFamily,
+    TypeError<A>: std::fmt::Debug,
 {
     type Output = T;
 
@@ -88,9 +89,14 @@ impl ErasabilityChecker {
     fn check_vcon_def(
         &mut self,
         def: &VconDef,
-        tcon: LazyTypeContext,
+        tcon_g0: LazyTypeContext,
     ) -> Result<(), ErasabilityError> {
-        todo!()
+        let param_types = self.check_dependent_exprs(&def.param_types.hashee, tcon_g0)?;
+        let tcon_with_param_types_g1 = LazyTypeContext::Snoc(&tcon_g0, param_types.to_derefed());
+
+        self.check_independent_exprs(&def.index_args.hashee, tcon_with_param_types_g1)?;
+
+        Ok(())
     }
 
     fn check_vcon(
@@ -137,7 +143,39 @@ impl ErasabilityChecker {
         &mut self,
         exprs: &[Expr],
         tcon: LazyTypeContext,
+    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, ErasabilityError> {
+        let mut out: Normalized<Vec<minimal_ast::Expr>> = Normalized::with_capacity(exprs.len());
+        let mut normalized_visited_exprs: Normalized<Vec<minimal_ast::Expr>> =
+            Normalized::with_capacity(exprs.len());
+
+        for expr in exprs {
+            let current_tcon = LazyTypeContext::Snoc(&tcon, normalized_visited_exprs.to_derefed());
+
+            self.check(expr.clone(), current_tcon)?;
+
+            let type_ = self
+                .typechecker
+                .get_type(expr.clone(), current_tcon)
+                .expect_well_typed();
+            out.push(type_);
+
+            let expr_minimal = self.typechecker.aux_remover.convert(expr.clone());
+            let normalized = self.typechecker.evaluator.eval(expr_minimal);
+            normalized_visited_exprs.push(normalized);
+        }
+
+        Ok(out)
+    }
+
+    fn check_independent_exprs(
+        &mut self,
+        exprs: &[Expr],
+        tcon: LazyTypeContext,
     ) -> Result<(), ErasabilityError> {
-        todo!()
+        for expr in exprs {
+            self.check(expr.clone(), tcon)?;
+        }
+
+        Ok(())
     }
 }
