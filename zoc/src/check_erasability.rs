@@ -104,7 +104,7 @@ impl ErasabilityChecker {
         vcon: RcHashed<Vcon>,
         tcon: LazyTypeContext,
     ) -> Result<(), ErasabilityError> {
-        todo!()
+        self.check_ind(vcon.hashee.ind.clone(), tcon)
     }
 
     fn check_match(
