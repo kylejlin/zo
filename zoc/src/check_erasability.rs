@@ -109,7 +109,7 @@ impl ErasabilityChecker {
 
     fn check_match(
         &mut self,
-        r#match: RcHashed<Match>,
+        match_: RcHashed<Match>,
         tcon: LazyTypeContext,
     ) -> Result<(), ErasabilityError> {
         todo!()
