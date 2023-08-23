@@ -2,6 +2,7 @@ use crate::{
     eval::Normalized, pretty_print::PrettyPrint, test_utils::*, typecheck::LazyTypeContext,
 };
 
+mod erasability;
 mod fun_recursion;
 mod positivity;
 

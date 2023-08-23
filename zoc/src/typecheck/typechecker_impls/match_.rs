@@ -304,3 +304,7 @@ impl TypeChecker {
             })
     }
 }
+
+// TODO: Consider whether we should add an exception
+// to the erasability rules for when
+// the matchee has a vcon at the top.
