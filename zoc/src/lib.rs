@@ -1,3 +1,4 @@
+pub mod check_erasability;
 pub mod eval;
 pub mod hash;
 pub mod pretty_print;
