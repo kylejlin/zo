@@ -1,0 +1,128 @@
+param platform: @std.Platform
+use @std.base(platform).*
+
+struct Rgb24
+    r: U8
+    g: U8
+    b: U8
+
+def render(
+    ~width: Usize
+    ~height: Usize
+    background: Canvas(width, height)
+    foreground: String
+    char_width: Usize
+    char_height: Usize
+    char_color: Rgb24
+    start_x: Usize
+    start_y: Usize
+) -> Canvas(width, height):
+    
+    start_yod = usize_to_ivar(height) - usize_to_ivar(start_y)
+
+
+// Chicken scratch:
+//
+// Problem:
+// value(r) depends on Rgb24
+// render depends on value(r)
+// Mutual module dependency.
+//
+// Solution:
+// Make each module return a 
+// dictionary where the values
+// are functions to the "true" values
+// and the params are the module params.
+// Then we know the "shape"
+// (i.e., the set of keys)
+// of each module ahead of time.
+// 
+// Then, for each item `lorem` in the current module `foo`,
+// we can try to "shrink" the dependency module `bar`
+// by substituting `bar(x).qux` with the value of `qux(x)`.
+// Of course, if we have any `dynamic_dot(bar(x), dyn_key)`,
+// then we can't shrink the dependency module, and must assume
+// that `lorem` could use every item in `bar`.
+//
+// The question then becomes what do we make the param types
+// of the dictionary's "value creators"?
+
+// Case study
+// > Note: assume U8 is magically included in the scope.
+
+////////////// render.jn /////////////////
+
+generate_params_from color_calc // adds
+// the name of each item in `color_calc`
+// to a record
+
+
+struct Rgb24
+    r: U8
+    g: U8
+    b: U8
+// Rgb24 never references anything from the `color_calc` mod,
+// so we do not parameterize it.
+
+fun draw(foo: U8, ...) -> Yob:
+    get_value(...)
+    ^^^^^ we look in the record,
+          and find that `get_value`
+          is from `color_calc`.
+
+          So we try to compute the type
+          of `get_value`.
+          There are 3 main possibilities:
+          1. We due to a circular reference:
+             Send an error message to the user.
+          2. We fail due to another type error.
+          3. We succeed.
+             Since `get_value` depends on `Rgb24`,
+             we must apply the `get_value` factory
+             to `Rgb24`.
+
+             Then `draw`'s type becomes:
+
+             `For(get_value: For(color: Rgb24) -> U8) -> For(foo: U8, ...) -> Yob`
+
+          In short, we check each item individually.
+          It's basically a depth-first search,
+          where we keep a list of visited items to
+          detect cyclical references.
+
+////////////// color_calc.jn /////////////////
+
+generate_params_from render
+
+fun get_value(color: Rgb24) -> U8
+                     ^^^^^ we look in the record,
+                           and find that `Rgb24`
+                           is from the `render` mod.
+                           `Rgb24` does not depend on anything
+                           from this module, so we do not need
+                           to apply it to anything.
+                           So `get_value`'s type becomes:
+
+                           `For(Rgb24: Set0) -> For(color: Rgb24) -> U8`.
+
+                           Actually, this solution still doesn't work,
+                           since now `Rgb24` is an opaque `Set0`
+                           (and therefore cannot be matched upon).
+                           But let's keep going and refine it later.
+
+
+    ...
+
+fun analyze_drawing(foo: U8, ...) -> Slfj:
+    temp = draw(foo, ...)
+           ^^^^ we look in the record and
+                find that `draw` is from `render`.
+                `draw` depends on `get_value`, so we must
+                instantiate the `draw` factory with `get_value`.
+                But `get_value` in turn depends on `Rgb24`,
+                so we must instantiate the `get_value` factory
+                with `Rgb24`.
+                Finally, `Rgb24` has no dependencies,
+                so we've reached the base case.
+
+    ...
