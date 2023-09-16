@@ -104,18 +104,37 @@ fun GamadjiFont(
 ) -> Set0:
     For(letter: GamadjiLetter) -> Vec(char_width * char_height, Rgba)
 
-Tokenlike = List(GamadjiLetter)
+fun lex(src: String) -> List(Either(GamadjiLetter, Char)):
+    lex_chars(src.chars)
+    
+fun lex_chars(-src: List(Char)) -> List(Either(GamadjiLetter, Char)):
+    match src
+    case nil:
+        []
+    case cons:
+        if src/car == 'a':
+            match src/cdr:
+            case nil:
+                [eleft(GamadjiLetter.a)]
+            case cons:
+                if src/cdr/car == 'i':
+                    eleft(GamadjiLetter.ai) ++ lex_chars(src/cdr/cdr)
+                elif src/cdr/car == 'u':
+                    eleft(GamadjiLetter.au) ++ lex_chars(src/cdr/cdr)
+                elif src/cdr/car == 'e':
+                    // TODO
+                    pass
+                else:
+                    eleft(GamadjiLetter.a) ++ lex_chars(src/cdr)
+        elif src/car == 'e':
+            // TODO
+            pass
 
-/// Nontokenizable characters are returned as-is.
-fun to_tokenlikes(src: String) -> List(Either(Tokenlike, Char)):
-    to_tokenlikes_with_pending_tokenlike(src, nil())
+        // ...
 
-// TODO: What's the recursive param?
-/// Nontokenizable characters are returned as-is.
-fun to_tokenlikes_with_pending_tokenlike(src: String, pending_tokenlike: Tokenlike) -> List(Either(Tokenlike, Char)):
-    if src.starts_with("aerr"):
-        pending_tokenlike.snoc(GamadjiLetter.aerr)
-
+        else:
+            eright(src/car) ++ lex_chars(src/cdr)
+                
 fun draw(
     trans: CanvasTransaction
     src: String
