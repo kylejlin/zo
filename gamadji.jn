@@ -1,128 +1,127 @@
 param platform: @std.Platform
-use @std.base(platform).*
+use @std.base.*(platform)
+use @canvas.base.*(platform)
 
-struct Rgb24
+struct Rgba:
     r: U8
     g: U8
     b: U8
+    a: U8
 
-def render(
-    ~width: Usize
-    ~height: Usize
-    background: Canvas(width, height)
-    foreground: String
+// TODO: Delete
+/*
+struct GamadjiFont(
     char_width: Usize
     char_height: Usize
-    char_color: Rgb24
-    start_x: Usize
-    start_y: Usize
-) -> Canvas(width, height):
-    
-    start_yod = usize_to_ivar(height) - usize_to_ivar(start_y)
+):
+    a: Vec(char_width * char_height, Rgba)
+    i: Vec(char_width * char_height, Rgba)
+    u: Vec(char_width * char_height, Rgba)
+    e: Vec(char_width * char_height, Rgba)
+    o: Vec(char_width * char_height, Rgba)
+    ai: Vec(char_width * char_height, Rgba)
+    au: Vec(char_width * char_height, Rgba)
+    ei: Vec(char_width * char_height, Rgba)
+    oi: Vec(char_width * char_height, Rgba)
 
+    aerr: Vec(char_width * char_height, Rgba)
+    irr: Vec(char_width * char_height, Rgba)
+    urr: Vec(char_width * char_height, Rgba)
+    yrr: Vec(char_width * char_height, Rgba)
 
-// Chicken scratch:
-//
-// Problem:
-// value(r) depends on Rgb24
-// render depends on value(r)
-// Mutual module dependency.
-//
-// Solution:
-// Make each module return a 
-// dictionary where the values
-// are functions to the "true" values
-// and the params are the module params.
-// Then we know the "shape"
-// (i.e., the set of keys)
-// of each module ahead of time.
-// 
-// Then, for each item `lorem` in the current module `foo`,
-// we can try to "shrink" the dependency module `bar`
-// by substituting `bar(x).qux` with the value of `qux(x)`.
-// Of course, if we have any `dynamic_dot(bar(x), dyn_key)`,
-// then we can't shrink the dependency module, and must assume
-// that `lorem` could use every item in `bar`.
-//
-// The question then becomes what do we make the param types
-// of the dictionary's "value creators"?
+    k: Vec(char_width * char_height, Rgba)
+    g: Vec(char_width * char_height, Rgba)
+    t: Vec(char_width * char_height, Rgba)
+    d: Vec(char_width * char_height, Rgba)
+    s: Vec(char_width * char_height, Rgba)
+    z: Vec(char_width * char_height, Rgba)
+    p: Vec(char_width * char_height, Rgba)
+    b: Vec(char_width * char_height, Rgba)
+    c: Vec(char_width * char_height, Rgba)
+    j: Vec(char_width * char_height, Rgba)
+    f: Vec(char_width * char_height, Rgba)
+    v: Vec(char_width * char_height, Rgba)
 
-// Case study
-// > Note: assume U8 is magically included in the scope.
+    n: Vec(char_width * char_height, Rgba)
+    m: Vec(char_width * char_height, Rgba)
+    l: Vec(char_width * char_height, Rgba)
+    h: Vec(char_width * char_height, Rgba)
 
-////////////// render.jn /////////////////
+    w: Vec(char_width * char_height, Rgba)
+    y: Vec(char_width * char_height, Rgba)
 
-generate_params_from color_calc // adds
-// the name of each item in `color_calc`
-// to a record
+    cisi: Vec(char_width * char_height, Rgba)
 
+    ru: Vec(char_width * char_height, Rgba)
+    rai: Vec(char_width * char_height, Rgba)
+*/
 
-struct Rgb24
-    r: U8
-    g: U8
-    b: U8
-// Rgb24 never references anything from the `color_calc` mod,
-// so we do not parameterize it.
+enum GamadjiLetter
+    a
+    i
+    u
+    e
+    o
+    ai
+    au
+    ei
+    oi
 
-fun draw(foo: U8, ...) -> Yob:
-    get_value(...)
-    ^^^^^ we look in the record,
-          and find that `get_value`
-          is from `color_calc`.
+    aerr
+    irr
+    urr
+    yrr
 
-          So we try to compute the type
-          of `get_value`.
-          There are 3 main possibilities:
-          1. We due to a circular reference:
-             Send an error message to the user.
-          2. We fail due to another type error.
-          3. We succeed.
-             Since `get_value` depends on `Rgb24`,
-             we must apply the `get_value` factory
-             to `Rgb24`.
+    k
+    g
+    t
+    d
+    s
+    z
+    p
+    b
+    c
+    j
+    f
+    v
 
-             Then `draw`'s type becomes:
+    n
+    m
+    l
+    h
 
-             `For(get_value: For(color: Rgb24) -> U8) -> For(foo: U8, ...) -> Yob`
+    w
+    y
 
-          In short, we check each item individually.
-          It's basically a depth-first search,
-          where we keep a list of visited items to
-          detect cyclical references.
+    cisi
 
-////////////// color_calc.jn /////////////////
+    ru
+    rai
 
-generate_params_from render
+fun GamadjiFont(
+    char_width: Usize,
+    char_height: Usize
+) -> Set0:
+    For(letter: GamadjiLetter) -> Vec(char_width * char_height, Rgba)
 
-fun get_value(color: Rgb24) -> U8
-                     ^^^^^ we look in the record,
-                           and find that `Rgb24`
-                           is from the `render` mod.
-                           `Rgb24` does not depend on anything
-                           from this module, so we do not need
-                           to apply it to anything.
-                           So `get_value`'s type becomes:
+Tokenlike = List(GamadjiLetter)
 
-                           `For(Rgb24: Set0) -> For(color: Rgb24) -> U8`.
+/// Nontokenizable characters are returned as-is.
+fun to_tokenlikes(src: String) -> List(Either(Tokenlike, Char)):
+    to_tokenlikes_with_pending_tokenlike(src, nil())
 
-                           Actually, this solution still doesn't work,
-                           since now `Rgb24` is an opaque `Set0`
-                           (and therefore cannot be matched upon).
-                           But let's keep going and refine it later.
+// TODO: What's the recursive param?
+/// Nontokenizable characters are returned as-is.
+fun to_tokenlikes_with_pending_tokenlike(src: String, pending_tokenlike: Tokenlike) -> List(Either(Tokenlike, Char)):
+    if src.starts_with("aerr"):
+        pending_tokenlike.snoc(GamadjiLetter.aerr)
 
-
-    ...
-
-fun analyze_drawing(foo: U8, ...) -> Slfj:
-    temp = draw(foo, ...)
-           ^^^^ we look in the record and
-                find that `draw` is from `render`.
-                `draw` depends on `get_value`, so we must
-                instantiate the `draw` factory with `get_value`.
-                But `get_value` in turn depends on `Rgb24`,
-                so we must instantiate the `get_value` factory
-                with `Rgb24`.
-                Finally, `Rgb24` has no dependencies,
-                so we've reached the base case.
-
-    ...
+fun draw(
+    trans: CanvasTransaction
+    src: String
+    #char_width: Usize
+    #char_height: Usize
+    font: GamadjiFont(char_width, char_height),
+    tokenizer: Tokenizer
+) -> CanvasTransaction:
+    pass
