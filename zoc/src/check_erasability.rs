@@ -44,6 +44,17 @@ where
 /// The following methods all assume that `expr` is well-typed.
 impl ErasabilityChecker {
     fn check(&mut self, expr: Expr, tcon: LazyTypeContext) -> Result<(), ErasabilityError> {
+        // If `expr`'s type type is erasable,
+        // then it doesn't matter whether `expr` has
+        // prop-derived-set instance instances,
+        // since `expr` can be erased anyway.
+        if self
+            .is_type_type_erasable(expr.clone(), tcon)
+            .expect_well_typed()
+        {
+            return Ok(());
+        }
+
         match expr {
             Expr::Match(e) => self.check_match(e, tcon),
             Expr::Fun(e) => self.check_fun(e, tcon),
@@ -125,5 +136,20 @@ impl ErasabilityChecker {
         }
 
         Ok(())
+    }
+}
+
+impl ErasabilityChecker {
+    fn is_type_type_erasable(
+        &mut self,
+        expr: Expr,
+        tcon: LazyTypeContext,
+    ) -> Result<bool, TypeError<UnitAuxDataFamily>> {
+        let type_ = self.typechecker.get_type(expr, tcon)?;
+        let type_type = self.typechecker.get_type(type_.into_raw(), tcon)?;
+        let type_type = type_type
+            .try_into_universe()
+            .expect("for every expr `t`, `type(type(t))` should be a universe");
+        Ok(type_type.raw().hashee.universe.erasable)
     }
 }
