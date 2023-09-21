@@ -59,8 +59,25 @@ impl ErasabilityChecker {
             Expr::Match(c) => self.check_match(c, tcon),
             Expr::Fun(c) => self.check_fun(c, tcon),
             Expr::App(c) => self.check_app(c, tcon),
-            Expr::For(c) => self.check_for(c, tcon),
-            Expr::Ind(_) | Expr::Vcon(_) | Expr::Deb(_) | Expr::Universe(_) => Ok(()),
+
+            // - We can skip checking `ind`s since we can erase them entirely.
+            //
+            // - We can skip checking `vcon`s since we can
+            //   almost erase them--we can erase all but their `vcon_index`.
+            //   The `vcon_index` is a static value, so we don't need to
+            //   worry about it depending on an erasable value.
+            //
+            // - We can skip checking `for`s since we can erase them entirely.
+            //
+            // - We can skip checking debs, since they are their only dependency.
+            //   So, they obviously cannot simultaneously
+            //   depend on an erasable value while also producing
+            //   a non-erasable output.
+            //
+            // - We can skip checking universes since we can erase them entirely.
+            Expr::Ind(_) | Expr::Vcon(_) | Expr::For(_) | Expr::Deb(_) | Expr::Universe(_) => {
+                Ok(())
+            }
         }
     }
 
@@ -111,14 +128,6 @@ impl ErasabilityChecker {
     fn check_app(
         &mut self,
         checkee: RcHashed<App>,
-        tcon: LazyTypeContext,
-    ) -> Result<(), ErasabilityError> {
-        todo!()
-    }
-
-    fn check_for(
-        &mut self,
-        checkee: RcHashed<For>,
         tcon: LazyTypeContext,
     ) -> Result<(), ErasabilityError> {
         todo!()
