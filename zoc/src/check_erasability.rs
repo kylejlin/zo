@@ -75,9 +75,37 @@ impl ErasabilityChecker {
     fn check_fun(
         &mut self,
         checkee: RcHashed<Fun>,
-        tcon: LazyTypeContext,
+        tcon_g0: LazyTypeContext,
     ) -> Result<(), ErasabilityError> {
-        todo!()
+        // We can skip checking the param types,
+        // since each of their type types (i.e., each param type type type)
+        // equals some Prop.
+
+        // We can skip checking the return type for the same reason.
+
+        // The only child we must check is the fun's `return_val`.
+
+        let param_types_g0 = self
+            .typechecker
+            .evaluator
+            .eval_expressions(checkee.hashee.param_types.clone());
+        let tcon_with_params_g1 =
+            LazyTypeContext::Snoc(&tcon_g0, param_types_g0.to_hashee().convert_ref());
+        let param_count = checkee.hashee.param_types.hashee.len();
+
+        let recursive_fun_param_type_g1 = self
+            .typechecker
+            .get_type_of_fun(checkee.clone(), tcon_g0)
+            .expect_well_typed()
+            .upshift(param_count, 0);
+        let singleton_g1 = Normalized::<[_; 1]>::new(recursive_fun_param_type_g1);
+        let tcon_with_params_and_recursive_fun_param_g2 =
+            LazyTypeContext::Snoc(&tcon_with_params_g1, singleton_g1.as_ref().convert_ref());
+
+        self.check(
+            checkee.hashee.return_val.clone(),
+            tcon_with_params_and_recursive_fun_param_g2,
+        )
     }
 
     fn check_app(
