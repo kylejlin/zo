@@ -135,36 +135,6 @@ impl ErasabilityChecker {
         Ok(())
     }
 
-    fn check_dependent_exprs(
-        &mut self,
-        checkee: &[Expr],
-        tcon: LazyTypeContext,
-    ) -> Result<Normalized<Vec<minimal_ast::Expr>>, ErasabilityError> {
-        // TODO: Fix
-
-        let mut out: Normalized<Vec<minimal_ast::Expr>> = Normalized::with_capacity(checkee.len());
-        let mut normalized_visited_exprs: Normalized<Vec<minimal_ast::Expr>> =
-            Normalized::with_capacity(checkee.len());
-
-        for expr in checkee {
-            let current_tcon = LazyTypeContext::Snoc(&tcon, normalized_visited_exprs.to_derefed());
-
-            self.check(expr.clone(), current_tcon)?;
-
-            let type_ = self
-                .typechecker
-                .get_type(expr.clone(), current_tcon)
-                .expect_well_typed();
-            out.push(type_);
-
-            let expr_minimal = self.typechecker.aux_remover.convert(expr.clone());
-            let normalized = self.typechecker.evaluator.eval(expr_minimal);
-            normalized_visited_exprs.push(normalized);
-        }
-
-        Ok(out)
-    }
-
     fn check_independent_exprs(
         &mut self,
         checkee: &[Expr],
