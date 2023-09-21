@@ -30,15 +30,26 @@ mod typechecker_impls;
 #[cfg(test)]
 mod tests;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct TypeChecker {
     pub evaluator: Evaluator,
     pub aux_remover: AuxDataRemover,
+    pub check_erasability: bool,
 }
 
 impl TypeChecker {
     pub fn new() -> Self {
-        Self::default()
+        TypeChecker {
+            evaluator: Default::default(),
+            aux_remover: Default::default(),
+            check_erasability: false,
+        }
+    }
+}
+
+impl Default for TypeChecker {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

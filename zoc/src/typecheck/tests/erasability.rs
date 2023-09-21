@@ -31,7 +31,7 @@ fn ng_2_variant_erasable_to_nonerasable() {
 )"#;
 
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let err = get_erasability_error_under_empty_tcon_or_panic(&src);
     let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
     insta::assert_display_snapshot!(pretty_printed_err);
 }
@@ -63,7 +63,7 @@ fn ng_1_variant_erasable_with_nonerasable_vcon_def_param_types_to_nonerasable() 
 )"#;
 
     let src = substitute_with_compounding(src_defs, unsubstituted_src);
-    let err = get_type_error_under_empty_tcon_or_panic(&src);
+    let err = get_erasability_error_under_empty_tcon_or_panic(&src);
     let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
     insta::assert_display_snapshot!(pretty_printed_err);
 }

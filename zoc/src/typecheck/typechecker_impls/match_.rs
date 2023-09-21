@@ -61,7 +61,12 @@ impl TypeChecker {
             .replace_debs(&substituter, 0);
         let normalized_return_type = self.evaluator.eval(return_type);
 
-        self.check_erasability(match_g0, matchee_type_ind_g0, return_type_type, tcon_g0)?;
+        self.check_match_erasability_if_needed(
+            match_g0,
+            matchee_type_ind_g0,
+            return_type_type,
+            tcon_g0,
+        )?;
 
         Ok(normalized_return_type)
     }
@@ -225,7 +230,26 @@ impl TypeChecker {
 }
 
 impl TypeChecker {
-    fn check_erasability<A: AuxDataFamily>(
+    fn check_match_erasability_if_needed<A: AuxDataFamily>(
+        &mut self,
+        match_g0: RcHashed<ast::Match<A>>,
+        matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,
+        match_return_type_type: RcHashed<minimal_ast::UniverseNode>,
+        tcon_g0: LazyTypeContext,
+    ) -> Result<(), TypeError<A>> {
+        if self.check_erasability {
+            self.check_match_erasability(
+                match_g0,
+                matchee_type_ind_g0,
+                match_return_type_type,
+                tcon_g0,
+            )
+        } else {
+            Ok(())
+        }
+    }
+
+    fn check_match_erasability<A: AuxDataFamily>(
         &mut self,
         match_g0: RcHashed<ast::Match<A>>,
         matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,

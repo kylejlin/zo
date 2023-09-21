@@ -48,10 +48,15 @@ pub fn eval_or_panic(src: &str) -> NormalForm {
 }
 
 pub fn get_type_under_empty_tcon_or_panic(src: &str) -> NormalForm {
-    let spanned = parse_spanned_ast_or_panic(src);
     let empty = Normalized::<[_; 0]>::new();
+    let tcon = LazyTypeContext::Base(empty.as_ref().convert_ref());
+    get_type_or_panic(src, tcon)
+}
+
+pub fn get_type_or_panic(src: &str, tcon: LazyTypeContext) -> NormalForm {
+    let spanned = parse_spanned_ast_or_panic(src);
     TypeChecker::default()
-        .get_type(spanned, LazyTypeContext::Base(empty.as_ref().convert_ref()))
+        .get_type(spanned, tcon)
         .pretty_unwrap()
 }
 
@@ -64,6 +69,29 @@ pub fn get_type_error_under_empty_tcon_or_panic(src: &str) -> TypeError<SpanAuxD
 pub fn get_type_error_or_panic(src: &str, tcon: LazyTypeContext) -> TypeError<SpanAuxDataFamily> {
     let spanned = parse_spanned_ast_or_panic(src);
     TypeChecker::default()
+        .get_type(spanned, tcon)
+        .map(Normalized::into_raw)
+        .pretty_unwrap_err()
+}
+
+pub fn get_erasability_error_under_empty_tcon_or_panic(src: &str) -> TypeError<SpanAuxDataFamily> {
+    let empty = Normalized::<[_; 0]>::new();
+    let tcon = LazyTypeContext::Base(empty.as_ref().convert_ref());
+    get_erasability_error_or_panic(src, tcon)
+}
+
+pub fn get_erasability_error_or_panic(
+    src: &str,
+    tcon: LazyTypeContext,
+) -> TypeError<SpanAuxDataFamily> {
+    get_type_or_panic(src, tcon);
+
+    let spanned = parse_spanned_ast_or_panic(src);
+    let mut erasability_checker = TypeChecker {
+        check_erasability: true,
+        ..Default::default()
+    };
+    erasability_checker
         .get_type(spanned, tcon)
         .map(Normalized::into_raw)
         .pretty_unwrap_err()
