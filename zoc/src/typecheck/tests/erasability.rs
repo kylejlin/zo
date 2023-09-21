@@ -67,3 +67,5 @@ fn ng_1_variant_erasable_with_nonerasable_vcon_def_param_types_to_nonerasable() 
     let pretty_printed_err = format!("{:#}", PrettyPrint(&err));
     insta::assert_display_snapshot!(pretty_printed_err);
 }
+
+// TODO: Add `ok_〇〇` cases.

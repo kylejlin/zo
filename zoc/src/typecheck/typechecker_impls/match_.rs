@@ -308,3 +308,14 @@ impl TypeChecker {
 // TODO: Consider whether we should add an exception
 // to the erasability rules for when
 // the matchee has a vcon at the top.
+//
+// WAIT:
+// Why don't we just check after normalizing?
+// Erasability has no effect on normalization,
+// so we can safely normalize any expression
+// as long as it is well-typed
+// (regardless of its erasability correctness).
+//
+// ALSO:
+// Maybe we skip checking erasability for expressions
+// of type type Prop.
