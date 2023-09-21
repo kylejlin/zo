@@ -54,6 +54,7 @@ impl Evaluator {
         .convert_to_expr_and_wrap_in_normalized();
 
         self.eval_expr_cache.insert(ind_digest, normalized.clone());
+        self.cache_self_loop(normalized.clone());
         normalized
     }
 
@@ -134,6 +135,7 @@ impl Evaluator {
         .convert_to_expr_and_wrap_in_normalized();
 
         self.eval_expr_cache.insert(vcon_digest, normalized.clone());
+        self.cache_self_loop(normalized.clone());
         normalized
     }
 
@@ -189,6 +191,7 @@ impl Evaluator {
 
         self.eval_expr_cache
             .insert(match_digest, normalized.clone());
+        self.cache_self_loop(normalized.clone());
         normalized
     }
 
@@ -260,6 +263,7 @@ impl Evaluator {
         .convert_to_expr_and_wrap_in_normalized();
 
         self.eval_expr_cache.insert(fun_digest, normalized.clone());
+        self.cache_self_loop(normalized.clone());
         normalized
     }
 
@@ -290,6 +294,7 @@ impl Evaluator {
         .convert_to_expr_and_wrap_in_normalized();
 
         self.eval_expr_cache.insert(app_digest, normalized.clone());
+        self.cache_self_loop(normalized.clone());
         normalized
     }
 
@@ -304,11 +309,22 @@ impl Evaluator {
         .convert_to_expr_and_wrap_in_normalized();
 
         self.eval_expr_cache.insert(for_digest, normalized.clone());
+        self.cache_self_loop(normalized.clone());
         normalized
     }
 
     fn substitute_and_downshift_debs(&mut self, expr: Expr, new_exprs: &[Expr]) -> Expr {
         expr.replace_debs(&DebDownshiftSubstituter { new_exprs }, 0)
+    }
+}
+
+impl Evaluator {
+    /// The normal form of every normal form `nf` is `nf` itself.
+    /// If we record this in the cache,
+    /// we can avoid having to re-evaluate `nf` in the future.
+    fn cache_self_loop(&mut self, normalized: NormalForm) {
+        self.eval_expr_cache
+            .insert(normalized.raw().digest().clone(), normalized.clone());
     }
 }
 
