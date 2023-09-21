@@ -27,7 +27,7 @@ impl TypeChecker {
         }
     }
 
-    fn get_types_of_dependent_expressions<A: AuxDataFamily>(
+    pub(crate) fn get_types_of_dependent_expressions<A: AuxDataFamily>(
         &mut self,
         exprs: &[ast::Expr<A>],
         tcon: LazyTypeContext,

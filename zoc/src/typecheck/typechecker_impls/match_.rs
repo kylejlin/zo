@@ -61,8 +61,6 @@ impl TypeChecker {
             .replace_debs(&substituter, 0);
         let normalized_return_type = self.evaluator.eval(return_type);
 
-        self.check_erasability(match_g0, matchee_type_ind_g0, return_type_type, tcon_g0)?;
-
         Ok(normalized_return_type)
     }
 
@@ -223,99 +221,3 @@ impl TypeChecker {
         Ok(())
     }
 }
-
-impl TypeChecker {
-    fn check_erasability<A: AuxDataFamily>(
-        &mut self,
-        match_g0: RcHashed<ast::Match<A>>,
-        matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,
-        match_return_type_type: RcHashed<minimal_ast::UniverseNode>,
-        tcon_g0: LazyTypeContext,
-    ) -> Result<(), TypeError<A>> {
-        if match_return_type_type.hashee.universe.erasable
-            || !matchee_type_ind_g0.raw().hashee.universe.erasable
-            || self.does_well_typed_ind_have_at_most_one_vcon_def_where_all_params_are_erasable(
-                &matchee_type_ind_g0.raw().hashee,
-                tcon_g0,
-            )
-        {
-            return Ok(());
-        }
-
-        Err(
-            TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
-                match_: match_g0.hashee.clone(),
-                matchee_type_type: minimal_ast::UniverseNode {
-                    universe: matchee_type_ind_g0.raw().hashee.universe,
-                    aux_data: (),
-                },
-                match_return_type_type: match_return_type_type.hashee.clone(),
-            },
-        )
-    }
-
-    fn does_well_typed_ind_have_at_most_one_vcon_def_where_all_params_are_erasable<
-        A: AuxDataFamily,
-    >(
-        &mut self,
-        ind_g0: &ast::Ind<A>,
-        tcon_g0: LazyTypeContext,
-    ) -> bool {
-        let vcon_defs = &ind_g0.vcon_defs.hashee;
-
-        if vcon_defs.len() > 1 {
-            return false;
-        }
-
-        if vcon_defs.len() == 0 {
-            return true;
-        }
-
-        let index_types_g0_minimal = self
-            .aux_remover
-            .convert_expressions(&ind_g0.index_types.hashee);
-        let normalized_index_types_g0 = self.evaluator.eval_expressions(index_types_g0_minimal);
-        let universe_node = NormalForm::universe(minimal_ast::UniverseNode {
-            universe: ind_g0.universe,
-            aux_data: (),
-        });
-        let ind_type_g0 =
-            Normalized::for_(normalized_index_types_g0, universe_node).collapse_if_nullary();
-
-        let ind_type_singleton = Normalized::<[_; 1]>::new(ind_type_g0.clone());
-        let tcon_with_ind_type_g1 =
-            LazyTypeContext::Snoc(&tcon_g0, ind_type_singleton.as_ref().convert_ref());
-
-        let vcon_def_g1 = &vcon_defs[0];
-        let vcon_def_param_type_types_g1 = self
-            .get_types_of_dependent_expressions(
-                &vcon_def_g1.param_types.hashee,
-                tcon_with_ind_type_g1,
-            )
-            .map_err(|err| err.remove_ast_aux_data(&mut self.aux_remover))
-            .expect("`ind_g0` is should be well-typed");
-
-        vcon_def_param_type_types_g1
-            .into_raw()
-            .into_iter()
-            .all(|param_type| {
-                let param_type = param_type.try_into_universe().expect("`ind_g0` is well-typed, so every vcon def param type type should be a universe");
-                param_type.hashee.universe.erasable
-            })
-    }
-}
-
-// TODO: Consider whether we should add an exception
-// to the erasability rules for when
-// the matchee has a vcon at the top.
-//
-// WAIT:
-// Why don't we just check after normalizing?
-// Erasability has no effect on normalization,
-// so we can safely normalize any expression
-// as long as it is well-typed
-// (regardless of its erasability correctness).
-//
-// ALSO:
-// Maybe we skip checking erasability for expressions
-// of type type Prop.

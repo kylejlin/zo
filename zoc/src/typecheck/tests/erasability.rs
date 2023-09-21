@@ -1,5 +1,7 @@
 use super::*;
 
+// TODO: Move this test
+#[ignore]
 #[test]
 fn ng_2_variant_erasable_to_nonerasable() {
     let bool_prop_def = (
@@ -36,6 +38,8 @@ fn ng_2_variant_erasable_to_nonerasable() {
     insta::assert_display_snapshot!(pretty_printed_err);
 }
 
+// TODO: Move this test
+#[ignore]
 #[test]
 fn ng_1_variant_erasable_with_nonerasable_vcon_def_param_types_to_nonerasable() {
     let bool_set_def = (
