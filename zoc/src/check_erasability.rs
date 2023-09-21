@@ -41,9 +41,7 @@ where
     }
 }
 
-/// The following methods all assume that:
-/// 1. `checkee` is well-typed.
-/// 2. `checkee` is a normal form.
+/// The following methods all assume that `checkee` is well-typed.
 impl ErasabilityChecker {
     fn check(&mut self, checkee: Expr, tcon: LazyTypeContext) -> Result<(), ErasabilityError> {
         // If `expr`'s type type is erasable,
