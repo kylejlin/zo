@@ -80,6 +80,7 @@ impl Evaluator {
 
         self.eval_exprs_cache
             .insert(exprs_digest, normalized.clone());
+        self.cache_expr_vec_self_loop(normalized.clone());
         normalized
     }
 
@@ -319,12 +320,20 @@ impl Evaluator {
 }
 
 impl Evaluator {
-    /// The normal form of every normal form `nf` is `nf` itself.
+    /// The normal form of every normal form `normalized` is `normalized` itself.
     /// If we record this in the cache,
-    /// we can avoid having to re-evaluate `nf` in the future.
+    /// we can avoid having to re-evaluate `normalized` in the future.
     fn cache_self_loop(&mut self, normalized: NormalForm) {
         self.eval_expr_cache
             .insert(normalized.raw().digest().clone(), normalized.clone());
+    }
+
+    /// The normal form of every normal form vec `normalized` is `normalized` itself.
+    /// If we record this in the cache,
+    /// we can avoid having to re-evaluate `normalized` in the future.
+    fn cache_expr_vec_self_loop(&mut self, normalized: Normalized<RcHashedVec<Expr>>) {
+        self.eval_exprs_cache
+            .insert(normalized.raw().digest.clone(), normalized.clone());
     }
 }
 
