@@ -179,16 +179,6 @@ impl<A: AuxDataFamily> TypeError<A> {
                 normalized_index_arg,
                 path_from_index_arg_to_problematic_deb,
             },
-
-            TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
-                match_,
-                matchee_type_type,
-                match_return_type_type,
-            } => TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
-                match_: remover.convert_match(rc_hashed(match_)).hashee.clone(),
-                matchee_type_type,
-                match_return_type_type,
-            },
         }
     }
 }

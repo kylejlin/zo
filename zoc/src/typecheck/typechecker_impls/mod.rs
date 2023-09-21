@@ -92,7 +92,7 @@ impl TypeChecker {
         Ok(normalized.to_hashee().cloned())
     }
 
-    fn assert_expr_type_is_universe<A: AuxDataFamily>(
+    pub(crate) fn assert_expr_type_is_universe<A: AuxDataFamily>(
         &mut self,
         expr: ast::Expr<A>,
         tcon: LazyTypeContext,

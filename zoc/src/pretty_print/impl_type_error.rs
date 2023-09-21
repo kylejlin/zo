@@ -436,29 +436,6 @@ where
                     )
                     .finish()
             }
-
-            TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
-                match_,
-                matchee_type_type,
-                match_return_type_type,
-            } => {
-                let mut remover = AuxDataRemover::default();
-                let match_minimal = remover.convert_match(rc_hashed(match_.clone()));
-                f.debug_struct("TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable")
-                    .field(
-                        "match_",
-                        &match_minimal
-                            .hashee
-                            .pretty_printed()
-                            .with_opt_location_appended(match_.opt_span()),
-                    )
-                    .field("matchee_type_type", &matchee_type_type.pretty_printed())
-                    .field(
-                        "match_return_type_type",
-                        &match_return_type_type.pretty_printed(),
-                    )
-                    .finish()
-            }
         }
     }
 }

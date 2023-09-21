@@ -64,7 +64,7 @@ impl TypeChecker {
         Ok(normalized_return_type)
     }
 
-    fn assert_matchee_type_is_inductive<A: AuxDataFamily>(
+    pub(crate) fn assert_matchee_type_is_inductive<A: AuxDataFamily>(
         &mut self,
         matchee: ast::Expr<A>,
         matchee_type: NormalForm,

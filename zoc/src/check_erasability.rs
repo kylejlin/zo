@@ -9,7 +9,13 @@ pub struct ErasabilityChecker {
 }
 
 #[derive(Clone)]
-pub enum ErasabilityError {}
+pub enum ErasabilityError {
+    MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
+        match_: Match,
+        matchee_type_type: minimal_ast::UniverseNode,
+        match_return_type_type: minimal_ast::UniverseNode,
+    },
+}
 
 impl ErasabilityChecker {
     pub fn check_erasability_of_well_typed_expr(
@@ -84,7 +90,60 @@ impl ErasabilityChecker {
     fn check_match(
         &mut self,
         checkee: RcHashed<Match>,
-        tcon: LazyTypeContext,
+        tcon_g0: LazyTypeContext,
+    ) -> Result<(), ErasabilityError> {
+        let match_g0 = checkee;
+
+        let (matchee_type_ind_g0, matchee_type_args_g0) = {
+            let matchee_type_g0 = self
+                .typechecker
+                .get_type(match_g0.hashee.matchee.clone(), tcon_g0)
+                .expect_well_typed();
+
+            self.typechecker
+                .assert_matchee_type_is_inductive(
+                    match_g0.hashee.matchee.clone(),
+                    matchee_type_g0.clone(),
+                )
+                .expect_well_typed()
+        };
+
+        let return_type_type = {
+            let tcon_extension = {
+                let matchee_type_ind_index_types_g0 = matchee_type_ind_g0.to_hashee().index_types();
+                let mut out = matchee_type_ind_index_types_g0.hashee().cloned();
+                let ind_capp_g0matchparamspartial =
+                    NormalForm::ind_capp_of_descending_debs(matchee_type_ind_g0.clone());
+                out.push(ind_capp_g0matchparamspartial);
+                out
+            };
+            let tcon_g0matchparams = LazyTypeContext::Snoc(&tcon_g0, tcon_extension.to_derefed());
+
+            self.typechecker
+                .assert_expr_type_is_universe(
+                    match_g0.hashee.return_type.clone(),
+                    tcon_g0matchparams,
+                )
+                .expect_well_typed()
+        };
+
+        self.check_match_erasability_without_checking_children(
+            match_g0.clone(),
+            matchee_type_ind_g0.clone(),
+            return_type_type,
+            tcon_g0,
+        )?;
+
+        self.check_match_cases(match_g0, matchee_type_ind_g0, tcon_g0)?;
+
+        Ok(())
+    }
+
+    fn check_match_cases(
+        &mut self,
+        checkee: RcHashed<Match>,
+        matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,
+        tcon_g0: LazyTypeContext,
     ) -> Result<(), ErasabilityError> {
         todo!()
     }
@@ -164,13 +223,13 @@ impl ErasabilityChecker {
 }
 
 impl ErasabilityChecker {
-    fn check_match_erasability_without_checking_children<A: AuxDataFamily>(
+    fn check_match_erasability_without_checking_children(
         &mut self,
-        match_g0: RcHashed<ast::Match<A>>,
+        match_g0: RcHashed<Match>,
         matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,
         match_return_type_type: RcHashed<minimal_ast::UniverseNode>,
         tcon_g0: LazyTypeContext,
-    ) -> Result<(), TypeError<A>> {
+    ) -> Result<(), ErasabilityError> {
         if match_return_type_type.hashee.universe.erasable
             || !matchee_type_ind_g0.raw().hashee.universe.erasable
             || self.does_well_typed_ind_have_at_most_one_vcon_def_where_all_params_are_erasable(
@@ -182,7 +241,7 @@ impl ErasabilityChecker {
         }
 
         Err(
-            TypeError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
+            ErasabilityError::MatcheeTypeTypeIsErasableButReturnTypeTypeIsNotErasable {
                 match_: match_g0.hashee.clone(),
                 matchee_type_type: minimal_ast::UniverseNode {
                     universe: matchee_type_ind_g0.raw().hashee.universe,
