@@ -23,20 +23,6 @@ impl TypeChecker {
             matchee_type_args_g0.clone(),
         )?;
 
-        let tcon_extension = {
-            let matchee_type_ind_index_types_g0 = matchee_type_ind_g0.to_hashee().index_types();
-            let mut out = matchee_type_ind_index_types_g0.hashee().cloned();
-            let ind_capp_g0matchparamspartial =
-                NormalForm::ind_capp_of_descending_debs(matchee_type_ind_g0.clone());
-            out.push(ind_capp_g0matchparamspartial);
-            out
-        };
-        let tcon_g0matchparams = LazyTypeContext::Snoc(&tcon_g0, tcon_extension.to_derefed());
-        let return_type_type = self.assert_expr_type_is_universe(
-            match_g0.hashee.return_type.clone(),
-            tcon_g0matchparams,
-        )?;
-
         self.typecheck_match_cases_assuming_number_of_cases_is_correct(
             match_g0.clone(),
             matchee_type_ind_g0.clone(),
@@ -64,6 +50,9 @@ impl TypeChecker {
         Ok(normalized_return_type)
     }
 
+    /// If `matchee_type` is an inductive type (i.e., an `ind` capp),
+    /// this function returns `Ok((matchee_type_ind, matchee_type_args))`.
+    /// `matchee_type_args` might be an empty.
     pub(crate) fn assert_matchee_type_is_inductive<A: AuxDataFamily>(
         &mut self,
         matchee: ast::Expr<A>,

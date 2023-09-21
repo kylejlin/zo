@@ -94,7 +94,7 @@ impl ErasabilityChecker {
     ) -> Result<(), ErasabilityError> {
         let match_g0 = checkee;
 
-        let (matchee_type_ind_g0, matchee_type_args_g0) = {
+        let (matchee_type_ind_g0, _) = {
             let matchee_type_g0 = self
                 .typechecker
                 .get_type(match_g0.hashee.matchee.clone(), tcon_g0)
