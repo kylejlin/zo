@@ -130,7 +130,9 @@ impl ErasabilityChecker {
         checkee: RcHashed<App>,
         tcon: LazyTypeContext,
     ) -> Result<(), ErasabilityError> {
-        todo!()
+        self.check(checkee.hashee.callee.clone(), tcon)?;
+        self.check_independent_exprs(&checkee.hashee.args.hashee, tcon)?;
+        Ok(())
     }
 
     fn check_dependent_exprs(
