@@ -142,10 +142,37 @@ impl ErasabilityChecker {
     fn check_match_cases(
         &mut self,
         checkee: RcHashed<Match>,
+        matchee_type_ind: Normalized<RcHashed<minimal_ast::Ind>>,
+        tcon: LazyTypeContext,
+    ) -> Result<(), ErasabilityError> {
+        let case_count = checkee.hashee.cases.hashee.len();
+        for i in 0..case_count {
+            self.check_ith_match_case(i, checkee.clone(), matchee_type_ind.clone(), tcon)?;
+        }
+        Ok(())
+    }
+
+    fn check_ith_match_case(
+        &mut self,
+        i: usize,
+        checkee: RcHashed<Match>,
         matchee_type_ind_g0: Normalized<RcHashed<minimal_ast::Ind>>,
         tcon_g0: LazyTypeContext,
     ) -> Result<(), ErasabilityError> {
-        todo!()
+        let match_g0 = checkee;
+
+        let case_g1 = &match_g0.hashee.cases.hashee[i];
+
+        let vcon_param_types = matchee_type_ind_g0
+            .to_hashee()
+            .vcon_defs()
+            .hashee()
+            .index(i)
+            .param_types();
+        let tcon_with_case_params_g1 =
+            LazyTypeContext::Snoc(&tcon_g0, vcon_param_types.hashee().convert_ref());
+
+        self.check(case_g1.return_val.clone(), tcon_with_case_params_g1)
     }
 
     fn check_fun(
