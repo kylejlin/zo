@@ -14,6 +14,7 @@ where
     }
 }
 
+mod impl_erasability_error;
 mod impl_minimal_ast;
 mod impl_type_error;
 
