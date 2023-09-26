@@ -134,4 +134,43 @@ fn ok_0_variant_erasable_to_nonerasable() {
     check_erasability_under_empty_tcon_or_panic(&src);
 }
 
+#[test]
+fn ok_erasable_with_nonerasable_vcon_def_param_types_to_erasable() {
+    let bool_prop_def = (
+        "<BOOL_PROP>",
+        r#"
+(ind Prop0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let true_prop_def = ("<TRUE_PROP>", "(vcon <BOOL_PROP> 0)");
+    let bool_set_def = (
+        "<BOOL_SET>",
+        r#"
+(ind Set0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let foo_def = (
+        "<FOO>",
+        r#"
+(ind Prop0 "Foo" () (
+    ((<BOOL_SET>) ())
+))"#,
+    );
+    let src_defs = [bool_prop_def, true_prop_def, bool_set_def, foo_def];
+
+    let unsubstituted_src = r#"
+(fun nonrec (<FOO>) <BOOL_PROP>
+    (match 1 1 <BOOL_PROP> (
+        (1 <TRUE_PROP>)
+    ))
+)"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    check_erasability_under_empty_tcon_or_panic(&src);
+}
+
 // TODO: Add `ok_〇〇` cases.
