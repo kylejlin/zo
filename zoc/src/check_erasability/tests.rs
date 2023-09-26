@@ -68,4 +68,43 @@ fn ng_1_variant_erasable_with_nonerasable_vcon_def_param_types_to_nonerasable() 
     insta::assert_display_snapshot!(pretty_printed_err);
 }
 
+#[test]
+fn ok_1_variant_erasable_with_erasable_vcon_def_param_types_to_nonerasable() {
+    let bool_prop_def = (
+        "<BOOL_PROP>",
+        r#"
+(ind Prop0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let bool_set_def = (
+        "<BOOL_SET>",
+        r#"
+(ind Set0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let true_set_def = ("<TRUE_SET>", r#"(vcon <BOOL_SET> 0)"#);
+    let foo_def = (
+        "<FOO>",
+        r#"
+(ind Prop0 "Foo" () (
+    ((<BOOL_PROP> <BOOL_PROP> <BOOL_PROP>) ())
+))"#,
+    );
+    let src_defs = [bool_prop_def, bool_set_def, true_set_def, foo_def];
+
+    let unsubstituted_src = r#"
+(fun nonrec (<FOO>) <BOOL_SET>
+    (match 1 1 <BOOL_SET> (
+        (3 <TRUE_SET>)
+    ))
+)"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    check_erasability_under_empty_tcon_or_panic(&src);
+}
+
 // TODO: Add `ok_〇〇` cases.

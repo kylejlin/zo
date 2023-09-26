@@ -98,3 +98,16 @@ pub fn get_erasability_error_or_panic(src: &str, tcon: LazyTypeContext) -> Erasa
         .check_erasability_of_well_typed_expr(normalized, tcon)
         .unwrap_err()
 }
+
+pub fn check_erasability_under_empty_tcon_or_panic(src: &str) {
+    let empty = Normalized::<[_; 0]>::new();
+    let tcon = LazyTypeContext::Base(empty.as_ref().convert_ref());
+    check_erasability_or_panic(src, tcon)
+}
+
+pub fn check_erasability_or_panic(src: &str, tcon: LazyTypeContext) {
+    let normalized = typecheck_and_eval_or_panic(src, tcon);
+    ErasabilityChecker::default()
+        .check_erasability_of_well_typed_expr(normalized, tcon)
+        .pretty_unwrap()
+}
