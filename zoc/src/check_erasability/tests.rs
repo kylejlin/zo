@@ -37,7 +37,15 @@ fn ng_2_variant_erasable_to_nonerasable() {
 }
 
 #[test]
-fn ng_1_variant_erasable_with_nonerasable_vcon_def_param_types_to_nonerasable() {
+fn ng_1_variant_erasable_with_at_least_1_nonerasable_vcon_def_param_type_to_nonerasable() {
+    let bool_prop_def = (
+        "<BOOL_PROP>",
+        r#"
+(ind Prop0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
     let bool_set_def = (
         "<BOOL_SET>",
         r#"
@@ -50,15 +58,15 @@ fn ng_1_variant_erasable_with_nonerasable_vcon_def_param_types_to_nonerasable() 
         "<FOO>",
         r#"
 (ind Prop0 "Foo" () (
-    ((<BOOL_SET>) ())
+    ((<BOOL_PROP> <BOOL_PROP> <BOOL_SET>) ())
 ))"#,
     );
-    let src_defs = [bool_set_def, foo_def];
+    let src_defs = [bool_prop_def, bool_set_def, foo_def];
 
     let unsubstituted_src = r#"
 (fun nonrec (<FOO>) <BOOL_SET>
     (match 1 1 <BOOL_SET> (
-        (1 0)
+        (3 0)
     ))
 )"#;
 
@@ -69,7 +77,7 @@ fn ng_1_variant_erasable_with_nonerasable_vcon_def_param_types_to_nonerasable() 
 }
 
 #[test]
-fn ok_1_variant_erasable_with_erasable_vcon_def_param_types_to_nonerasable() {
+fn ok_1_variant_erasable_with_all_erasable_vcon_def_param_types_to_nonerasable() {
     let bool_prop_def = (
         "<BOOL_PROP>",
         r#"
@@ -135,7 +143,7 @@ fn ok_0_variant_erasable_to_nonerasable() {
 }
 
 #[test]
-fn ok_erasable_with_nonerasable_vcon_def_param_types_to_erasable() {
+fn ok_erasable_with_at_least_1_nonerasable_vcon_def_param_type_to_erasable() {
     let bool_prop_def = (
         "<BOOL_PROP>",
         r#"
