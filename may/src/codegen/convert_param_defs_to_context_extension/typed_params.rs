@@ -50,7 +50,7 @@ impl MayConverter {
             mnode::CommaSeparatedParamDefs::One(param) => {
                 dash_policy.check(param, 0)?;
 
-                let param_type = self.convert(&param.type_, context)?;
+                let (param_type, _) = self.convert(&param.type_, context, &DropContext)?;
                 let entry = self.get_deb_defining_entry(param.name.val());
 
                 Ok((vec![entry], vec![param_type]))
@@ -67,7 +67,7 @@ impl MayConverter {
                 dash_policy.check(rac, param_types.len())?;
 
                 let extended_context = Context::Snoc(&context, &entries);
-                let rac_type = self.convert(&rac.type_, extended_context)?;
+                let (rac_type, _) = self.convert(&rac.type_, extended_context, &DropContext)?;
 
                 entries.push(self.get_deb_defining_entry(rac.name.val()));
                 param_types.push(rac_type);

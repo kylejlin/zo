@@ -1,28 +1,31 @@
 use super::*;
 
 impl MayConverter {
-    pub(crate) fn convert_match(
+    pub(crate) fn convert_match<C: ContextToOwned>(
         &mut self,
         expr: &mnode::Match,
         context: Context,
-    ) -> Result<znode::Expr, SemanticError> {
-        let matchee = self.convert(&expr.matchee, context)?;
+        converter: &C,
+    ) -> Result<(znode::Expr, C::Out), SemanticError> {
+        let (matchee, _) = self.convert(&expr.matchee, context, &DropContext)?;
 
         let extension =
             self.convert_return_arity_clause_to_context_extension(&expr.return_arity)?;
         let return_type_arity = extension.len();
         let context_with_return_params = Context::Snoc(&context, &extension);
-        let return_type = self.convert(&expr.return_type, context_with_return_params)?;
+        let (return_type, _) =
+            self.convert(&expr.return_type, context_with_return_params, &DropContext)?;
 
         let cases = self.convert_match_cases(&expr.cases, context)?;
 
-        Ok(self.cache_match(znode::Match {
+        let converted_leaf = self.cache_match(znode::Match {
             matchee,
             return_type_arity,
             return_type,
             cases,
             aux_data: (),
-        }))
+        });
+        Ok((converted_leaf, converter.convert_context_to_owned(context)))
     }
 
     fn convert_match_cases(
@@ -57,7 +60,7 @@ impl MayConverter {
         let extension = self.convert_match_case_params_to_context_extension(&case.params);
         let context_with_params = Context::Snoc(&context, &extension);
 
-        let return_val = self.convert(&case.return_val, context_with_params)?;
+        let (return_val, _) = self.convert(&case.return_val, context_with_params, &DropContext)?;
 
         Ok(znode::MatchCase {
             arity,

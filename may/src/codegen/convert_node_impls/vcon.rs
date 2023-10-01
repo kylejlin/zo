@@ -1,17 +1,20 @@
 use super::*;
 
 impl MayConverter {
-    pub(crate) fn convert_vcon(
+    pub(crate) fn convert_vcon<C: ContextToOwned>(
         &mut self,
         expr: &mnode::Vcon,
         context: Context,
-    ) -> Result<znode::Expr, SemanticError> {
+        converter: &C,
+    ) -> Result<(znode::Expr, C::Out), SemanticError> {
         let vcon_index = expr.vcon_index.index;
         if vcon_index >= expr.innards.cases.len() {
             return Err(SemanticError::InvalidVconIndex(expr.vcon_index.clone()));
         }
 
-        self.convert_vcon_with_valid_vcon_index(&expr.innards, vcon_index, context)
+        let converted_leaf =
+            self.convert_vcon_with_valid_vcon_index(&expr.innards, vcon_index, context)?;
+        Ok((converted_leaf, converter.convert_context_to_owned(context)))
     }
 
     pub(crate) fn convert_vcon_with_valid_vcon_index(

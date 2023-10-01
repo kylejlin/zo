@@ -1,11 +1,12 @@
 use super::*;
 
 impl MayConverter {
-    pub(crate) fn convert_ind(
+    pub(crate) fn convert_ind<C: ContextToOwned>(
         &mut self,
         expr: &mnode::Ind,
         context: Context,
-    ) -> Result<znode::Expr, SemanticError> {
+        converter: &C,
+    ) -> Result<(znode::Expr, C::Out), SemanticError> {
         let ind = self.convert_ind_innards(&expr.innards, context)?;
 
         let vcon_extension = self.get_vcon_definitions(expr, context)?;
@@ -18,7 +19,7 @@ impl MayConverter {
         let context_with_ind = Context::Snoc(&context, &ind_singleton);
         let context_with_ind_and_vcons = Context::Snoc(&context_with_ind, &vcon_extension);
 
-        self.convert(&expr.next_val, context_with_ind_and_vcons)
+        self.convert(&expr.next_val, context_with_ind_and_vcons, converter)
     }
 
     fn get_vcon_definitions<'a>(
