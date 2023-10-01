@@ -17,7 +17,7 @@ impl MayConverter {
         &mut self,
         expr: &mnode::Expr,
         context: Context,
-    ) -> Result<znode::Expr, SemanticError> {
+    ) -> Result<(znode::Expr, Vec<znode::Expr>), SemanticError> {
         match expr {
             mnode::Expr::Let(e) => self.convert_let(e, context),
             mnode::Expr::Ind(e) => self.convert_ind(e, context),

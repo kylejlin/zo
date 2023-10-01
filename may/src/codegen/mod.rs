@@ -33,7 +33,21 @@ pub use error::*;
 #[cfg(test)]
 mod tests;
 
-pub fn may_to_zo(expr: &mnode::Expr) -> Result<znode::Expr, SemanticError> {
+/// If this function succeeds, it returns `Ok((converted_expr, sub_defs))` where:
+///
+/// - `converted_expr` is the Zo representation of `expr`
+///
+/// - `sub_defs` is a vector of the Zo representations of the
+///   substitutable definitions (i.e., values defined by `fun`, `ind`, and `let`)
+///   defined in the construction of `converted_expr`.
+///
+///   These definitions are in "top-to-bottom" order.
+///
+/// For example, if `expr` is `ind Foo case foo_x case foo_y return Set0 ind Bar case bar_x case bar_y return Set0 bar_x`,
+/// then `converted_expr` is the Zo representation of `bar_x`,
+/// and `sub_defs` is `vec![zo_foo, zo_bar]`
+/// (where `zo_foo` and `zo_bar` are the Zo representations of `ind Foo ...` and `ind Bar ...` respectively).
+pub fn may_to_zo(expr: &mnode::Expr) -> Result<(znode::Expr, Vec<znode::Expr>), SemanticError> {
     MayConverter::default().convert(expr, Context::empty())
 }
 
