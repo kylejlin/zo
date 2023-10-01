@@ -39,7 +39,7 @@ fun or(a: Bool, b: Bool): Bool
         b
     return1 Bool
 
-fun eq(a: Bool, b: Bool): Bool
+fun bool_eq(a: Bool, b: Bool): Bool
     match a
     case true:
         b
@@ -47,42 +47,83 @@ fun eq(a: Bool, b: Bool): Bool
         not(b)
     return1 Bool
 
-fun neq(a: Bool, b: Bool): Bool
-    not(eq(a, b))
+fun bool_neq(a: Bool, b: Bool): Bool
+    not(bool_eq(a, b))
 
 // ================================================================
-// Nat
+// Bit
 // ================================================================
 
-ind Nat
-    case zero
-    case succ(_: Nat)
+ind Bit
+    case b0
+    case b1
     return Set0
 
-fun add(-a: Nat, b: Nat): Nat
+fun bit_eq(a: Bit, b: Bit): Bool
     match a
-    case zero:
-        b
-    case succ(pred):
-        succ(add(pred, b))
-    return1 Nat
+    case b0:
+        match b
+        case b0:
+            true
+        case b1:
+            false
+        return1 Bool
+    case b1:
+        match b
+        case b0:
+            false
+        case b1:
+            true
+        return1 Bool
+    return1 Bool
 
-fun mul(-a: Nat, b: Nat): Nat
+fun bit_neq(a: Bit, b: Bit): Bool
+    not(bit_eq(a, b))
+
+// ================================================================
+// Pos
+// ================================================================
+
+ind Pos
+    case pos_one
+    case pos_snoc(left: Pos, right: Bit)
+    return Set0
+
+fun pos_succ(-a: Pos): Pos
     match a
-    case zero:
-        zero
-    case succ(pred):
-        add(b, mul(pred, b))
-    return1 Nat
+    case pos_one:
+        pos_snoc(pos_one, b0)
+    case pos_snoc(left, right):
+        match right
+        case b0:
+            pos_snoc(left, b1)
+        case b1:
+            pos_snoc(pos_succ(left), b0)
+        return1 Pos
+    return1 Pos
 
-// We define zero to the zeroth power to equal one.
-fun pow(base: Nat, -exp: Nat): Nat
-    match exp
-    case zero:
-        succ(zero)
-    case succ(exp_pred):
-        mul(base, pow(base, exp_pred))
-    return1 Nat
+fun pos_add(-a: Pos, b: Pos): Pos
+    match a
+    case pos_one:
+        pos_succ(b)
+    case pos_snoc(a_left, a_right):
+        match b
+        case pos_one:
+            pos_succ(a)
+        case pos_snoc(b_left, b_right):
+            match a_right
+            case b0:
+                pos_snoc(pos_add(a_left, b_left), b_right)
+            case b1:
+                match b_right
+                case b0:
+                    pos_snoc(pos_add(a_left, b_left), b1)
+                case b1:
+                    pos_snoc(pos_add(a_left, pos_succ(b_left)), b0)
+                return1 Pos
+            return1 Pos
+        return1 Pos
+    return1 Pos
 
 // ================================================================
 // Exists
