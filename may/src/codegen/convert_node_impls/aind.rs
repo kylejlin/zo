@@ -1,12 +1,14 @@
 use super::*;
 
 impl MayConverter {
-    pub(crate) fn convert_aind(
+    pub(crate) fn convert_aind<C: ContextToOwned>(
         &mut self,
         expr: &mnode::Aind,
         context: Context,
-    ) -> Result<znode::Expr, SemanticError> {
-        self.convert_ind_innards(&expr.innards, context)
+        converter: &C,
+    ) -> Result<(znode::Expr, C::Out), SemanticError> {
+        let converted_leaf = self.convert_ind_innards(&expr.innards, context)?;
+        Ok((converted_leaf, converter.convert_context_to_owned(context)))
     }
 
     pub(crate) fn convert_ind_innards(

@@ -39,11 +39,15 @@ ind Nat
 succ(succ(zero))
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -69,11 +73,15 @@ fun add(-a: Nat, b: Nat): Nat
 add(_2, _3)
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -86,11 +94,15 @@ ind(T: Set0) List
 List
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -103,11 +115,15 @@ ind(T: Set0) List
 nil
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -120,11 +136,15 @@ ind(T: Set0) List
 cons
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -159,11 +179,15 @@ let a_b_c = acons(a, acons(b, acons(c, anil)))
 rev(Abc, a_b_c)
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -175,11 +199,15 @@ ind(T: Set0, left: T) Eq[_: T]
 Eq
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -191,11 +219,15 @@ ind(T: Set0, left: T) Eq[_: T]
 refl
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -212,11 +244,15 @@ afun(T: Set0, a: T, b: T, eq: Eq(T, a)(b)): Eq(T, b)(a)
     use [c] return Eq(T, c)(a)
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -244,11 +280,15 @@ afun(
     f(bc)
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -287,11 +327,15 @@ fun add_n_zero(-n: Nat): Eq(Nat, n)(add(n, zero))
 add_n_zero
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -331,11 +375,15 @@ fun add_n_succ_m(-n: Nat, m: Nat): Eq(Nat, succ(add(n, m)))(add(n, succ(m)))
 add_n_succ_m
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -409,11 +457,15 @@ afun add_commutative(-n: Nat, m: Nat): Eq(Nat, add(n, m))(add(m, n))
     return1 Eq(Nat, add(n_capp, m))(add(m, n_capp))
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -438,11 +490,15 @@ afun eq_implies_substitutable(
     return P(in_a_out_b)
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
 #[test]
@@ -463,9 +519,13 @@ afun substitutable_implies_eq(
     sub(eq_a, refl(T, a))
 "#;
     let cst = parse_or_panic(src);
-    let zo = may_to_zo(&cst).unwrap();
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
-    assert_expr_is_well_typed_under_empty_tcon(zo.clone());
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
 
-    insta::assert_display_snapshot!(PrettyPrint(&zo));
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
