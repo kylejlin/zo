@@ -28,6 +28,64 @@ fn assert_expr_is_well_typed_under_empty_tcon(ast: znode::Expr) {
         .pretty_unwrap();
 }
 
+fn assert_expr_is_ill_typed_under_empty_tcon(ast: znode::Expr) {
+    use zoc::{
+        eval::Normalized,
+        pretty_print::PrettyUnwrapErr,
+        syntax_tree::{lexer::lex as zo_lex, parser::parse as zo_parse},
+        typecheck::{LazyTypeContext, TypeChecker},
+    };
+
+    let src = PrettyPrint(&ast).to_string();
+    let tokens = zo_lex(&src).unwrap();
+    let ost = zo_parse(tokens).unwrap();
+
+    let empty = Normalized::<[_; 0]>::new();
+    TypeChecker::default()
+        .get_type(
+            ost.into(),
+            LazyTypeContext::Base(empty.as_ref().convert_ref()),
+        )
+        .map(Normalized::into_raw)
+        .pretty_unwrap_err();
+}
+
+#[test]
+fn ill_typed_unused_def_does_not_affect_converted_leaf() {
+    let src = r#"
+ind Nat
+    case zero
+    case succ(_: Nat)
+    return Set0
+
+fun bad(n: Nat): Nat
+    match n
+    case zero:
+        zero
+    // missing `succ` case
+    return1 Nat
+
+succ(succ(zero))
+"#;
+    let cst = parse_or_panic(src);
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
+
+    // `substitutable_defs` should be `[Nat, zero, succ, bad]`.
+    assert_eq!(4, substitutable_defs.len());
+
+    // `Nat`, `zero`, and `succ` should be well typed.
+    assert_expr_is_well_typed_under_empty_tcon(substitutable_defs[0].clone());
+    assert_expr_is_well_typed_under_empty_tcon(substitutable_defs[1].clone());
+    assert_expr_is_well_typed_under_empty_tcon(substitutable_defs[2].clone());
+
+    // `bad` should be ill typed.
+    assert_expr_is_ill_typed_under_empty_tcon(substitutable_defs[3].clone());
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
 #[test]
 fn two() {
     let src = r#"
