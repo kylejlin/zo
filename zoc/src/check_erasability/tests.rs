@@ -206,4 +206,29 @@ fn ok_2_variant_erasable_to_erasable() {
     check_erasability_under_empty_tcon_or_panic(&src);
 }
 
+#[test]
+fn ok_nonerasable_to_nonerasable() {
+    let bool_set_def = (
+        "<BOOL_SET>",
+        r#"
+(ind Set0 "Bool" () (
+    (() ())
+    (() ())
+))"#,
+    );
+    let true_set_def = ("<TRUE_SET>", r#"(vcon <BOOL_SET> 0)"#);
+    let src_defs = [bool_set_def, true_set_def];
+
+    let unsubstituted_src = r#"
+(fun nonrec (<BOOL_SET>) <BOOL_SET>
+    (match 1 1 <BOOL_SET> (
+        (0 <TRUE_SET>)
+        (0 <TRUE_SET>)
+    ))
+)"#;
+
+    let src = substitute_with_compounding(src_defs, unsubstituted_src);
+    check_erasability_under_empty_tcon_or_panic(&src);
+}
+
 // TODO: Add `ok_〇〇` cases.
