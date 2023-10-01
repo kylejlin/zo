@@ -14,7 +14,7 @@ impl MayConverter {
         UnshiftedEntry {
             key,
             val,
-            defines_deb: true,
+            def_type: DefinitionType::Deb,
         }
     }
 }

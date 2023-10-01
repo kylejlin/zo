@@ -11,7 +11,7 @@ impl MayConverter {
         let val_singleton = [UnshiftedEntry {
             key: &expr.name.value,
             val,
-            defines_deb: false,
+            def_type: DefinitionType::Substitutable,
         }];
         let extended_context = Context::Snoc(&context, &val_singleton);
 

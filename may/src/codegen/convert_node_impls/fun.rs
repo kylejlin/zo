@@ -10,7 +10,7 @@ impl MayConverter {
         let fun_singleton = [UnshiftedEntry {
             key: &expr.name.value,
             val: fun,
-            defines_deb: false,
+            def_type: DefinitionType::Substitutable,
         }];
         let context_with_fun = Context::Snoc(&context, &fun_singleton);
         self.convert(&expr.next_val, context_with_fun)

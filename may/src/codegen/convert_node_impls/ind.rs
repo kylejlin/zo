@@ -13,7 +13,7 @@ impl MayConverter {
         let ind_singleton = [UnshiftedEntry {
             key: &expr.innards.name.value,
             val: ind,
-            defines_deb: false,
+            def_type: DefinitionType::Substitutable,
         }];
         let context_with_ind = Context::Snoc(&context, &ind_singleton);
         let context_with_ind_and_vcons = Context::Snoc(&context_with_ind, &vcon_extension);
@@ -37,7 +37,7 @@ impl MayConverter {
                 Ok(UnshiftedEntry {
                     key: &case.name.value,
                     val: vcon,
-                    defines_deb: false,
+                    def_type: DefinitionType::Substitutable,
                 })
             })
             .collect()
