@@ -1,0 +1,11 @@
+---
+source: may/src/codegen/tests/mod.rs
+expression: PrettyPrint(&converted_leaf)
+---
+(
+    ind
+    Prop0
+    "DummyLeaf"
+    ()
+    ()
+)

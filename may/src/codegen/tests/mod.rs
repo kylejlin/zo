@@ -587,3 +587,18 @@ afun substitutable_implies_eq(
 
     insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
+
+#[test]
+fn stdlib() {
+    let src = include_str!("std.may");
+    let cst = parse_or_panic(src);
+    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
+
+    for def in substitutable_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}

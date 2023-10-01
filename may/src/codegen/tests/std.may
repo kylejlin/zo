@@ -4,7 +4,7 @@
 
 ind Unit
     case unit
-    return Set0
+    return Prop0
 
 // ================================================================
 // Bool
@@ -39,6 +39,17 @@ fun or(a: Bool, b: Bool): Bool
         b
     return1 Bool
 
+fun eq(a: Bool, b: Bool): Bool
+    match a
+    case true:
+        b
+    case false:
+        not(b)
+    return1 Bool
+
+fun neq(a: Bool, b: Bool): Bool
+    not(eq(a, b))
+
 // ================================================================
 // Nat
 // ================================================================
@@ -48,7 +59,7 @@ ind Nat
     case succ(_: Nat)
     return Set0
 
-fun add(a: Nat, b: Nat): Nat
+fun add(-a: Nat, b: Nat): Nat
     match a
     case zero:
         b
@@ -56,7 +67,7 @@ fun add(a: Nat, b: Nat): Nat
         succ(add(pred, b))
     return1 Nat
 
-fun mul(a: Nat, b: Nat): Nat
+fun mul(-a: Nat, b: Nat): Nat
     match a
     case zero:
         zero
@@ -65,7 +76,7 @@ fun mul(a: Nat, b: Nat): Nat
     return1 Nat
 
 // We define zero to the zeroth power to equal one.
-fun pow(base: Nat, exp: Nat): Nat
+fun pow(base: Nat, -exp: Nat): Nat
     match exp
     case zero:
         succ(zero)
@@ -82,27 +93,12 @@ ind(T: Set0, P: For(_: T) -> Prop0) Exists
     return Prop0
 
 // ================================================================
-// Dummy tail
+// Dummy leaf
 //
 // - If you want to use the above library,
-//   delete this `Dummy tail` section,
+//   delete this `Dummy leaf` section,
 //   and add your code below.
 // ================================================================
 
-ind Precise(T: Set0, t: T)
-    case precise
-    return Set0
-
-aind DummyTail
-    case dummy_tail(
-        _: Unit,
-        _: Precise(Unit, unit),
-
-        _: Bool,
-        _: Precise(Bool, true),
-        _: Precise(Bool, false),
-        _: Precise(For(_: Bool) -> Bool, not),
-        _: Precise(For(_: Bool, _: Bool) -> Bool, and),
-        _: Precise(For(_: Bool, _: Bool) -> Bool, or),
-    )
+aind DummyLeaf
     return Prop0
