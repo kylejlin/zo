@@ -1,0 +1,5 @@
+// This is not May, but I want to test the extension.
+
+if foo == "hi" do
+   print x
+end

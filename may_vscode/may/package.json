@@ -1,0 +1,25 @@
+{
+  "name": "may",
+  "displayName": "May",
+  "description": "May programming language support",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "may",
+      "aliases": ["May", "may"],
+      "extensions": [".may"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "may",
+      "scopeName": "source.may",
+      "path": "./syntaxes/may.tmLanguage.json"
+    }]
+  }
+}
