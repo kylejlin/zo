@@ -125,12 +125,12 @@ fun pos_add(-a: Pos, b: Pos): Pos
         return1 Pos
     return1 Pos
 
-fun pos_mult(-a: Pos, b: Pos): Pos
+fun pos_mul(-a: Pos, b: Pos): Pos
     match a
     case pos_one:
         b
     case pos_snoc(a_left, a_right):
-        let a_left_times_2b = pos_snoc(pos_mult(a_left, b), b0)
+        let a_left_times_2b = pos_snoc(pos_mul(a_left, b), b0)
         match a_right
         case b0:
             a_left_times_2b
@@ -138,6 +138,49 @@ fun pos_mult(-a: Pos, b: Pos): Pos
             pos_add(b, a_left_times_2b)
         return1 Pos
     return1 Pos
+
+// ================================================================
+// Nat
+// ================================================================
+
+ind Nat
+    case nat_zero
+    case nat_pos(n: Pos)
+    return Set0
+
+fun nat_succ(a: Nat): Nat
+    match a
+    case nat_zero:
+        nat_pos(pos_one)
+    case nat_pos(n):
+        nat_pos(pos_succ(n))
+    return1 Nat
+
+fun nat_add(a: Nat, b: Nat): Nat
+    match a
+    case nat_zero:
+        b
+    case nat_pos(a):
+        match b
+        case nat_zero:
+            nat_pos(a)
+        case nat_pos(b):
+            nat_pos(pos_add(a, b))
+        return1 Nat
+    return1 Nat
+
+fun nat_mul(a: Nat, b: Nat): Nat
+    match a
+    case nat_zero:
+        nat_zero
+    case nat_pos(a):
+        match b
+        case nat_zero:
+            nat_zero
+        case nat_pos(b):
+            nat_pos(pos_mul(a, b))
+        return1 Nat
+    return1 Nat
 
 // ================================================================
 // Exists
