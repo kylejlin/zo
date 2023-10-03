@@ -125,6 +125,20 @@ fun pos_add(-a: Pos, b: Pos): Pos
         return1 Pos
     return1 Pos
 
+fun pos_mult(-a: Pos, b: Pos): Pos
+    match a
+    case pos_one:
+        b
+    case pos_snoc(a_left, a_right):
+        let a_left_times_2b = pos_snoc(pos_mult(a_left, b), b0)
+        match a_right
+        case b0:
+            a_left_times_2b
+        case b1:
+            pos_add(b, a_left_times_2b)
+        return1 Pos
+    return1 Pos
+
 // ================================================================
 // Exists
 // ================================================================
