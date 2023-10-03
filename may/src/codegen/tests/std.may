@@ -134,6 +134,23 @@ ind(T: Set0, P: For(_: T) -> Prop0) Exists
     return Prop0
 
 // ================================================================
+// Misc syntax test
+// ================================================================
+// TODO: Delete this section
+
+let x = vcon1 Dummy "CustomDummy" [_: Pos]
+    case dummy_a: [pos_one]
+    case dummy_b: [pos_one]
+    return Prop0
+
+let y = match x
+    case dummy_a:
+        pos_one
+    case dummy_b:
+        pos_one
+    use _matchee: [_index_arg] return Pos
+
+// ================================================================
 // Dummy leaf
 //
 // - If you want to use the above library,

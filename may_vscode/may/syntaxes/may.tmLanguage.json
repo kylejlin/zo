@@ -1,32 +1,54 @@
 {
-	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "May",
-	"patterns": [
-		{
-			"include": "#keywords"
-		},
-		{
-			"include": "#strings"
-		}
-	],
-	"repository": {
-		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.may",
-				"match": "\\b(if|while|for|return)\\b"
-			}]
-		},
-		"strings": {
-			"name": "string.quoted.double.may",
-			"begin": "\"",
-			"end": "\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.may",
-					"match": "\\\\."
-				}
-			]
-		}
-	},
-	"scopeName": "source.may"
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "May",
+  "patterns": [
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#strings"
+    }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "name": "comment.line.documentation.may",
+          "match": "//[^\\n]*"
+        },
+        {
+          "name": "keyword.control.may",
+          "match": "\\b(let|ind|fun|aind|match|afun|For|case|return(\\d*)|use|vcon(\\d+))\\b"
+        },
+        {
+          "name": "keyword.control.dash.may",
+          "match": "\\-(?=[a-zA-Z0-9])"
+        },
+        {
+          "name": "constant.language.boolean.may",
+          "match": "\\b((Set|Prop)\\d+)\\b"
+        },
+        {
+          "name": "entity.name.type.may",
+          "match": "\\b(_*[A-Z][a-zA-Z_0-9]*)\\b"
+        },
+        {
+          "name": "entity.name.variable.may",
+          "match": "\\b(_*[a-z][a-zA-Z_0-9]*)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.may",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.may",
+          "match": "\\\\."
+        }
+      ]
+    }
+  },
+  "scopeName": "source.may"
 }
