@@ -50,7 +50,7 @@ fn assert_expr_is_ill_typed_under_empty_tcon(ast: znode::Expr) {
         .pretty_unwrap_err();
 }
 
-fn assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(
+fn assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(
     src: &str,
 ) -> znode::Expr {
     let cst = parse_or_panic(src);
@@ -102,122 +102,10 @@ succ(succ(zero))
 }
 
 #[test]
-fn two() {
-    let src = include_str!("samples/two.may");
+fn comprehensive_syntax_check() {
+    let src = include_str!("samples/comprehensive_syntax_check.may");
     let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn add_two_three() {
-    let src = include_str!("samples/add_two_three.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn list() {
-    let src = include_str!("samples/list.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn list_nil() {
-    let src = include_str!("samples/list_nil.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn list_cons() {
-    let src = include_str!("samples/list_cons.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn rev() {
-    let src = include_str!("samples/rev.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn eq() {
-    let src = include_str!("samples/eq.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn eq_refl() {
-    let src = include_str!("samples/eq_refl.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn eq_commutative() {
-    let src = include_str!("samples/eq_commutative.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn eq_transitive() {
-    let src = include_str!("samples/eq_transitive.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn add_n_zero() {
-    let src = include_str!("samples/add_n_zero.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn add_n_succ_m() {
-    let src = include_str!("samples/add_n_succ_m.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn add_commutative() {
-    let src = include_str!("samples/add_commutative.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn eq_implies_substitutable() {
-    let src = include_str!("samples/eq_implies_substitutable.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
-    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
-}
-
-#[test]
-fn substitutable_implies_eq() {
-    let src = include_str!("samples/substitutable_implies_eq.may");
-    let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
     insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
@@ -225,6 +113,126 @@ fn substitutable_implies_eq() {
 fn stdlib() {
     let src = include_str!("samples/std.may");
     let converted_leaf =
-        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn two() {
+    let src = include_str!("samples/two.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn add_two_three() {
+    let src = include_str!("samples/add_two_three.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn list() {
+    let src = include_str!("samples/list.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn list_nil() {
+    let src = include_str!("samples/list_nil.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn list_cons() {
+    let src = include_str!("samples/list_cons.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn rev() {
+    let src = include_str!("samples/rev.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn eq() {
+    let src = include_str!("samples/eq.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn eq_refl() {
+    let src = include_str!("samples/eq_refl.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn eq_commutative() {
+    let src = include_str!("samples/eq_commutative.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn eq_transitive() {
+    let src = include_str!("samples/eq_transitive.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn add_n_zero() {
+    let src = include_str!("samples/add_n_zero.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn add_n_succ_m() {
+    let src = include_str!("samples/add_n_succ_m.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn add_commutative() {
+    let src = include_str!("samples/add_commutative.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn eq_implies_substitutable() {
+    let src = include_str!("samples/eq_implies_substitutable.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
+
+#[test]
+fn substitutable_implies_eq() {
+    let src = include_str!("samples/substitutable_implies_eq.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
     insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
