@@ -590,7 +590,7 @@ afun substitutable_implies_eq(
 
 #[test]
 fn stdlib() {
-    let src = include_str!("std.may");
+    let src = include_str!("samples/std.may");
     let cst = parse_or_panic(src);
     let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
 
