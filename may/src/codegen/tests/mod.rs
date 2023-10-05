@@ -50,6 +50,21 @@ fn assert_expr_is_ill_typed_under_empty_tcon(ast: znode::Expr) {
         .pretty_unwrap_err();
 }
 
+fn assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(
+    src: &str,
+) -> znode::Expr {
+    let cst = parse_or_panic(src);
+    let (converted_leaf, topright_defs) = may_to_zo(&cst).unwrap();
+
+    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
+
+    for def in topright_defs {
+        assert_expr_is_well_typed_under_empty_tcon(def);
+    }
+
+    converted_leaf
+}
+
 #[test]
 fn ill_typed_unused_def_does_not_affect_converted_leaf() {
     let src = r#"
@@ -88,23 +103,9 @@ succ(succ(zero))
 
 #[test]
 fn two() {
-    let src = r#"
-ind Nat
-    case zero
-    case succ(_: Nat)
-    return Set0
-
-succ(succ(zero))
-"#;
-    let cst = parse_or_panic(src);
-    let (converted_leaf, substitutable_defs) = may_to_zo(&cst).unwrap();
-
-    assert_expr_is_well_typed_under_empty_tcon(converted_leaf.clone());
-
-    for def in substitutable_defs {
-        assert_expr_is_well_typed_under_empty_tcon(def);
-    }
-
+    let src = include_str!("samples/two.may");
+    let converted_leaf =
+        assert_final_expression_and_topright_defs_are_well_typed_under_empty_tcon(src);
     insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
 
