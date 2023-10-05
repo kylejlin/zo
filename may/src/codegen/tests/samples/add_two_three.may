@@ -1,0 +1,18 @@
+ind Nat
+    case zero
+    case succ(_: Nat)
+    return Set0
+
+let _2 = succ(succ(zero))
+
+let _3 = succ(_2)
+
+fun add(-a: Nat, b: Nat): Nat
+    match a
+    case zero:
+        b
+    case succ(a_pred):
+        succ(add(a_pred, b))
+    return1 Nat
+
+add(_2, _3)

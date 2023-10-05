@@ -1,0 +1,14 @@
+ind(T: Set0, left: T) Eq[_: T]
+    case refl: [left]
+    return Prop0
+
+afun substitutable_implies_eq(
+    T: Set0,
+    a: T,
+    b: T,
+    sub: For(P: For(_: T) -> Prop0, pa: P(a)) -> P(b),
+): Eq(T, a)(b)
+    fun eq_a(c: T): Prop0
+        Eq(T, a)(c)
+    sub(eq_a, refl(T, a))
+    

@@ -1,0 +1,18 @@
+ind(T: Set0, left: T) Eq[_: T]
+    case refl: [left]
+    return Prop0
+
+afun eq_implies_substitutable(
+    T: Set0,
+    a: T,
+    b: T,
+    eq: Eq(T, a)(b),
+    P: For(_: T) -> Prop0,
+    pa: P(a),
+): P(b)
+    match eq
+    case refl:
+        pa
+    use [in_a_out_b]
+    return P(in_a_out_b)
+    
