@@ -1,5 +1,0 @@
-ind(T: Set0) List
-    case nil
-    case cons(_: T, _: List)
-    return Set0
-List

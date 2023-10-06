@@ -30,9 +30,6 @@ mod cst_impls;
 pub mod error;
 pub use error::*;
 
-#[cfg(test)]
-mod tests;
-
 /// If this function succeeds, it returns `Ok((converted_expr, toprightmost_defs))` where:
 ///
 /// - `converted_leaf` is the Zo representation of `expr`

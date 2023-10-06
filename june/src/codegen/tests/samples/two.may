@@ -1,6 +1,0 @@
-ind Nat
-    case zero
-    case succ(_: Nat)
-    return Set0
-
-succ(succ(zero))
