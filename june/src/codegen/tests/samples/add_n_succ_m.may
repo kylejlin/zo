@@ -1,0 +1,32 @@
+ind(T: Set0, left: T) Eq[_: T]
+    case refl: [left]
+    return Prop0
+
+ind Nat
+    case zero
+    case succ(_: Nat)
+    return Set0
+
+fun add(-a: Nat, b: Nat): Nat
+    match a
+    case zero:
+        b
+    case succ(a_pred):
+        succ(add(a_pred, b))
+    return1 Nat
+
+fun add_n_succ_m(-n: Nat, m: Nat): Eq(Nat, succ(add(n, m)))(add(n, succ(m)))
+    match n
+    case zero:
+        refl(Nat, succ(m))
+    case succ(n_pred):
+        // Goal: Eq(Nat, succ(succ(add(n_pred, m))))(succ(add(n_pred, succ(m))))
+        match add_n_succ_m(n_pred, m)
+        case refl:
+            refl(Nat, succ(succ(add(n_pred, m))))
+        use [in_succ_add_out_add_succ]
+        return Eq(Nat, succ(succ(add(n_pred, m))))(succ(in_succ_add_out_add_succ))
+    use n_capp
+    return1 Eq(Nat, succ(add(n_capp, m)))(add(n_capp, succ(m)))
+
+add_n_succ_m

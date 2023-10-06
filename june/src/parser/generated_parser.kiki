@@ -1,0 +1,335 @@
+start Expr
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum Expr {
+    Let(Let)
+    Ind(Ind)
+    Fun(Fun)
+
+    Aind(Aind)
+    Vcon(Vcon)
+    Match(Match)
+    Afun(Afun)
+    For(For)
+    VarOrApp(VarOrApp)
+    Universe($Universe)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Let {
+    letkw: $LetKw
+    name: $Ident
+    _: $Eq
+    val: Expr
+    next_val: Expr
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Ind {
+    indkw: $IndKw
+    innards: IndCommonInnards
+    next_val: Expr
+}
+
+// "Innards" refer to common syntax
+// shared between `ind` and `aind`.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct IndCommonInnards {
+    params: OptParenthesizedParamDefs
+    name: $Ident
+    custom_zo_name: OptString
+    indices: OptSquareBracketedParamDefs
+    cases: ZeroOrMoreIndCases
+    returnkw: $ReturnKw
+    universe: $Universe
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptString {
+    None
+    Some($String)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptParenthesizedParamDefs {
+    None
+    Some(ParenthesizedCommaSeparatedParamDefs)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct ParenthesizedCommaSeparatedParamDefs {
+    lparen: $LParen
+    params: CommaSeparatedParamDefs
+    trailing_comma: OptComma
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptComma {
+    None
+    Some($Comma)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum CommaSeparatedParamDefs {
+    One(ParamDef)
+    Snoc(
+        CommaSeparatedParamDefs
+        _: $Comma
+        ParamDef
+    )
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct ParamDef {
+    dash: OptDash
+    name: IdentOrUnderscore
+    _: $Colon
+    type_: Expr
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptDash {
+    None
+    Some($Dash)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptSquareBracketedParamDefs {
+    None
+    Some(SquareBracketedParamDefs)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct SquareBracketedParamDefs {
+    lsquare: $LSquare
+    params: CommaSeparatedParamDefs
+    trailing_comma: OptComma
+    rsquare: $RSquare
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum ZeroOrMoreIndCases {
+    Nil
+    Snoc(
+        ZeroOrMoreIndCases
+        IndCase
+    )
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct IndCase {
+    casekw: $CaseKw
+    name: $Ident
+    params: OptParenthesizedParamDefs
+    return_type: OptColonSquareBracketedExprs
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptColonSquareBracketedExprs {
+    None
+    Some(
+        _: $Colon
+        _: $LSquare
+        CommaSeparatedExprs
+        _: OptComma
+        _: $RSquare
+    )
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Fun {
+    funkw: $FunKw
+    name: $Ident
+    innards: FunCommonInnards
+    next_val: Expr
+}
+
+// "Innards" refer to common syntax
+// shared between `fun` and `afun`.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct FunCommonInnards {
+    params: ParenthesizedCommaSeparatedParamDefs
+    _: $Colon
+    return_type: Expr
+    return_val: Expr
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Aind {
+    aindkw: $AindKw
+    innards: IndCommonInnards
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Vcon {
+    vcon_index: $VconIndex
+    innards: IndCommonInnards
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Match {
+    matchkw: $MatchKw
+    matchee: Expr
+    cases: ZeroOrMoreMatchCases
+    return_arity: ReturnArityClause
+    return_type: Expr
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum ReturnArityClause {
+    Unnamed($ReturnArity)
+    Matchee(
+        _: $UseKw
+        $Ident
+        $ReturnArity
+    )
+    Indices(
+        _: $UseKw
+        SquareBracketedCommaSeparatedIdentsOrUnderscores
+        _: $ReturnKw
+    )
+    MatcheeAndIndices(
+        _: $UseKw
+        $Ident
+        _: $Colon
+        SquareBracketedCommaSeparatedIdentsOrUnderscores
+        _: $ReturnKw
+    )
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct SquareBracketedCommaSeparatedIdentsOrUnderscores {
+    lsquare: $LSquare
+    idents: CommaSeparatedIdentsOrUnderscores
+    trailing_comma: OptComma
+    rsquare: $RSquare
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum CommaSeparatedIdentsOrUnderscores {
+    One(IdentOrUnderscore)
+    Snoc(
+        CommaSeparatedIdentsOrUnderscores
+        _: $Comma
+        IdentOrUnderscore
+    )
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum ZeroOrMoreMatchCases {
+    Nil
+    Snoc(
+        ZeroOrMoreMatchCases
+        MatchCase
+    )
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct MatchCase {
+    casekw: $CaseKw
+    name: $Ident
+    params: OptParenthesizedCommaSeparatedIdentsOrUnderscores
+    _: $Colon
+    return_val: Expr
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptParenthesizedCommaSeparatedIdentsOrUnderscores {
+    None
+    Some(ParenthesizedCommaSeparatedIdentsOrUnderscores)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct ParenthesizedCommaSeparatedIdentsOrUnderscores {
+    lparen: $LParen
+    idents: CommaSeparatedIdentsOrUnderscores
+    trailing_comma: OptComma
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct Afun {
+    afunkw: $AfunKw
+    name: OptIdent
+    innards: FunCommonInnards
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptIdent {
+    None
+    Some($Ident)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct App {
+    callee: VarOrApp
+    lparen: $LParen
+    args: CommaSeparatedExprs
+    trailing_comma: OptComma
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum VarOrApp {
+    Var($Ident)
+    App(App)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum CommaSeparatedExprs {
+    One(Expr)
+    Snoc(
+        CommaSeparatedExprs
+        _: $Comma
+        Expr
+    )
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct For {
+    forkw: $ForKw
+    params: ParenthesizedCommaSeparatedParamDefs
+    _: $ThinArrow
+    return_type: Expr
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum IdentOrUnderscore {
+    Ident($Ident)
+    Underscore($Underscore)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+terminal Token {
+    $LParen: crate::token::ByteIndex
+    $RParen: crate::token::ByteIndex
+    $LSquare: crate::token::ByteIndex
+    $RSquare: crate::token::ByteIndex
+    $Eq: crate::token::ByteIndex
+    $Colon: crate::token::ByteIndex
+    $Comma: crate::token::ByteIndex
+    $ThinArrow: crate::token::ByteIndex
+    $Dash: crate::token::ByteIndex
+    $Underscore: crate::token::ByteIndex
+
+    $LetKw: crate::token::ByteIndex
+    $IndKw: crate::token::ByteIndex
+    $FunKw: crate::token::ByteIndex
+
+    $AindKw: crate::token::ByteIndex
+    $MatchKw: crate::token::ByteIndex
+    $AfunKw: crate::token::ByteIndex
+    $ForKw: crate::token::ByteIndex
+
+    $CaseKw: crate::token::ByteIndex
+    $ReturnKw: crate::token::ByteIndex
+    $UseKw: crate::token::ByteIndex
+
+    $Ident: crate::token::Ident
+    $Number: crate::token::NumberLiteral
+    $String: crate::token::StringLiteral
+    $Universe: crate::token::UniverseLiteral
+    $VconIndex: crate::token::VconIndexLiteral
+    $ReturnArity: crate::token::ReturnArityLiteral
+}

@@ -1,0 +1,4 @@
+ind(T: Set0, left: T) Eq[_: T]
+    case refl: [left]
+    return Prop0
+refl

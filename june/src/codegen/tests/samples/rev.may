@@ -1,0 +1,27 @@
+ind(T: Set0) List
+    case nil
+    case cons(_: T, _: List)
+    return Set0
+
+fun rev(T: Set0, xs: List(T)): List(T)
+    fun helper(-xs: List(T), acc: List(T)): List(T)
+        match xs
+        case nil:
+            acc
+        case cons(x, xs):
+            helper(xs, cons(T)(x, acc))
+        return1 List(T)
+    helper(xs, nil(T))
+
+ind Abc
+    case a
+    case b
+    case c
+    return Set0
+
+let acons = cons(Abc)
+let anil = nil(Abc)
+
+let a_b_c = acons(a, acons(b, acons(c, anil)))
+
+rev(Abc, a_b_c)

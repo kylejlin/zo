@@ -1,0 +1,14 @@
+---
+source: june/src/parser/tests/ind.rs
+expression: err
+---
+Some(
+    Ident(
+        Ident {
+            value: "illegal",
+            start: ByteIndex(
+                76,
+            ),
+        },
+    ),
+)

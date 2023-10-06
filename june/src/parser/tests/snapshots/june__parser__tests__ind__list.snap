@@ -1,0 +1,184 @@
+---
+source: june/src/parser/tests/ind.rs
+expression: cst
+---
+Ind(
+    Ind {
+        indkw: ByteIndex(
+            1,
+        ),
+        innards: IndCommonInnards {
+            params: Some(
+                ParenthesizedCommaSeparatedParamDefs {
+                    lparen: ByteIndex(
+                        4,
+                    ),
+                    params: One(
+                        ParamDef {
+                            dash: None,
+                            name: Ident(
+                                Ident {
+                                    value: "T",
+                                    start: ByteIndex(
+                                        5,
+                                    ),
+                                },
+                            ),
+                            type_: Universe(
+                                UniverseLiteral {
+                                    level: 0,
+                                    start: ByteIndex(
+                                        8,
+                                    ),
+                                    erasable: false,
+                                },
+                            ),
+                        },
+                    ),
+                    trailing_comma: None,
+                    rparen: ByteIndex(
+                        12,
+                    ),
+                },
+            ),
+            name: Ident {
+                value: "List",
+                start: ByteIndex(
+                    14,
+                ),
+            },
+            custom_zo_name: None,
+            indices: None,
+            cases: Snoc(
+                Snoc(
+                    Nil,
+                    IndCase {
+                        casekw: ByteIndex(
+                            23,
+                        ),
+                        name: Ident {
+                            value: "nil",
+                            start: ByteIndex(
+                                28,
+                            ),
+                        },
+                        params: None,
+                        return_type: None,
+                    },
+                ),
+                IndCase {
+                    casekw: ByteIndex(
+                        36,
+                    ),
+                    name: Ident {
+                        value: "cons",
+                        start: ByteIndex(
+                            41,
+                        ),
+                    },
+                    params: Some(
+                        ParenthesizedCommaSeparatedParamDefs {
+                            lparen: ByteIndex(
+                                45,
+                            ),
+                            params: Snoc(
+                                One(
+                                    ParamDef {
+                                        dash: None,
+                                        name: Ident(
+                                            Ident {
+                                                value: "car",
+                                                start: ByteIndex(
+                                                    46,
+                                                ),
+                                            },
+                                        ),
+                                        type_: VarOrApp(
+                                            Var(
+                                                Ident {
+                                                    value: "T",
+                                                    start: ByteIndex(
+                                                        51,
+                                                    ),
+                                                },
+                                            ),
+                                        ),
+                                    },
+                                ),
+                                ParamDef {
+                                    dash: None,
+                                    name: Ident(
+                                        Ident {
+                                            value: "cdr",
+                                            start: ByteIndex(
+                                                54,
+                                            ),
+                                        },
+                                    ),
+                                    type_: VarOrApp(
+                                        Var(
+                                            Ident {
+                                                value: "List",
+                                                start: ByteIndex(
+                                                    59,
+                                                ),
+                                            },
+                                        ),
+                                    ),
+                                },
+                            ),
+                            trailing_comma: None,
+                            rparen: ByteIndex(
+                                63,
+                            ),
+                        },
+                    ),
+                    return_type: None,
+                },
+            ),
+            returnkw: ByteIndex(
+                69,
+            ),
+            universe: UniverseLiteral {
+                level: 0,
+                start: ByteIndex(
+                    76,
+                ),
+                erasable: false,
+            },
+        },
+        next_val: VarOrApp(
+            App(
+                App {
+                    callee: Var(
+                        Ident {
+                            value: "List",
+                            start: ByteIndex(
+                                82,
+                            ),
+                        },
+                    ),
+                    lparen: ByteIndex(
+                        86,
+                    ),
+                    args: One(
+                        VarOrApp(
+                            Var(
+                                Ident {
+                                    value: "Nat",
+                                    start: ByteIndex(
+                                        87,
+                                    ),
+                                },
+                            ),
+                        ),
+                    ),
+                    trailing_comma: None,
+                    rparen: ByteIndex(
+                        90,
+                    ),
+                },
+            ),
+        ),
+    },
+)

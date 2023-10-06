@@ -1,0 +1,51 @@
+---
+source: june/src/codegen/tests/mod.rs
+expression: PrettyPrint(&converted_leaf)
+---
+(
+    fun
+    nonrec
+    (
+        Set0
+        0
+    )
+    (
+        (
+            ind
+            Prop0
+            "Eq"
+            (
+                1
+            )
+            (
+                (
+                    ()
+                    (
+                        1
+                    )
+                )
+            )
+        )
+        0
+    )
+    (
+        vcon
+        (
+            ind
+            Prop0
+            "Eq"
+            (
+                2
+            )
+            (
+                (
+                    ()
+                    (
+                        2
+                    )
+                )
+            )
+        )
+        0
+    )
+)

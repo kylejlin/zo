@@ -1,0 +1,55 @@
+---
+source: june/src/parser/tests/ind.rs
+expression: cst
+---
+Ind(
+    Ind {
+        indkw: ByteIndex(
+            1,
+        ),
+        innards: IndCommonInnards {
+            params: None,
+            name: Ident {
+                value: "Foo",
+                start: ByteIndex(
+                    5,
+                ),
+            },
+            custom_zo_name: Some(
+                StringLiteral {
+                    value: "Empty",
+                    span: (
+                        ByteIndex(
+                            9,
+                        ),
+                        ByteIndex(
+                            16,
+                        ),
+                    ),
+                },
+            ),
+            indices: None,
+            cases: Nil,
+            returnkw: ByteIndex(
+                21,
+            ),
+            universe: UniverseLiteral {
+                level: 0,
+                start: ByteIndex(
+                    28,
+                ),
+                erasable: false,
+            },
+        },
+        next_val: VarOrApp(
+            Var(
+                Ident {
+                    value: "Foo",
+                    start: ByteIndex(
+                        34,
+                    ),
+                },
+            ),
+        ),
+    },
+)

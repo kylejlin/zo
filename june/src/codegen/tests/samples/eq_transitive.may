@@ -1,0 +1,20 @@
+ind(T: Set0, left: T) Eq[_: T]
+    case refl: [left]
+    return Prop0
+
+afun(
+    T: Set0,
+    a: T,
+    b: T,
+    c: T,
+    ab: Eq(T, a)(b),
+    bc: Eq(T, b)(c),
+): Eq(T, a)(c)
+    let f =
+        match ab
+        case refl:
+            afun(ac: Eq(T, a)(c)): Eq(T, a)(c)
+                ac
+        use [ina_outb]
+        return For(_: Eq(T, ina_outb)(c)) -> Eq(T, a)(c)
+    f(bc)
