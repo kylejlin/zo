@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 439bb134bb2a36df5685fea73f342d6a1f2adfd20f1fa7af0dd22fca2d153047
+// @sha256 443d65f719e8d714da4648779a3d6cff3c25e26fa43a866bab0a1f217308f89d
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.

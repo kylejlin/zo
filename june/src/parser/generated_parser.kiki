@@ -91,8 +91,6 @@ enum ZeroOrMoreIndCases {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct IndCase {
-    // TODO: Delete
-    // casekw: $CaseKw
     name: $Ident
     params: OptParenthesizedNonfunParamDefs
     index_args: OptCaretParenthesizedExprs
