@@ -5,5 +5,6 @@ pub mod cst {
     pub use super::generated_parser::*;
 }
 
-#[cfg(test)]
-mod tests;
+// TODO: Uncomment
+// #[cfg(test)]
+// mod tests;

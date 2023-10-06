@@ -85,6 +85,7 @@ impl Lexer<'_> {
             '=' => self.out.push(Token::Eq(current_index)),
             ':' => self.out.push(Token::Colon(current_index)),
             ',' => self.out.push(Token::Comma(current_index)),
+            '^' => self.out.push(Token::Caret(current_index)),
             '-' => self.state = State::Dash(current_index),
             '/' => self.state = State::Slash(current_index),
             _ => {
@@ -239,50 +240,57 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
         "_" => return Some(Token::Underscore(start)),
 
         "let" => return Some(Token::LetKw(start)),
-        "ind" => return Some(Token::IndKw(start)),
         "fun" => return Some(Token::FunKw(start)),
 
-        "aind" => return Some(Token::AindKw(start)),
         "match" => return Some(Token::MatchKw(start)),
         "afun" => return Some(Token::AfunKw(start)),
         "For" => return Some(Token::ForKw(start)),
 
         "case" => return Some(Token::CaseKw(start)),
-        "return" => return Some(Token::ReturnKw(start)),
         "use" => return Some(Token::UseKw(start)),
+        "end" => return Some(Token::EndKw(start)),
+        "dec" => return Some(Token::DecKw(start)),
 
         _ => {}
     }
 
     if s.starts_with("Set") {
-        let level = get_number_after_prefix(s, "Set")?;
-        return Some(Token::UniverseLiteral(UniverseLiteral {
+        let level = get_nonzero_number_after_prefix_but_return_zero_if_empty_string(s, "Set")?;
+        return Some(Token::CapitalizedUniverseLiteral(
+            CapitalizedUniverseLiteral {
+                level,
+                start,
+                erasable: false,
+            },
+        ));
+    }
+
+    if s.starts_with("Prop") {
+        let level = get_nonzero_number_after_prefix_but_return_zero_if_empty_string(s, "Prop")?;
+        return Some(Token::CapitalizedUniverseLiteral(
+            CapitalizedUniverseLiteral {
+                level,
+                start,
+                erasable: true,
+            },
+        ));
+    }
+
+    if s.starts_with("set") {
+        let level = get_nonzero_number_after_prefix_but_return_zero_if_empty_string(s, "set")?;
+        return Some(Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
             level,
             start,
             erasable: false,
         }));
     }
 
-    if s.starts_with("Prop") {
-        let level = get_number_after_prefix(s, "Prop")?;
-        return Some(Token::UniverseLiteral(UniverseLiteral {
+    if s.starts_with("prop") {
+        let level = get_nonzero_number_after_prefix_but_return_zero_if_empty_string(s, "prop")?;
+        return Some(Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
             level,
             start,
             erasable: true,
-        }));
-    }
-
-    if s.starts_with("vcon") {
-        let index = get_number_after_prefix(s, "vcon")?;
-        return Some(Token::VconIndexLiteral(VconIndexLiteral { index, start }));
-    }
-
-    if s.starts_with("return") {
-        let arity = get_number_after_prefix(s, "return")?;
-
-        return Some(Token::ReturnArityLiteral(ReturnArityLiteral {
-            arity,
-            start,
         }));
     }
 
@@ -303,14 +311,25 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
     None
 }
 
-fn get_number_after_prefix(s: &str, prefix: &str) -> Option<usize> {
+/// - If `&s[prefix.len()..]` is empty, this function returns `Some(0)`.
+///
+/// - If `&s[prefix.len()..]` is a nonzero number `n` with no leading zeros,
+///   this function returns `Some(n)`.
+///
+/// - Otherwise, this function returns `None`.
+///
+///   - As a corollary, if `&s[prefix.len()..]` is a number with extraneous leading zeros,
+///     this function returns `None`.
+fn get_nonzero_number_after_prefix_but_return_zero_if_empty_string(
+    s: &str,
+    prefix: &str,
+) -> Option<usize> {
     let level_src = &s[prefix.len()..];
     if level_src.is_empty() {
-        return None;
+        return Some(0);
     }
 
-    let has_extraneous_leading_zeros = level_src != "0" && level_src.starts_with('0');
-    if has_extraneous_leading_zeros {
+    if level_src.starts_with('0') {
         return None;
     }
 
@@ -617,20 +636,22 @@ mod tests {
 
     #[test]
     fn ind_nat() {
-        let src = r#"ind Nat case zero case succ(pred: Nat) return Set0"#;
+        let src = r#"set Nat zero succ(pred: Nat) end"#;
         let actual = lex(src);
         let expected = Ok(vec![
-            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+                level: 0,
+                start: ByteIndex(src.find("set").unwrap()),
+                erasable: false,
+            }),
             Token::Ident(Ident {
                 value: "Nat".to_owned(),
                 start: ByteIndex(src.find("Nat").unwrap()),
             }),
-            Token::CaseKw(ByteIndex(8)),
             Token::Ident(Ident {
                 value: "zero".to_owned(),
                 start: ByteIndex(src.find("zero").unwrap()),
             }),
-            Token::CaseKw(ByteIndex(18)),
             Token::Ident(Ident {
                 value: "succ".to_owned(),
                 start: ByteIndex(src.find("succ").unwrap()),
@@ -643,34 +664,38 @@ mod tests {
             Token::Colon(ByteIndex(src.find(":").unwrap())),
             Token::Ident(Ident {
                 value: "Nat".to_owned(),
-                start: ByteIndex(34),
+                start: ByteIndex(src.find_nth("Nat", 1).unwrap()),
             }),
             Token::RParen(ByteIndex(src.find(")").unwrap())),
-            Token::ReturnKw(ByteIndex(src.find("return").unwrap())),
-            Token::UniverseLiteral(UniverseLiteral {
-                level: 0,
-                start: ByteIndex(src.find("Set0").unwrap()),
-                erasable: false,
-            }),
+            Token::EndKw(ByteIndex(src.find("end").unwrap())),
         ]);
         assert_eq!(expected, actual);
     }
 
     #[test]
     fn ind_eq() {
-        let src = r#"ind(T: Set0, left: T) Eq[_: T] case refl: [left] return Prop0"#;
+        let src = r#"prop Eq(T: Set, left: T) ^(right: T) refl ^(left) end"#;
         let actual = lex(src);
         let expected = Ok(vec![
-            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+                level: 0,
+                start: ByteIndex(src.find("prop").unwrap()),
+                erasable: true,
+            }),
+            Token::Ident(Ident {
+                value: "Eq".to_owned(),
+                start: ByteIndex(src.find("Eq").unwrap()),
+            }),
+            //
             Token::LParen(ByteIndex(src.find("(").unwrap())),
             Token::Ident(Ident {
                 value: "T".to_owned(),
                 start: ByteIndex(src.find("T").unwrap()),
             }),
             Token::Colon(ByteIndex(src.find(":").unwrap())),
-            Token::UniverseLiteral(UniverseLiteral {
+            Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
                 level: 0,
-                start: ByteIndex(src.find("Set0").unwrap()),
+                start: ByteIndex(src.find("Set").unwrap()),
                 erasable: false,
             }),
             Token::Comma(ByteIndex(src.find(",").unwrap())),
@@ -678,44 +703,38 @@ mod tests {
                 value: "left".to_owned(),
                 start: ByteIndex(src.find("left").unwrap()),
             }),
-            Token::Colon(ByteIndex(17)),
+            Token::Colon(ByteIndex(src.find_nth(":", 1).unwrap())),
             Token::Ident(Ident {
                 value: "T".to_owned(),
-                start: ByteIndex(19),
+                start: ByteIndex(src.find_nth("T", 1).unwrap()),
             }),
             Token::RParen(ByteIndex(src.find(")").unwrap())),
             //
+            Token::Caret(ByteIndex(src.find("^").unwrap())),
+            Token::LParen(ByteIndex(src.find_nth("(", 1).unwrap())),
             Token::Ident(Ident {
-                value: "Eq".to_owned(),
-                start: ByteIndex(src.find("Eq").unwrap()),
+                value: "right".to_owned(),
+                start: ByteIndex(src.find("right").unwrap()),
             }),
-            Token::LSquare(ByteIndex(src.find("[").unwrap())),
-            Token::Underscore(ByteIndex(src.find("_").unwrap())),
-            Token::Colon(ByteIndex(26)),
+            Token::Colon(ByteIndex(src.find_nth(":", 2).unwrap())),
             Token::Ident(Ident {
                 value: "T".to_owned(),
-                start: ByteIndex(28),
+                start: ByteIndex(src.find_nth("T", 2).unwrap()),
             }),
-            Token::RSquare(ByteIndex(src.find("]").unwrap())),
+            Token::RParen(ByteIndex(src.find_nth(")", 1).unwrap())),
             //
-            Token::CaseKw(ByteIndex(src.find("case").unwrap())),
             Token::Ident(Ident {
                 value: "refl".to_owned(),
                 start: ByteIndex(src.find("refl").unwrap()),
             }),
-            Token::Colon(ByteIndex(40)),
-            Token::LSquare(ByteIndex(42)),
+            Token::Caret(ByteIndex(src.find_nth("^", 1).unwrap())),
+            Token::LParen(ByteIndex(src.find_nth("(", 2).unwrap())),
             Token::Ident(Ident {
                 value: "left".to_owned(),
-                start: ByteIndex(43),
+                start: ByteIndex(src.find_nth("left", 1).unwrap()),
             }),
-            Token::RSquare(ByteIndex(47)),
-            Token::ReturnKw(ByteIndex(src.find("return").unwrap())),
-            Token::UniverseLiteral(UniverseLiteral {
-                level: 0,
-                start: ByteIndex(src.find("Prop0").unwrap()),
-                erasable: true,
-            }),
+            Token::RParen(ByteIndex(src.find_nth(")", 2).unwrap())),
+            Token::EndKw(ByteIndex(src.find("end").unwrap())),
         ]);
         assert_eq!(expected, actual);
     }
@@ -742,73 +761,78 @@ mod tests {
 
     #[test]
     fn keywords() {
-        let src = r#"_ let ind fun aind match afun For case return use Set0 Set1 Set33 Prop0 Prop1 Prop33 vcon0 vcon1 vcon33 return0 return1 return33"#;
+        let src = r#"_ let set set1 set33 prop prop1 prop33 fun match afun For case use end dec Set Set1 Set33 Prop Prop1 Prop33"#;
         let actual = lex(src);
         let expected = Ok(vec![
             Token::Underscore(ByteIndex(src.find("_").unwrap())),
             Token::LetKw(ByteIndex(src.find("let").unwrap())),
-            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+                level: 0,
+                start: ByteIndex(src.find("set").unwrap()),
+                erasable: false,
+            }),
+            Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+                level: 1,
+                start: ByteIndex(src.find("set1").unwrap()),
+                erasable: false,
+            }),
+            Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+                level: 33,
+                start: ByteIndex(src.find("set33").unwrap()),
+                erasable: false,
+            }),
+            Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+                level: 0,
+                start: ByteIndex(src.find("prop").unwrap()),
+                erasable: true,
+            }),
+            Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+                level: 1,
+                start: ByteIndex(src.find("prop1").unwrap()),
+                erasable: true,
+            }),
+            Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+                level: 33,
+                start: ByteIndex(src.find("prop33").unwrap()),
+                erasable: true,
+            }),
             Token::FunKw(ByteIndex(src.find("fun").unwrap())),
-            Token::AindKw(ByteIndex(src.find("aind").unwrap())),
             Token::MatchKw(ByteIndex(src.find("match").unwrap())),
             Token::AfunKw(ByteIndex(src.find("afun").unwrap())),
             Token::ForKw(ByteIndex(src.find("For").unwrap())),
             Token::CaseKw(ByteIndex(src.find("case").unwrap())),
-            Token::ReturnKw(ByteIndex(src.find("return").unwrap())),
             Token::UseKw(ByteIndex(src.find("use").unwrap())),
-            Token::UniverseLiteral(UniverseLiteral {
+            Token::EndKw(ByteIndex(src.find("end").unwrap())),
+            Token::DecKw(ByteIndex(src.find("dec").unwrap())),
+            Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
                 level: 0,
-                start: ByteIndex(src.find("Set0").unwrap()),
+                start: ByteIndex(src.find("Set").unwrap()),
                 erasable: false,
             }),
-            Token::UniverseLiteral(UniverseLiteral {
+            Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
                 level: 1,
                 start: ByteIndex(src.find("Set1").unwrap()),
                 erasable: false,
             }),
-            Token::UniverseLiteral(UniverseLiteral {
+            Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
                 level: 33,
                 start: ByteIndex(src.find("Set33").unwrap()),
                 erasable: false,
             }),
-            Token::UniverseLiteral(UniverseLiteral {
+            Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
                 level: 0,
-                start: ByteIndex(src.find("Prop0").unwrap()),
+                start: ByteIndex(src.find("Prop").unwrap()),
                 erasable: true,
             }),
-            Token::UniverseLiteral(UniverseLiteral {
+            Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
                 level: 1,
                 start: ByteIndex(src.find("Prop1").unwrap()),
                 erasable: true,
             }),
-            Token::UniverseLiteral(UniverseLiteral {
+            Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
                 level: 33,
                 start: ByteIndex(src.find("Prop33").unwrap()),
                 erasable: true,
-            }),
-            Token::VconIndexLiteral(VconIndexLiteral {
-                index: 0,
-                start: ByteIndex(src.find("vcon0").unwrap()),
-            }),
-            Token::VconIndexLiteral(VconIndexLiteral {
-                index: 1,
-                start: ByteIndex(src.find("vcon1").unwrap()),
-            }),
-            Token::VconIndexLiteral(VconIndexLiteral {
-                index: 33,
-                start: ByteIndex(src.find("vcon33").unwrap()),
-            }),
-            Token::ReturnArityLiteral(ReturnArityLiteral {
-                arity: 0,
-                start: ByteIndex(src.find("return0").unwrap()),
-            }),
-            Token::ReturnArityLiteral(ReturnArityLiteral {
-                arity: 1,
-                start: ByteIndex(src.find("return1").unwrap()),
-            }),
-            Token::ReturnArityLiteral(ReturnArityLiteral {
-                arity: 33,
-                start: ByteIndex(src.find("return33").unwrap()),
             }),
         ]);
         assert_eq!(expected, actual);
@@ -816,11 +840,11 @@ mod tests {
 
     #[test]
     fn no_whitespace() {
-        let src = r#"(ind)"#;
+        let src = r#"(let)"#;
         let actual = lex(src);
         let expected = Ok(vec![
             Token::LParen(ByteIndex(src.find("(").unwrap())),
-            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::LetKw(ByteIndex(src.find("let").unwrap())),
             Token::RParen(ByteIndex(src.find(")").unwrap())),
         ]);
         assert_eq!(expected, actual);
@@ -830,12 +854,12 @@ mod tests {
     fn comments() {
         let src = r#"(// Hello world!
 // You can write comments on their own line.
-ind // You can also write them at the end of a line 
+let // You can also write them at the end of a line 
 use)"#;
         let actual = lex(src);
         let expected = Ok(vec![
             Token::LParen(ByteIndex(src.find("(").unwrap())),
-            Token::IndKw(ByteIndex(src.find("ind").unwrap())),
+            Token::LetKw(ByteIndex(src.find("let").unwrap())),
             Token::UseKw(ByteIndex(src.find("use").unwrap())),
             Token::RParen(ByteIndex(src.find(")").unwrap())),
         ]);
@@ -843,15 +867,58 @@ use)"#;
     }
 
     #[test]
-    fn set_zero_zero() {
-        let src = r#"Set00"#;
+    fn lowercase_set_zero() {
+        let src = r#"set0"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);
     }
 
     #[test]
-    fn prop_zero_zero() {
+    fn lowercase_prop_zero() {
+        let src = r#"prop0"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+    #[test]
+    fn capitalized_set_zero() {
+        let src = r#"Set0"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+    #[test]
+    fn capitalized_prop_zero() {
+        let src = r#"Prop0"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn lowercase_set_zero_zero() {
+        let src = r#"set00"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+    #[test]
+    fn lowercase_prop_zero_zero() {
+        let src = r#"prop00"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+    #[test]
+    fn capitalized_set_zero_zero() {
+        let src = r#"Set00"#;
+        let actual = lex(src);
+        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+        assert_eq!(expected, actual);
+    }
+    #[test]
+    fn capitalized_prop_zero_zero() {
         let src = r#"Prop00"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
@@ -859,50 +926,54 @@ use)"#;
     }
 
     #[test]
-    fn vcon_zero_zero() {
-        let src = r#"vcon00"#;
+    fn lowercase_set_zero_one() {
+        let src = r#"set01"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);
     }
-
     #[test]
-    fn return_zero_zero() {
-        let src = r#"return00"#;
+    fn lowercase_prop_zero_one() {
+        let src = r#"prop01"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);
     }
-
     #[test]
-    fn set_zero_one() {
+    fn capitalized_set_zero_one() {
         let src = r#"Set01"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);
     }
-
     #[test]
-    fn prop_zero_one() {
+    fn capitalized_prop_zero_one() {
         let src = r#"Prop01"#;
         let actual = lex(src);
         let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
         assert_eq!(expected, actual);
     }
 
-    #[test]
-    fn vcon_zero_one() {
-        let src = r#"vcon01"#;
-        let actual = lex(src);
-        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
-        assert_eq!(expected, actual);
+    trait FindNth {
+        /// `n` is zero-indexed.
+        ///
+        /// ```rust
+        /// assert_eq!("abcxx".find_nth("x", 0), Some(3));
+        /// assert_eq!("abcxx".find_nth("x", 1), Some(4));
+        /// assert_eq!("abcxx".find_nth("x", 2), None);
+        /// ```
+        fn find_nth(&self, needle: &str, n: usize) -> Option<usize>;
     }
 
-    #[test]
-    fn return_zero_one() {
-        let src = r#"return01"#;
-        let actual = lex(src);
-        let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
-        assert_eq!(expected, actual);
+    impl FindNth for str {
+        fn find_nth(&self, needle: &str, n: usize) -> Option<usize> {
+            let mut last_needle_pos = self.find(needle)?;
+            for _ in 0..n {
+                let start = last_needle_pos + needle.len();
+                let local_needle_pos = self[start..].find(needle)?;
+                last_needle_pos = start + local_needle_pos;
+            }
+            Some(last_needle_pos)
+        }
     }
 }

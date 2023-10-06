@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 a7a28e69fd856df2647a8f446a5f52c98e7471b767e67925662ee98a47e78d89
+// @sha256 439bb134bb2a36df5685fea73f342d6a1f2adfd20f1fa7af0dd22fca2d153047
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -38,8 +38,8 @@ pub enum Token {
     Ident(crate::token::Ident),
     NumberLiteral(crate::token::NumberLiteral),
     StringLiteral(crate::token::StringLiteral),
-    IndUniverseLiteral(crate::token::IndUniverseLiteral),
-    UniverseLiteral(crate::token::UniverseLiteral),
+    LowercaseUniverseLiteral(crate::token::LowercaseUniverseLiteral),
+    CapitalizedUniverseLiteral(crate::token::CapitalizedUniverseLiteral),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -66,7 +66,7 @@ pub enum Expr {
         Box<VarOrApp>,
     ),
     Universe(
-        crate::token::UniverseLiteral,
+        crate::token::CapitalizedUniverseLiteral,
     ),
 }
 
@@ -80,7 +80,7 @@ pub struct Let {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Ind {
-    pub ind_universe: crate::token::IndUniverseLiteral,
+    pub ind_universe: crate::token::LowercaseUniverseLiteral,
     pub name: crate::token::Ident,
     pub params: Box<OptParenthesizedNonfunParamDefs>,
     pub indices: Box<OptCaretParenthesizedParamDefs>,
@@ -247,6 +247,7 @@ pub enum OptMatchReturnTypeClause {
     ),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MatchReturnTypeClause {
     pub return_params: Box<ReturnParamClause>,
     pub return_type: Box<Expr>,
@@ -444,8 +445,8 @@ enum QuasiterminalKind {
     Ident = 20,
     NumberLiteral = 21,
     StringLiteral = 22,
-    IndUniverseLiteral = 23,
-    UniverseLiteral = 24,
+    LowercaseUniverseLiteral = 23,
+    CapitalizedUniverseLiteral = 24,
     Eof = 25,
 }
 
@@ -672,8 +673,8 @@ enum Node {
     Ident(crate::token::Ident),
     NumberLiteral(crate::token::NumberLiteral),
     StringLiteral(crate::token::StringLiteral),
-    IndUniverseLiteral(crate::token::IndUniverseLiteral),
-    UniverseLiteral(crate::token::UniverseLiteral),
+    LowercaseUniverseLiteral(crate::token::LowercaseUniverseLiteral),
+    CapitalizedUniverseLiteral(crate::token::CapitalizedUniverseLiteral),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -837,7 +838,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R7 => {
-            let t0 = nodes.pop().unwrap().try_into_universe_literal_24().ok().unwrap();
+            let t0 = nodes.pop().unwrap().try_into_capitalized_universe_literal_24().ok().unwrap();
             
             states.truncate(states.len() - 1);
             
@@ -874,7 +875,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             let indices_3 = Box::new(OptCaretParenthesizedParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
             let params_2 = Box::new(OptParenthesizedNonfunParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
             let name_1 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
-            let ind_universe_0 = nodes.pop().unwrap().try_into_ind_universe_literal_23().ok().unwrap();
+            let ind_universe_0 = nodes.pop().unwrap().try_into_lowercase_universe_literal_23().ok().unwrap();
             
             states.truncate(states.len() - 7);
             
@@ -1607,8 +1608,8 @@ impl QuasiterminalKind {
             Token::Ident(_) => Self::Ident,
             Token::NumberLiteral(_) => Self::NumberLiteral,
             Token::StringLiteral(_) => Self::StringLiteral,
-            Token::IndUniverseLiteral(_) => Self::IndUniverseLiteral,
-            Token::UniverseLiteral(_) => Self::UniverseLiteral,
+            Token::LowercaseUniverseLiteral(_) => Self::LowercaseUniverseLiteral,
+            Token::CapitalizedUniverseLiteral(_) => Self::CapitalizedUniverseLiteral,
         }
     }
 }
@@ -1639,8 +1640,8 @@ impl Node {
             Token::Ident(t) => Self::Ident(t),
             Token::NumberLiteral(t) => Self::NumberLiteral(t),
             Token::StringLiteral(t) => Self::StringLiteral(t),
-            Token::IndUniverseLiteral(t) => Self::IndUniverseLiteral(t),
-            Token::UniverseLiteral(t) => Self::UniverseLiteral(t),
+            Token::LowercaseUniverseLiteral(t) => Self::LowercaseUniverseLiteral(t),
+            Token::CapitalizedUniverseLiteral(t) => Self::CapitalizedUniverseLiteral(t),
         }
     }
 }
@@ -10080,16 +10081,16 @@ impl Node {
         }
     }
     
-    fn try_into_ind_universe_literal_23(self) -> Result<crate::token::IndUniverseLiteral, Self> {
+    fn try_into_lowercase_universe_literal_23(self) -> Result<crate::token::LowercaseUniverseLiteral, Self> {
         match self {
-            Self::IndUniverseLiteral(t) => Ok(t),
+            Self::LowercaseUniverseLiteral(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_universe_literal_24(self) -> Result<crate::token::UniverseLiteral, Self> {
+    fn try_into_capitalized_universe_literal_24(self) -> Result<crate::token::CapitalizedUniverseLiteral, Self> {
         match self {
-            Self::UniverseLiteral(t) => Ok(t),
+            Self::CapitalizedUniverseLiteral(t) => Ok(t),
             _ => Err(self),
         }
     }

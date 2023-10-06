@@ -40,11 +40,20 @@ pub struct StringLiteral {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
-pub struct UniverseLiteral {
+pub struct CapitalizedUniverseLiteral {
     pub level: usize,
     pub start: ByteIndex,
     /// This is true if the literal is a `Prop`
     /// and false if the literal is a `Set`.
+    pub erasable: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
+pub struct LowercaseUniverseLiteral {
+    pub level: usize,
+    pub start: ByteIndex,
+    /// This is true if the literal is a `prop`
+    /// and false if the literal is a `set`.
     pub erasable: bool,
 }
 

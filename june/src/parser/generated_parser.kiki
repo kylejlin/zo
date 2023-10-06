@@ -10,7 +10,7 @@ enum Expr {
     Afun(Afun)
     For(For)
     VarOrApp(VarOrApp)
-    Universe($UniverseLiteral)
+    Universe($CapitalizedUniverseLiteral)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -24,7 +24,7 @@ struct Let {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Ind {
-    ind_universe: $IndUniverseLiteral
+    ind_universe: $LowercaseUniverseLiteral
     name: $Ident
     params: OptParenthesizedNonfunParamDefs
     indices: OptCaretParenthesizedParamDefs
@@ -191,6 +191,7 @@ enum OptMatchReturnTypeClause {
     Some(MatchReturnTypeClause)
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct MatchReturnTypeClause {
     return_params: ReturnParamClause
     return_type: Expr
@@ -339,6 +340,6 @@ terminal Token {
     $Ident: crate::token::Ident
     $NumberLiteral: crate::token::NumberLiteral
     $StringLiteral: crate::token::StringLiteral
-    $IndUniverseLiteral: crate::token::IndUniverseLiteral
-    $UniverseLiteral: crate::token::UniverseLiteral
+    $LowercaseUniverseLiteral: crate::token::LowercaseUniverseLiteral
+    $CapitalizedUniverseLiteral: crate::token::CapitalizedUniverseLiteral
 }
