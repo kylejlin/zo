@@ -6,8 +6,6 @@ enum Expr {
     Ind(Ind)
     Fun(Fun)
 
-    Aind(Aind)
-    Vcon(Vcon)
     Match(Match)
     Afun(Afun)
     For(For)
@@ -26,40 +24,26 @@ struct Let {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Ind {
-    indkw: $IndKw
-    innards: IndCommonInnards
+    ind_universe: $IndUniverseLiteral
+    name: $Ident
+    params: OptParenthesizedNonfunParamDefs
+    indices: OptCaretParenthesizedParamDefs
+    cases: ZeroOrMoreIndCases
+    endkw: $EndKw
+
     next_val: Expr
 }
 
-// "Innards" refer to common syntax
-// shared between `ind` and `aind`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct IndCommonInnards {
-    params: OptParenthesizedParamDefs
-    name: $Ident
-    custom_zo_name: OptString
-    indices: OptSquareBracketedParamDefs
-    cases: ZeroOrMoreIndCases
-    returnkw: $ReturnKw
-    universe: $UniverseLiteral
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptString {
+enum OptParenthesizedNonfunParamDefs {
     None
-    Some($StringLiteral)
+    Some(ParenthesizedCommaSeparatedNonfunParamDefs)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptParenthesizedParamDefs {
-    None
-    Some(ParenthesizedCommaSeparatedParamDefs)
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct ParenthesizedCommaSeparatedParamDefs {
+struct ParenthesizedCommaSeparatedNonfunParamDefs {
     lparen: $LParen
-    params: CommaSeparatedParamDefs
+    params: CommaSeparatedNonfunParamDefs
     trailing_comma: OptComma
     rparen: $RParen
 }
@@ -71,41 +55,29 @@ enum OptComma {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum CommaSeparatedParamDefs {
-    One(ParamDef)
+enum CommaSeparatedNonfunParamDefs {
+    One(NonfunParamDef)
     Snoc(
-        CommaSeparatedParamDefs
+        CommaSeparatedNonfunParamDefs
         _: $Comma
-        ParamDef
+        NonfunParamDef
     )
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct ParamDef {
-    dash: OptDash
+struct NonfunParamDef {
     name: IdentOrUnderscore
     _: $Colon
     type_: Expr
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptDash {
+enum OptCaretParenthesizedParamDefs {
     None
-    Some($Dash)
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptSquareBracketedParamDefs {
-    None
-    Some(SquareBracketedParamDefs)
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct SquareBracketedParamDefs {
-    lsquare: $LSquare
-    params: CommaSeparatedParamDefs
-    trailing_comma: OptComma
-    rsquare: $RSquare
+    Some(
+        _: $Caret
+        ParenthesizedCommaSeparatedNonfunParamDefs
+    )
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -119,21 +91,37 @@ enum ZeroOrMoreIndCases {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct IndCase {
-    casekw: $CaseKw
+    // TODO: Delete
+    // casekw: $CaseKw
     name: $Ident
-    params: OptParenthesizedParamDefs
-    return_type: OptColonSquareBracketedExprs
+    params: OptParenthesizedNonfunParamDefs
+    index_args: OptCaretParenthesizedExprs
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum OptColonSquareBracketedExprs {
+enum OptCaretParenthesizedExprs {
     None
     Some(
-        _: $Colon
-        _: $LSquare
+        _: $Caret
+        ParenthesizedCommaSeparatedExprs
+    )
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct ParenthesizedCommaSeparatedExprs {
+    lparen: $LParen
+    exprs: CommaSeparatedExprs
+    trailing_comma: OptComma
+    rparen: $RParen
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum CommaSeparatedExprs {
+    One(Expr)
+    Snoc(
         CommaSeparatedExprs
-        _: OptComma
-        _: $RSquare
+        _: $Comma
+        Expr
     )
 }
 
@@ -146,64 +134,96 @@ struct Fun {
 }
 
 // "Innards" refer to common syntax
-// shared between `fun` and `afun`.
+// shared between `fun` and `lam`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct FunCommonInnards {
-    params: ParenthesizedCommaSeparatedParamDefs
-    _: $Colon
+    params: ParenthesizedCommaSeparatedFunParamDefs
+    _: $ThinArrow
     return_type: Expr
     return_val: Expr
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Aind {
-    aindkw: $AindKw
-    innards: IndCommonInnards
+struct ParenthesizedCommaSeparatedFunParamDefs {
+    lparen: $LParen
+    params: CommaSeparatedFunParamDefs
+    trailing_comma: OptComma
+    rparen: $RParen
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Vcon {
-    vcon_index: $VconIndexLiteral
-    innards: IndCommonInnards
+enum CommaSeparatedFunParamDefs {
+    One(FunParamDef)
+    Snoc(
+        CommaSeparatedFunParamDefs
+        _: $Comma
+        FunParamDef
+    )
+}
+
+// `fun` params may start with the `dec` keyword
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct FunParamDef {
+    deckw: OptDecKw
+    name: IdentOrUnderscore
+    _: $Colon
+    type_: Expr
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptDecKw {
+    None
+    Some($DecKw)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Match {
     matchkw: $MatchKw
     matchee: Expr
+    return_type: OptMatchReturnTypeClause
     cases: ZeroOrMoreMatchCases
-    return_arity: ReturnArityClause
+    endkw: $EndKw
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum OptMatchReturnTypeClause {
+    None
+    Some(MatchReturnTypeClause)
+}
+
+struct MatchReturnTypeClause {
+    return_params: ReturnParamClause
     return_type: Expr
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum ReturnArityClause {
-    Unnamed($ReturnArityLiteral)
+enum ReturnParamClause {
+    None($ThinArrow)
     Matchee(
         _: $UseKw
         $Ident
-        $ReturnArityLiteral
+        $ThinArrow
     )
     Indices(
         _: $UseKw
-        SquareBracketedCommaSeparatedIdentsOrUnderscores
-        _: $ReturnKw
+        CaretParenthesizedCommaSeparatedIdentsOrUnderscores
+        _: $ThinArrow
     )
     MatcheeAndIndices(
         _: $UseKw
         $Ident
-        _: $Colon
-        SquareBracketedCommaSeparatedIdentsOrUnderscores
-        _: $ReturnKw
+        CaretParenthesizedCommaSeparatedIdentsOrUnderscores
+        _: $ThinArrow
     )
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct SquareBracketedCommaSeparatedIdentsOrUnderscores {
-    lsquare: $LSquare
+struct CaretParenthesizedCommaSeparatedIdentsOrUnderscores {
+    caret: $Caret
+    lsquare: $LParen
     idents: CommaSeparatedIdentsOrUnderscores
     trailing_comma: OptComma
-    rsquare: $RSquare
+    rsquare: $RParen
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -277,19 +297,9 @@ enum VarOrApp {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum CommaSeparatedExprs {
-    One(Expr)
-    Snoc(
-        CommaSeparatedExprs
-        _: $Comma
-        Expr
-    )
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct For {
     forkw: $ForKw
-    params: ParenthesizedCommaSeparatedParamDefs
+    params: ParenthesizedCommaSeparatedNonfunParamDefs
     _: $ThinArrow
     return_type: Expr
 }
@@ -311,25 +321,24 @@ terminal Token {
     $Comma: crate::token::ByteIndex
     $ThinArrow: crate::token::ByteIndex
     $Dash: crate::token::ByteIndex
+    $Caret: crate::token::ByteIndex
     $Underscore: crate::token::ByteIndex
 
     $LetKw: crate::token::ByteIndex
-    $IndKw: crate::token::ByteIndex
     $FunKw: crate::token::ByteIndex
 
-    $AindKw: crate::token::ByteIndex
     $MatchKw: crate::token::ByteIndex
     $AfunKw: crate::token::ByteIndex
     $ForKw: crate::token::ByteIndex
 
     $CaseKw: crate::token::ByteIndex
-    $ReturnKw: crate::token::ByteIndex
     $UseKw: crate::token::ByteIndex
+    $EndKw: crate::token::ByteIndex
+    $DecKw: crate::token::ByteIndex
 
     $Ident: crate::token::Ident
     $NumberLiteral: crate::token::NumberLiteral
     $StringLiteral: crate::token::StringLiteral
+    $IndUniverseLiteral: crate::token::IndUniverseLiteral
     $UniverseLiteral: crate::token::UniverseLiteral
-    $VconIndexLiteral: crate::token::VconIndexLiteral
-    $ReturnArityLiteral: crate::token::ReturnArityLiteral
 }
