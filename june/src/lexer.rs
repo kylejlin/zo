@@ -211,7 +211,7 @@ impl Lexer<'_> {
                         ));
                     }
                 };
-                self.out.push(Token::String(StringLiteral {
+                self.out.push(Token::StringLiteral(StringLiteral {
                     value,
                     span: (start, end),
                 }));
@@ -229,7 +229,7 @@ impl Lexer<'_> {
 
 fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
     if let Ok(val) = s.parse::<usize>() {
-        return Some(Token::Number(NumberLiteral {
+        return Some(Token::NumberLiteral(NumberLiteral {
             value: val,
             span: (start, ByteIndex(start.0 + s.len())),
         }));
@@ -256,7 +256,7 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
 
     if s.starts_with("Set") {
         let level = get_number_after_prefix(s, "Set")?;
-        return Some(Token::Universe(UniverseLiteral {
+        return Some(Token::UniverseLiteral(UniverseLiteral {
             level,
             start,
             erasable: false,
@@ -265,7 +265,7 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
 
     if s.starts_with("Prop") {
         let level = get_number_after_prefix(s, "Prop")?;
-        return Some(Token::Universe(UniverseLiteral {
+        return Some(Token::UniverseLiteral(UniverseLiteral {
             level,
             start,
             erasable: true,
@@ -274,13 +274,16 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
 
     if s.starts_with("vcon") {
         let index = get_number_after_prefix(s, "vcon")?;
-        return Some(Token::VconIndex(VconIndexLiteral { index, start }));
+        return Some(Token::VconIndexLiteral(VconIndexLiteral { index, start }));
     }
 
     if s.starts_with("return") {
         let arity = get_number_after_prefix(s, "return")?;
 
-        return Some(Token::ReturnArity(ReturnArityLiteral { arity, start }));
+        return Some(Token::ReturnArityLiteral(ReturnArityLiteral {
+            arity,
+            start,
+        }));
     }
 
     if s.is_empty() {
@@ -644,7 +647,7 @@ mod tests {
             }),
             Token::RParen(ByteIndex(src.find(")").unwrap())),
             Token::ReturnKw(ByteIndex(src.find("return").unwrap())),
-            Token::Universe(UniverseLiteral {
+            Token::UniverseLiteral(UniverseLiteral {
                 level: 0,
                 start: ByteIndex(src.find("Set0").unwrap()),
                 erasable: false,
@@ -665,7 +668,7 @@ mod tests {
                 start: ByteIndex(src.find("T").unwrap()),
             }),
             Token::Colon(ByteIndex(src.find(":").unwrap())),
-            Token::Universe(UniverseLiteral {
+            Token::UniverseLiteral(UniverseLiteral {
                 level: 0,
                 start: ByteIndex(src.find("Set0").unwrap()),
                 erasable: false,
@@ -708,7 +711,7 @@ mod tests {
             }),
             Token::RSquare(ByteIndex(47)),
             Token::ReturnKw(ByteIndex(src.find("return").unwrap())),
-            Token::Universe(UniverseLiteral {
+            Token::UniverseLiteral(UniverseLiteral {
                 level: 0,
                 start: ByteIndex(src.find("Prop0").unwrap()),
                 erasable: true,
@@ -753,57 +756,57 @@ mod tests {
             Token::CaseKw(ByteIndex(src.find("case").unwrap())),
             Token::ReturnKw(ByteIndex(src.find("return").unwrap())),
             Token::UseKw(ByteIndex(src.find("use").unwrap())),
-            Token::Universe(UniverseLiteral {
+            Token::UniverseLiteral(UniverseLiteral {
                 level: 0,
                 start: ByteIndex(src.find("Set0").unwrap()),
                 erasable: false,
             }),
-            Token::Universe(UniverseLiteral {
+            Token::UniverseLiteral(UniverseLiteral {
                 level: 1,
                 start: ByteIndex(src.find("Set1").unwrap()),
                 erasable: false,
             }),
-            Token::Universe(UniverseLiteral {
+            Token::UniverseLiteral(UniverseLiteral {
                 level: 33,
                 start: ByteIndex(src.find("Set33").unwrap()),
                 erasable: false,
             }),
-            Token::Universe(UniverseLiteral {
+            Token::UniverseLiteral(UniverseLiteral {
                 level: 0,
                 start: ByteIndex(src.find("Prop0").unwrap()),
                 erasable: true,
             }),
-            Token::Universe(UniverseLiteral {
+            Token::UniverseLiteral(UniverseLiteral {
                 level: 1,
                 start: ByteIndex(src.find("Prop1").unwrap()),
                 erasable: true,
             }),
-            Token::Universe(UniverseLiteral {
+            Token::UniverseLiteral(UniverseLiteral {
                 level: 33,
                 start: ByteIndex(src.find("Prop33").unwrap()),
                 erasable: true,
             }),
-            Token::VconIndex(VconIndexLiteral {
+            Token::VconIndexLiteral(VconIndexLiteral {
                 index: 0,
                 start: ByteIndex(src.find("vcon0").unwrap()),
             }),
-            Token::VconIndex(VconIndexLiteral {
+            Token::VconIndexLiteral(VconIndexLiteral {
                 index: 1,
                 start: ByteIndex(src.find("vcon1").unwrap()),
             }),
-            Token::VconIndex(VconIndexLiteral {
+            Token::VconIndexLiteral(VconIndexLiteral {
                 index: 33,
                 start: ByteIndex(src.find("vcon33").unwrap()),
             }),
-            Token::ReturnArity(ReturnArityLiteral {
+            Token::ReturnArityLiteral(ReturnArityLiteral {
                 arity: 0,
                 start: ByteIndex(src.find("return0").unwrap()),
             }),
-            Token::ReturnArity(ReturnArityLiteral {
+            Token::ReturnArityLiteral(ReturnArityLiteral {
                 arity: 1,
                 start: ByteIndex(src.find("return1").unwrap()),
             }),
-            Token::ReturnArity(ReturnArityLiteral {
+            Token::ReturnArityLiteral(ReturnArityLiteral {
                 arity: 33,
                 start: ByteIndex(src.find("return33").unwrap()),
             }),

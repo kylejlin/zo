@@ -12,7 +12,7 @@ enum Expr {
     Afun(Afun)
     For(For)
     VarOrApp(VarOrApp)
-    Universe($Universe)
+    Universe($UniverseLiteral)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -41,13 +41,13 @@ struct IndCommonInnards {
     indices: OptSquareBracketedParamDefs
     cases: ZeroOrMoreIndCases
     returnkw: $ReturnKw
-    universe: $Universe
+    universe: $UniverseLiteral
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum OptString {
     None
-    Some($String)
+    Some($StringLiteral)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -163,7 +163,7 @@ struct Aind {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Vcon {
-    vcon_index: $VconIndex
+    vcon_index: $VconIndexLiteral
     innards: IndCommonInnards
 }
 
@@ -178,11 +178,11 @@ struct Match {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ReturnArityClause {
-    Unnamed($ReturnArity)
+    Unnamed($ReturnArityLiteral)
     Matchee(
         _: $UseKw
         $Ident
-        $ReturnArity
+        $ReturnArityLiteral
     )
     Indices(
         _: $UseKw
@@ -327,9 +327,9 @@ terminal Token {
     $UseKw: crate::token::ByteIndex
 
     $Ident: crate::token::Ident
-    $Number: crate::token::NumberLiteral
-    $String: crate::token::StringLiteral
-    $Universe: crate::token::UniverseLiteral
-    $VconIndex: crate::token::VconIndexLiteral
-    $ReturnArity: crate::token::ReturnArityLiteral
+    $NumberLiteral: crate::token::NumberLiteral
+    $StringLiteral: crate::token::StringLiteral
+    $UniverseLiteral: crate::token::UniverseLiteral
+    $VconIndexLiteral: crate::token::VconIndexLiteral
+    $ReturnArityLiteral: crate::token::ReturnArityLiteral
 }

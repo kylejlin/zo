@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 e548c27aeff2df8ac58c24d78e5c208b5afa169c62a902d14a584a2f51a220cc
+// @sha256 2b66b0dd7680bba6e9c8b63fcff8fb3c9afac76cd94820c5ac8ebfec8cd12c52
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -36,11 +36,11 @@ pub enum Token {
     ReturnKw(crate::token::ByteIndex),
     UseKw(crate::token::ByteIndex),
     Ident(crate::token::Ident),
-    Number(crate::token::NumberLiteral),
-    String(crate::token::StringLiteral),
-    Universe(crate::token::UniverseLiteral),
-    VconIndex(crate::token::VconIndexLiteral),
-    ReturnArity(crate::token::ReturnArityLiteral),
+    NumberLiteral(crate::token::NumberLiteral),
+    StringLiteral(crate::token::StringLiteral),
+    UniverseLiteral(crate::token::UniverseLiteral),
+    VconIndexLiteral(crate::token::VconIndexLiteral),
+    ReturnArityLiteral(crate::token::ReturnArityLiteral),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -438,11 +438,11 @@ enum QuasiterminalKind {
     ReturnKw = 18,
     UseKw = 19,
     Ident = 20,
-    Number = 21,
-    String = 22,
-    Universe = 23,
-    VconIndex = 24,
-    ReturnArity = 25,
+    NumberLiteral = 21,
+    StringLiteral = 22,
+    UniverseLiteral = 23,
+    VconIndexLiteral = 24,
+    ReturnArityLiteral = 25,
     Eof = 26,
 }
 
@@ -665,11 +665,11 @@ enum Node {
     ReturnKw(crate::token::ByteIndex),
     UseKw(crate::token::ByteIndex),
     Ident(crate::token::Ident),
-    Number(crate::token::NumberLiteral),
-    String(crate::token::StringLiteral),
-    Universe(crate::token::UniverseLiteral),
-    VconIndex(crate::token::VconIndexLiteral),
-    ReturnArity(crate::token::ReturnArityLiteral),
+    NumberLiteral(crate::token::NumberLiteral),
+    StringLiteral(crate::token::StringLiteral),
+    UniverseLiteral(crate::token::UniverseLiteral),
+    VconIndexLiteral(crate::token::VconIndexLiteral),
+    ReturnArityLiteral(crate::token::ReturnArityLiteral),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -857,7 +857,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R9 => {
-            let t0 = nodes.pop().unwrap().try_into_universe_23().ok().unwrap();
+            let t0 = nodes.pop().unwrap().try_into_universe_literal_23().ok().unwrap();
             
             states.truncate(states.len() - 1);
             
@@ -904,7 +904,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R12 => {
-            let universe_6 = nodes.pop().unwrap().try_into_universe_23().ok().unwrap();
+            let universe_6 = nodes.pop().unwrap().try_into_universe_literal_23().ok().unwrap();
             let returnkw_5 = nodes.pop().unwrap().try_into_return_kw_18().ok().unwrap();
             let cases_4 = Box::new(ZeroOrMoreIndCases::try_from(nodes.pop().unwrap()).ok().unwrap());
             let indices_3 = Box::new(OptSquareBracketedParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
@@ -934,7 +934,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R14 => {
-            let t0 = nodes.pop().unwrap().try_into_string_22().ok().unwrap();
+            let t0 = nodes.pop().unwrap().try_into_string_literal_22().ok().unwrap();
             
             states.truncate(states.len() - 1);
             
@@ -1208,7 +1208,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R36 => {
             let innards_1 = Box::new(IndCommonInnards::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let vcon_index_0 = nodes.pop().unwrap().try_into_vcon_index_24().ok().unwrap();
+            let vcon_index_0 = nodes.pop().unwrap().try_into_vcon_index_literal_24().ok().unwrap();
             
             states.truncate(states.len() - 2);
             
@@ -1241,7 +1241,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R38 => {
-            let t0 = nodes.pop().unwrap().try_into_return_arity_25().ok().unwrap();
+            let t0 = nodes.pop().unwrap().try_into_return_arity_literal_25().ok().unwrap();
             
             states.truncate(states.len() - 1);
             
@@ -1253,7 +1253,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R39 => {
-            let t2 = nodes.pop().unwrap().try_into_return_arity_25().ok().unwrap();
+            let t2 = nodes.pop().unwrap().try_into_return_arity_literal_25().ok().unwrap();
             let t1 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
             nodes.pop().unwrap();
             
@@ -1598,11 +1598,11 @@ impl QuasiterminalKind {
             Token::ReturnKw(_) => Self::ReturnKw,
             Token::UseKw(_) => Self::UseKw,
             Token::Ident(_) => Self::Ident,
-            Token::Number(_) => Self::Number,
-            Token::String(_) => Self::String,
-            Token::Universe(_) => Self::Universe,
-            Token::VconIndex(_) => Self::VconIndex,
-            Token::ReturnArity(_) => Self::ReturnArity,
+            Token::NumberLiteral(_) => Self::NumberLiteral,
+            Token::StringLiteral(_) => Self::StringLiteral,
+            Token::UniverseLiteral(_) => Self::UniverseLiteral,
+            Token::VconIndexLiteral(_) => Self::VconIndexLiteral,
+            Token::ReturnArityLiteral(_) => Self::ReturnArityLiteral,
         }
     }
 }
@@ -1631,11 +1631,11 @@ impl Node {
             Token::ReturnKw(t) => Self::ReturnKw(t),
             Token::UseKw(t) => Self::UseKw(t),
             Token::Ident(t) => Self::Ident(t),
-            Token::Number(t) => Self::Number(t),
-            Token::String(t) => Self::String(t),
-            Token::Universe(t) => Self::Universe(t),
-            Token::VconIndex(t) => Self::VconIndex(t),
-            Token::ReturnArity(t) => Self::ReturnArity(t),
+            Token::NumberLiteral(t) => Self::NumberLiteral(t),
+            Token::StringLiteral(t) => Self::StringLiteral(t),
+            Token::UniverseLiteral(t) => Self::UniverseLiteral(t),
+            Token::VconIndexLiteral(t) => Self::VconIndexLiteral(t),
+            Token::ReturnArityLiteral(t) => Self::ReturnArityLiteral(t),
         }
     }
 }
@@ -10050,37 +10050,37 @@ impl Node {
         }
     }
     
-    fn try_into_number_21(self) -> Result<crate::token::NumberLiteral, Self> {
+    fn try_into_number_literal_21(self) -> Result<crate::token::NumberLiteral, Self> {
         match self {
-            Self::Number(t) => Ok(t),
+            Self::NumberLiteral(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_string_22(self) -> Result<crate::token::StringLiteral, Self> {
+    fn try_into_string_literal_22(self) -> Result<crate::token::StringLiteral, Self> {
         match self {
-            Self::String(t) => Ok(t),
+            Self::StringLiteral(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_universe_23(self) -> Result<crate::token::UniverseLiteral, Self> {
+    fn try_into_universe_literal_23(self) -> Result<crate::token::UniverseLiteral, Self> {
         match self {
-            Self::Universe(t) => Ok(t),
+            Self::UniverseLiteral(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_vcon_index_24(self) -> Result<crate::token::VconIndexLiteral, Self> {
+    fn try_into_vcon_index_literal_24(self) -> Result<crate::token::VconIndexLiteral, Self> {
         match self {
-            Self::VconIndex(t) => Ok(t),
+            Self::VconIndexLiteral(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_return_arity_25(self) -> Result<crate::token::ReturnArityLiteral, Self> {
+    fn try_into_return_arity_literal_25(self) -> Result<crate::token::ReturnArityLiteral, Self> {
         match self {
-            Self::ReturnArity(t) => Ok(t),
+            Self::ReturnArityLiteral(t) => Ok(t),
             _ => Err(self),
         }
     }
