@@ -1,0 +1,45 @@
+set Nat
+    zero
+    succ[Nat]
+
+set1 Nat
+    zero
+    succ[Nat]
+
+set Nat
+    zero
+    // Using `()` for named params
+    succ(pred: Nat)
+
+// We use `Set` instead of `Set0`.
+// `Set1` (and onward) is still `Set1` (and onward),
+// as usual
+set List(T: Set)
+    nil
+    cons[T, List]
+
+// NOTE:
+// Constructors are "flat".
+// For example, `cons` is
+// `For(T: Set, _: T, _: List(T)) -> List(T)`
+// instead of
+// `For(T: Set) -> For(_: T, _: List(T)) -> List(T)`.
+// ...
+// on second thought, let's curry _everything_.
+
+prop Eq(T: Set, left: T) ^[T]
+    refl ^(left)
+
+prop1 HigherEq(T: Set, left: T) ^[T]
+    higher_refl ^(left)
+
+set Rgb
+    new[Nat, Nat, Nat]
+
+fun red(color: Rgb): Nat
+    color.0
+
+
+
+set U8
+    new(n: Int, #in_range: EqTrue(n, U8.max))
