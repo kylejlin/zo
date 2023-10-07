@@ -12,14 +12,14 @@ enum Module {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ModuleItem {
     Var(Var)
-    Ind(Ind)
+    Enum(Enum)
     Def(Def)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum Expr {
     Var(ChainVar)
-    Ind(ChainInd)
+    Enum(ChainEnum)
     Def(ChainDef)
 
     Match(Match)
@@ -43,18 +43,18 @@ struct Var {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct ChainInd {
-    standalone: Ind
+struct ChainEnum {
+    standalone: Enum
     next_val: Expr
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Ind {
+struct Enum {
     ind_universe: $EnumKw
     name: $Ident
     params: OptParenthesizedNonfunParamDefs
     indices: OptCaretParenthesizedParamDefs
-    cases: ZeroOrMoreIndCases
+    cases: ZeroOrMoreEnumCases
     endkw: $EndKw
 }
 
@@ -105,16 +105,16 @@ enum OptCaretParenthesizedParamDefs {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum ZeroOrMoreIndCases {
+enum ZeroOrMoreEnumCases {
     Nil
     Snoc(
-        ZeroOrMoreIndCases
-        IndCase
+        ZeroOrMoreEnumCases
+        EnumCase
     )
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct IndCase {
+struct EnumCase {
     name: $Ident
     params: OptParenthesizedNonfunParamDefs
     index_args: OptCaretParenthesizedExprs

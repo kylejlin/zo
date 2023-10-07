@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 da5d6debf3eec66ea00bb720aaa6e06253fffc3deed9ae42ddc7a5fce42e8618
+// @sha256 f54afe73ab5491685d52a8f6f8220a386b14fcf92ae033f525647ec1ba2170e6
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -55,8 +55,8 @@ pub enum ModuleItem {
     Var(
         Box<Var>,
     ),
-    Ind(
-        Box<Ind>,
+    Enum(
+        Box<Enum>,
     ),
     Def(
         Box<Def>,
@@ -68,8 +68,8 @@ pub enum Expr {
     Var(
         Box<ChainVar>,
     ),
-    Ind(
-        Box<ChainInd>,
+    Enum(
+        Box<ChainEnum>,
     ),
     Def(
         Box<ChainDef>,
@@ -104,18 +104,18 @@ pub struct Var {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ChainInd {
-    pub standalone: Box<Ind>,
+pub struct ChainEnum {
+    pub standalone: Box<Enum>,
     pub next_val: Box<Expr>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Ind {
+pub struct Enum {
     pub ind_universe: crate::token::EnumKw,
     pub name: crate::token::Ident,
     pub params: Box<OptParenthesizedNonfunParamDefs>,
     pub indices: Box<OptCaretParenthesizedParamDefs>,
-    pub cases: Box<ZeroOrMoreIndCases>,
+    pub cases: Box<ZeroOrMoreEnumCases>,
     pub endkw: crate::token::ByteIndex,
 }
 
@@ -169,16 +169,16 @@ pub enum OptCaretParenthesizedParamDefs {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ZeroOrMoreIndCases {
+pub enum ZeroOrMoreEnumCases {
     Nil,
     Snoc(
-        Box<ZeroOrMoreIndCases>,
-        Box<IndCase>,
+        Box<ZeroOrMoreEnumCases>,
+        Box<EnumCase>,
     ),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct IndCase {
+pub struct EnumCase {
     pub name: crate::token::Ident,
     pub params: Box<OptParenthesizedNonfunParamDefs>,
     pub index_args: Box<OptCaretParenthesizedExprs>,
@@ -491,16 +491,16 @@ enum NonterminalKind {
     Expr = 2,
     ChainVar = 3,
     Var = 4,
-    ChainInd = 5,
-    Ind = 6,
+    ChainEnum = 5,
+    Enum = 6,
     OptParenthesizedNonfunParamDefs = 7,
     ParenthesizedCommaSeparatedNonfunParamDefs = 8,
     OptComma = 9,
     CommaSeparatedNonfunParamDefs = 10,
     NonfunParamDef = 11,
     OptCaretParenthesizedParamDefs = 12,
-    ZeroOrMoreIndCases = 13,
-    IndCase = 14,
+    ZeroOrMoreEnumCases = 13,
+    EnumCase = 14,
     OptCaretParenthesizedExprs = 15,
     ParenthesizedCommaSeparatedExprs = 16,
     CommaSeparatedExprs = 17,
@@ -664,16 +664,16 @@ enum Node {
     Expr(Expr),
     ChainVar(ChainVar),
     Var(Var),
-    ChainInd(ChainInd),
-    Ind(Ind),
+    ChainEnum(ChainEnum),
+    Enum(Enum),
     OptParenthesizedNonfunParamDefs(OptParenthesizedNonfunParamDefs),
     ParenthesizedCommaSeparatedNonfunParamDefs(ParenthesizedCommaSeparatedNonfunParamDefs),
     OptComma(OptComma),
     CommaSeparatedNonfunParamDefs(CommaSeparatedNonfunParamDefs),
     NonfunParamDef(NonfunParamDef),
     OptCaretParenthesizedParamDefs(OptCaretParenthesizedParamDefs),
-    ZeroOrMoreIndCases(ZeroOrMoreIndCases),
-    IndCase(IndCase),
+    ZeroOrMoreEnumCases(ZeroOrMoreEnumCases),
+    EnumCase(EnumCase),
     OptCaretParenthesizedExprs(OptCaretParenthesizedExprs),
     ParenthesizedCommaSeparatedExprs(ParenthesizedCommaSeparatedExprs),
     CommaSeparatedExprs(CommaSeparatedExprs),
@@ -843,12 +843,12 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R3 => {
-            let t0 = Box::new(Ind::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(Enum::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::ModuleItem(ModuleItem::Ind(
+                Node::ModuleItem(ModuleItem::Enum(
                     t0,
                 )),
                 NonterminalKind::ModuleItem,
@@ -879,12 +879,12 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R6 => {
-            let t0 = Box::new(ChainInd::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(ChainEnum::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::Expr(Expr::Ind(
+                Node::Expr(Expr::Enum(
                     t0,
                 )),
                 NonterminalKind::Expr,
@@ -993,21 +993,21 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R15 => {
             let next_val_1 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let standalone_0 = Box::new(Ind::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let standalone_0 = Box::new(Enum::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 2);
             
             (
-                Node::ChainInd(ChainInd {
+                Node::ChainEnum(ChainEnum {
                     standalone: standalone_0,
                     next_val: next_val_1,
                 }),
-                NonterminalKind::ChainInd,
+                NonterminalKind::ChainEnum,
             )
         }
         RuleKind::R16 => {
             let endkw_5 = nodes.pop().unwrap().try_into_end_kw_18().ok().unwrap();
-            let cases_4 = Box::new(ZeroOrMoreIndCases::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let cases_4 = Box::new(ZeroOrMoreEnumCases::try_from(nodes.pop().unwrap()).ok().unwrap());
             let indices_3 = Box::new(OptCaretParenthesizedParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
             let params_2 = Box::new(OptParenthesizedNonfunParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
             let name_1 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
@@ -1016,7 +1016,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 6);
             
             (
-                Node::Ind(Ind {
+                Node::Enum(Enum {
                     ind_universe: ind_universe_0,
                     name: name_1,
                     params: params_2,
@@ -1024,7 +1024,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
                     cases: cases_4,
                     endkw: endkw_5,
                 }),
-                NonterminalKind::Ind,
+                NonterminalKind::Enum,
             )
         }
         RuleKind::R17 => {
@@ -1144,22 +1144,22 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R27 => {
             (
-                Node::ZeroOrMoreIndCases(ZeroOrMoreIndCases::Nil),
-                NonterminalKind::ZeroOrMoreIndCases,
+                Node::ZeroOrMoreEnumCases(ZeroOrMoreEnumCases::Nil),
+                NonterminalKind::ZeroOrMoreEnumCases,
             )
         }
         RuleKind::R28 => {
-            let t1 = Box::new(IndCase::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let t0 = Box::new(ZeroOrMoreIndCases::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t1 = Box::new(EnumCase::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(ZeroOrMoreEnumCases::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 2);
             
             (
-                Node::ZeroOrMoreIndCases(ZeroOrMoreIndCases::Snoc(
+                Node::ZeroOrMoreEnumCases(ZeroOrMoreEnumCases::Snoc(
                     t0,
                     t1,
                 )),
-                NonterminalKind::ZeroOrMoreIndCases,
+                NonterminalKind::ZeroOrMoreEnumCases,
             )
         }
         RuleKind::R29 => {
@@ -1170,12 +1170,12 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 3);
             
             (
-                Node::IndCase(IndCase {
+                Node::EnumCase(EnumCase {
                     name: name_0,
                     params: params_1,
                     index_args: index_args_2,
                 }),
-                NonterminalKind::IndCase,
+                NonterminalKind::EnumCase,
             )
         }
         RuleKind::R30 => {
@@ -10619,23 +10619,23 @@ impl TryFrom<Node> for Var {
     }
 }
 
-impl TryFrom<Node> for ChainInd {
+impl TryFrom<Node> for ChainEnum {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::ChainInd(n) => Ok(n),
+            Node::ChainEnum(n) => Ok(n),
             _ => Err(node),
         }
     }
 }
 
-impl TryFrom<Node> for Ind {
+impl TryFrom<Node> for Enum {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::Ind(n) => Ok(n),
+            Node::Enum(n) => Ok(n),
             _ => Err(node),
         }
     }
@@ -10707,23 +10707,23 @@ impl TryFrom<Node> for OptCaretParenthesizedParamDefs {
     }
 }
 
-impl TryFrom<Node> for ZeroOrMoreIndCases {
+impl TryFrom<Node> for ZeroOrMoreEnumCases {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::ZeroOrMoreIndCases(n) => Ok(n),
+            Node::ZeroOrMoreEnumCases(n) => Ok(n),
             _ => Err(node),
         }
     }
 }
 
-impl TryFrom<Node> for IndCase {
+impl TryFrom<Node> for EnumCase {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::IndCase(n) => Ok(n),
+            Node::EnumCase(n) => Ok(n),
             _ => Err(node),
         }
     }
