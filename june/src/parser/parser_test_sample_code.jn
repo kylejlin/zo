@@ -1,0 +1,17 @@
+enum Nat
+    zero
+    succ(pred: Nat)
+end
+
+enum* Eq(T: Type, left: T) ^(right: T)
+    refl ^(left)
+end
+
+def add(dec a: Nat, b: Nat) -> Nat
+    match a
+    case zero:
+        b
+    case succ(a_pred):
+        succ(add(a_pred, b))
+    end
+    
