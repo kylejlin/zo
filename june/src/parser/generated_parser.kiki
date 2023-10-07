@@ -15,7 +15,6 @@ enum Expr {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Let {
-    letkw: $LetKw
     name: $Ident
     _: $Eq
     val: Expr
