@@ -10,7 +10,7 @@ enum Expr {
     Afun(Afun)
     For(For)
     VarOrApp(VarOrApp)
-    Universe($CapitalizedUniverseLiteral)
+    Universe($UniverseLiteral)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -23,7 +23,7 @@ struct Var {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Ind {
-    ind_universe: $LowercaseUniverseLiteral
+    ind_universe: $EnumKw
     name: $Ident
     params: OptParenthesizedNonfunParamDefs
     indices: OptCaretParenthesizedParamDefs
@@ -322,6 +322,7 @@ terminal Token {
     $Caret: crate::token::ByteIndex
     $Underscore: crate::token::ByteIndex
 
+    $EnumKw: crate::token::EnumKw
     $DefKw: crate::token::ByteIndex
 
     $MatchKw: crate::token::ByteIndex
@@ -336,6 +337,5 @@ terminal Token {
     $Ident: crate::token::Ident
     $NumberLiteral: crate::token::NumberLiteral
     $StringLiteral: crate::token::StringLiteral
-    $LowercaseUniverseLiteral: crate::token::LowercaseUniverseLiteral
-    $CapitalizedUniverseLiteral: crate::token::CapitalizedUniverseLiteral
+    $UniverseLiteral: crate::token::UniverseLiteral
 }

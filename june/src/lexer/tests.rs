@@ -18,12 +18,12 @@ fn just_whitespace() {
 
 #[test]
 fn ind_nat() {
-    let src = r#"set Nat zero succ(pred: Nat) end"#;
+    let src = r#"enum Nat zero succ(pred: Nat) end"#;
     let actual = lex(src);
     let expected = Ok(vec![
-        Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+        Token::EnumKw(EnumKw {
             level: 0,
-            start: ByteIndex(src.find("set").unwrap()),
+            start: ByteIndex(src.find("enum").unwrap()),
             erasable: false,
         }),
         Token::Ident(Ident {
@@ -56,12 +56,12 @@ fn ind_nat() {
 
 #[test]
 fn ind_eq() {
-    let src = r#"prop Eq(T: Set, left: T) ^(right: T) refl ^(left) end"#;
+    let src = r#"enum* Eq(T: Type, left: T) ^(right: T) refl ^(left) end"#;
     let actual = lex(src);
     let expected = Ok(vec![
-        Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+        Token::EnumKw(EnumKw {
             level: 0,
-            start: ByteIndex(src.find("prop").unwrap()),
+            start: ByteIndex(src.find("enum*").unwrap()),
             erasable: true,
         }),
         Token::Ident(Ident {
@@ -75,9 +75,9 @@ fn ind_eq() {
             start: ByteIndex(src.find("T").unwrap()),
         }),
         Token::Colon(ByteIndex(src.find(":").unwrap())),
-        Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
+        Token::UniverseLiteral(UniverseLiteral {
             level: 0,
-            start: ByteIndex(src.find("Set").unwrap()),
+            start: ByteIndex(src.find("Type").unwrap()),
             erasable: false,
         }),
         Token::Comma(ByteIndex(src.find(",").unwrap())),
@@ -88,7 +88,7 @@ fn ind_eq() {
         Token::Colon(ByteIndex(src.find_nth(":", 1).unwrap())),
         Token::Ident(Ident {
             value: "T".to_owned(),
-            start: ByteIndex(src.find_nth("T", 1).unwrap()),
+            start: ByteIndex(src.find("T) ^").unwrap()),
         }),
         Token::RParen(ByteIndex(src.find(")").unwrap())),
         //
@@ -101,7 +101,7 @@ fn ind_eq() {
         Token::Colon(ByteIndex(src.find_nth(":", 2).unwrap())),
         Token::Ident(Ident {
             value: "T".to_owned(),
-            start: ByteIndex(src.find_nth("T", 2).unwrap()),
+            start: ByteIndex(src.find("T) refl").unwrap()),
         }),
         Token::RParen(ByteIndex(src.find_nth(")", 1).unwrap())),
         //
@@ -143,38 +143,38 @@ fn dashes_and_thin_arrows() {
 
 #[test]
 fn keywords() {
-    let src = r#"_ set set1 set33 prop prop1 prop33 def match fun For case use end dec Set Set1 Set33 Prop Prop1 Prop33"#;
+    let src = r#"_ enum enum1 enum33 enum* enum1* enum33* def match fun For case use end dec Type Type1 Type33 Type* Type1* Type33*"#;
     let actual = lex(src);
     let expected = Ok(vec![
         Token::Underscore(ByteIndex(src.find("_").unwrap())),
-        Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+        Token::EnumKw(EnumKw {
             level: 0,
-            start: ByteIndex(src.find("set").unwrap()),
+            start: ByteIndex(src.find("enum").unwrap()),
             erasable: false,
         }),
-        Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+        Token::EnumKw(EnumKw {
             level: 1,
-            start: ByteIndex(src.find("set1").unwrap()),
+            start: ByteIndex(src.find("enum1").unwrap()),
             erasable: false,
         }),
-        Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+        Token::EnumKw(EnumKw {
             level: 33,
-            start: ByteIndex(src.find("set33").unwrap()),
+            start: ByteIndex(src.find("enum33").unwrap()),
             erasable: false,
         }),
-        Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+        Token::EnumKw(EnumKw {
             level: 0,
-            start: ByteIndex(src.find("prop").unwrap()),
+            start: ByteIndex(src.find("enum*").unwrap()),
             erasable: true,
         }),
-        Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+        Token::EnumKw(EnumKw {
             level: 1,
-            start: ByteIndex(src.find("prop1").unwrap()),
+            start: ByteIndex(src.find("enum1*").unwrap()),
             erasable: true,
         }),
-        Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+        Token::EnumKw(EnumKw {
             level: 33,
-            start: ByteIndex(src.find("prop33").unwrap()),
+            start: ByteIndex(src.find("enum33*").unwrap()),
             erasable: true,
         }),
         Token::DefKw(ByteIndex(src.find("def").unwrap())),
@@ -185,34 +185,34 @@ fn keywords() {
         Token::UseKw(ByteIndex(src.find("use").unwrap())),
         Token::EndKw(ByteIndex(src.find("end").unwrap())),
         Token::DecKw(ByteIndex(src.find("dec").unwrap())),
-        Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
+        Token::UniverseLiteral(UniverseLiteral {
             level: 0,
-            start: ByteIndex(src.find("Set").unwrap()),
+            start: ByteIndex(src.find("Type").unwrap()),
             erasable: false,
         }),
-        Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
+        Token::UniverseLiteral(UniverseLiteral {
             level: 1,
-            start: ByteIndex(src.find("Set1").unwrap()),
+            start: ByteIndex(src.find("Type1").unwrap()),
             erasable: false,
         }),
-        Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
+        Token::UniverseLiteral(UniverseLiteral {
             level: 33,
-            start: ByteIndex(src.find("Set33").unwrap()),
+            start: ByteIndex(src.find("Type33").unwrap()),
             erasable: false,
         }),
-        Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
+        Token::UniverseLiteral(UniverseLiteral {
             level: 0,
-            start: ByteIndex(src.find("Prop").unwrap()),
+            start: ByteIndex(src.find("Type*").unwrap()),
             erasable: true,
         }),
-        Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
+        Token::UniverseLiteral(UniverseLiteral {
             level: 1,
-            start: ByteIndex(src.find("Prop1").unwrap()),
+            start: ByteIndex(src.find("Type1*").unwrap()),
             erasable: true,
         }),
-        Token::CapitalizedUniverseLiteral(CapitalizedUniverseLiteral {
+        Token::UniverseLiteral(UniverseLiteral {
             level: 33,
-            start: ByteIndex(src.find("Prop33").unwrap()),
+            start: ByteIndex(src.find("Type33*").unwrap()),
             erasable: true,
         }),
     ]);
@@ -248,88 +248,88 @@ use)"#;
 }
 
 #[test]
-fn lowercase_set_zero() {
-    let src = r#"set0"#;
+fn enum0() {
+    let src = r#"enum0"#;
     let actual = lex(src);
     let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
     assert_eq!(expected, actual);
 }
 
 #[test]
-fn lowercase_prop_zero() {
-    let src = r#"prop0"#;
+fn enum0_star() {
+    let src = r#"enum0*"#;
     let actual = lex(src);
     let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
     assert_eq!(expected, actual);
 }
 #[test]
-fn capitalized_set_zero() {
-    let src = r#"Set0"#;
+fn type0() {
+    let src = r#"Type0"#;
     let actual = lex(src);
     let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
     assert_eq!(expected, actual);
 }
 #[test]
-fn capitalized_prop_zero() {
-    let src = r#"Prop0"#;
-    let actual = lex(src);
-    let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
-    assert_eq!(expected, actual);
-}
-
-#[test]
-fn lowercase_set_zero_zero() {
-    let src = r#"set00"#;
-    let actual = lex(src);
-    let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
-    assert_eq!(expected, actual);
-}
-#[test]
-fn lowercase_prop_zero_zero() {
-    let src = r#"prop00"#;
-    let actual = lex(src);
-    let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
-    assert_eq!(expected, actual);
-}
-#[test]
-fn capitalized_set_zero_zero() {
-    let src = r#"Set00"#;
-    let actual = lex(src);
-    let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
-    assert_eq!(expected, actual);
-}
-#[test]
-fn capitalized_prop_zero_zero() {
-    let src = r#"Prop00"#;
+fn type0_star() {
+    let src = r#"Type0*"#;
     let actual = lex(src);
     let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
     assert_eq!(expected, actual);
 }
 
 #[test]
-fn lowercase_set_zero_one() {
-    let src = r#"set01"#;
+fn enum00() {
+    let src = r#"enum00"#;
     let actual = lex(src);
     let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
     assert_eq!(expected, actual);
 }
 #[test]
-fn lowercase_prop_zero_one() {
-    let src = r#"prop01"#;
+fn enum00_star() {
+    let src = r#"enum00*"#;
     let actual = lex(src);
     let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
     assert_eq!(expected, actual);
 }
 #[test]
-fn capitalized_set_zero_one() {
-    let src = r#"Set01"#;
+fn type00() {
+    let src = r#"Type00"#;
     let actual = lex(src);
     let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
     assert_eq!(expected, actual);
 }
 #[test]
-fn capitalized_prop_zero_one() {
-    let src = r#"Prop01"#;
+fn type00_star() {
+    let src = r#"Type00*"#;
+    let actual = lex(src);
+    let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+    assert_eq!(expected, actual);
+}
+
+#[test]
+fn enum01() {
+    let src = r#"enum01"#;
+    let actual = lex(src);
+    let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+    assert_eq!(expected, actual);
+}
+#[test]
+fn enum01_star() {
+    let src = r#"enum01*"#;
+    let actual = lex(src);
+    let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+    assert_eq!(expected, actual);
+}
+#[test]
+fn type01() {
+    let src = r#"Type01"#;
+    let actual = lex(src);
+    let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
+    assert_eq!(expected, actual);
+}
+#[test]
+fn type01_star() {
+    let src = r#"Type01*"#;
     let actual = lex(src);
     let expected = Err(LexError(ByteIndex(0), ByteIndex(src.len())));
     assert_eq!(expected, actual);

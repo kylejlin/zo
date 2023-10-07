@@ -118,6 +118,15 @@ impl Lexer<'_> {
                     byte_len: byte_len + 1,
                 }
             }
+
+            '*' => {
+                self.state = State::Word {
+                    start,
+                    byte_len: byte_len + 1,
+                };
+                self.finish_pending_state_and_reset()?;
+            }
+
             _ => {
                 self.finish_pending_state_and_reset()?;
                 self.handle_char(current_index, current)?;
@@ -259,43 +268,21 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
         _ => {}
     }
 
-    if s.starts_with("Set") {
-        let level = get_nonzero_number_after_prefix_but_return_zero_if_empty_string(s, "Set")?;
-        return Some(Token::CapitalizedUniverseLiteral(
-            CapitalizedUniverseLiteral {
-                level,
-                start,
-                erasable: false,
-            },
-        ));
-    }
-
-    if s.starts_with("Prop") {
-        let level = get_nonzero_number_after_prefix_but_return_zero_if_empty_string(s, "Prop")?;
-        return Some(Token::CapitalizedUniverseLiteral(
-            CapitalizedUniverseLiteral {
-                level,
-                start,
-                erasable: true,
-            },
-        ));
-    }
-
-    if s.starts_with("set") {
-        let level = get_nonzero_number_after_prefix_but_return_zero_if_empty_string(s, "set")?;
-        return Some(Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+    if s.starts_with("Type") {
+        let (level, erasable) = parse_universe_level_and_erasability(&s["Type".len()..])?;
+        return Some(Token::UniverseLiteral(UniverseLiteral {
             level,
             start,
-            erasable: false,
+            erasable,
         }));
     }
 
-    if s.starts_with("prop") {
-        let level = get_nonzero_number_after_prefix_but_return_zero_if_empty_string(s, "prop")?;
-        return Some(Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
+    if s.starts_with("enum") {
+        let (level, erasable) = parse_universe_level_and_erasability(&s["enum".len()..])?;
+        return Some(Token::EnumKw(EnumKw {
             level,
             start,
-            erasable: true,
+            erasable,
         }));
     }
 
@@ -316,31 +303,33 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
     None
 }
 
-/// - If `&s[prefix.len()..]` is empty, this function returns `Some(0)`.
+fn parse_universe_level_and_erasability(s: &str) -> Option<(usize, bool)> {
+    if s.ends_with('*') {
+        let level = parse_universe_level(&s[..s.len() - '*'.len_utf8()])?;
+        Some((level, true))
+    } else {
+        let level = parse_universe_level(s)?;
+        Some((level, false))
+    }
+}
+
+/// - If `s` is empty, this function returns `Some(0)`.
 ///
-/// - If `&s[prefix.len()..]` is a nonzero number `n` with no leading zeros,
+/// - If `s` does not begin with `'0'` and successfully parses as some number `n`,
 ///   this function returns `Some(n)`.
 ///
 /// - Otherwise, this function returns `None`.
 ///
-///   - As a corollary, if `&s[prefix.len()..]` is a number with extraneous leading zeros,
+///   - As a corollary, if `s` is a number with leading zeros,
 ///     this function returns `None`.
-fn get_nonzero_number_after_prefix_but_return_zero_if_empty_string(
-    s: &str,
-    prefix: &str,
-) -> Option<usize> {
-    let level_src = &s[prefix.len()..];
-    if level_src.is_empty() {
+fn parse_universe_level(s: &str) -> Option<usize> {
+    if s.is_empty() {
         return Some(0);
     }
 
-    if level_src.starts_with('0') {
+    if s.starts_with('0') {
         return None;
     }
 
-    let Ok(level) = level_src.parse::<usize>() else {
-        return None;
-    };
-
-    Some(level)
+    s.parse::<usize>().ok()
 }

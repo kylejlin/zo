@@ -40,7 +40,7 @@ pub struct StringLiteral {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
-pub struct CapitalizedUniverseLiteral {
+pub struct UniverseLiteral {
     pub level: usize,
     pub start: ByteIndex,
     /// This is true if the literal is a `Prop`
@@ -49,7 +49,7 @@ pub struct CapitalizedUniverseLiteral {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
-pub struct LowercaseUniverseLiteral {
+pub struct EnumKw {
     pub level: usize,
     pub start: ByteIndex,
     /// This is true if the literal is a `prop`
