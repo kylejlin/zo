@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 c4ad88c1544ea4f9e76227785e079e45d0472fad9ca53e0c7e44b15d6e21b89c
+// @sha256 148e94e1cd22096c252e6084ca08cb96bf2cf521c480d8c35a6b4ccd9bee9596
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -26,10 +26,9 @@ pub enum Token {
     Dash(crate::token::ByteIndex),
     Caret(crate::token::ByteIndex),
     Underscore(crate::token::ByteIndex),
-    LetKw(crate::token::ByteIndex),
-    FunKw(crate::token::ByteIndex),
+    DefKw(crate::token::ByteIndex),
     MatchKw(crate::token::ByteIndex),
-    AfunKw(crate::token::ByteIndex),
+    FunKw(crate::token::ByteIndex),
     ForKw(crate::token::ByteIndex),
     CaseKw(crate::token::ByteIndex),
     UseKw(crate::token::ByteIndex),
@@ -44,14 +43,14 @@ pub enum Token {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Expr {
-    Let(
-        Box<Let>,
+    Var(
+        Box<Var>,
     ),
     Ind(
         Box<Ind>,
     ),
-    Fun(
-        Box<Fun>,
+    Def(
+        Box<Def>,
     ),
     Match(
         Box<Match>,
@@ -71,7 +70,7 @@ pub enum Expr {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Let {
+pub struct Var {
     pub name: crate::token::Ident,
     pub val: Box<Expr>,
     pub next_val: Box<Expr>,
@@ -181,8 +180,8 @@ pub enum CommaSeparatedExprs {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Fun {
-    pub funkw: crate::token::ByteIndex,
+pub struct Def {
+    pub defkw: crate::token::ByteIndex,
     pub name: crate::token::Ident,
     pub innards: Box<FunCommonInnards>,
     pub next_val: Box<Expr>,
@@ -325,7 +324,7 @@ pub struct ParenthesizedCommaSeparatedIdentsOrUnderscores {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Afun {
-    pub afunkw: crate::token::ByteIndex,
+    pub funkw: crate::token::ByteIndex,
     pub name: Box<OptIdent>,
     pub innards: Box<FunCommonInnards>,
 }
@@ -432,27 +431,26 @@ enum QuasiterminalKind {
     Dash = 8,
     Caret = 9,
     Underscore = 10,
-    LetKw = 11,
-    FunKw = 12,
-    MatchKw = 13,
-    AfunKw = 14,
-    ForKw = 15,
-    CaseKw = 16,
-    UseKw = 17,
-    EndKw = 18,
-    DecKw = 19,
-    Ident = 20,
-    NumberLiteral = 21,
-    StringLiteral = 22,
-    LowercaseUniverseLiteral = 23,
-    CapitalizedUniverseLiteral = 24,
-    Eof = 25,
+    DefKw = 11,
+    MatchKw = 12,
+    FunKw = 13,
+    ForKw = 14,
+    CaseKw = 15,
+    UseKw = 16,
+    EndKw = 17,
+    DecKw = 18,
+    Ident = 19,
+    NumberLiteral = 20,
+    StringLiteral = 21,
+    LowercaseUniverseLiteral = 22,
+    CapitalizedUniverseLiteral = 23,
+    Eof = 24,
 }
 
 #[derive(Clone, Copy, Debug)]
 enum NonterminalKind {
     Expr = 0,
-    Let = 1,
+    Var = 1,
     Ind = 2,
     OptParenthesizedNonfunParamDefs = 3,
     ParenthesizedCommaSeparatedNonfunParamDefs = 4,
@@ -465,7 +463,7 @@ enum NonterminalKind {
     OptCaretParenthesizedExprs = 11,
     ParenthesizedCommaSeparatedExprs = 12,
     CommaSeparatedExprs = 13,
-    Fun = 14,
+    Def = 14,
     FunCommonInnards = 15,
     ParenthesizedCommaSeparatedFunParamDefs = 16,
     CommaSeparatedFunParamDefs = 17,
@@ -612,7 +610,7 @@ enum State {
 
 enum Node {
     Expr(Expr),
-    Let(Let),
+    Var(Var),
     Ind(Ind),
     OptParenthesizedNonfunParamDefs(OptParenthesizedNonfunParamDefs),
     ParenthesizedCommaSeparatedNonfunParamDefs(ParenthesizedCommaSeparatedNonfunParamDefs),
@@ -625,7 +623,7 @@ enum Node {
     OptCaretParenthesizedExprs(OptCaretParenthesizedExprs),
     ParenthesizedCommaSeparatedExprs(ParenthesizedCommaSeparatedExprs),
     CommaSeparatedExprs(CommaSeparatedExprs),
-    Fun(Fun),
+    Def(Def),
     FunCommonInnards(FunCommonInnards),
     ParenthesizedCommaSeparatedFunParamDefs(ParenthesizedCommaSeparatedFunParamDefs),
     CommaSeparatedFunParamDefs(CommaSeparatedFunParamDefs),
@@ -658,10 +656,9 @@ enum Node {
     Dash(crate::token::ByteIndex),
     Caret(crate::token::ByteIndex),
     Underscore(crate::token::ByteIndex),
-    LetKw(crate::token::ByteIndex),
-    FunKw(crate::token::ByteIndex),
+    DefKw(crate::token::ByteIndex),
     MatchKw(crate::token::ByteIndex),
-    AfunKw(crate::token::ByteIndex),
+    FunKw(crate::token::ByteIndex),
     ForKw(crate::token::ByteIndex),
     CaseKw(crate::token::ByteIndex),
     UseKw(crate::token::ByteIndex),
@@ -751,12 +748,12 @@ enum RuleKind {
 fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: RuleKind) -> (Node, NonterminalKind) {
     match rule_kind {
         RuleKind::R0 => {
-            let t0 = Box::new(Let::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(Var::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::Expr(Expr::Let(
+                Node::Expr(Expr::Var(
                     t0,
                 )),
                 NonterminalKind::Expr,
@@ -775,12 +772,12 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R2 => {
-            let t0 = Box::new(Fun::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(Def::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::Expr(Expr::Fun(
+                Node::Expr(Expr::Def(
                     t0,
                 )),
                 NonterminalKind::Expr,
@@ -835,7 +832,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R7 => {
-            let t0 = nodes.pop().unwrap().try_into_capitalized_universe_literal_24().ok().unwrap();
+            let t0 = nodes.pop().unwrap().try_into_capitalized_universe_literal_23().ok().unwrap();
             
             states.truncate(states.len() - 1);
             
@@ -850,27 +847,27 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             let next_val_3 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             let val_2 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             nodes.pop().unwrap();
-            let name_0 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
+            let name_0 = nodes.pop().unwrap().try_into_ident_19().ok().unwrap();
             
             states.truncate(states.len() - 4);
             
             (
-                Node::Let(Let {
+                Node::Var(Var {
                     name: name_0,
                     val: val_2,
                     next_val: next_val_3,
                 }),
-                NonterminalKind::Let,
+                NonterminalKind::Var,
             )
         }
         RuleKind::R9 => {
             let next_val_6 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let endkw_5 = nodes.pop().unwrap().try_into_end_kw_18().ok().unwrap();
+            let endkw_5 = nodes.pop().unwrap().try_into_end_kw_17().ok().unwrap();
             let cases_4 = Box::new(ZeroOrMoreIndCases::try_from(nodes.pop().unwrap()).ok().unwrap());
             let indices_3 = Box::new(OptCaretParenthesizedParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
             let params_2 = Box::new(OptParenthesizedNonfunParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let name_1 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
-            let ind_universe_0 = nodes.pop().unwrap().try_into_lowercase_universe_literal_23().ok().unwrap();
+            let name_1 = nodes.pop().unwrap().try_into_ident_19().ok().unwrap();
+            let ind_universe_0 = nodes.pop().unwrap().try_into_lowercase_universe_literal_22().ok().unwrap();
             
             states.truncate(states.len() - 7);
             
@@ -1025,7 +1022,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         RuleKind::R22 => {
             let index_args_2 = Box::new(OptCaretParenthesizedExprs::try_from(nodes.pop().unwrap()).ok().unwrap());
             let params_1 = Box::new(OptParenthesizedNonfunParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let name_0 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
+            let name_0 = nodes.pop().unwrap().try_into_ident_19().ok().unwrap();
             
             states.truncate(states.len() - 3);
             
@@ -1105,19 +1102,19 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         RuleKind::R28 => {
             let next_val_3 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             let innards_2 = Box::new(FunCommonInnards::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let name_1 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
-            let funkw_0 = nodes.pop().unwrap().try_into_fun_kw_12().ok().unwrap();
+            let name_1 = nodes.pop().unwrap().try_into_ident_19().ok().unwrap();
+            let defkw_0 = nodes.pop().unwrap().try_into_def_kw_11().ok().unwrap();
             
             states.truncate(states.len() - 4);
             
             (
-                Node::Fun(Fun {
-                    funkw: funkw_0,
+                Node::Def(Def {
+                    defkw: defkw_0,
                     name: name_1,
                     innards: innards_2,
                     next_val: next_val_3,
                 }),
-                NonterminalKind::Fun,
+                NonterminalKind::Def,
             )
         }
         RuleKind::R29 => {
@@ -1206,7 +1203,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R35 => {
-            let t0 = nodes.pop().unwrap().try_into_dec_kw_19().ok().unwrap();
+            let t0 = nodes.pop().unwrap().try_into_dec_kw_18().ok().unwrap();
             
             states.truncate(states.len() - 1);
             
@@ -1218,11 +1215,11 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R36 => {
-            let endkw_4 = nodes.pop().unwrap().try_into_end_kw_18().ok().unwrap();
+            let endkw_4 = nodes.pop().unwrap().try_into_end_kw_17().ok().unwrap();
             let cases_3 = Box::new(ZeroOrMoreMatchCases::try_from(nodes.pop().unwrap()).ok().unwrap());
             let return_type_2 = Box::new(OptMatchReturnTypeClause::try_from(nodes.pop().unwrap()).ok().unwrap());
             let matchee_1 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let matchkw_0 = nodes.pop().unwrap().try_into_match_kw_13().ok().unwrap();
+            let matchkw_0 = nodes.pop().unwrap().try_into_match_kw_12().ok().unwrap();
             
             states.truncate(states.len() - 5);
             
@@ -1283,7 +1280,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R41 => {
             let t2 = nodes.pop().unwrap().try_into_thin_arrow_7().ok().unwrap();
-            let t1 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
+            let t1 = nodes.pop().unwrap().try_into_ident_19().ok().unwrap();
             nodes.pop().unwrap();
             
             states.truncate(states.len() - 3);
@@ -1313,7 +1310,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         RuleKind::R43 => {
             nodes.pop().unwrap();
             let t2 = Box::new(CaretParenthesizedCommaSeparatedIdentsOrUnderscores::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let t1 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
+            let t1 = nodes.pop().unwrap().try_into_ident_19().ok().unwrap();
             nodes.pop().unwrap();
             
             states.truncate(states.len() - 4);
@@ -1397,8 +1394,8 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             let return_val_4 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             nodes.pop().unwrap();
             let params_2 = Box::new(OptParenthesizedCommaSeparatedIdentsOrUnderscores::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let name_1 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
-            let casekw_0 = nodes.pop().unwrap().try_into_case_kw_16().ok().unwrap();
+            let name_1 = nodes.pop().unwrap().try_into_ident_19().ok().unwrap();
+            let casekw_0 = nodes.pop().unwrap().try_into_case_kw_15().ok().unwrap();
             
             states.truncate(states.len() - 5);
             
@@ -1451,13 +1448,13 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         RuleKind::R53 => {
             let innards_2 = Box::new(FunCommonInnards::try_from(nodes.pop().unwrap()).ok().unwrap());
             let name_1 = Box::new(OptIdent::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let afunkw_0 = nodes.pop().unwrap().try_into_afun_kw_14().ok().unwrap();
+            let funkw_0 = nodes.pop().unwrap().try_into_fun_kw_13().ok().unwrap();
             
             states.truncate(states.len() - 3);
             
             (
                 Node::Afun(Afun {
-                    afunkw: afunkw_0,
+                    funkw: funkw_0,
                     name: name_1,
                     innards: innards_2,
                 }),
@@ -1471,7 +1468,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R55 => {
-            let t0 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
+            let t0 = nodes.pop().unwrap().try_into_ident_19().ok().unwrap();
             
             states.truncate(states.len() - 1);
             
@@ -1503,7 +1500,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R57 => {
-            let t0 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
+            let t0 = nodes.pop().unwrap().try_into_ident_19().ok().unwrap();
             
             states.truncate(states.len() - 1);
             
@@ -1530,7 +1527,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             let return_type_3 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
             nodes.pop().unwrap();
             let params_1 = Box::new(ParenthesizedCommaSeparatedNonfunParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let forkw_0 = nodes.pop().unwrap().try_into_for_kw_15().ok().unwrap();
+            let forkw_0 = nodes.pop().unwrap().try_into_for_kw_14().ok().unwrap();
             
             states.truncate(states.len() - 4);
             
@@ -1544,7 +1541,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R60 => {
-            let t0 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
+            let t0 = nodes.pop().unwrap().try_into_ident_19().ok().unwrap();
             
             states.truncate(states.len() - 1);
             
@@ -1591,10 +1588,9 @@ impl QuasiterminalKind {
             Token::Dash(_) => Self::Dash,
             Token::Caret(_) => Self::Caret,
             Token::Underscore(_) => Self::Underscore,
-            Token::LetKw(_) => Self::LetKw,
-            Token::FunKw(_) => Self::FunKw,
+            Token::DefKw(_) => Self::DefKw,
             Token::MatchKw(_) => Self::MatchKw,
-            Token::AfunKw(_) => Self::AfunKw,
+            Token::FunKw(_) => Self::FunKw,
             Token::ForKw(_) => Self::ForKw,
             Token::CaseKw(_) => Self::CaseKw,
             Token::UseKw(_) => Self::UseKw,
@@ -1623,10 +1619,9 @@ impl Node {
             Token::Dash(t) => Self::Dash(t),
             Token::Caret(t) => Self::Caret(t),
             Token::Underscore(t) => Self::Underscore(t),
-            Token::LetKw(t) => Self::LetKw(t),
-            Token::FunKw(t) => Self::FunKw(t),
+            Token::DefKw(t) => Self::DefKw(t),
             Token::MatchKw(t) => Self::MatchKw(t),
-            Token::AfunKw(t) => Self::AfunKw(t),
+            Token::FunKw(t) => Self::FunKw(t),
             Token::ForKw(t) => Self::ForKw(t),
             Token::CaseKw(t) => Self::CaseKw(t),
             Token::UseKw(t) => Self::UseKw(t),
@@ -1650,9 +1645,8 @@ impl Quasiterminal {
     }
 }
 
-const ACTION_TABLE: [[Action; 26]; 117] = [
+const ACTION_TABLE: [[Action; 25]; 117] = [
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1691,7 +1685,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Shift(State::S62),
         Action::Shift(State::S8),
         Action::Shift(State::S106),
@@ -1708,35 +1701,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
     ],
     [
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S62),
-        Action::Shift(State::S8),
-        Action::Shift(State::S106),
-        Action::Shift(State::S39),
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S24),
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S26),
-        Action::Shift(State::S23),
-        Action::Err,
-    ],
-    [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1775,7 +1739,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Shift(State::S62),
         Action::Shift(State::S8),
         Action::Shift(State::S106),
@@ -1792,91 +1755,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
     ],
     [
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S62),
-        Action::Shift(State::S8),
-        Action::Shift(State::S106),
-        Action::Shift(State::S39),
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S24),
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S26),
-        Action::Shift(State::S23),
-        Action::Err,
-    ],
-    [
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S62),
-        Action::Shift(State::S8),
-        Action::Shift(State::S106),
-        Action::Shift(State::S39),
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S24),
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S26),
-        Action::Shift(State::S23),
-        Action::Err,
-    ],
-    [
-        Action::Err,
-        Action::Reduce(RuleKind::R0),
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-        Action::Err,
-        Action::Reduce(RuleKind::R0),
-        Action::Err,
-        Action::Err,
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-        Action::Reduce(RuleKind::R0),
-    ],
-    [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1915,6 +1793,32 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
+        Action::Shift(State::S62),
+        Action::Shift(State::S8),
+        Action::Shift(State::S106),
+        Action::Shift(State::S39),
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S24),
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S26),
+        Action::Shift(State::S23),
+        Action::Err,
+    ],
+    [
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
         Action::Err,
         Action::Shift(State::S62),
         Action::Shift(State::S8),
@@ -1933,6 +1837,86 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
     ],
     [
         Action::Err,
+        Action::Reduce(RuleKind::R0),
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
+        Action::Err,
+        Action::Reduce(RuleKind::R0),
+        Action::Err,
+        Action::Err,
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
+        Action::Reduce(RuleKind::R0),
+    ],
+    [
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S62),
+        Action::Shift(State::S8),
+        Action::Shift(State::S106),
+        Action::Shift(State::S39),
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S24),
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S26),
+        Action::Shift(State::S23),
+        Action::Err,
+    ],
+    [
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S62),
+        Action::Shift(State::S8),
+        Action::Shift(State::S106),
+        Action::Shift(State::S39),
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S24),
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S26),
+        Action::Shift(State::S23),
+        Action::Err,
+    ],
+    [
         Action::Err,
         Action::Err,
         Action::Err,
@@ -1971,7 +1955,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Shift(State::S62),
         Action::Shift(State::S8),
         Action::Shift(State::S106),
@@ -1988,35 +1971,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
     ],
     [
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S62),
-        Action::Shift(State::S8),
-        Action::Shift(State::S106),
-        Action::Shift(State::S39),
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S24),
-        Action::Err,
-        Action::Err,
-        Action::Shift(State::S26),
-        Action::Shift(State::S23),
-        Action::Err,
-    ],
-    [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2055,6 +2009,32 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
+        Action::Shift(State::S62),
+        Action::Shift(State::S8),
+        Action::Shift(State::S106),
+        Action::Shift(State::S39),
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S24),
+        Action::Err,
+        Action::Err,
+        Action::Shift(State::S26),
+        Action::Shift(State::S23),
+        Action::Err,
+    ],
+    [
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
+        Action::Err,
         Action::Err,
         Action::Shift(State::S62),
         Action::Shift(State::S8),
@@ -2083,7 +2063,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Shift(State::S62),
         Action::Shift(State::S8),
         Action::Shift(State::S106),
@@ -2100,7 +2079,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2136,7 +2114,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Reduce(RuleKind::R1),
         Action::Reduce(RuleKind::R1),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2164,7 +2141,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Reduce(RuleKind::R2),
         Action::Reduce(RuleKind::R2),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2192,7 +2168,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Reduce(RuleKind::R3),
         Action::Reduce(RuleKind::R3),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2220,7 +2195,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Reduce(RuleKind::R4),
         Action::Reduce(RuleKind::R4),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2248,7 +2222,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Reduce(RuleKind::R5),
         Action::Reduce(RuleKind::R5),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2279,7 +2252,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R6),
         Action::Reduce(RuleKind::R6),
         Action::Reduce(RuleKind::R6),
@@ -2304,7 +2276,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Reduce(RuleKind::R7),
         Action::Reduce(RuleKind::R7),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2335,7 +2306,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R57),
         Action::Reduce(RuleKind::R57),
         Action::Reduce(RuleKind::R57),
@@ -2363,7 +2333,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R8),
         Action::Reduce(RuleKind::R8),
         Action::Reduce(RuleKind::R8),
@@ -2380,7 +2349,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Reduce(RuleKind::R8),
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2425,7 +2393,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R10),
         Action::Err,
         Action::Reduce(RuleKind::R10),
@@ -2453,7 +2420,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R18),
         Action::Err,
         Action::Reduce(RuleKind::R18),
@@ -2481,7 +2447,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R20),
         Action::Err,
         Action::Reduce(RuleKind::R20),
@@ -2492,7 +2457,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2531,7 +2495,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R9),
         Action::Reduce(RuleKind::R9),
         Action::Reduce(RuleKind::R9),
@@ -2565,7 +2528,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R10),
         Action::Err,
         Action::Reduce(RuleKind::R10),
@@ -2586,7 +2548,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Reduce(RuleKind::R11),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2623,7 +2584,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Shift(State::S114),
         Action::Err,
         Action::Err,
@@ -2639,7 +2599,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Shift(State::S45),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2685,7 +2644,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -2698,7 +2656,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Reduce(RuleKind::R12),
         Action::Err,
         Action::Reduce(RuleKind::R12),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2717,7 +2674,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
     ],
     [
         Action::Shift(State::S34),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2745,7 +2701,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
     ],
     [
         Action::Shift(State::S34),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2797,7 +2752,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -2807,7 +2761,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Shift(State::S11),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2853,7 +2806,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -2881,7 +2833,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -2891,7 +2842,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Shift(State::S47),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2931,7 +2881,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Shift(State::S114),
         Action::Err,
         Action::Err,
@@ -2951,7 +2900,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Reduce(RuleKind::R34),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -2987,7 +2935,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Shift(State::S114),
         Action::Err,
         Action::Err,
@@ -3021,7 +2968,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -3031,7 +2977,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Reduce(RuleKind::R16),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3077,7 +3022,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -3105,10 +3049,8 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3136,7 +3078,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3181,7 +3122,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R23),
         Action::Err,
         Action::Reduce(RuleKind::R23),
@@ -3192,7 +3132,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3245,10 +3184,8 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3301,10 +3238,8 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3357,7 +3292,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -3385,10 +3319,8 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3441,7 +3373,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -3452,7 +3383,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Reduce(RuleKind::R28),
         Action::Reduce(RuleKind::R28),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3473,7 +3403,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
     ],
     [
         Action::Shift(State::S68),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3525,7 +3454,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -3536,7 +3464,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Reduce(RuleKind::R29),
         Action::Reduce(RuleKind::R29),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3567,7 +3494,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Reduce(RuleKind::R34),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3586,7 +3512,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
     [
         Action::Err,
         Action::Shift(State::S70),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3637,7 +3562,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -3665,7 +3589,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -3675,7 +3598,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Reduce(RuleKind::R32),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3707,7 +3629,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Shift(State::S115),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3749,7 +3670,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -3759,7 +3679,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Reduce(RuleKind::R33),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3791,7 +3710,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Reduce(RuleKind::R35),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3816,7 +3734,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Shift(State::S83),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3851,7 +3768,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R47),
         Action::Err,
         Action::Reduce(RuleKind::R47),
@@ -3864,7 +3780,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3903,7 +3818,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R36),
         Action::Reduce(RuleKind::R36),
         Action::Reduce(RuleKind::R36),
@@ -3920,7 +3834,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Reduce(RuleKind::R36),
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -3963,7 +3876,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R39),
         Action::Err,
         Action::Reduce(RuleKind::R39),
@@ -3976,7 +3888,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4014,7 +3925,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Shift(State::S91),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4057,10 +3967,8 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4113,10 +4021,8 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4169,10 +4075,8 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4225,7 +4129,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -4247,7 +4150,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Shift(State::S114),
         Action::Err,
         Action::Err,
@@ -4258,7 +4160,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
     [
         Action::Err,
         Action::Shift(State::S94),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4309,7 +4210,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -4323,7 +4223,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Shift(State::S115),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4365,7 +4264,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -4393,10 +4291,8 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4424,7 +4320,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4477,7 +4372,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -4505,10 +4399,8 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4561,12 +4453,10 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
         Action::Shift(State::S105),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4617,11 +4507,9 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Reduce(RuleKind::R54),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4659,7 +4547,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R53),
         Action::Reduce(RuleKind::R53),
         Action::Reduce(RuleKind::R53),
@@ -4677,7 +4564,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
     ],
     [
         Action::Reduce(RuleKind::R55),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4729,7 +4615,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Reduce(RuleKind::R56),
@@ -4743,7 +4628,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R56),
         Action::Reduce(RuleKind::R56),
         Action::Reduce(RuleKind::R56),
@@ -4768,7 +4652,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Reduce(RuleKind::R58),
         Action::Reduce(RuleKind::R58),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4813,7 +4696,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
         Action::Err,
@@ -4827,7 +4709,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
         Action::Reduce(RuleKind::R59),
         Action::Reduce(RuleKind::R59),
         Action::Reduce(RuleKind::R59),
@@ -4851,7 +4732,6 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Reduce(RuleKind::R60),
         Action::Reduce(RuleKind::R60),
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -4897,10 +4777,8 @@ const ACTION_TABLE: [[Action; 26]; 117] = [
         Action::Err,
         Action::Err,
         Action::Err,
-        Action::Err,
     ],
     [
-        Action::Err,
         Action::Err,
         Action::Err,
         Action::Err,
@@ -9397,12 +9275,12 @@ impl TryFrom<Node> for Expr {
     }
 }
 
-impl TryFrom<Node> for Let {
+impl TryFrom<Node> for Var {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::Let(n) => Ok(n),
+            Node::Var(n) => Ok(n),
             _ => Err(node),
         }
     }
@@ -9540,12 +9418,12 @@ impl TryFrom<Node> for CommaSeparatedExprs {
     }
 }
 
-impl TryFrom<Node> for Fun {
+impl TryFrom<Node> for Def {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::Fun(n) => Ok(n),
+            Node::Def(n) => Ok(n),
             _ => Err(node),
         }
     }
@@ -9860,98 +9738,91 @@ impl Node {
         }
     }
     
-    fn try_into_let_kw_11(self) -> Result<crate::token::ByteIndex, Self> {
+    fn try_into_def_kw_11(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
-            Self::LetKw(t) => Ok(t),
+            Self::DefKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_fun_kw_12(self) -> Result<crate::token::ByteIndex, Self> {
-        match self {
-            Self::FunKw(t) => Ok(t),
-            _ => Err(self),
-        }
-    }
-    
-    fn try_into_match_kw_13(self) -> Result<crate::token::ByteIndex, Self> {
+    fn try_into_match_kw_12(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::MatchKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_afun_kw_14(self) -> Result<crate::token::ByteIndex, Self> {
+    fn try_into_fun_kw_13(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
-            Self::AfunKw(t) => Ok(t),
+            Self::FunKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_for_kw_15(self) -> Result<crate::token::ByteIndex, Self> {
+    fn try_into_for_kw_14(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::ForKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_case_kw_16(self) -> Result<crate::token::ByteIndex, Self> {
+    fn try_into_case_kw_15(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::CaseKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_use_kw_17(self) -> Result<crate::token::ByteIndex, Self> {
+    fn try_into_use_kw_16(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::UseKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_end_kw_18(self) -> Result<crate::token::ByteIndex, Self> {
+    fn try_into_end_kw_17(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::EndKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_dec_kw_19(self) -> Result<crate::token::ByteIndex, Self> {
+    fn try_into_dec_kw_18(self) -> Result<crate::token::ByteIndex, Self> {
         match self {
             Self::DecKw(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_ident_20(self) -> Result<crate::token::Ident, Self> {
+    fn try_into_ident_19(self) -> Result<crate::token::Ident, Self> {
         match self {
             Self::Ident(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_number_literal_21(self) -> Result<crate::token::NumberLiteral, Self> {
+    fn try_into_number_literal_20(self) -> Result<crate::token::NumberLiteral, Self> {
         match self {
             Self::NumberLiteral(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_string_literal_22(self) -> Result<crate::token::StringLiteral, Self> {
+    fn try_into_string_literal_21(self) -> Result<crate::token::StringLiteral, Self> {
         match self {
             Self::StringLiteral(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_lowercase_universe_literal_23(self) -> Result<crate::token::LowercaseUniverseLiteral, Self> {
+    fn try_into_lowercase_universe_literal_22(self) -> Result<crate::token::LowercaseUniverseLiteral, Self> {
         match self {
             Self::LowercaseUniverseLiteral(t) => Ok(t),
             _ => Err(self),
         }
     }
     
-    fn try_into_capitalized_universe_literal_24(self) -> Result<crate::token::CapitalizedUniverseLiteral, Self> {
+    fn try_into_capitalized_universe_literal_23(self) -> Result<crate::token::CapitalizedUniverseLiteral, Self> {
         match self {
             Self::CapitalizedUniverseLiteral(t) => Ok(t),
             _ => Err(self),

@@ -2,9 +2,9 @@ start Expr
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum Expr {
-    Let(Let)
+    Var(Var)
     Ind(Ind)
-    Fun(Fun)
+    Def(Def)
 
     Match(Match)
     Afun(Afun)
@@ -14,7 +14,7 @@ enum Expr {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Let {
+struct Var {
     name: $Ident
     _: $Eq
     val: Expr
@@ -123,15 +123,15 @@ enum CommaSeparatedExprs {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Fun {
-    funkw: $FunKw
+struct Def {
+    defkw: $DefKw
     name: $Ident
     innards: FunCommonInnards
     next_val: Expr
 }
 
 // "Innards" refer to common syntax
-// shared between `fun` and `lam`.
+// shared between `fun` and `def`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct FunCommonInnards {
     params: ParenthesizedCommaSeparatedFunParamDefs
@@ -268,7 +268,7 @@ struct ParenthesizedCommaSeparatedIdentsOrUnderscores {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Afun {
-    afunkw: $AfunKw
+    funkw: $FunKw
     name: OptIdent
     innards: FunCommonInnards
 }
@@ -322,11 +322,10 @@ terminal Token {
     $Caret: crate::token::ByteIndex
     $Underscore: crate::token::ByteIndex
 
-    $LetKw: crate::token::ByteIndex
-    $FunKw: crate::token::ByteIndex
+    $DefKw: crate::token::ByteIndex
 
     $MatchKw: crate::token::ByteIndex
-    $AfunKw: crate::token::ByteIndex
+    $FunKw: crate::token::ByteIndex
     $ForKw: crate::token::ByteIndex
 
     $CaseKw: crate::token::ByteIndex

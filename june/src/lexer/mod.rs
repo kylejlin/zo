@@ -245,11 +245,10 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
     match s {
         "_" => return Some(Token::Underscore(start)),
 
-        "let" => return Some(Token::LetKw(start)),
-        "fun" => return Some(Token::FunKw(start)),
+        "def" => return Some(Token::DefKw(start)),
 
         "match" => return Some(Token::MatchKw(start)),
-        "afun" => return Some(Token::AfunKw(start)),
+        "fun" => return Some(Token::FunKw(start)),
         "For" => return Some(Token::ForKw(start)),
 
         "case" => return Some(Token::CaseKw(start)),

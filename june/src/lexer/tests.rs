@@ -143,11 +143,10 @@ fn dashes_and_thin_arrows() {
 
 #[test]
 fn keywords() {
-    let src = r#"_ let set set1 set33 prop prop1 prop33 fun match afun For case use end dec Set Set1 Set33 Prop Prop1 Prop33"#;
+    let src = r#"_ set set1 set33 prop prop1 prop33 def match fun For case use end dec Set Set1 Set33 Prop Prop1 Prop33"#;
     let actual = lex(src);
     let expected = Ok(vec![
         Token::Underscore(ByteIndex(src.find("_").unwrap())),
-        Token::LetKw(ByteIndex(src.find("let").unwrap())),
         Token::LowercaseUniverseLiteral(LowercaseUniverseLiteral {
             level: 0,
             start: ByteIndex(src.find("set").unwrap()),
@@ -178,9 +177,9 @@ fn keywords() {
             start: ByteIndex(src.find("prop33").unwrap()),
             erasable: true,
         }),
-        Token::FunKw(ByteIndex(src.find("fun").unwrap())),
+        Token::DefKw(ByteIndex(src.find("def").unwrap())),
         Token::MatchKw(ByteIndex(src.find("match").unwrap())),
-        Token::AfunKw(ByteIndex(src.find("afun").unwrap())),
+        Token::FunKw(ByteIndex(src.find("fun").unwrap())),
         Token::ForKw(ByteIndex(src.find("For").unwrap())),
         Token::CaseKw(ByteIndex(src.find("case").unwrap())),
         Token::UseKw(ByteIndex(src.find("use").unwrap())),
@@ -222,11 +221,11 @@ fn keywords() {
 
 #[test]
 fn no_whitespace() {
-    let src = r#"(let)"#;
+    let src = r#"(def)"#;
     let actual = lex(src);
     let expected = Ok(vec![
         Token::LParen(ByteIndex(src.find("(").unwrap())),
-        Token::LetKw(ByteIndex(src.find("let").unwrap())),
+        Token::DefKw(ByteIndex(src.find("def").unwrap())),
         Token::RParen(ByteIndex(src.find(")").unwrap())),
     ]);
     assert_eq!(expected, actual);
@@ -236,12 +235,12 @@ fn no_whitespace() {
 fn comments() {
     let src = r#"(// Hello world!
 // You can write comments on their own line.
-let // You can also write them at the end of a line 
+def // You can also write them at the end of a line 
 use)"#;
     let actual = lex(src);
     let expected = Ok(vec![
         Token::LParen(ByteIndex(src.find("(").unwrap())),
-        Token::LetKw(ByteIndex(src.find("let").unwrap())),
+        Token::DefKw(ByteIndex(src.find("def").unwrap())),
         Token::UseKw(ByteIndex(src.find("use").unwrap())),
         Token::RParen(ByteIndex(src.find(")").unwrap())),
     ]);
