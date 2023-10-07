@@ -1,9 +1,11 @@
 enum Nat
-    case zero
-    case succ(pred: Nat)
+    zero
+    succ(pred: Nat)
+end
 
 enum* Eq(T: Type, left: T) ^(right: T)
-    case refl ^(left)
+    refl ^(left)
+end
 
 def add(dec a: Nat, b: Nat) -> Nat
     match a
