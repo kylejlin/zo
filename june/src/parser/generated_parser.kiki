@@ -55,7 +55,6 @@ struct Enum {
     params: OptParenthesizedNonfunParamDefs
     indices: OptCaretParenthesizedParamDefs
     cases: ZeroOrMoreEnumCases
-    endkw: $EndKw
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -115,6 +114,7 @@ enum ZeroOrMoreEnumCases {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct EnumCase {
+    casekw: $CaseKw
     name: $Ident
     params: OptParenthesizedNonfunParamDefs
     index_args: OptCaretParenthesizedExprs
