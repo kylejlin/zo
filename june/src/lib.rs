@@ -3,5 +3,4 @@ pub mod parser;
 pub mod token;
 pub use parser::cst;
 
-// TODO: Uncomment
-// pub mod codegen;
+pub mod codegen;

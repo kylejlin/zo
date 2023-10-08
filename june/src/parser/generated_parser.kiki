@@ -11,32 +11,32 @@ enum Module {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ModuleItem {
-    Var(Var)
+    VarDef(VarDef)
     Enum(Enum)
     Def(Def)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum Expr {
-    Var(ChainVar)
+    VarDef(ChainVarDef)
     Enum(ChainEnum)
     Def(ChainDef)
 
     Match(Match)
-    Afun(Afun)
+    Fun(Fun)
     For(For)
     VarOrApp(VarOrApp)
     Universe($UniverseLiteral)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct ChainVar {
-    standalone: Var
+struct ChainVarDef {
+    standalone: VarDef
     next_val: Expr
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Var {
+struct VarDef {
     name: $Ident
     _: $Eq
     val: Expr
@@ -50,7 +50,7 @@ struct ChainEnum {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Enum {
-    ind_universe: $EnumKw
+    universe: $EnumKw
     name: $Ident
     params: OptParenthesizedNonfunParamDefs
     indices: OptCaretParenthesizedParamDefs
@@ -297,7 +297,7 @@ struct ParenthesizedCommaSeparatedIdentsOrUnderscores {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Afun {
+struct Fun {
     funkw: $FunKw
     name: OptIdent
     innards: FunCommonInnards

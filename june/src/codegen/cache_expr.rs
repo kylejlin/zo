@@ -1,6 +1,6 @@
 use super::*;
 
-impl MayConverter {
+impl JuneConverter {
     pub(crate) fn cache_expr(&mut self, node: znode::Expr) -> znode::Expr {
         let digest = node.digest();
         if let Some(existing) = self.znode_cache.get(digest) {
@@ -116,7 +116,7 @@ impl MayConverter {
     }
 }
 
-impl MayConverter {
+impl JuneConverter {
     pub(crate) fn cache_expr_vec(&mut self, node: Vec<znode::Expr>) -> RcHashedVec<znode::Expr> {
         let hashed = bypass_cache_and_rc_hash(node);
 
@@ -131,7 +131,7 @@ impl MayConverter {
     }
 }
 
-impl MayConverter {
+impl JuneConverter {
     pub(crate) fn cache_string_value(&mut self, val: StringValue) -> Rc<StringValue> {
         let val = Rc::new(val);
 

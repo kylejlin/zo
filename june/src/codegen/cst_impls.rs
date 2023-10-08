@@ -56,8 +56,8 @@ impl mnode::ZeroOrMoreMatchCases {
     }
 }
 
-impl mnode::OptParenthesizedParamDefs {
-    pub(crate) fn to_std_option(&self) -> Option<&mnode::CommaSeparatedParamDefs> {
+impl mnode::OptParenthesizedNonfunParamDefs {
+    pub(crate) fn to_std_option(&self) -> Option<&mnode::CommaSeparatedNonfunParamDefs> {
         match self {
             Self::Some(defs) => Some(&defs.params),
             Self::None => None,
@@ -65,8 +65,8 @@ impl mnode::OptParenthesizedParamDefs {
     }
 }
 
-impl mnode::OptSquareBracketedParamDefs {
-    pub(crate) fn to_std_option(&self) -> Option<&mnode::CommaSeparatedParamDefs> {
+impl mnode::OptCaretParenthesizedParamDefs {
+    pub(crate) fn to_std_option(&self) -> Option<&mnode::CommaSeparatedNonfunParamDefs> {
         match self {
             Self::Some(defs) => Some(&defs.params),
             Self::None => None,
@@ -74,20 +74,20 @@ impl mnode::OptSquareBracketedParamDefs {
     }
 }
 
-impl mnode::OptColonSquareBracketedExprs {
+impl mnode::OptCaretParenthesizedExprs {
     pub(crate) fn to_std_option(&self) -> Option<&mnode::CommaSeparatedExprs> {
         match self {
-            Self::Some(defs) => Some(defs),
+            Self::Some(defs) => Some(&defs.exprs),
             Self::None => None,
         }
     }
 }
 
-impl mnode::ZeroOrMoreIndCases {
-    pub(crate) fn to_vec(&self) -> Vec<&mnode::IndCase> {
+impl mnode::ZeroOrMoreEnumCases {
+    pub(crate) fn to_vec(&self) -> Vec<&mnode::EnumCase> {
         match self {
-            mnode::ZeroOrMoreIndCases::Nil => vec![],
-            mnode::ZeroOrMoreIndCases::Snoc(rdc, rac) => {
+            mnode::ZeroOrMoreEnumCases::Nil => vec![],
+            mnode::ZeroOrMoreEnumCases::Snoc(rdc, rac) => {
                 let mut rdc = rdc.to_vec();
                 rdc.push(rac);
                 rdc
@@ -97,8 +97,8 @@ impl mnode::ZeroOrMoreIndCases {
 
     pub(crate) fn len(&self) -> usize {
         match self {
-            mnode::ZeroOrMoreIndCases::Nil => 0,
-            mnode::ZeroOrMoreIndCases::Snoc(rdc, _) => rdc.len() + 1,
+            mnode::ZeroOrMoreEnumCases::Nil => 0,
+            mnode::ZeroOrMoreEnumCases::Snoc(rdc, _) => rdc.len() + 1,
         }
     }
 }

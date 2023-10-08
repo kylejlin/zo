@@ -1,20 +1,21 @@
 use super::*;
 
-impl MayConverter {
-    pub(crate) fn convert_match<C: ContextToOwned>(
+impl JuneConverter {
+    pub(crate) fn convert_match(
         &mut self,
         expr: &mnode::Match,
         context: Context,
-        converter: &C,
-    ) -> Result<(znode::Expr, C::Out), SemanticError> {
-        let (matchee, _) = self.convert(&expr.matchee, context, &DropContext)?;
+    ) -> Result<znode::Expr, SemanticError> {
+        let matchee = self.convert(&expr.matchee, context)?;
 
+        // let extension =
+        //     self.convert_return_arity_clause_to_context_extension(&expr.return_arity)?;
         let extension =
-            self.convert_return_arity_clause_to_context_extension(&expr.return_arity)?;
+            || -> Vec<UnshiftedEntry> { panic!("TODO: Impl match extension inference.") }();
         let return_type_arity = extension.len();
         let context_with_return_params = Context::Snoc(&context, &extension);
-        let (return_type, _) =
-            self.convert(&expr.return_type, context_with_return_params, &DropContext)?;
+        // let return_type = self.convert(&expr.return_type, context_with_return_params)?;
+        let return_type = || -> znode::Expr { panic!("TODO: Impl match return type inference.") }();
 
         let cases = self.convert_match_cases(&expr.cases, context)?;
 
@@ -25,7 +26,7 @@ impl MayConverter {
             cases,
             aux_data: (),
         });
-        Ok((converted_leaf, converter.convert_context_to_owned(context)))
+        Ok(converted_leaf)
     }
 
     fn convert_match_cases(
@@ -55,17 +56,19 @@ impl MayConverter {
         case: &mnode::MatchCase,
         context: Context,
     ) -> Result<znode::MatchCase, SemanticError> {
-        let arity = case.params.len();
+        // let arity = case.params.len();
 
-        let extension = self.convert_match_case_params_to_context_extension(&case.params);
-        let context_with_params = Context::Snoc(&context, &extension);
+        // let extension = self.convert_match_case_params_to_context_extension(&case.params);
+        // let context_with_params = Context::Snoc(&context, &extension);
 
-        let (return_val, _) = self.convert(&case.return_val, context_with_params, &DropContext)?;
+        // let return_val = self.convert(&case.return_val, context_with_params)?;
 
-        Ok(znode::MatchCase {
-            arity,
-            return_val,
-            aux_data: (),
-        })
+        // Ok(znode::MatchCase {
+        //     arity,
+        //     return_val,
+        //     aux_data: (),
+        // })
+
+        todo!()
     }
 }

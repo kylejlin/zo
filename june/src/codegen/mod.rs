@@ -113,40 +113,8 @@ pub use error::*;
 /// Therefore, if you call this function with the above example code,
 /// `toprightmost_defs` will contain the Zo representations for `ind Bool` and `fun and`,
 /// in that order.
-pub fn may_to_zo(expr: &mnode::Expr) -> Result<(znode::Expr, Vec<znode::Expr>), SemanticError> {
-    MayConverter::default().convert(expr, Context::empty(), &ContextToUnshiftedSubstitutableDefs)
-}
-
-trait ContextToOwned {
-    type Out;
-    fn convert_context_to_owned(&self, context: Context) -> Self::Out;
-}
-
-struct DropContext;
-impl ContextToOwned for DropContext {
-    type Out = ();
-
-    fn convert_context_to_owned(&self, _: Context) -> Self::Out {}
-}
-
-struct ContextToUnshiftedSubstitutableDefs;
-impl ContextToOwned for ContextToUnshiftedSubstitutableDefs {
-    type Out = Vec<znode::Expr>;
-
-    fn convert_context_to_owned(&self, context: Context) -> Self::Out {
-        match context {
-            Context::Base(entries) => {
-                get_unshifted_substitutable_defs_from_entries(entries).collect()
-            }
-
-            Context::Snoc(rdc, rac) => {
-                let mut rdc = self.convert_context_to_owned(*rdc);
-                let rac = get_unshifted_substitutable_defs_from_entries(rac);
-                rdc.extend(rac);
-                rdc
-            }
-        }
-    }
+pub fn june_to_zo(expr: &mnode::Expr) -> Result<znode::Expr, SemanticError> {
+    JuneConverter::default().convert(expr, Context::empty())
 }
 
 fn get_unshifted_substitutable_defs_from_entries<'a>(
@@ -159,7 +127,7 @@ fn get_unshifted_substitutable_defs_from_entries<'a>(
 }
 
 #[derive(Debug, Default)]
-struct MayConverter {
+struct JuneConverter {
     znode_cache: NoHashHashMap<Digest, znode::Expr>,
     znode_vec_cache: NoHashHashMap<Digest, RcHashedVec<znode::Expr>>,
     str_val_cache: HashSet<Rc<StringValue>>,

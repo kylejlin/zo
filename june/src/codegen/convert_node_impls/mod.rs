@@ -1,40 +1,35 @@
 use super::*;
 
-mod fun;
-mod ind;
-mod let_;
+mod def;
+mod enum_;
+mod var_def;
 
-mod afun;
-mod aind;
 mod for_;
+mod fun;
 mod match_;
 mod universe;
 mod var_or_app;
-mod vcon;
 
-impl MayConverter {
-    pub(crate) fn convert<C: ContextToOwned>(
+impl JuneConverter {
+    pub(crate) fn convert(
         &mut self,
         expr: &mnode::Expr,
         context: Context,
-        converter: &C,
-    ) -> Result<(znode::Expr, C::Out), SemanticError> {
+    ) -> Result<znode::Expr, SemanticError> {
         match expr {
-            mnode::Expr::Let(e) => self.convert_let(e, context, converter),
-            mnode::Expr::Ind(e) => self.convert_ind(e, context, converter),
-            mnode::Expr::Fun(e) => self.convert_fun(e, context, converter),
-            mnode::Expr::Aind(e) => self.convert_aind(e, context, converter),
-            mnode::Expr::Vcon(e) => self.convert_vcon(e, context, converter),
-            mnode::Expr::Match(e) => self.convert_match(e, context, converter),
-            mnode::Expr::Afun(e) => self.convert_afun(e, context, converter),
-            mnode::Expr::For(e) => self.convert_for(e, context, converter),
-            mnode::Expr::VarOrApp(e) => self.convert_var_or_app(e, context, converter),
-            mnode::Expr::Universe(e) => self.convert_universe(e, context, converter),
+            mnode::Expr::VarDef(e) => self.convert_chain_var_def(e, context),
+            mnode::Expr::Enum(e) => self.convert_chain_enum(e, context),
+            mnode::Expr::Def(e) => self.convert_chain_def(e, context),
+            mnode::Expr::Match(e) => self.convert_match(e, context),
+            mnode::Expr::Fun(e) => self.convert_fun(e, context),
+            mnode::Expr::For(e) => self.convert_for(e, context),
+            mnode::Expr::VarOrApp(e) => self.convert_var_or_app(e, context),
+            mnode::Expr::Universe(e) => self.convert_universe(e, context),
         }
     }
 }
 
-impl MayConverter {
+impl JuneConverter {
     fn convert_optional_exprs(
         &mut self,
         exprs: Option<&mnode::CommaSeparatedExprs>,
@@ -63,12 +58,12 @@ impl MayConverter {
     ) -> Result<Vec<znode::Expr>, SemanticError> {
         match exprs {
             mnode::CommaSeparatedExprs::One(e) => {
-                let (e, _) = self.convert(e, context, &DropContext)?;
+                let e = self.convert(e, context)?;
                 Ok(vec![e])
             }
             mnode::CommaSeparatedExprs::Snoc(rdc, rac) => {
                 let mut rdc = self.convert_exprs_without_hashing_vec(rdc, context)?;
-                let (rac, _) = self.convert(rac, context, &DropContext)?;
+                let rac = self.convert(rac, context)?;
                 rdc.push(rac);
                 Ok(rdc)
             }

@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 f54afe73ab5491685d52a8f6f8220a386b14fcf92ae033f525647ec1ba2170e6
+// @sha256 e79a93b686831dc4d930b5c26ed60d7acfc8e85799a2a2491ef887d819ebb1ea
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -52,8 +52,8 @@ pub enum Module {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ModuleItem {
-    Var(
-        Box<Var>,
+    VarDef(
+        Box<VarDef>,
     ),
     Enum(
         Box<Enum>,
@@ -65,8 +65,8 @@ pub enum ModuleItem {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Expr {
-    Var(
-        Box<ChainVar>,
+    VarDef(
+        Box<ChainVarDef>,
     ),
     Enum(
         Box<ChainEnum>,
@@ -77,8 +77,8 @@ pub enum Expr {
     Match(
         Box<Match>,
     ),
-    Afun(
-        Box<Afun>,
+    Fun(
+        Box<Fun>,
     ),
     For(
         Box<For>,
@@ -92,13 +92,13 @@ pub enum Expr {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ChainVar {
-    pub standalone: Box<Var>,
+pub struct ChainVarDef {
+    pub standalone: Box<VarDef>,
     pub next_val: Box<Expr>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Var {
+pub struct VarDef {
     pub name: crate::token::Ident,
     pub val: Box<Expr>,
 }
@@ -111,7 +111,7 @@ pub struct ChainEnum {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Enum {
-    pub ind_universe: crate::token::EnumKw,
+    pub universe: crate::token::EnumKw,
     pub name: crate::token::Ident,
     pub params: Box<OptParenthesizedNonfunParamDefs>,
     pub indices: Box<OptCaretParenthesizedParamDefs>,
@@ -360,7 +360,7 @@ pub struct ParenthesizedCommaSeparatedIdentsOrUnderscores {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Afun {
+pub struct Fun {
     pub funkw: crate::token::ByteIndex,
     pub name: Box<OptIdent>,
     pub innards: Box<FunCommonInnards>,
@@ -489,8 +489,8 @@ enum NonterminalKind {
     Module = 0,
     ModuleItem = 1,
     Expr = 2,
-    ChainVar = 3,
-    Var = 4,
+    ChainVarDef = 3,
+    VarDef = 4,
     ChainEnum = 5,
     Enum = 6,
     OptParenthesizedNonfunParamDefs = 7,
@@ -521,7 +521,7 @@ enum NonterminalKind {
     MatchCase = 32,
     OptParenthesizedCommaSeparatedIdentsOrUnderscores = 33,
     ParenthesizedCommaSeparatedIdentsOrUnderscores = 34,
-    Afun = 35,
+    Fun = 35,
     OptIdent = 36,
     App = 37,
     VarOrApp = 38,
@@ -662,8 +662,8 @@ enum Node {
     Module(Module),
     ModuleItem(ModuleItem),
     Expr(Expr),
-    ChainVar(ChainVar),
-    Var(Var),
+    ChainVarDef(ChainVarDef),
+    VarDef(VarDef),
     ChainEnum(ChainEnum),
     Enum(Enum),
     OptParenthesizedNonfunParamDefs(OptParenthesizedNonfunParamDefs),
@@ -694,7 +694,7 @@ enum Node {
     MatchCase(MatchCase),
     OptParenthesizedCommaSeparatedIdentsOrUnderscores(OptParenthesizedCommaSeparatedIdentsOrUnderscores),
     ParenthesizedCommaSeparatedIdentsOrUnderscores(ParenthesizedCommaSeparatedIdentsOrUnderscores),
-    Afun(Afun),
+    Fun(Fun),
     OptIdent(OptIdent),
     App(App),
     VarOrApp(VarOrApp),
@@ -831,12 +831,12 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R2 => {
-            let t0 = Box::new(Var::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(VarDef::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::ModuleItem(ModuleItem::Var(
+                Node::ModuleItem(ModuleItem::VarDef(
                     t0,
                 )),
                 NonterminalKind::ModuleItem,
@@ -867,12 +867,12 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R5 => {
-            let t0 = Box::new(ChainVar::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(ChainVarDef::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::Expr(Expr::Var(
+                Node::Expr(Expr::VarDef(
                     t0,
                 )),
                 NonterminalKind::Expr,
@@ -915,12 +915,12 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R9 => {
-            let t0 = Box::new(Afun::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(Fun::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::Expr(Expr::Afun(
+                Node::Expr(Expr::Fun(
                     t0,
                 )),
                 NonterminalKind::Expr,
@@ -964,16 +964,16 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R13 => {
             let next_val_1 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let standalone_0 = Box::new(Var::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let standalone_0 = Box::new(VarDef::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 2);
             
             (
-                Node::ChainVar(ChainVar {
+                Node::ChainVarDef(ChainVarDef {
                     standalone: standalone_0,
                     next_val: next_val_1,
                 }),
-                NonterminalKind::ChainVar,
+                NonterminalKind::ChainVarDef,
             )
         }
         RuleKind::R14 => {
@@ -984,11 +984,11 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 3);
             
             (
-                Node::Var(Var {
+                Node::VarDef(VarDef {
                     name: name_0,
                     val: val_2,
                 }),
-                NonterminalKind::Var,
+                NonterminalKind::VarDef,
             )
         }
         RuleKind::R15 => {
@@ -1011,13 +1011,13 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             let indices_3 = Box::new(OptCaretParenthesizedParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
             let params_2 = Box::new(OptParenthesizedNonfunParamDefs::try_from(nodes.pop().unwrap()).ok().unwrap());
             let name_1 = nodes.pop().unwrap().try_into_ident_20().ok().unwrap();
-            let ind_universe_0 = nodes.pop().unwrap().try_into_enum_kw_11().ok().unwrap();
+            let universe_0 = nodes.pop().unwrap().try_into_enum_kw_11().ok().unwrap();
             
             states.truncate(states.len() - 6);
             
             (
                 Node::Enum(Enum {
-                    ind_universe: ind_universe_0,
+                    universe: universe_0,
                     name: name_1,
                     params: params_2,
                     indices: indices_3,
@@ -1608,12 +1608,12 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 3);
             
             (
-                Node::Afun(Afun {
+                Node::Fun(Fun {
                     funkw: funkw_0,
                     name: name_1,
                     innards: innards_2,
                 }),
-                NonterminalKind::Afun,
+                NonterminalKind::Fun,
             )
         }
         RuleKind::R62 => {
@@ -10597,23 +10597,23 @@ impl TryFrom<Node> for Expr {
     }
 }
 
-impl TryFrom<Node> for ChainVar {
+impl TryFrom<Node> for ChainVarDef {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::ChainVar(n) => Ok(n),
+            Node::ChainVarDef(n) => Ok(n),
             _ => Err(node),
         }
     }
 }
 
-impl TryFrom<Node> for Var {
+impl TryFrom<Node> for VarDef {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::Var(n) => Ok(n),
+            Node::VarDef(n) => Ok(n),
             _ => Err(node),
         }
     }
@@ -10949,12 +10949,12 @@ impl TryFrom<Node> for ParenthesizedCommaSeparatedIdentsOrUnderscores {
     }
 }
 
-impl TryFrom<Node> for Afun {
+impl TryFrom<Node> for Fun {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::Afun(n) => Ok(n),
+            Node::Fun(n) => Ok(n),
             _ => Err(node),
         }
     }

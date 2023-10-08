@@ -1,12 +1,11 @@
 use super::*;
 
-impl MayConverter {
-    pub(crate) fn convert_universe<C: ContextToOwned>(
+impl JuneConverter {
+    pub(crate) fn convert_universe(
         &mut self,
         expr: &mnode::UniverseLiteral,
         context: Context,
-        converter: &C,
-    ) -> Result<(znode::Expr, C::Out), SemanticError> {
+    ) -> Result<znode::Expr, SemanticError> {
         let converted_leaf = self.cache_universe(znode::UniverseNode {
             universe: Universe {
                 level: UniverseLevel(expr.level),
@@ -14,6 +13,6 @@ impl MayConverter {
             },
             aux_data: (),
         });
-        Ok((converted_leaf, converter.convert_context_to_owned(context)))
+        Ok(converted_leaf)
     }
 }
