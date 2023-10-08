@@ -25,7 +25,7 @@ enum Bool
     true
 end
 
-def filter(T: Type, l: List(T), p: For(_: T) -> Bool) -> List(T)
+def filter(T: Type, dec l: List(T), p: For(_: T) -> Bool) -> List(T)
     match l
     case nil:
         nil
@@ -36,4 +36,39 @@ def filter(T: Type, l: List(T), p: For(_: T) -> Bool) -> List(T)
         case false:
             filter(tail, p)
         end
+    end
+
+n1 = succ(zero)
+n2 = succ(n1)
+n3 = succ(n2)
+
+list123 = cons(Nat)(n1,
+    cons(Nat)(n2,
+        cons(Nat)(n3, nil(Nat))
+    )
+)
+
+def sum(dec l: List(Nat)) -> Nat
+    match l
+    case nil:
+        zero
+    case cons(head, tail):
+        add(head, sum(tail))
+    end
+
+n8 =
+    n6 = sum(list123)
+
+    enum CoinSide
+        heads
+        tails
+    end
+
+    garbage = zero
+
+    match heads
+    case heads:
+        add(n2, n6)
+    case tails:
+        garbage
     end
