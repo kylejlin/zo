@@ -15,3 +15,25 @@ def add(dec a: Nat, b: Nat) -> Nat
         succ(add(a_pred, b))
     end
     
+enum List(T: Type)
+    nil
+    cons(head: T, tail: List)
+end
+
+enum Bool
+    false
+    true
+end
+
+def filter(T: Type, l: List(T), p: For(_: T) -> Bool) -> List(T)
+    match l
+    case nil:
+        nil
+    case cons(head, tail):
+        match p(head)
+        case true:
+            cons(head, filter(tail, p))
+        case false:
+            filter(tail, p)
+        end
+    end
