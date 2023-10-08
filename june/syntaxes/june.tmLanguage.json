@@ -26,7 +26,11 @@
         },
         {
           "name": "keyword.control.arrow.june",
-          "match": "(?<=\\s)->(?=\\s)"
+          "match": "(?<=[\\s,()\\[\\]\\{\\}]|$|(?::\\s))->(?=[\\s,()\\[\\]\\{\\}]|$|(?::\\s))"
+        },
+        {
+          "name": "keyword.control.caret.june",
+          "match": "(?<=[\\s,()\\[\\]\\{\\}]|$|(?::\\s))\\^(?=[\\s,()\\[\\]\\{\\}]|$|(?::\\s))"
         },
         {
           "name": "constant.language.universe.june",
