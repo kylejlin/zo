@@ -1,0 +1,25 @@
+{
+  "name": "june",
+  "displayName": "June",
+  "description": "Language support for the June programming language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.83.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "june",
+      "aliases": ["June", "june"],
+      "extensions": ["jn"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "june",
+      "scopeName": "source.june",
+      "path": "./syntaxes/june.tmLanguage.json"
+    }]
+  }
+}
