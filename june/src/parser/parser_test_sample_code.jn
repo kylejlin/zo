@@ -72,3 +72,39 @@ n8 =
     case tails:
         garbage
     end
+
+def not(b: Bool) -> Bool
+    match b
+    case true:
+        false
+    case false:
+        true
+    end
+
+def nat_eq(dec a: Nat, b: Nat) -> Bool
+    match a
+    case zero:
+        match b
+        case zero:
+            true
+        case succ(_):
+            false
+        end
+    case succ(a_pred):
+        match b
+        case zero:
+            false
+        case succ(b_pred):
+            nat_eq(a_pred, b_pred)
+        end
+    end
+
+n5 = 
+    def nat_ne(n: Nat) -> Bool
+        not(nat_eq(n))
+
+    non1 = filter(Nat, list123, fun(n: Nat) -> Bool
+        nat_ne(n, n1)
+    )
+
+    sum(non1)
