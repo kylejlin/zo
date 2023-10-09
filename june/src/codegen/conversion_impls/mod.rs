@@ -71,3 +71,26 @@ impl JuneConverter {
         }
     }
 }
+
+impl JuneConverter {
+    fn convert_and_typecheck(
+        &mut self,
+        expr: &jnode::Expr,
+        context: Context,
+    ) -> Result<znode::Expr, SemanticError> {
+        let converted = self.convert(expr, context)?;
+
+        if let Err(zo_err) = self
+            .zo_typechecker
+            .get_type(converted.clone(), context.into())
+        {
+            return Err(SemanticError::ConvertedExprHasZoErr(
+                expr.clone(),
+                converted.clone(),
+                zo_err,
+            ));
+        }
+
+        Ok(converted)
+    }
+}

@@ -6,6 +6,15 @@ impl JuneConverter {
         expr: &jnode::ChainVarDef,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        todo!()
+        let val = self.convert(&expr.standalone.val, context)?;
+
+        let val_singleton = [UnshiftedEntry {
+            key: &expr.standalone.name.value,
+            val,
+            is_deb: false,
+        }];
+        let extended_context = Context::Snoc(&context, &val_singleton);
+
+        self.convert_and_typecheck(&expr.next_val, extended_context)
     }
 }

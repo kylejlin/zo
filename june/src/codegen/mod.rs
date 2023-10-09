@@ -1,4 +1,4 @@
-use zoc::syntax_tree::ast::prelude::minimal_ast as znode;
+use zoc::syntax_tree::ast::prelude::minimal_ast::{self as znode, UnitAuxDataFamily};
 
 mod jnode {
     pub use crate::{cst::*, token::*};
@@ -12,6 +12,8 @@ use zoc::{
         UniverseLevel,
     },
 };
+
+type ZoError = zoc::typecheck::TypeError<UnitAuxDataFamily>;
 
 use std::{collections::HashSet, rc::Rc};
 
@@ -40,4 +42,5 @@ struct JuneConverter {
 pub enum SemanticError {
     VarNotDefined(jnode::Ident),
     MultipleDashedParams(jnode::FunParamDef, jnode::FunParamDef),
+    ConvertedExprHasZoErr(jnode::Expr, znode::Expr, ZoError),
 }

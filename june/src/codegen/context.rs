@@ -1,5 +1,7 @@
 use super::*;
 
+use zoc::typecheck::LazyTypeContext;
+
 #[derive(Clone, Copy, Debug)]
 pub enum Context<'a> {
     Base(&'a [UnshiftedEntry<'a>]),
@@ -103,4 +105,10 @@ fn get_entry_unchecked<'a>(
     }
 
     Err(num_of_debs_defined)
+}
+
+impl<'a> From<Context<'a>> for LazyTypeContext<'a> {
+    fn from(context: Context) -> Self {
+        todo!()
+    }
 }
