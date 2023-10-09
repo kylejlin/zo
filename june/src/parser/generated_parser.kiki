@@ -12,15 +12,15 @@ enum Module {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ModuleItem {
     VarDef(VarDef)
-    Enum(Enum)
-    Def(Def)
+    EnumDef(EnumDef)
+    FunDef(Def)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum Expr {
     VarDef(ChainVarDef)
-    Enum(ChainEnum)
-    Def(ChainDef)
+    EnumDef(ChainEnumDef)
+    FunDef(ChainFunDef)
 
     Match(Match)
     Fun(Fun)
@@ -43,13 +43,13 @@ struct VarDef {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct ChainEnum {
-    standalone: Enum
+struct ChainEnumDef {
+    standalone: EnumDef
     next_val: Expr
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Enum {
+struct EnumDef {
     universe: $EnumKw
     name: $Ident
     params: OptParenthesizedNonfunParamDefs
@@ -148,7 +148,7 @@ enum CommaSeparatedExprs {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct ChainDef {
+struct ChainFunDef {
     standalone: Def
     next_val: Expr
 }

@@ -3,7 +3,7 @@
 // You can read more at https://crates.io/crates/kiki
 //
 // This code was generated from a grammar with the following hash:
-// @sha256 e79a93b686831dc4d930b5c26ed60d7acfc8e85799a2a2491ef887d819ebb1ea
+// @sha256 2a488cd25d145be333e112a61394ae3bf228b0071f4b79777ce0628c96c995e4
 
 // Since this code is automatically generated,
 // some parts may be unidiomatic.
@@ -55,10 +55,10 @@ pub enum ModuleItem {
     VarDef(
         Box<VarDef>,
     ),
-    Enum(
-        Box<Enum>,
+    EnumDef(
+        Box<EnumDef>,
     ),
-    Def(
+    FunDef(
         Box<Def>,
     ),
 }
@@ -68,11 +68,11 @@ pub enum Expr {
     VarDef(
         Box<ChainVarDef>,
     ),
-    Enum(
-        Box<ChainEnum>,
+    EnumDef(
+        Box<ChainEnumDef>,
     ),
-    Def(
-        Box<ChainDef>,
+    FunDef(
+        Box<ChainFunDef>,
     ),
     Match(
         Box<Match>,
@@ -104,13 +104,13 @@ pub struct VarDef {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ChainEnum {
-    pub standalone: Box<Enum>,
+pub struct ChainEnumDef {
+    pub standalone: Box<EnumDef>,
     pub next_val: Box<Expr>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Enum {
+pub struct EnumDef {
     pub universe: crate::token::EnumKw,
     pub name: crate::token::Ident,
     pub params: Box<OptParenthesizedNonfunParamDefs>,
@@ -212,7 +212,7 @@ pub enum CommaSeparatedExprs {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ChainDef {
+pub struct ChainFunDef {
     pub standalone: Box<Def>,
     pub next_val: Box<Expr>,
 }
@@ -491,8 +491,8 @@ enum NonterminalKind {
     Expr = 2,
     ChainVarDef = 3,
     VarDef = 4,
-    ChainEnum = 5,
-    Enum = 6,
+    ChainEnumDef = 5,
+    EnumDef = 6,
     OptParenthesizedNonfunParamDefs = 7,
     ParenthesizedCommaSeparatedNonfunParamDefs = 8,
     OptComma = 9,
@@ -504,7 +504,7 @@ enum NonterminalKind {
     OptCaretParenthesizedExprs = 15,
     ParenthesizedCommaSeparatedExprs = 16,
     CommaSeparatedExprs = 17,
-    ChainDef = 18,
+    ChainFunDef = 18,
     Def = 19,
     FunCommonInnards = 20,
     ParenthesizedCommaSeparatedFunParamDefs = 21,
@@ -664,8 +664,8 @@ enum Node {
     Expr(Expr),
     ChainVarDef(ChainVarDef),
     VarDef(VarDef),
-    ChainEnum(ChainEnum),
-    Enum(Enum),
+    ChainEnumDef(ChainEnumDef),
+    EnumDef(EnumDef),
     OptParenthesizedNonfunParamDefs(OptParenthesizedNonfunParamDefs),
     ParenthesizedCommaSeparatedNonfunParamDefs(ParenthesizedCommaSeparatedNonfunParamDefs),
     OptComma(OptComma),
@@ -677,7 +677,7 @@ enum Node {
     OptCaretParenthesizedExprs(OptCaretParenthesizedExprs),
     ParenthesizedCommaSeparatedExprs(ParenthesizedCommaSeparatedExprs),
     CommaSeparatedExprs(CommaSeparatedExprs),
-    ChainDef(ChainDef),
+    ChainFunDef(ChainFunDef),
     Def(Def),
     FunCommonInnards(FunCommonInnards),
     ParenthesizedCommaSeparatedFunParamDefs(ParenthesizedCommaSeparatedFunParamDefs),
@@ -843,12 +843,12 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R3 => {
-            let t0 = Box::new(Enum::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(EnumDef::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::ModuleItem(ModuleItem::Enum(
+                Node::ModuleItem(ModuleItem::EnumDef(
                     t0,
                 )),
                 NonterminalKind::ModuleItem,
@@ -860,7 +860,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 1);
             
             (
-                Node::ModuleItem(ModuleItem::Def(
+                Node::ModuleItem(ModuleItem::FunDef(
                     t0,
                 )),
                 NonterminalKind::ModuleItem,
@@ -879,24 +879,24 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             )
         }
         RuleKind::R6 => {
-            let t0 = Box::new(ChainEnum::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(ChainEnumDef::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::Expr(Expr::Enum(
+                Node::Expr(Expr::EnumDef(
                     t0,
                 )),
                 NonterminalKind::Expr,
             )
         }
         RuleKind::R7 => {
-            let t0 = Box::new(ChainDef::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let t0 = Box::new(ChainFunDef::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 1);
             
             (
-                Node::Expr(Expr::Def(
+                Node::Expr(Expr::FunDef(
                     t0,
                 )),
                 NonterminalKind::Expr,
@@ -993,16 +993,16 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
         }
         RuleKind::R15 => {
             let next_val_1 = Box::new(Expr::try_from(nodes.pop().unwrap()).ok().unwrap());
-            let standalone_0 = Box::new(Enum::try_from(nodes.pop().unwrap()).ok().unwrap());
+            let standalone_0 = Box::new(EnumDef::try_from(nodes.pop().unwrap()).ok().unwrap());
             
             states.truncate(states.len() - 2);
             
             (
-                Node::ChainEnum(ChainEnum {
+                Node::ChainEnumDef(ChainEnumDef {
                     standalone: standalone_0,
                     next_val: next_val_1,
                 }),
-                NonterminalKind::ChainEnum,
+                NonterminalKind::ChainEnumDef,
             )
         }
         RuleKind::R16 => {
@@ -1016,7 +1016,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 6);
             
             (
-                Node::Enum(Enum {
+                Node::EnumDef(EnumDef {
                     universe: universe_0,
                     name: name_1,
                     params: params_2,
@@ -1024,7 +1024,7 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
                     cases: cases_4,
                     endkw: endkw_5,
                 }),
-                NonterminalKind::Enum,
+                NonterminalKind::EnumDef,
             )
         }
         RuleKind::R17 => {
@@ -1249,11 +1249,11 @@ fn pop_and_reduce(states: &mut Vec<State>, nodes: &mut Vec<Node>, rule_kind: Rul
             states.truncate(states.len() - 2);
             
             (
-                Node::ChainDef(ChainDef {
+                Node::ChainFunDef(ChainFunDef {
                     standalone: standalone_0,
                     next_val: next_val_1,
                 }),
-                NonterminalKind::ChainDef,
+                NonterminalKind::ChainFunDef,
             )
         }
         RuleKind::R36 => {
@@ -10619,23 +10619,23 @@ impl TryFrom<Node> for VarDef {
     }
 }
 
-impl TryFrom<Node> for ChainEnum {
+impl TryFrom<Node> for ChainEnumDef {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::ChainEnum(n) => Ok(n),
+            Node::ChainEnumDef(n) => Ok(n),
             _ => Err(node),
         }
     }
 }
 
-impl TryFrom<Node> for Enum {
+impl TryFrom<Node> for EnumDef {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::Enum(n) => Ok(n),
+            Node::EnumDef(n) => Ok(n),
             _ => Err(node),
         }
     }
@@ -10762,12 +10762,12 @@ impl TryFrom<Node> for CommaSeparatedExprs {
     }
 }
 
-impl TryFrom<Node> for ChainDef {
+impl TryFrom<Node> for ChainFunDef {
     type Error = Node;
 
     fn try_from(node: Node) -> Result<Self, Self::Error> {
         match node {
-            Node::ChainDef(n) => Ok(n),
+            Node::ChainFunDef(n) => Ok(n),
             _ => Err(node),
         }
     }

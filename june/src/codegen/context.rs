@@ -10,13 +10,7 @@ pub enum Context<'a> {
 pub struct UnshiftedEntry<'a> {
     pub key: &'a str,
     pub val: znode::Expr,
-    pub def_type: DefinitionType,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub enum DefinitionType {
-    Deb,
-    Substitutable,
+    pub is_deb: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
@@ -103,7 +97,7 @@ fn get_entry_unchecked<'a>(
         if entry.key == key {
             return Ok((entry, Distance(num_of_debs_defined)));
         }
-        if entry.def_type == DefinitionType::Deb {
+        if entry.is_deb {
             num_of_debs_defined += 1;
         }
     }
