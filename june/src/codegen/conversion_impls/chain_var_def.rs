@@ -18,3 +18,13 @@ impl JuneConverter {
         self.convert(&expr.next_val, extended_context)
     }
 }
+
+impl JuneConverter {
+    pub fn convert_mod_and_typecheck(
+        &mut self,
+        expr: &jnode::Module,
+        context: Context,
+    ) -> Result<Vec<(String, znode::Expr)>, SemanticError> {
+        todo!()
+    }
+}
