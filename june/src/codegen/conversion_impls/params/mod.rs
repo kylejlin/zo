@@ -3,6 +3,20 @@ use super::*;
 impl JuneConverter {
     /// If the params are valid,
     /// this function returns `Ok((entries, param_types, dash_index))`.
+    pub(crate) fn convert_optional_typed_nonfun_param_defs_to_context_extension<'a>(
+        &mut self,
+        params: Option<&'a jnode::CommaSeparatedNonfunParamDefs>,
+        context: Context,
+    ) -> Result<(Vec<UnshiftedEntry<'a>>, Vec<znode::Expr>), SemanticError> {
+        let Some(params) = params else {
+            return Ok((vec![], vec![]));
+        };
+
+        self.convert_typed_nonfun_param_defs_to_context_extension(params, context)
+    }
+
+    /// If the params are valid,
+    /// this function returns `Ok((entries, param_types, dash_index))`.
     pub(crate) fn convert_typed_nonfun_param_defs_to_context_extension<'a>(
         &mut self,
         params: &'a jnode::CommaSeparatedNonfunParamDefs,

@@ -13,6 +13,46 @@ pub mod cst {
             }
         }
     }
+
+    impl ZeroOrMoreEnumCases {
+        pub fn to_vec(&self) -> Vec<&EnumCase> {
+            match self {
+                ZeroOrMoreEnumCases::Nil => vec![],
+                ZeroOrMoreEnumCases::Snoc(rdc, rac) => {
+                    let mut v = rdc.to_vec();
+                    v.push(rac);
+                    v
+                }
+            }
+        }
+    }
+
+    impl OptCaretParenthesizedParamDefs {
+        pub fn to_std_option(&self) -> Option<&CommaSeparatedNonfunParamDefs> {
+            match self {
+                OptCaretParenthesizedParamDefs::None => None,
+                OptCaretParenthesizedParamDefs::Some(p) => Some(&p.params),
+            }
+        }
+    }
+
+    impl OptParenthesizedNonfunParamDefs {
+        pub fn to_std_option(&self) -> Option<&CommaSeparatedNonfunParamDefs> {
+            match self {
+                OptParenthesizedNonfunParamDefs::None => None,
+                OptParenthesizedNonfunParamDefs::Some(p) => Some(&p.params),
+            }
+        }
+    }
+
+    impl OptCaretParenthesizedExprs {
+        pub fn to_std_option(&self) -> Option<&CommaSeparatedExprs> {
+            match self {
+                OptCaretParenthesizedExprs::None => None,
+                OptCaretParenthesizedExprs::Some(p) => Some(&p.exprs),
+            }
+        }
+    }
 }
 
 #[cfg(test)]

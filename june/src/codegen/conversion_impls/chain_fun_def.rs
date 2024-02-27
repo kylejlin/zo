@@ -6,8 +6,11 @@ impl JuneConverter {
         expr: &jnode::ChainFunDef,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        let fun =
-            self.convert_standalone_def(&expr.standalone, &expr.standalone.name.value, context)?;
+        let fun = self.convert_standalone_fun_def(
+            &expr.standalone,
+            &expr.standalone.name.value,
+            context,
+        )?;
         let fun_singleton = [UnshiftedEntry {
             key: &expr.standalone.name.value,
             val: fun,
@@ -17,7 +20,7 @@ impl JuneConverter {
         self.convert(&expr.next_val, context_with_fun)
     }
 
-    pub(crate) fn convert_standalone_def(
+    pub(crate) fn convert_standalone_fun_def(
         &mut self,
         expr: &jnode::Def,
         fun_name: &str,
