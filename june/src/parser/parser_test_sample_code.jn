@@ -120,7 +120,7 @@ enum TrailingComma(n: Nat,) ^(x: Nat,)
     trailing_comma(p: Nat,) ^(x,)
 end
 
-def trailing_comma_fn_and_app(dec n: Nat,) -> Nat
+def trailing_comma_def_and_app(dec n: Nat,) -> Nat
     add(n5, n5,)
 
 for_trailing_comma = For(_: Nat,) -> Bool
