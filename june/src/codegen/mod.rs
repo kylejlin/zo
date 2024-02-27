@@ -41,6 +41,6 @@ struct JuneConverter {
 #[derive(Clone, Debug)]
 pub enum SemanticError {
     VarNotDefined(jnode::Ident),
-    MultipleDashedParams(jnode::FunParamDef, jnode::FunParamDef),
+    MultipleDecreasingParams(jnode::FunParamDef, jnode::FunParamDef),
     ConvertedExprHasZoErr(jnode::Expr, znode::Expr, ZoError),
 }
