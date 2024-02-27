@@ -3,6 +3,13 @@ enum Nat
     succ(pred: Nat)
 end
 
+enum Never
+end
+
+def ex_falso(T: Type, f: Never) -> T
+    match f
+    end
+
 enum* Eq(T: Type, left: T) ^(right: T)
     refl ^(left)
 end
@@ -108,3 +115,59 @@ n5 =
     )
 
     sum(non1)
+
+enum TrailingComma(n: Nat,) ^(x: Nat,)
+    trailing_comma(p: Nat,) ^(x,)
+end
+
+def trailing_comma_fn_and_app(dec n: Nat,) -> Nat
+    add(n5, n5,)
+
+for_trailing_comma = For(_: Nat,) -> Bool
+
+match_return_type_simple = match n5 -> Bool
+    case zero:
+        true
+    case succ(_):
+        false
+end
+
+match_return_type_matchee = match n5
+use n5_prime -> Bool
+    case zero:
+        true
+    case succ(_):
+        false
+end
+
+match_return_type_indices = match refl(Nat, zero)
+use ^(zero_prime) -> Bool
+    case zero:
+        true
+    case succ(_):
+        false
+end
+
+match_return_type_indices_trailing_comma = match refl(Nat, zero)
+use ^(zero_prime,) -> Bool
+    case zero:
+        true
+    case succ(_):
+        false
+end
+
+match_return_type_matchee_and_indices = match refl(Nat, zero)
+use refl_zero_prime ^(zero_prime) -> Bool
+    case zero:
+        true
+    case succ(_):
+        false
+end
+
+match_return_type_matchee_and_indices = match refl(Nat, zero)
+use refl_zero_prime ^(zero_prime,) -> Bool
+    case zero:
+        true
+    case succ(_):
+        false
+end

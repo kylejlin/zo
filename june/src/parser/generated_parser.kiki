@@ -160,6 +160,7 @@ struct Def {
     innards: FunCommonInnards
 }
 
+// TODO: See if this is still necessary?
 // "Innards" refer to common syntax
 // shared between `fun` and `def`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
