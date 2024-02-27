@@ -143,7 +143,7 @@ fn dashes_and_thin_arrows() {
 
 #[test]
 fn keywords() {
-    let src = r#"_ enum enum1 enum33 enum* enum1* enum33* def match fun For case use end dec Type Type1 Type33 Type* Type1* Type33*"#;
+    let src = r#"_ enum enum1 enum33 enum* enum1* enum33* def match For case use end dec Type Type1 Type33 Type* Type1* Type33*"#;
     let actual = lex(src);
     let expected = Ok(vec![
         Token::Underscore(ByteIndex(src.find("_").unwrap())),
@@ -179,7 +179,6 @@ fn keywords() {
         }),
         Token::DefKw(ByteIndex(src.find("def").unwrap())),
         Token::MatchKw(ByteIndex(src.find("match").unwrap())),
-        Token::FunKw(ByteIndex(src.find("fun").unwrap())),
         Token::ForKw(ByteIndex(src.find("For").unwrap())),
         Token::CaseKw(ByteIndex(src.find("case").unwrap())),
         Token::UseKw(ByteIndex(src.find("use").unwrap())),

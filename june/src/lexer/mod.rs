@@ -257,7 +257,6 @@ fn parse_word(s: &str, start: ByteIndex) -> Option<Token> {
         "def" => return Some(Token::DefKw(start)),
 
         "match" => return Some(Token::MatchKw(start)),
-        "fun" => return Some(Token::FunKw(start)),
         "For" => return Some(Token::ForKw(start)),
 
         "case" => return Some(Token::CaseKw(start)),

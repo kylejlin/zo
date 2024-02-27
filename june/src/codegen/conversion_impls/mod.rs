@@ -5,7 +5,6 @@ mod chain_fun_def;
 mod chain_var_def;
 
 mod for_;
-mod fun;
 mod match_;
 mod universe;
 mod var_or_app;
@@ -22,7 +21,6 @@ impl JuneConverter {
             jnode::Expr::FunDef(e) => self.convert_chain_fun_def(e, context),
 
             jnode::Expr::Match(e) => self.convert_match(e, context),
-            jnode::Expr::Fun(e) => self.convert_fun(e, context),
             jnode::Expr::For(e) => self.convert_for(e, context),
             jnode::Expr::VarOrApp(e) => self.convert_var_or_app(e, context),
             jnode::Expr::Universe(e) => self.convert_universe(e, context),

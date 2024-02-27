@@ -23,7 +23,6 @@ enum Expr {
     FunDef(ChainFunDef)
 
     Match(Match)
-    Fun(Fun)
     For(For)
     VarOrApp(VarOrApp)
     Universe($UniverseLiteral)
@@ -157,14 +156,6 @@ struct ChainFunDef {
 struct Def {
     defkw: $DefKw
     name: $Ident
-    innards: FunCommonInnards
-}
-
-// TODO: See if this is still necessary?
-// "Innards" refer to common syntax
-// shared between `fun` and `def`.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct FunCommonInnards {
     params: ParenthesizedCommaSeparatedFunParamDefs
     _: $ThinArrow
     return_type: Expr
@@ -298,13 +289,6 @@ struct ParenthesizedCommaSeparatedIdentsOrUnderscores {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Fun {
-    funkw: $FunKw
-    name: OptIdent
-    innards: FunCommonInnards
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum OptIdent {
     None
     Some($Ident)
@@ -357,7 +341,6 @@ terminal Token {
     $DefKw: crate::token::ByteIndex
 
     $MatchKw: crate::token::ByteIndex
-    $FunKw: crate::token::ByteIndex
     $ForKw: crate::token::ByteIndex
 
     $CaseKw: crate::token::ByteIndex

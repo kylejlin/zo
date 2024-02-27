@@ -110,9 +110,10 @@ n5 =
     def nat_ne(n: Nat) -> Bool
         not(nat_eq(n))
 
-    non1 = filter(Nat, list123, fun(n: Nat) -> Bool
+    def not_equal_to_1(n: Nat) -> Bool
         nat_ne(n, n1)
-    )
+
+    non1 = filter(Nat, list123, not_equal_to_1)
 
     sum(non1)
 
