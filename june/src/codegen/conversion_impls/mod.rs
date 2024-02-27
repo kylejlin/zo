@@ -1,3 +1,5 @@
+use zoc::eval::NormalForm;
+
 use super::*;
 
 mod chain_enum_def;
@@ -80,10 +82,15 @@ impl JuneConverter {
     ) -> Result<znode::Expr, SemanticError> {
         let converted = self.convert(expr, context)?;
 
-        if let Err(zo_err) = self
-            .zo_typechecker
-            .get_type(converted.clone(), context.into())
-        {
+        let tcon_entries: zoc::eval::Normalized<Vec<znode::Expr>> = self
+            .convert_june_context_to_zo_tcon_excluding_nondeb_entries(context)
+            .into_iter()
+            .collect();
+
+        if let Err(zo_err) = self.zo_typechecker.get_type(
+            converted.clone(),
+            zoc::typecheck::LazyTypeContext::Base(tcon_entries.to_derefed()),
+        ) {
             return Err(SemanticError::ConvertedExprHasZoErr(
                 expr.clone(),
                 converted.clone(),
@@ -92,5 +99,38 @@ impl JuneConverter {
         }
 
         Ok(converted)
+    }
+
+    fn convert_june_context_to_zo_tcon_excluding_nondeb_entries(
+        &mut self,
+        context: Context,
+    ) -> Vec<NormalForm> {
+        match context {
+            Context::Base(entries) => self.get_normalized_values_of_nondeb_entries(entries),
+
+            Context::Snoc(left, right) => {
+                let mut v = self.convert_june_context_to_zo_tcon_excluding_nondeb_entries(*left);
+                let extension = self.get_normalized_values_of_nondeb_entries(right);
+                v.extend(extension);
+                v
+            }
+        }
+    }
+
+    fn get_normalized_values_of_nondeb_entries(
+        &mut self,
+        entries: &[UnshiftedEntry<'_>],
+    ) -> Vec<NormalForm> {
+        entries
+            .iter()
+            .filter_map(|entry| -> Option<NormalForm> {
+                if !entry.is_deb {
+                    return None;
+                }
+
+                let normalized = self.zo_typechecker.evaluator.eval(entry.val.clone());
+                Some(normalized)
+            })
+            .collect()
     }
 }
