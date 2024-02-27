@@ -1,0 +1,34 @@
+// Currently, internal definitions may be ill typed
+// as long as the final leaf node is well-typed.
+// This is currently intended (albeit possibly surprising) behavior.
+
+ind Nat
+    case zero
+    case succ(_: Nat)
+    return Set0
+
+afun add(-a: Nat, b: Nat): Nat
+    // ----- Ill typed definitions: ------- //
+
+    let ILL_TYPED_LET = Nat(Nat)
+
+    fun ILL_TYPED_FUN(a: add): Nat
+        Nat
+
+    ind ILL_TYPED_IND
+        case foo(_: Nat(Nat, ILL_TYPED_LET))
+        return Set0
+
+    // ------------------------------------ //
+
+    // Despite the above ill-typed definitions,
+    // this file should compile fine,
+    // since the ill-typed definitions are never included
+    // in the final output Zo code.
+
+    match a
+    case zero:
+        b
+    case succ(a_pred):
+        succ(add(a_pred, b))
+    return1 Nat

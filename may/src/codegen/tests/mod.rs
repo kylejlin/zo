@@ -236,3 +236,11 @@ fn substitutable_implies_eq() {
         assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
     insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
 }
+
+#[test]
+fn ill_typed_internal_def() {
+    let src = include_str!("samples/ill_typed_internal_def.may");
+    let converted_leaf =
+        assert_expression_and_its_topright_defs_are_well_typed_under_empty_tcon(src);
+    insta::assert_display_snapshot!(PrettyPrint(&converted_leaf));
+}
