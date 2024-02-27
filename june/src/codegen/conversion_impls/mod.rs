@@ -9,6 +9,8 @@ mod match_;
 mod universe;
 mod var_or_app;
 
+mod params;
+
 impl JuneConverter {
     pub(crate) fn convert(
         &mut self,

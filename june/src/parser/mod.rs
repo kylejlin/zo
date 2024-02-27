@@ -2,7 +2,17 @@ pub use generated_parser::parse;
 mod generated_parser;
 
 pub mod cst {
+
     pub use super::generated_parser::*;
+
+    impl IdentOrUnderscore {
+        pub fn val(&self) -> &str {
+            match self {
+                IdentOrUnderscore::Ident(s) => &s.value,
+                IdentOrUnderscore::Underscore(_) => "_",
+            }
+        }
+    }
 }
 
 #[cfg(test)]
