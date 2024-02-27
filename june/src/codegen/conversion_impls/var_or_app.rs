@@ -6,6 +6,37 @@ impl JuneConverter {
         expr: &jnode::VarOrApp,
         context: Context,
     ) -> Result<znode::Expr, SemanticError> {
-        todo!()
+        match expr {
+            jnode::VarOrApp::Var(e) => self.convert_var(e, context),
+            jnode::VarOrApp::App(e) => self.convert_app(e, context),
+        }
+    }
+
+    fn convert_var(
+        &mut self,
+        expr: &jnode::Ident,
+        context: Context,
+    ) -> Result<znode::Expr, SemanticError> {
+        let Some((entry, Distance(dist))) = context.get(&expr.value) else {
+            return Err(SemanticError::VarNotDefined(expr.clone()));
+        };
+        let val = entry.val.clone().replace_debs(&DebUpshifter(dist), 0);
+        let converted_leaf = self.cache_expr(val);
+        Ok(converted_leaf)
+    }
+
+    fn convert_app(
+        &mut self,
+        expr: &jnode::App,
+        context: Context,
+    ) -> Result<znode::Expr, SemanticError> {
+        let callee = self.convert_var_or_app(&expr.callee, context)?;
+        let args = self.convert_exprs(&expr.args, context)?;
+        let converted_leaf = self.cache_app(znode::App {
+            callee,
+            args,
+            aux_data: (),
+        });
+        Ok(converted_leaf)
     }
 }
