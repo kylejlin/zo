@@ -14,11 +14,8 @@ impl JuneConverter {
             &expr.return_type,
         )?;
         let return_type_arity = extension.len();
-        let context_with_return_params = Context::Snoc(&context, &extension);
 
-        // TODO: Delete
-        // let return_type = self.convert(&expr.return_type, context_with_return_params)?;
-        // TODO: Generate return type if it exists. Otherwise, infer it.
+        let return_type = self.get_match_return_type(expr, context)?;
 
         let cases = self.convert_match_cases(&expr.cases, context)?;
 
@@ -75,5 +72,34 @@ impl JuneConverter {
             return_val,
             aux_data: (),
         })
+    }
+
+    fn get_match_return_type(
+        &mut self,
+        expr: &jnode::Match,
+        context: Context,
+    ) -> Result<znode::Expr, SemanticError> {
+        match &*expr.return_type {
+            jnode::OptMatchReturnTypeClause::None => self.get_first_case_return_type(expr, context),
+
+            jnode::OptMatchReturnTypeClause::Some(return_type_clause) => {
+                let extension = self.get_context_extension_for_match_return_type_params(
+                    &expr.matchee,
+                    context,
+                    &expr.return_type,
+                )?;
+                let extended_context = Context::Snoc(&context, &extension);
+                self.convert(&return_type_clause.return_type, extended_context)
+            }
+        }
+    }
+
+    fn get_first_case_return_type(
+        &mut self,
+        expr: &jnode::Match,
+        context: Context,
+    ) -> Result<znode::Expr, SemanticError> {
+        todo!()
+        // Difficult
     }
 }

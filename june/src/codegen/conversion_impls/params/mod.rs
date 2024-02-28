@@ -147,9 +147,9 @@ impl JuneConverter {
         &mut self,
         matchee: &jnode::Expr,
         context: Context,
-        arity_clause: &'a jnode::OptMatchReturnTypeClause,
+        return_type_clause: &'a jnode::OptMatchReturnTypeClause,
     ) -> Result<Vec<UnshiftedEntry<'a>>, SemanticError> {
-        match arity_clause {
+        match return_type_clause {
             jnode::OptMatchReturnTypeClause::None => self
                 .get_anonymous_context_extension_with_len_equal_to_match_return_arity(
                     matchee, context,
@@ -219,7 +219,7 @@ impl JuneConverter {
         context: Context,
         return_type_clause: &'a jnode::MatchReturnTypeClause,
     ) -> Result<Vec<UnshiftedEntry<'a>>, SemanticError> {
-        Ok(match *return_type_clause.return_params {
+        Ok(match &*return_type_clause.return_params {
             jnode::ReturnParamClause::None(_) => self
                 .get_anonymous_context_extension_with_len_equal_to_match_return_arity(
                     matchee, context,
@@ -230,12 +230,12 @@ impl JuneConverter {
                 let return_arity_minus_1 = return_arity
                     .checked_sub(1)
                     .expect("Return arity should always be 1 or greater.");
+                let matchee_entry =
+                    std::iter::once(self.get_deb_defining_entry(&matchee_name_token.value));
 
                 (0..return_arity_minus_1)
                     .map(|_| self.get_deb_defining_entry("_"))
-                    .chain(std::iter::once(
-                        self.get_deb_defining_entry(&matchee_name_token.value),
-                    ))
+                    .chain(matchee_entry)
                     .collect()
             }
 
@@ -253,14 +253,14 @@ impl JuneConverter {
             jnode::ReturnParamClause::MatcheeAndIndices(matchee_name_token, index_name_tokens) => {
                 // TODO: Calculate return_arity,
                 // and then check that it is equal to index_names.len().
+                let matchee_entry =
+                    std::iter::once(self.get_deb_defining_entry(&matchee_name_token.value));
                 index_name_tokens
                     .idents
                     .to_vec()
                     .into_iter()
                     .map(|name| self.get_deb_defining_entry(name.val()))
-                    .chain(std::iter::once(
-                        self.get_deb_defining_entry(&matchee_name_token.value),
-                    ))
+                    .chain(matchee_entry)
                     .collect()
             }
         })

@@ -115,34 +115,44 @@ impl JuneConverter {
         &mut self,
         context: Context,
     ) -> Vec<znode::NormalForm> {
-        match context {
-            Context::Base(entries) => self.get_normalized_values_of_nondeb_entries(entries),
-
-            Context::Snoc(left, right) => {
-                let mut v = self.convert_june_context_to_zo_tcon_excluding_nondeb_entries(*left);
-                let extension = self.get_normalized_values_of_nondeb_entries(right);
-                v.extend(extension);
-                v
-            }
-        }
+        todo!()
     }
 
-    fn get_normalized_values_of_nondeb_entries(
-        &mut self,
-        entries: &[UnshiftedEntry<'_>],
-    ) -> Vec<znode::NormalForm> {
-        entries
-            .iter()
-            .filter_map(|entry| -> Option<znode::NormalForm> {
-                if !entry.is_deb {
-                    return None;
-                }
+    // TODO: I'm pretty sure this is wrong (which is why I commented it out).
+    // The Zo context entries are _types_,
+    // but I think the June context entries are _values_.
+    // fn convert_june_context_to_zo_tcon_excluding_nondeb_entries(
+    //     &mut self,
+    //     context: Context,
+    // ) -> Vec<znode::NormalForm> {
+    //     match context {
+    //         Context::Base(entries) => self.get_normalized_values_of_nondeb_entries(entries),
 
-                let normalized = self.zo_typechecker.evaluator.eval(entry.val.clone());
-                Some(normalized)
-            })
-            .collect()
-    }
+    //         Context::Snoc(left, right) => {
+    //             let mut v = self.convert_june_context_to_zo_tcon_excluding_nondeb_entries(*left);
+    //             let extension = self.get_normalized_values_of_nondeb_entries(right);
+    //             v.extend(extension);
+    //             v
+    //         }
+    //     }
+    // }
+
+    // fn get_normalized_values_of_nondeb_entries(
+    //     &mut self,
+    //     entries: &[UnshiftedEntry<'_>],
+    // ) -> Vec<znode::NormalForm> {
+    //     entries
+    //         .iter()
+    //         .filter_map(|entry| -> Option<znode::NormalForm> {
+    //             if !entry.is_deb {
+    //                 return None;
+    //             }
+
+    //             let normalized = self.zo_typechecker.evaluator.eval(entry.val.clone());
+    //             Some(normalized)
+    //         })
+    //         .collect()
+    // }
 }
 
 impl JuneConverter {
