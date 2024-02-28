@@ -53,6 +53,55 @@ pub mod cst {
             }
         }
     }
+
+    impl ZeroOrMoreMatchCases {
+        pub fn to_vec(&self) -> Vec<&MatchCase> {
+            match self {
+                ZeroOrMoreMatchCases::Nil => vec![],
+                ZeroOrMoreMatchCases::Snoc(rdc, rac) => {
+                    let mut v = rdc.to_vec();
+                    v.push(rac);
+                    v
+                }
+            }
+        }
+    }
+
+    impl OptParenthesizedCommaSeparatedIdentsOrUnderscores {
+        pub fn len(&self) -> usize {
+            match self {
+                OptParenthesizedCommaSeparatedIdentsOrUnderscores::None => 0,
+                OptParenthesizedCommaSeparatedIdentsOrUnderscores::Some(p) => p.len(),
+            }
+        }
+
+        pub fn is_empty(&self) -> bool {
+            self.len() == 0
+        }
+    }
+
+    impl ParenthesizedCommaSeparatedIdentsOrUnderscores {
+        pub fn len(&self) -> usize {
+            self.idents.len()
+        }
+
+        pub fn is_empty(&self) -> bool {
+            self.len() == 0
+        }
+    }
+
+    impl CommaSeparatedIdentsOrUnderscores {
+        pub fn len(&self) -> usize {
+            match self {
+                CommaSeparatedIdentsOrUnderscores::One(_) => 1,
+                CommaSeparatedIdentsOrUnderscores::Snoc(rdc, _) => 1 + rdc.len(),
+            }
+        }
+
+        pub fn is_empty(&self) -> bool {
+            self.len() == 0
+        }
+    }
 }
 
 #[cfg(test)]

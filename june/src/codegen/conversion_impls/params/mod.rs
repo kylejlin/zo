@@ -143,6 +143,107 @@ enum DecIndexOrParamCount<'a> {
 }
 
 impl JuneConverter {
+    pub(crate) fn get_context_extension_for_match_return_type_params<'a>(
+        &mut self,
+        matchee: &jnode::Expr,
+        context: Context,
+        arity_clause: &'a jnode::OptMatchReturnTypeClause,
+    ) -> Result<Vec<UnshiftedEntry<'a>>, SemanticError> {
+        match arity_clause {
+            jnode::OptMatchReturnTypeClause::None => self
+                .get_anonymous_context_extension_with_len_equal_to_match_return_arity(
+                    matchee, context,
+                ),
+
+            jnode::OptMatchReturnTypeClause::Some(return_type_clause) => todo!(),
+        }
+    }
+
+    pub(crate) fn get_anonymous_context_extension_with_len_equal_to_match_return_arity(
+        &mut self,
+        matchee: &jnode::Expr,
+        context: Context,
+    ) -> Result<Vec<UnshiftedEntry<'static>>, SemanticError> {
+        let return_arity = self.infer_match_return_arity(matchee, context)?;
+
+        Ok((0..return_arity)
+            .map(|_| self.get_deb_defining_entry("_"))
+            .collect())
+    }
+
+    pub(crate) fn infer_match_return_arity<'a>(
+        &mut self,
+        matchee: &jnode::Expr,
+        context: Context,
+    ) -> Result<usize, SemanticError> {
+        let matchee_type = self.convert_and_typecheck(matchee, context)?.type_;
+        match matchee_type.raw() {
+            znode::Expr::Ind(_) => Ok(1),
+
+            znode::Expr::App(matchee_type_app) => match &matchee_type_app.hashee.callee {
+                znode::Expr::Ind(_) => Ok(1 + matchee_type_app.hashee.args.hashee.len()),
+
+                znode::Expr::Vcon(_)
+                | znode::Expr::Match(_)
+                | znode::Expr::Fun(_)
+                | znode::Expr::App(_)
+                | znode::Expr::For(_)
+                | znode::Expr::Deb(_)
+                | znode::Expr::Universe(_) => Err(SemanticError::MatcheeHasUnmatchableType(
+                    matchee.clone(),
+                    matchee_type,
+                )),
+            },
+
+            znode::Expr::Vcon(_)
+            | znode::Expr::Match(_)
+            | znode::Expr::Fun(_)
+            | znode::Expr::App(_)
+            | znode::Expr::For(_)
+            | znode::Expr::Deb(_)
+            | znode::Expr::Universe(_) => Err(SemanticError::MatcheeHasUnmatchableType(
+                matchee.clone(),
+                matchee_type,
+            )),
+        }
+    }
+}
+
+impl JuneConverter {
+    pub(crate) fn convert_match_case_params_to_context_extension<'a>(
+        &mut self,
+        params: &'a jnode::OptParenthesizedCommaSeparatedIdentsOrUnderscores,
+    ) -> Vec<UnshiftedEntry<'a>> {
+        match params {
+            jnode::OptParenthesizedCommaSeparatedIdentsOrUnderscores::None => vec![],
+
+            jnode::OptParenthesizedCommaSeparatedIdentsOrUnderscores::Some(parenthesized) => {
+                let mut out = vec![];
+                self.push_index_names(&parenthesized.idents, &mut out);
+                out
+            }
+        }
+    }
+
+    fn push_index_names<'a>(
+        &mut self,
+        index_names: &'a jnode::CommaSeparatedIdentsOrUnderscores,
+        out: &mut Vec<UnshiftedEntry<'a>>,
+    ) {
+        match index_names {
+            jnode::CommaSeparatedIdentsOrUnderscores::One(ident_or_underscore) => {
+                out.push(self.get_deb_defining_entry(ident_or_underscore.val()));
+            }
+
+            jnode::CommaSeparatedIdentsOrUnderscores::Snoc(rdc, rac) => {
+                self.push_index_names(rdc, out);
+                out.push(self.get_deb_defining_entry(rac.val()));
+            }
+        }
+    }
+}
+
+impl JuneConverter {
     pub(crate) fn get_deb_defining_entry<'a>(&mut self, key: &'a str) -> UnshiftedEntry<'a> {
         let val = self.cache_deb(znode::DebNode {
             deb: Deb(0),

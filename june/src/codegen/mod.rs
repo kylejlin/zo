@@ -1,4 +1,11 @@
-use zoc::syntax_tree::ast::prelude::minimal_ast::{self as znode, UnitAuxDataFamily};
+use zoc::syntax_tree::ast::prelude::minimal_ast::UnitAuxDataFamily;
+
+mod znode {
+    pub use zoc::{
+        eval::{NormalForm, Normalized},
+        syntax_tree::ast::prelude::minimal_ast::*,
+    };
+}
 
 mod jnode {
     pub use crate::{cst::*, token::*};
@@ -43,4 +50,5 @@ pub enum SemanticError {
     VarNotDefined(jnode::Ident),
     MultipleDecreasingParams(jnode::FunParamDef, jnode::FunParamDef),
     ConvertedExprHasZoErr(jnode::Expr, znode::Expr, ZoError),
+    MatcheeHasUnmatchableType(jnode::Expr, znode::NormalForm),
 }

@@ -1,5 +1,3 @@
-use zoc::eval::NormalForm;
-
 use super::*;
 
 mod chain_enum_def;
@@ -74,37 +72,49 @@ impl JuneConverter {
     }
 }
 
+struct WellTypedConvertedExpr {
+    expr: znode::Expr,
+    type_: znode::NormalForm,
+}
+
 impl JuneConverter {
     fn convert_and_typecheck(
         &mut self,
         expr: &jnode::Expr,
         context: Context,
-    ) -> Result<znode::Expr, SemanticError> {
+    ) -> Result<WellTypedConvertedExpr, SemanticError> {
         let converted = self.convert(expr, context)?;
 
-        let tcon_entries: zoc::eval::Normalized<Vec<znode::Expr>> = self
+        let tcon_entries: znode::Normalized<Vec<znode::Expr>> = self
             .convert_june_context_to_zo_tcon_excluding_nondeb_entries(context)
             .into_iter()
             .collect();
 
-        if let Err(zo_err) = self.zo_typechecker.get_type(
+        let typecheck_result = self.zo_typechecker.get_type(
             converted.clone(),
             zoc::typecheck::LazyTypeContext::Base(tcon_entries.to_derefed()),
-        ) {
-            return Err(SemanticError::ConvertedExprHasZoErr(
-                expr.clone(),
-                converted.clone(),
-                zo_err,
-            ));
-        }
+        );
 
-        Ok(converted)
+        match typecheck_result {
+            Err(zo_err) => {
+                return Err(SemanticError::ConvertedExprHasZoErr(
+                    expr.clone(),
+                    converted.clone(),
+                    zo_err,
+                ))
+            }
+
+            Ok(type_) => Ok(WellTypedConvertedExpr {
+                expr: converted,
+                type_,
+            }),
+        }
     }
 
     fn convert_june_context_to_zo_tcon_excluding_nondeb_entries(
         &mut self,
         context: Context,
-    ) -> Vec<NormalForm> {
+    ) -> Vec<znode::NormalForm> {
         match context {
             Context::Base(entries) => self.get_normalized_values_of_nondeb_entries(entries),
 
@@ -120,10 +130,10 @@ impl JuneConverter {
     fn get_normalized_values_of_nondeb_entries(
         &mut self,
         entries: &[UnshiftedEntry<'_>],
-    ) -> Vec<NormalForm> {
+    ) -> Vec<znode::NormalForm> {
         entries
             .iter()
-            .filter_map(|entry| -> Option<NormalForm> {
+            .filter_map(|entry| -> Option<znode::NormalForm> {
                 if !entry.is_deb {
                     return None;
                 }
