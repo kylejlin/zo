@@ -155,7 +155,12 @@ impl JuneConverter {
                     matchee, context,
                 ),
 
-            jnode::OptMatchReturnTypeClause::Some(return_type_clause) => todo!(),
+            jnode::OptMatchReturnTypeClause::Some(return_type_clause) => self
+                .get_context_extension_for_match_return_type_params_using_match_return_type_clause(
+                    matchee,
+                    context,
+                    return_type_clause,
+                ),
         }
     }
 
@@ -206,6 +211,59 @@ impl JuneConverter {
                 matchee_type,
             )),
         }
+    }
+
+    fn get_context_extension_for_match_return_type_params_using_match_return_type_clause<'a>(
+        &mut self,
+        matchee: &jnode::Expr,
+        context: Context,
+        return_type_clause: &'a jnode::MatchReturnTypeClause,
+    ) -> Result<Vec<UnshiftedEntry<'a>>, SemanticError> {
+        Ok(match *return_type_clause.return_params {
+            jnode::ReturnParamClause::None(_) => self
+                .get_anonymous_context_extension_with_len_equal_to_match_return_arity(
+                    matchee, context,
+                )?,
+
+            jnode::ReturnParamClause::Matchee(matchee_name_token, _) => {
+                let return_arity = self.infer_match_return_arity(matchee, context)?;
+                let return_arity_minus_1 = return_arity
+                    .checked_sub(1)
+                    .expect("Return arity should always be 1 or greater.");
+
+                (0..return_arity_minus_1)
+                    .map(|_| self.get_deb_defining_entry("_"))
+                    .chain(std::iter::once(
+                        self.get_deb_defining_entry(&matchee_name_token.value),
+                    ))
+                    .collect()
+            }
+
+            jnode::ReturnParamClause::Indices(index_name_tokens) => {
+                // TODO: Calculate return_arity,
+                // and then check that it is equal to index_names.len().
+                index_name_tokens
+                    .idents
+                    .to_vec()
+                    .into_iter()
+                    .map(|name| self.get_deb_defining_entry(name.val()))
+                    .collect()
+            }
+
+            jnode::ReturnParamClause::MatcheeAndIndices(matchee_name_token, index_name_tokens) => {
+                // TODO: Calculate return_arity,
+                // and then check that it is equal to index_names.len().
+                index_name_tokens
+                    .idents
+                    .to_vec()
+                    .into_iter()
+                    .map(|name| self.get_deb_defining_entry(name.val()))
+                    .chain(std::iter::once(
+                        self.get_deb_defining_entry(&matchee_name_token.value),
+                    ))
+                    .collect()
+            }
+        })
     }
 }
 

@@ -101,6 +101,17 @@ pub mod cst {
         pub fn is_empty(&self) -> bool {
             self.len() == 0
         }
+
+        pub fn to_vec(&self) -> Vec<&IdentOrUnderscore> {
+            match self {
+                CommaSeparatedIdentsOrUnderscores::One(i) => vec![i],
+                CommaSeparatedIdentsOrUnderscores::Snoc(rdc, rac) => {
+                    let mut v = rdc.to_vec();
+                    v.push(rac);
+                    v
+                }
+            }
+        }
     }
 }
 
