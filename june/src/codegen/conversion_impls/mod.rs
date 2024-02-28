@@ -134,3 +134,13 @@ impl JuneConverter {
             .collect()
     }
 }
+
+impl JuneConverter {
+    pub fn convert_mod_and_typecheck(
+        &mut self,
+        expr: &jnode::Module,
+        context: Context,
+    ) -> Result<Vec<(String, znode::Expr)>, SemanticError> {
+        todo!()
+    }
+}
